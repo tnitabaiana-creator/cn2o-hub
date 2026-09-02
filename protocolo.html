@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CN2O · Protocolo — Família Transmissão</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ============ IDENTIDADE CN2O — Brandbook jan/2026 ============
+   Paleta oficial (exclusiva): #631325 vinho · #202a3a marinho · #ffffff
+   Tons intermediários derivados só por transparência das cores oficiais.
+   Tipografia: Ambient Bold (títulos) / Lato Regular (texto).
+   Ambient Bold não existe como webfont — Montserrat 700/800 é o
+   substituto de tela; troque pelo arquivo licenciado quando disponível. */
+:root{
+  --vinho:#631325; --marinho:#202a3a; --branco:#ffffff;
+  --linha:rgba(32,42,58,.24); --linha-suave:rgba(32,42,58,.12);
+  --texto:var(--marinho); --texto-suave:rgba(32,42,58,.66);
+  --vinho-fundo:rgba(99,19,37,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Lato',sans-serif;background:var(--branco);color:var(--texto);font-size:15px;line-height:1.5}
+.versalete{font-family:'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.14em;font-weight:600}
+
+/* Cabeçalho — assinatura da marca sobre branco, filete vinho no topo */
+header{background:var(--branco);border-top:4px solid var(--vinho);border-bottom:1px solid var(--linha);padding:24px 28px;position:relative;overflow:hidden}
+header svg.topo{position:absolute;right:-30px;top:-14px;height:150%;opacity:.10}
+.marca{display:flex;align-items:center;gap:18px;position:relative}
+.mono{font-family:'Montserrat',sans-serif;font-weight:800;color:var(--marinho);font-size:34px;line-height:.85;letter-spacing:-.01em}
+.mono .ponto{display:inline-block;width:9px;height:9px;background:var(--vinho);margin-left:3px}
+.barra{width:3px;align-self:stretch;background:var(--vinho)}
+.nomes h1{font-family:'Montserrat',sans-serif;font-weight:700;font-size:19px;letter-spacing:.04em;color:var(--marinho);text-transform:uppercase}
+.nomes .oficio{font-family:'Montserrat',sans-serif;font-weight:600;font-size:11.5px;letter-spacing:.3em;color:var(--vinho);text-transform:uppercase;margin-top:3px}
+.nomes .tab{font-size:12px;letter-spacing:.14em;color:var(--texto-suave);margin-top:4px}
+
+.selo{display:inline-block;font-size:10px;background:var(--vinho-fundo);color:var(--vinho);border:1px solid rgba(99,19,37,.25);border-radius:4px;padding:3px 8px;letter-spacing:.1em;margin-left:10px;vertical-align:middle;text-transform:uppercase;font-family:'Montserrat',sans-serif;font-weight:600}
+
+.wrap{max-width:1180px;margin:0 auto;padding:26px 20px 90px;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:28px;align-items:start}
+@media(max-width:920px){.wrap{grid-template-columns:1fr}.rail{position:static!important;order:2}}
+
+/* Blocos */
+.bloco{background:var(--branco);border:1px solid var(--linha);border-radius:10px;padding:20px 22px;margin-bottom:18px}
+.bloco h2{font-size:12.5px;color:var(--vinho);margin-bottom:15px}
+.bloco h2 span.n{display:inline-block;background:var(--vinho);color:var(--branco);border-radius:50%;width:20px;height:20px;text-align:center;line-height:20px;font-size:11px;margin-right:8px}
+.oculto{display:none!important}
+
+/* Chips de ato */
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{border:1.5px solid var(--linha);background:var(--branco);border-radius:8px;padding:12px 16px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;letter-spacing:.06em;color:var(--marinho);transition:.15s}
+.chip:hover{border-color:var(--vinho)}
+.chip.ativo{background:var(--vinho);border-color:var(--vinho);color:var(--branco)}
+
+/* Campos */
+.grade{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:640px){.grade{grid-template-columns:1fr}}
+label.rotulo{display:block;font-size:12.5px;color:var(--vinho);font-weight:700;letter-spacing:.09em;margin-bottom:7px}
+input[type=text],input[type=tel],input[type=date],select,textarea{width:100%;border:1.5px solid var(--linha);border-radius:7px;padding:11px 12px;font-family:'Lato',sans-serif;font-size:15px;background:var(--branco);color:var(--texto)}
+textarea{resize:vertical;min-height:70px}
+input::placeholder,textarea::placeholder{color:rgba(32,42,58,.38)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--vinho);outline-offset:1px;border-color:var(--vinho)}
+
+/* Opções */
+.opcoes{display:flex;flex-wrap:wrap;gap:8px}
+.op{border:1.5px solid var(--linha);border-radius:7px;padding:9px 13px;cursor:pointer;font-size:13.5px;background:var(--branco);transition:.12s;user-select:none}
+.op:hover{border-color:var(--vinho)}
+.op.sel{background:var(--vinho);border-color:var(--vinho);color:var(--branco)}
+.op.tog.sel{background:var(--marinho);border-color:var(--marinho)}
+.pergunta{margin-bottom:16px}
+.pergunta:last-child{margin-bottom:0}
+.pergunta .titulo-p{font-size:14px;font-weight:700;color:var(--marinho);margin-bottom:9px;border-left:3px solid var(--vinho);padding-left:9px;line-height:1.25}
+.sub{border-left:3px solid var(--linha);padding-left:14px;margin-top:12px}
+
+/* Avisos — vinho institucional, sem cor estranha à paleta */
+.aviso{background:var(--vinho-fundo);border-left:3px solid var(--vinho);border-radius:0 7px 7px 0;padding:10px 12px;font-size:12.5px;color:var(--marinho);margin-top:10px}
+.badge-parceiro{display:inline-block;margin-top:7px;background:var(--vinho);color:var(--branco);border-radius:6px;padding:5px 10px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em}
+
+/* Trilho do dossiê — painel marinho, acentos vinho e branco */
+.rail{position:sticky;top:18px}
+.dossie{background:var(--marinho);color:var(--branco);border-radius:10px;padding:20px 20px 22px;border-top:4px solid var(--vinho)}
+.dossie h3{font-size:12px;letter-spacing:.16em;color:rgba(255,255,255,.82);margin-bottom:4px}
+.dossie .titulo-prev{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;margin-bottom:14px;min-height:18px;color:var(--branco);word-break:break-word}
+.dossie ul{list-style:none}
+.dossie li{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.10);font-size:13.5px;cursor:pointer}
+.dossie li:last-child{border-bottom:none}
+.dossie li .cx{width:17px;height:17px;border:1.5px solid rgba(255,255,255,.45);border-radius:4px;flex:none;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:11px}
+.dossie li.marcado .cx{background:var(--vinho);border-color:var(--vinho);color:var(--branco);font-weight:700}
+.dossie li.marcado{color:var(--branco)}
+.dossie li:not(.marcado){color:rgba(255,255,255,.70)}
+.dossie li.inj{animation:entra .25s ease}
+@keyframes entra{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:none}}
+.dossie .contagem{margin-top:14px;font-size:12.5px;color:rgba(255,255,255,.82);letter-spacing:.08em}
+.btn-prot{width:100%;margin-top:14px;background:var(--vinho);color:var(--branco);border:none;border-radius:8px;padding:14px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:.15s}
+.btn-prot:hover{filter:brightness(1.15)}
+.btn-prot:disabled{background:rgba(255,255,255,.18);color:rgba(255,255,255,.5);cursor:not-allowed}
+.nota-rail{font-size:11.5px;color:var(--texto-suave);margin-top:10px;text-align:center}
+.dossie .nota-rail{color:rgba(255,255,255,.55)}
+
+/* Modais */
+.veu{position:fixed;inset:0;background:rgba(32,42,58,.65);display:none;align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto;z-index:50}
+.veu.aberto{display:flex}
+.modal{background:var(--branco);border-radius:12px;border-top:4px solid var(--vinho);max-width:640px;width:100%;padding:26px 26px 22px}
+.modal h3{font-size:12px;color:var(--vinho);margin-bottom:14px}
+.recibo{background:var(--vinho-fundo);border:1px solid rgba(99,19,37,.20);border-radius:10px;padding:16px 18px;font-size:14px;white-space:pre-wrap;line-height:1.6;color:var(--marinho)}
+.payload{background:var(--marinho);color:rgba(255,255,255,.85);border-radius:10px;padding:16px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;white-space:pre;overflow:auto;margin-top:16px;max-height:260px}
+.fechar{margin-top:16px;background:var(--marinho);color:var(--branco);border:none;border-radius:7px;padding:11px 18px;font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:.1em;cursor:pointer;text-transform:uppercase}
+.btn-check{position:fixed;bottom:18px;right:18px;z-index:40;background:var(--marinho);color:var(--branco);border:none;border-radius:50px;padding:13px 19px;font-family:'Montserrat',sans-serif;font-weight:600;font-size:12px;letter-spacing:.08em;cursor:pointer;box-shadow:0 4px 16px rgba(32,42,58,.35);display:none}
+.btn-check.on{display:block}
+.ck-grp{font-family:'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-weight:600;font-size:11px;color:var(--vinho);margin:14px 0 6px}
+.ck-grp:first-child{margin-top:0}
+.ck-it{padding:6px 0;border-bottom:1px dashed var(--linha);font-size:13.5px}
+.ck-it span{color:var(--texto-suave);font-size:12px}
+.modo-test .cel-padrao{display:none!important}
+.bloco.destaque{border:2px solid var(--vinho);background:var(--vinho-fundo)}
+.bloco.destaque h2{font-size:14px}
+.qual-grp{font-family:'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-weight:700;font-size:12px;color:var(--vinho);margin:16px 0 8px;border-left:3px solid var(--vinho);padding-left:9px}
+.qual-grp:first-child{margin-top:0}
+</style>
+</head>
+<body>
+
+<header>
+  <svg class="topo" viewBox="0 0 300 200" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="#202a3a" stroke-width="1.4">
+    <path d="M0 160 C60 120 90 150 150 110 S250 80 300 40"/>
+    <path d="M0 180 C70 140 100 168 160 128 S260 100 300 62"/>
+    <path d="M0 140 C50 104 84 132 144 94 S244 62 300 20"/>
+  </svg>
+  <div class="marca">
+    <div class="mono">CN<br>2O<span class="ponto"></span></div>
+    <div class="barra"></div>
+    <div class="nomes">
+      <h1>Hub de Protocolo<span class="selo">Protótipo — simulação</span></h1>
+      <p class="oficio">2º Ofício de Itabaiana - SE</p>
+      <p class="tab">César Bravo &nbsp;|&nbsp; Tabelião</p>
+      <p class="tab" id="sessaoInfo" style="margin-top:2px"></p>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+<main>
+
+  <!-- 1 · ATO -->
+  <section class="bloco">
+    <h2 class="versalete"><span class="n">1</span>Tipo de ato</h2>
+    <div class="chips" id="chipsAto">
+      <button class="chip" data-ato="CV-Urbano">CV · Urbano</button>
+      <button class="chip" data-ato="CV-Rural">CV · Rural</button>
+      <button class="chip" data-ato="CDP">CDP · Posse</button>
+      <button class="chip" data-ato="CDH">CDH · Herança</button>
+      <button class="chip" data-ato="DOA">Doação</button>
+      <button class="chip" data-ato="TEST">Testamento</button>
+      <button class="chip" data-ato="INV">Inventário</button>
+    </div>
+  </section>
+
+  <!-- 2 · IDENTIFICAÇÃO -->
+  <section class="bloco oculto" id="blIdent">
+    <h2 class="versalete"><span class="n">2</span>Identificação</h2>
+    <div class="grade">
+      <div id="boxVendedor" class="oculto cel-padrao" style="grid-column:1 / -1">
+        <label class="rotulo versalete" for="vendNome">Vendedor(es)</label>
+        <input type="text" id="vendNome" list="vendedores" placeholder="Nome do vendedor" autocomplete="off">
+        <datalist id="vendedores"></datalist>
+        <div id="vendCatBox" style="margin-top:8px" class="opcoes">
+          <div class="op op-cat" data-cat="Particular">Particular</div>
+          <div class="op op-cat" data-cat="Construtor">Construtor — PF ou pequeno PJ</div>
+        </div>
+        <div id="badgeBandeira" class="oculto badge-parceiro" style="margin-top:7px"></div>
+      </div>
+      <div class="cel-padrao">
+        <label class="rotulo versalete" for="apresNome" id="rotApres">Apresentante — corretor, imobiliária ou intermediário PF</label>
+        <input type="text" id="apresNome" list="parceiros" placeholder="Nome completo de quem apresenta" autocomplete="off">
+        <datalist id="parceiros"></datalist>
+        <div class="badge-parceiro oculto" id="badgeParceiro">Corretor cadastrado — bandeira cinza</div>
+      </div>
+      <div class="cel-padrao">
+        <label class="rotulo versalete" for="apresTel">Telefone do apresentante (recebe o recibo)</label>
+        <input type="tel" id="apresTel" placeholder="(79) 9____-____">
+      </div>
+      <div class="cel-padrao">
+        <label class="rotulo versalete" for="parteNome" id="rotParte">Nome da parte envolvida</label>
+        <input type="text" id="parteNome" placeholder="Nome completo" autocomplete="off">
+      </div>
+      <div class="cel-padrao">
+        <label class="rotulo versalete" for="parteTel">Telefone da parte (se houver)</label>
+        <input type="tel" id="parteTel" placeholder="(79) 9____-____">
+      </div>
+    </div>
+    <div class="pergunta" style="margin-top:14px">
+      <div class="opcoes"><div class="op tog" id="urgente">⚑ Urgente</div></div>
+    </div>
+  </section>
+
+  <!-- 2b · QUALIFICAÇÃO DO TESTAMENTO -->
+  <section class="bloco oculto" id="blTestQual">
+    <h2 class="versalete"><span class="n">✦</span>Qualificação — preenchimento manual (sem guia, sem documentação prévia)</h2>
+    <div id="qualCampos"></div>
+  </section>
+
+  <!-- 3 · TRIAGEM -->
+  <section class="bloco oculto" id="blTriagem">
+    <h2 class="versalete"><span class="n">3</span><span id="rotTriagem">Triagem — </span><span id="tituloTriagem"></span></h2>
+    <div class="aviso oculto" id="avisoSigilo">⚠ Testamento segue trilho restrito: o conteúdo do ato não é anexado ao cartão; o cartão registra apenas o protocolo e a referência do livro.</div>
+    <div class="aviso oculto" id="avisoCDH">ℹ Cedentes e cessionário NÃO são referenciados aqui — serão extraídos no Momento 3: cedentes = herdeiros do espólio indicado no campo TRANSMITENTE da guia de ITBI ("Espólio de Fulano"), identificados pela certidão de óbito e qualificados pelas certidões de nascimento/casamento; cessionário = campo ADQUIRENTE da guia. O nome digitado acima serve ao recibo e será conferido contra a guia.</div>
+    <div id="perguntas"></div>
+  </section>
+
+  <!-- 4 · OBSERVAÇÕES -->
+  <section class="bloco oculto" id="blObs">
+    <h2 class="versalete"><span class="n">4</span><span id="obsTitulo">Observações não documentadas</span></h2>
+    <label class="rotulo versalete" for="obs" id="obsLabel">Condições específicas, vontade particular do interessado, combinados verbais — só o que não consta de documento nenhum</label>
+    <textarea id="obs" rows="3" placeholder="Ex.: testador quer condição de que o legatário conclua a faculdade; cliente trará a matrícula na sexta…"></textarea>
+    <div class="nota-rail" style="text-align:left;margin-top:6px">Uso interno — vai para a descrição do cartão, não para o recibo do cliente.</div>
+  </section>
+
+</main>
+
+<!-- TRILHO: DOSSIÊ -->
+<aside class="rail">
+  <div class="dossie">
+    <h3 class="versalete">Dossiê físico recebido</h3>
+    <div class="titulo-prev" id="tituloPrev">Escolha o tipo de ato para começar</div>
+    <ul id="listaDossie"></ul>
+    <div class="contagem" id="contagem"></div>
+    <button class="btn-prot" id="btnProt" disabled>Protocolizar</button>
+    <div class="nota-rail">O recibo sai no WhatsApp do interessado com esta relação de documentos.</div>
+  </div>
+</aside>
+</div>
+
+<!-- MODAL: CONFERÊNCIA DOCUMENTAL (abre ao escolher o ato) -->
+<div class="veu" id="veuCheck">
+  <div class="modal">
+    <h3 class="versalete" id="checkTitulo"></h3>
+    <div class="nota-rail" style="text-align:left;margin:0 0 12px">Referência completa do ato para conferir a pasta no balcão. O trilho à direita monta o dossiê do caso concreto conforme as respostas da triagem.</div>
+    <div id="checkLista"></div>
+    <button class="fechar" onclick="document.getElementById('veuCheck').classList.remove('aberto')">Conferido — iniciar triagem</button>
+  </div>
+</div>
+<button class="btn-check" id="btnCheck">📋 Checklist do ato</button>
+
+<!-- MODAL -->
+<div class="veu" id="veu">
+  <div class="modal">
+    <h3 class="versalete">Recibo (prévia do WhatsApp)</h3>
+    <div class="nota-rail" style="text-align:left;margin:0 0 10px" id="reciboDest"></div>
+    <div class="recibo" id="reciboTxt"></div>
+    <h3 class="versalete" style="margin-top:18px">Payload → Railway (contrato de dados)</h3>
+    <div class="payload" id="payloadTxt"></div>
+    <button class="fechar" onclick="document.getElementById('veu').classList.remove('aberto')">Fechar</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   ESTADO
+============================================================ */
+const S = { ato:null, urgente:false, respostas:{}, dossie:{} };
+
+const PAPEIS = {
+  'CV-Urbano':{t:'Vendedor(es)',a:'Comprador(es)',parte:'Nome do comprador(a)',ra:'Comprador(a)'},
+  'CV-Rural' :{t:'Vendedor(es)',a:'Comprador(es)',parte:'Nome do comprador(a)',ra:'Comprador(a)'},
+  'CDP':{t:'Cedente(s)',a:'Cessionário(s)',parte:'Nome do cessionário(a)',ra:'Cessionário(a)'},
+  'CDH':{t:'Cedente(s)',a:'Cessionário',parte:'Nome do cessionário (o 1º, se mais de um)',ra:'Cessionário(a)'},
+  'DOA':{t:'Doador(a)',a:'Donatário(a)',parte:'Nome do donatário(a)',ra:'Donatário(a)'},
+  'TEST':{t:'Testador(a)',a:'Beneficiário(s)',parte:'Nome do testador(a)',ra:'Testador(a)'},
+  'INV':{t:'Espólio',a:'Herdeiros',parte:'Nome do inventariante',ra:'Inventariante',apres:'Advogado apresentante (regra do ato)'}
+};
+const APRES_PADRAO='Apresentante — corretor, imobiliária ou intermediário PF';
+const ATO_NOME={'CV-Urbano':'Escritura de Compra e Venda (imóvel urbano)','CV-Rural':'Escritura de Compra e Venda (imóvel rural)','CDP':'Escritura de Cessão de Direitos Possessórios','CDH':'Escritura de Cessão de Direitos Hereditários','DOA':'Escritura de Doação','TEST':'Testamento Público','INV':'Escritura de Inventário e Partilha'};
+
+/* ============================================================
+   PERGUNTAS DE TRIAGEM
+   cada opção pode injetar itens no dossiê: inj:[...]
+============================================================ */
+function perguntasTestamento(){
+  /* MANIFESTAÇÃO DO TESTADOR — modelos em forma de botões (filtragem estruturada) */
+  return [
+    {id:'vontade', titulo:'Extensão da disposição', ops:[
+      {v:'Testar a parte disponível SEM adiantamento de legítima'},
+      {v:'Testar a parte disponível COM adiantamento de legítima', aviso:'Sujeita a colação; os quinhões dos demais herdeiros serão ajustados pela cláusula.'}
+    ]},
+    {id:'restritivas', titulo:'Cláusulas restritivas', ops:[
+      {v:'COM inalienabilidade, incomunicabilidade e impenhorabilidade'},
+      {v:'SEM cláusulas restritivas'}
+    ]},
+    {id:'usufruto', titulo:'Usufruto', ops:[
+      {v:'COM cláusula de instituição de usufruto'},
+      {v:'SEM cláusula de usufruto'}
+    ]},
+    {id:'reconhecimento', titulo:'Reconhecimento de filho', ops:[
+      {v:'Não'},
+      {v:'Sim', aviso:'O reconhecimento de filho é irrevogável, ainda que o testamento venha a ser revogado.'}
+    ]},
+    {id:'substituicao', titulo:'Cláusula de substituição testamentária (pré-morte do legatário ao testador)', ops:[
+      {v:'Não'},{v:'Sim'}
+    ]},
+    {id:'legado', titulo:'Haverá deixa de legado?', ops:[
+      {v:'Não'},{v:'Sim'}
+    ]},
+    {id:'qtd_legados', titulo:'Quantos legados?', dependeDe:['legado','Sim'], ops:[{v:'1'},{v:'2'},{v:'3'}]},
+    {id:'legado1_desc', tipo:'texto', titulo:'Legado 1 — descrição do bem', placeholder:'Descrição individualizada do bem legado', dependeDe:['legado','Sim']},
+    {id:'legado1_dest', tipo:'texto', titulo:'Legado 1 — legatário destinatário', placeholder:'Nome do legatário', dependeDe:['legado','Sim']},
+    {id:'legado2_desc', tipo:'texto', titulo:'Legado 2 — descrição do bem', dependeDe:['qtd_legados',['2','3']]},
+    {id:'legado2_dest', tipo:'texto', titulo:'Legado 2 — legatário destinatário', dependeDe:['qtd_legados',['2','3']]},
+    {id:'legado3_desc', tipo:'texto', titulo:'Legado 3 — descrição do bem', dependeDe:['qtd_legados','3']},
+    {id:'legado3_dest', tipo:'texto', titulo:'Legado 3 — legatário destinatário', dependeDe:['qtd_legados','3']},
+    {id:'outras', titulo:'Outras cláusulas especiais?', ops:[
+      {v:'Não'},{v:'Sim — detalhar no campo destacado abaixo'}
+    ]}
+  ];
+}
+
+/* ===== QUALIFICAÇÃO DO TESTAMENTO — 4 grupos, tudo manual ===== */
+S.qual={};
+S.qtest={civil:null,regime:null,benefNat:null,benefQtd:'1'};
+const QCAMPOS_PESSOA=[['nome','Nome completo'],['estado_civil','Estado civil'],['profissao','Profissão'],['endereco','Endereço completo'],['rg','RG'],['cpf','CPF']];
+
+function montarQualTest(){
+  const box=el('qualCampos'); box.innerHTML='';
+  const grupo=t=>{const d=document.createElement('div');d.className='qual-grp';d.textContent=t;box.appendChild(d);};
+  const grade=()=>{const g=document.createElement('div');g.className='grade';box.appendChild(g);return g;};
+  const campo=(g,chave,rot,ph)=>{
+    const cel=document.createElement('div');
+    cel.innerHTML=`<label class="rotulo versalete">${rot}</label>`;
+    const inp=document.createElement('input'); inp.type='text'; inp.autocomplete='off';
+    if(ph) inp.placeholder=ph;
+    inp.value=S.qual[chave]||'';
+    inp.addEventListener('input',()=>{S.qual[chave]=inp.value;renderDossie();});
+    cel.appendChild(inp); g.appendChild(cel);
+  };
+  const chips=(rot,chave,valores)=>{
+    const d=document.createElement('div'); d.className='pergunta';
+    d.innerHTML=`<div class="titulo-p">${rot}</div>`;
+    const ops=document.createElement('div'); ops.className='opcoes';
+    valores.forEach(v=>{
+      const b=document.createElement('div'); b.className='op'; b.textContent=v;
+      if(S.qtest[chave]===v) b.classList.add('sel');
+      b.addEventListener('click',()=>{S.qtest[chave]=v; montarQualTest(); renderDossie();});
+      ops.appendChild(b);
+    });
+    d.appendChild(ops); box.appendChild(d);
+  };
+
+  // 1 · TESTADOR
+  grupo('1 · Testador(a) — quem roga a lavratura');
+  let g=grade();
+  campo(g,'testador_nome','Nome completo');
+  campo(g,'testador_rg','RG'); campo(g,'testador_cpf','CPF');
+  campo(g,'testador_profissao','Profissão');
+  campo(g,'testador_endereco','Endereço completo');
+  campo(g,'testador_telefone','Telefone (WhatsApp do recibo)');
+  chips('Estado civil','civil',['Solteiro(a)','Casado(a)','Divorciado(a)','Viúvo(a)','União estável']);
+  if(S.qtest.civil==='Casado(a)')
+    chips('Regime de bens','regime',['Comunhão parcial','Comunhão universal','Separação convencional','Comunhão (antes da Lei 6.515/77)']);
+  if(S.qtest.civil==='Casado(a)'||S.qtest.civil==='União estável'){
+    const g2=grade();
+    campo(g2,'conjuge_nome','Nome do cônjuge/companheiro(a)');
+    campo(g2,'conjuge_profissao','Profissão do cônjuge/companheiro(a)');
+  }
+
+  // 2 · BENEFICIÁRIOS
+  grupo('2 · Beneficiário(s) do testamento — não precisam estar presentes');
+  chips('Natureza','benefNat',['Beneficiário(s) universal(is)','Legatário(s)']);
+  chips('Quantos beneficiários?','benefQtd',['1','2','3','4']);
+  const n=parseInt(S.qtest.benefQtd||'1',10);
+  for(let i=1;i<=n;i++){
+    grupo(`Beneficiário ${i}`);
+    const gb=grade();
+    QCAMPOS_PESSOA.forEach(([k,rot])=>campo(gb,`benef${i}_${k}`,rot));
+  }
+
+  // 3 · TESTAMENTEIRO
+  grupo('3 · Testamenteiro — qualificação completa (não precisa estar presente)');
+  const gt=grade();
+  QCAMPOS_PESSOA.forEach(([k,rot])=>campo(gt,`testamenteiro_${k}`,rot));
+
+  // 4 · TESTEMUNHAS
+  grupo('4 · Testemunhas instrumentárias — qualificação completa');
+  [1,2].forEach(i=>{
+    grupo(`Testemunha ${i}`);
+    const gx=grade();
+    QCAMPOS_PESSOA.forEach(([k,rot])=>campo(gx,`testemunha${i}_${k}`,rot));
+  });
+}
+
+function perguntasDoAto(ato){
+  if(ato==='TEST') return perguntasTestamento();
+  if(ato==='INV') return perguntasInventario();
+  const P = PAPEIS[ato]; const Q=[];
+
+  // Transmitente (não se aplica ao CDH: cedentes extraídos da documentação no Momento 3)
+  if(ato!=='CDH'){
+  Q.push({id:'t_tipo', titulo:`${P.t} — pessoa`, ops:[
+    {v:'Pessoa física'},
+    {v:'Pessoa jurídica', inj:['Contrato social','RG/CPF do representante','Certidão simplificada da Junta']},
+    {v:'Múltiplos transmitentes', inj:['RG/CPF e certidões de estado civil de TODOS os transmitentes (e cônjuges)'], aviso:'Qualificação individual extraída da documentação no Momento 3 — mesmo princípio do CDH.'}
+  ]});
+  Q.push({id:'t_civil', titulo:`${P.t} — estado civil`, dependeDe:['t_tipo','Pessoa física'], ops:[
+    {v:'Solteiro(a)'},
+    {v:'Casado(a)', inj:['Certidão de casamento (transmitente)']},
+    {v:'Divorciado(a)', inj:['Certidão de casamento com averbação (transmitente)']},
+    {v:'Viúvo(a)', inj:['Certidão de casamento com averbação de óbito','Alerta: verificar meação/herança']},
+    {v:'União estável', inj:['Declaração/escritura de união estável (se houver)']}
+  ]});
+  Q.push({id:'t_regime', titulo:`${P.t} — regime de bens`, dependeDe:['t_civil','Casado(a)'], ops:[
+    {v:'Comunhão parcial', inj:['RG/CPF do cônjuge (vênia)']},
+    {v:'Comunhão universal', inj:['RG/CPF do cônjuge (participa transmitindo)']},
+    {v:'Separação convencional', inj:['Pacto antenupcial registrado']},
+    {v:'Comunhão (antes da Lei 6.515/77)', inj:['RG/CPF do cônjuge (participa transmitindo)']}
+  ]});
+  Q.push({id:'t_origem_bem', titulo:'Imóvel — origem na titularidade do transmitente', dependeDe:['t_tipo','Pessoa física'], ops:[
+    {v:'Adquirido no casamento'},
+    {v:'Bem particular'},
+    {v:'Herança', aviso:'Verificar se o caso pede CDH ou inventário prévio.'}
+  ]});
+  }
+
+  // Adquirente (CDH: cessionário extraído do campo ADQUIRENTE da guia de ITBI)
+  if(ato!=='CDH'){
+  Q.push({id:'a_civil', titulo:`${P.a} — estado civil`, ops:[
+    {v:'Solteiro(a)'},
+    {v:'Casado(a)', inj:['Certidão de casamento (adquirente)']},
+    {v:'Divorciado(a)'},
+    {v:'Viúvo(a)'},
+    {v:'União estável'},
+    {v:'Múltiplos adquirentes', inj:['RG/CPF e certidões de estado civil de TODOS os adquirentes'], aviso:'Mais de um adquirente: o gerador insere a cláusula de instituição de condomínio voluntário (titularidade condominial); qualificação individual no Momento 3.'}
+  ]});
+  Q.push({id:'a_ue', titulo:`${P.a} — como constará a união estável?`, dependeDe:['a_civil','União estável'], ops:[
+    {v:'Prova documental existente', inj:['Escritura/declaração de união estável','RG/CPF do convivente'], aviso:'A união estável consta por prova documental; convivente qualificado no ato.'},
+    {v:'Cláusula declaratória no próprio instrumento', inj:['RG/CPF do convivente'], aviso:'O gerador insere cláusula declaratória de que o adquirente convive em união estável com o convivente, devidamente qualificado.'}
+  ]});
+  Q.push({id:'a_regime', titulo:`${P.a} — regime de bens`, dependeDe:['a_civil','Casado(a)'], ops:[
+    {v:'Comunhão parcial'},
+    {v:'Comunhão universal'},
+    {v:'Separação convencional', inj:['Pacto antenupcial registrado (adquirente)']}
+  ]});
+  }
+
+  // Parentesco + representação
+  if(ato!=='DOA' && ato!=='CDH'){
+    Q.push({id:'parentesco', titulo:'Transmissão de ascendente para descendente?', ops:[
+      {v:'Não'},
+      {v:'Sim', inj:['RG/CPF dos demais descendentes (irmãos)','Anuência dos demais descendentes (art. 496 CC)']}
+    ]});
+  }
+  Q.push({id:'procuracao', titulo:'Alguém comparece representado por procuração?', ops:[
+    {v:'Não'},
+    {v:'Sim', inj:['Procuração com poderes específicos','RG/CPF do procurador']}
+  ]});
+
+  // Pagamento (exceto DOA) — momento primeiro; forma dentro de cada momento
+  if(ato!=='DOA'){
+    Q.push({id:'pag_momento', titulo:'Momento do pagamento do preço', ops:[
+      {v:'Já pago integralmente (data anterior)', aviso:'Se por transferência ou cheque, exigir o comprovante DE IMEDIATO, antes de protocolar.'},
+      {v:'Integralmente no ato da lavratura'},
+      {v:'Misto — parte já paga, parte no ato', aviso:'Discriminar os VALORES de cada parte no campo Observações.'}
+    ]});
+    // Já pago
+    Q.push({id:'pag_ant_forma', titulo:'Pagamento já realizado — forma', dependeDe:['pag_momento','Já pago integralmente (data anterior)'], ops:[
+      {v:'Dinheiro em espécie (moeda manual)', aviso:'Cláusula específica: preço pago em moeda corrente manual, contado e conferido pelo vendedor, na data indicada abaixo.'},
+      {v:'Transferência / depósito / PIX', inj:['Comprovante bancário da transferência'], aviso:'Exigir o comprovante DE IMEDIATO.'},
+      {v:'Cheque', inj:['Cópia do cheque (banco, agência, número)'], aviso:'Quitação plena só com a compensação — avaliar pro soluto × pro solvendo.'}
+    ]});
+    Q.push({id:'pag_ant_data', tipo:'data', titulo:'Data do pagamento realizado', dependeDe:['pag_momento','Já pago integralmente (data anterior)']});
+    // No ato
+    Q.push({id:'pag_ato_forma', titulo:'Pagamento no ato da lavratura — forma', dependeDe:['pag_momento','Integralmente no ato da lavratura'], ops:[
+      {v:'Dinheiro em espécie (moeda manual)', aviso:'Cláusula: preço pago em moeda corrente manual, contado e conferido pelo vendedor no ato.'},
+      {v:'Cheque', inj:['Cópia do cheque (banco, agência, número)'], aviso:'Consignar banco e número; avaliar pro soluto × pro solvendo.'},
+      {v:'Transferência / PIX', inj:['Comprovante bancário (exibido no ato)'], aviso:'Comprovante exibido e conferido no ato; cópia para o arquivamento.'},
+      {v:'Financiamento bancário', inj:['Cédula/contrato de financiamento'], aviso:'Consignar a instituição e a parte paga com recursos próprios, se houver.'}
+    ]});
+    // Misto — as duas parcelas discriminadas
+    Q.push({id:'pag_m_antes_forma', titulo:'Parte JÁ PAGA — forma', dependeDe:['pag_momento','Misto — parte já paga, parte no ato'], ops:[
+      {v:'Dinheiro em espécie (moeda manual)', aviso:'Consignar valor e a data (abaixo) da parte paga em espécie.'},
+      {v:'Transferência / depósito / PIX', inj:['Comprovante bancário da parte já paga'], aviso:'Exigir o comprovante DE IMEDIATO.'},
+      {v:'Cheque', inj:['Cópia do cheque da parte já paga']}
+    ]});
+    Q.push({id:'pag_m_antes_data', tipo:'data', titulo:'Parte já paga — data do pagamento', dependeDe:['pag_momento','Misto — parte já paga, parte no ato']});
+    Q.push({id:'pag_m_ato_forma', titulo:'Parte NO ATO da lavratura — forma', dependeDe:['pag_momento','Misto — parte já paga, parte no ato'], ops:[
+      {v:'Dinheiro em espécie (moeda manual)', aviso:'Cláusula: parcela final em moeda corrente manual, contada e conferida pelo vendedor no ato.'},
+      {v:'Cheque', inj:['Cópia do cheque (parcela do ato)']},
+      {v:'Transferência / PIX', inj:['Comprovante bancário (parcela do ato)']},
+      {v:'Financiamento bancário', inj:['Cédula/contrato de financiamento']}
+    ]});
+    // Local do pagamento feito no ato (vale para "no ato" e para a parcela do misto)
+    Q.push({id:'pag_local', titulo:'Onde ocorrerá o pagamento no ato?', dependeDe:['pag_momento',['Integralmente no ato da lavratura','Misto — parte já paga, parte no ato']], ops:[
+      {v:'Nas dependências da serventia', aviso:'A escritura consigna o pagamento realizado nas dependências da serventia.'},
+      {v:'Fora das dependências da serventia', aviso:'A escritura consigna que o pagamento se dá fora das dependências da serventia, conforme declarado pelas partes.'}
+    ]});
+    Q.push({id:'caucao', titulo:'Há desconfiança entre as partes quanto ao pagamento?', ops:[
+      {v:'Não'},
+      {v:'Sim — orientar conta caução notarial', aviso:'Oriente as partes: o comprador deposita o preço na conta caução do cartório e o valor só é liberado ao vendedor após a assinatura de AMBOS na escritura. Segurança para os dois lados.'}
+    ]});
+    Q.push({id:'corretor', titulo:'Houve intermediação de corretor?', ops:[
+      {v:'Não'},
+      {v:'Sim', inj:['Declaração de intermediação (CRECI e valor)']}
+    ]});
+  }
+
+  // Específicos do ato
+  if(ato==='CV-Urbano'){
+    Q.push({id:'titulo_reg', titulo:'Título anterior está registrado na matrícula?', ops:[
+      {v:'Sim'},
+      {v:'Não', aviso:'O gerador incluirá a cláusula de continuidade registral.'}
+    ]});
+  }
+  if(ato==='CV-Rural'){
+    Q.push({id:'adcorpus', titulo:'Venda ad corpus?', ops:[{v:'Sim'},{v:'Não (ad mensuram)'}]});
+    Q.push({id:'geo', titulo:'Georreferenciamento', ops:[
+      {v:'SIGEF/CAR apresentado', inj:['Georreferenciamento SIGEF/CAR']},
+      {v:'Dispensado pela área', aviso:'Confirmar limite de área para dispensa.'}
+    ]});
+  }
+  if(ato==='CDP'){
+    Q.push({id:'posse_origem', titulo:'Origem da posse do cedente', ops:[
+      {v:'Aquisição anterior', inj:['Documento da posse anterior (contrato/CDP)']},
+      {v:'Herança', inj:['Documentação da origem hereditária da posse']},
+      {v:'Ocupação'}
+    ]});
+  }
+  if(ato==='CDH'){
+    Q.push({id:'config', titulo:'Configuração do negócio — atenção', ops:[
+      {v:'Cessão pura — APENAS os herdeiros cedem direitos hereditários', aviso:'Só a fração hereditária é objeto do ato; o cônjuge sobrevivente, se existir, não transmite nada aqui.'},
+      {v:'Negócio misto — sobrevivente VENDE a meação + herdeiros CEDEM a herança', aviso:'Muda a nomenclatura do ato e exige cláusula especial: a meação NÃO é herança — conforme o regime, o sobrevivente já é proprietário de 50% e VENDE essa fração ideal; apenas a metade dos herdeiros é inventariada/partilhada e objeto de cessão. Seguir o padrão próprio do negócio misto (Módulo 3-B).'}
+    ]});
+    Q.push({id:'origem_meacao', titulo:'Origem da meação do sobrevivente', dependeDe:['config','Negócio misto — sobrevivente VENDE a meação + herdeiros CEDEM a herança'], ops:[
+      {v:'Casamento — comunhão universal', aviso:'Meação de 50% sobre todo o acervo.'},
+      {v:'Casamento — comunhão parcial (bem adquirido na constância)', aviso:'Meação de 50% sobre o bem comum; conferir na matrícula/certidão a aquisição na constância.'},
+      {v:'União estável', inj:['Prova da união estável (Tema 809 STF)'], aviso:'O gerador insere a cláusula de legitimação da meeira/meeiro (Tema 809 STF).'}
+    ]});
+    Q.push({id:'cess_herdeiro', titulo:'O cessionário também é herdeiro?', ops:[
+      {v:'Não', aviso:'Cessão a terceiro: observar o direito de preferência dos coerdeiros (arts. 1.794–1.795 CC) — cláusula própria no modelo.'},
+      {v:'Sim', aviso:'Ajustar a fração cedida (ex.: 83,34%).'}
+    ]});
+    Q.push({id:'objeto', titulo:'Objeto da cessão', ops:[
+      {v:'Quinhão universal'},
+      {v:'Bem determinado', inj:['Matrícula do bem determinado']}
+    ]});
+    Q.push({id:'tributo', titulo:'ITCMD/ITBI', ops:[
+      {v:'Recolhido', inj:['Guia paga (ITCMD/ITBI)']},
+      {v:'A recolher'}
+    ]});
+    Q.push({id:'anuentes', titulo:'Há intervenientes-anuentes prestando vênia?', ops:[
+      {v:'Não'},{v:'Sim', inj:['RG/CPF dos anuentes']}
+    ]});
+  }
+  if(ato==='DOA'){
+    Q.push({id:'rel', titulo:'Relação entre doador e donatário', ops:[
+      {v:'Ascendente → descendente (pai/mãe → filho; avô/avó → neto)', aviso:'Art. 544 CC: importa adiantamento de legítima, salvo cláusula expressa em contrário.'},
+      {v:'Cônjuge ou companheiro(a) do doador', aviso:'Cônjuge herdeiro necessário: mesma lógica de adiantamento (art. 544 CC).'},
+      {v:'Outro parente'},
+      {v:'Terceiro sem parentesco'}
+    ]});
+    Q.push({id:'natureza', titulo:'Natureza da doação (se o donatário é herdeiro necessário)', ops:[
+      {v:'Adiantamento de legítima (regra do art. 544 CC)', aviso:'Sujeita a colação no futuro inventário.'},
+      {v:'Pela parte disponível, com dispensa de colação', aviso:'Consignar cláusula EXPRESSA de dispensa de colação (art. 2.005 CC).'},
+      {v:'Donatário não é herdeiro necessário'}
+    ]});
+    Q.push({id:'patrimonio', titulo:'Patrimônio do doador × valor doado', ops:[
+      {v:'A doação cabe na metade disponível'},
+      {v:'Pode exceder a metade disponível', aviso:'Risco de doação inoficiosa — nula no excesso (art. 549 CC). Avaliar o patrimônio no momento da liberalidade.'},
+      {v:'Doador está doando todos os seus bens', aviso:'Doação universal é nula sem reserva de renda ou usufruto suficiente à subsistência (art. 548 CC) — exigir a reserva.'}
+    ]});
+    Q.push({id:'usufruto', titulo:'Reserva de usufruto', ops:[
+      {v:'Sem reserva'},
+      {v:'Usufruto vitalício em favor do doador', aviso:'O gerador insere a cláusula de reserva de usufruto vitalício (transmite-se só a nua-propriedade).'},
+      {v:'Usufruto vitalício do doador e do cônjuge, com direito de acrescer', aviso:'Cláusula com acrescer entre usufrutuários: falecendo um, o usufruto consolida-se no sobrevivente.'}
+    ]});
+    Q.push({id:'encargo', titulo:'Doação pura ou com encargo?', ops:[
+      {v:'Pura'},
+      {v:'Com encargo (modal)', aviso:'Descrever o encargo no campo Observações; exige aceitação expressa do donatário.'}
+    ]});
+    Q.push({id:'menor', titulo:'Donatário menor ou incapaz?', ops:[
+      {v:'Não'},
+      {v:'Sim', inj:['RG/CPF do representante legal'], aviso:'Doação pura a incapaz dispensa aceitação (art. 543 CC); avaliar cláusula de inalienabilidade.'}
+    ]});
+    Q.push({id:'clausulas', titulo:'Cláusulas restritivas', multi:true, ops:[
+      {v:'Incomunicabilidade'},{v:'Inalienabilidade'},{v:'Impenhorabilidade'},
+      {v:'Reversão ao doador (art. 547 CC)'},{v:'Nenhuma'}
+    ]});
+    Q.push({id:'fracao', titulo:'Fração doada', ops:[{v:'100% do imóvel'},{v:'Parte ideal'}]});
+  }
+  return Q;
+}
+
+/* Dossiê base por ato */
+function dossieBase(ato){
+  if(ato==='TEST') return ['RG/CPF do testador','Comprovante de residência do testador','Qualificação dos beneficiários (RG/CPF)','RG/CPF das 2 testemunhas'];
+  if(ato==='INV') return ['Petição/minuta do advogado (nome e OAB — extraídos no Momento 3)','Procuração dos herdeiros ao advogado','Certidão de óbito do autor da herança','Certidão de casamento do falecido (com averbações)','RG/CPF de todos os herdeiros e cônjuges','Matrícula(s) atualizada(s) dos bens','Declaração(ões) de ITCMD','CND municipal dos imóveis','CND federal do espólio','Certidão negativa de testamento (CENSEC)'];
+  const b=['RG/CPF do(s) transmitente(s)','RG/CPF do(s) adquirente(s)','Comprovante de residência'];
+  if(ato==='CV-Urbano') b.push('Matrícula atualizada','Guia de ITBI','CND municipal (IPTU)','Inscrição imobiliária');
+  if(ato==='CV-Rural')  b.push('Matrícula atualizada','Guia de ITBI','CCIR','ITR / CND rural');
+  if(ato==='CDP')       b.push('Cadastro municipal do imóvel','ITBI (conforme o município)');
+  if(ato==='CDH')       b.push('Guia de ITBI/ITCMD (âncora: transmitente = Espólio; adquirente = cessionário)','Certidão de óbito do autor da herança','Certidão de casamento do falecido (com averbações)','Certidões de nascimento/casamento dos herdeiros cedentes','RG/CPF dos cônjuges dos cedentes');
+  if(ato==='DOA')       b.push('Matrícula atualizada','Guia de ITCMD','CND municipal');
+  return b;
+}
+
+/* ============================================================
+   RENDERIZAÇÃO
+============================================================ */
+const el=id=>document.getElementById(id);
+
+/* ===== BANDEIRAMENTO =====
+   verde  = loteador/incorporador (vendedor na lista corporativa)
+   rosa   = exclusiva Construtora Santa Mônica (principal cliente)
+   amarelo= construtor comum — PF ou pequeno PJ (marcado pela escrevente)
+   roxo   = advogado apresentando (origem = Advogado: inventário, CDH…)
+   cinza  = corretor/imobiliária cadastrado como apresentante
+   No go-live, as duas listas vêm do Trello: ⚙ Vendedores Corporativos e
+   ⚙ Corretores (GET /vendedores e /corretores) — atualizáveis sem código. */
+const VENDEDORES_CORP=[
+  {nome:'CONSTRUTORA SANTA MÔNICA',bandeira:'rosa'},
+  {nome:'ETHOS INCORPORADORA',bandeira:'verde'},
+  {nome:'ATRIO URBANIZADORA',bandeira:'verde'},
+  {nome:'CONSTRUTORA FORTTE',bandeira:'verde'},
+  {nome:'E-21 EMPREENDIMENTOS',bandeira:'verde'},
+  {nome:'JMM CONSTRUTORA',bandeira:'verde'},
+  {nome:'PAIVA CONSTRUTORA',bandeira:'verde'},
+  {nome:'PORTO RESIDENCE',bandeira:'verde'}
+];
+let CORRETORES=['J.C. IMÓVEIS']; // lista ⚙ Corretores
+let ADVOGADOS=['DR. JHÔNATAS LIMA','DRA. JESSICA SOUZA DOS SANTOS','DR. ALEXANDRO ARGOLO','DR. ALESSANDRO SANTOS','DR. RUAN CHAGAS','DRA. MARINA MENDONÇA','DR. MATHEUS CARVALHO','DRA. RAYANE','DR. HARRYSON LINO','DRA. ADENILTA','DRA. THAMIRYS ALMEIDA','DR. TANISSON SANTOS','DRA. ACUNENA VASCO','DRA. FLAVIA JACONIAS','DRA. ANDREZA SOUZA','DRA. ISABELLY CUNHA','DRA. YASMIN SAMPAIO','DRA. FABIANA GAMA','DRA. ANA CAROLINA','DRA. REGIENE DE SANTANA','DRA. LICIA LOPES','DRA. GENY REZENDE','DR. ALBERTO NOGUEIRA','DRA. IANE','DR. GERÔNIMO','DR. ANDREY ROCHA','DR. PEDRO MODESTO','DR. IGOR MONTEIRO','DRA. DANI ALFANO','DR. FABIO SANTANA','DR. DOUGLAS']; // lista ⚙ Advogados
+const BAND_INFO={
+  verde:{dot:'🟢',rot:'Loteador/Incorporador'},
+  rosa:{dot:'💗',rot:'Santa Mônica — cliente principal'},
+  amarelo:{dot:'🟡',rot:'Construtor (PF/pequeno PJ)'},
+  roxo:{dot:'🟣',rot:'Advogado'},
+  cinza:{dot:'⚪',rot:'Corretor/Imobiliária'}
+};
+function preencherListas(){
+  el('vendedores').innerHTML=VENDEDORES_CORP.map(v=>`<option value="${v.nome}">`).join('');
+  let aps=CORRETORES;
+  if(S.ato==='INV') aps=ADVOGADOS;
+  else if(S.ato==='CDH') aps=[...ADVOGADOS,...CORRETORES];
+  el('parceiros').innerHTML=aps.map(c=>`<option value="${c}">`).join('');
+}
+function advogadoCadastrado(){
+  const c=(el('apresNome').value||'').trim().toUpperCase();
+  return ADVOGADOS.includes(c);
+}
+function vendedorCorp(){
+  const v=(el('vendNome')?.value||'').trim().toUpperCase();
+  return VENDEDORES_CORP.find(i=>i.nome===v)||null;
+}
+function corretorCadastrado(){
+  const c=(el('apresNome').value||'').trim().toUpperCase();
+  return CORRETORES.includes(c);
+}
+function bandeirasAtuais(){
+  const b=[];
+  const ehCV = S.ato==='CV-Urbano'||S.ato==='CV-Rural';
+  if(ehCV){
+    const vc=vendedorCorp();
+    if(vc) b.push(vc.bandeira);
+    else if(S.vendCat==='Construtor') b.push('amarelo');
+  }
+  if(S.ato==='INV' || advogadoCadastrado()) b.push('roxo');
+  if(corretorCadastrado()) b.push('cinza');
+  return b;
+}
+
+function abrirChecklist(){
+  if(!S.ato) return;
+  el('checkTitulo').textContent='Conferência documental — '+S.ato;
+  const vistos=new Set();
+  const conds=[];
+  perguntasDoAto(S.ato).forEach(q=>(q.ops||[]).forEach(o=>{
+    (o.inj||[]).forEach(i=>{
+      const chave=i+'|'+o.v;
+      if(!vistos.has(chave)){vistos.add(chave);conds.push({i,v:o.v});}
+    });
+  }));
+  el('checkLista').innerHTML=
+    '<div class="ck-grp">Sempre exigidos</div>'+
+    dossieBase(S.ato).map(b=>`<div class="ck-it">☐ ${b}</div>`).join('')+
+    (conds.length?'<div class="ck-grp">Condicionais — entram conforme a triagem</div>'+
+      conds.map(c=>`<div class="ck-it">☐ ${c.i} <span>· se «${c.v}»</span></div>`).join(''):'');
+  el('veuCheck').classList.add('aberto');
+}
+el('btnCheck').addEventListener('click',abrirChecklist);
+
+document.querySelectorAll('#chipsAto .chip').forEach(c=>{
+  c.addEventListener('click',()=>{
+    document.querySelectorAll('#chipsAto .chip').forEach(x=>x.classList.remove('ativo'));
+    c.classList.add('ativo');
+    S.ato=c.dataset.ato; S.respostas={}; S.dossie={};
+    if(S.ato!=='TEST'){ S.qual={}; S.qtest={civil:null,regime:null,benefNat:null,benefQtd:'1'}; }
+    el('btnCheck').classList.add('on');
+    el('blIdent').classList.remove('oculto');
+    el('blTriagem').classList.remove('oculto');
+    el('blObs').classList.remove('oculto');
+    el('avisoSigilo').classList.toggle('oculto', S.ato!=='TEST');
+    el('avisoCDH').classList.toggle('oculto', S.ato!=='CDH');
+    el('tituloTriagem').textContent = (S.ato==='TEST') ? '' : S.ato;
+    el('rotParte').textContent=PAPEIS[S.ato].parte;
+    el('rotApres').textContent=PAPEIS[S.ato].apres||APRES_PADRAO;
+    preencherListas();
+    const ehTest = S.ato==='TEST';
+    el('blIdent').classList.toggle('modo-test', ehTest);
+    el('blTestQual').classList.toggle('oculto', !ehTest);
+    if(ehTest) montarQualTest();
+    el('rotTriagem').textContent = ehTest ? 'Manifestação do Testador' : 'Triagem — ';
+    el('obsTitulo').textContent = ehTest ? 'Outras cláusulas especiais — manifestação complementar' : 'Observações não documentadas';
+    el('obsLabel').textContent = ehTest
+      ? 'Detalhe aqui as cláusulas especiais e particularidades não pré-classificadas nos botões acima (substitutos, condições, revogação de testamento anterior, deserdação com causa, bem de família etc.)'
+      : 'Condições específicas, vontade particular do interessado, combinados verbais — só o que não consta de documento nenhum';
+    el('blObs').classList.toggle('destaque', ehTest);
+    el('obs').rows = ehTest ? 7 : 3;
+    const ehCV = S.ato==='CV-Urbano'||S.ato==='CV-Rural';
+    el('boxVendedor').classList.toggle('oculto', !ehCV);
+    if(!ehCV){ el('vendNome').value=''; S.vendCat=null; document.querySelectorAll('#vendCatBox .op-cat').forEach(x=>x.classList.remove('sel')); }
+    renderPerguntas(); renderDossie(); abrirChecklist();
+  });
+});
+
+el('urgente').addEventListener('click',e=>{S.urgente=!S.urgente;e.target.classList.toggle('sel',S.urgente);renderDossie();});
+preencherListas();
+S.vendCat=null;
+document.querySelectorAll('#vendCatBox .op-cat').forEach(b=>{
+  b.addEventListener('click',()=>{
+    S.vendCat = (S.vendCat===b.dataset.cat)? null : b.dataset.cat;
+    document.querySelectorAll('#vendCatBox .op-cat').forEach(x=>x.classList.toggle('sel', x.dataset.cat===S.vendCat));
+    renderDossie();
+  });
+});
+el('vendNome').addEventListener('input',()=>{
+  // reconhecido na lista corporativa → categoria manual sai de cena
+  el('vendCatBox').style.display = vendedorCorp()? 'none':'flex';
+  renderDossie();
+});
+
+['apresNome','apresTel','parteNome','parteTel'].forEach(id=>el(id).addEventListener('input',renderDossie));
+
+function visivel(q){
+  if(!q.dependeDe) return true;
+  const v=S.respostas[q.dependeDe[0]];
+  return Array.isArray(q.dependeDe[1]) ? q.dependeDe[1].includes(v) : v===q.dependeDe[1];
+}
+
+function renderPerguntas(){
+  const box=el('perguntas'); box.innerHTML='';
+  perguntasDoAto(S.ato).forEach(q=>{
+    if(!visivel(q)) { delete S.respostas[q.id]; return; }
+    const div=document.createElement('div'); div.className='pergunta'+(q.dependeDe?' sub':'');
+    div.innerHTML=`<div class="titulo-p">${q.titulo}</div>`;
+    if(q.tipo==='data'||q.tipo==='texto'){
+      const inp=document.createElement('input');
+      inp.type = q.tipo==='data' ? 'date' : 'text';
+      inp.style.maxWidth = q.tipo==='data' ? '220px' : '420px';
+      if(q.placeholder) inp.placeholder=q.placeholder;
+      inp.value=S.respostas[q.id]||'';
+      const ev = q.tipo==='data' ? 'change' : 'input';
+      inp.addEventListener(ev,()=>{S.respostas[q.id]=inp.value;renderDossie();});
+      div.appendChild(inp); box.appendChild(div); return;
+    }
+    const ops=document.createElement('div'); ops.className='opcoes';
+    q.ops.forEach(o=>{
+      const b=document.createElement('div'); b.className='op'; b.textContent=o.v;
+      const marcado = q.multi ? (S.respostas[q.id]||[]).includes(o.v) : S.respostas[q.id]===o.v;
+      if(marcado) b.classList.add('sel');
+      b.addEventListener('click',()=>{
+        if(q.multi){
+          let arr=S.respostas[q.id]||[];
+          if(o.v==='Nenhuma'){arr=['Nenhuma'];}
+          else{arr=arr.filter(x=>x!=='Nenhuma'); arr=arr.includes(o.v)?arr.filter(x=>x!==o.v):[...arr,o.v];}
+          S.respostas[q.id]=arr;
+        } else S.respostas[q.id]=o.v;
+        renderPerguntas(); renderDossie();
+      });
+      ops.appendChild(b);
+    });
+    div.appendChild(ops);
+    const sel = q.multi? null : q.ops.find(o=>o.v===S.respostas[q.id]);
+    if(sel && sel.aviso){const a=document.createElement('div');a.className='aviso';a.textContent='⚠ '+sel.aviso;div.appendChild(a);}
+    box.appendChild(div);
+  });
+}
+
+function itensDossie(){
+  const itens=[...dossieBase(S.ato)];
+  perguntasDoAto(S.ato).forEach(q=>{
+    if(!visivel(q) || !q.ops) return;
+    const r=S.respostas[q.id]; if(!r) return;
+    (q.multi?r:[r]).forEach(v=>{
+      const o=q.ops.find(x=>x.v===v);
+      if(o&&o.inj) o.inj.forEach(i=>{if(!itens.includes(i))itens.push(i);});
+    });
+  });
+  return itens;
+}
+
+function tituloCartao(){
+  const nome = (S.ato==='TEST' ? (S.qual['testador_nome']||'') : (el('parteNome').value||'')).trim().toUpperCase();
+  return `Prot. (${S.ato}) {NNNN} - ${nome||'…'}`;
+}
+
+function renderDossie(){
+  if(!S.ato) return;
+  const bands=bandeirasAtuais();
+  const adv=advogadoCadastrado(), corr=corretorCadastrado();
+  el('badgeParceiro').classList.toggle('oculto', !(adv||corr));
+  if(adv) el('badgeParceiro').textContent='🟣 Advogado cadastrado — bandeira roxa';
+  else if(corr) el('badgeParceiro').textContent='⚪ Corretor cadastrado — bandeira cinza';
+  const vc=vendedorCorp();
+  const bb=el('badgeBandeira');
+  const bandVend = vc? vc.bandeira : (S.vendCat==='Construtor'?'amarelo':null);
+  bb.classList.toggle('oculto', !bandVend);
+  if(bandVend) bb.textContent=`${BAND_INFO[bandVend].dot} Bandeira ${bandVend} — ${BAND_INFO[bandVend].rot}`;
+  const dots=bands.map(b=>BAND_INFO[b].dot).join('');
+  el('tituloPrev').textContent = tituloCartao() + (dots?'  '+dots:'') + (S.urgente?'  ⚑':'');
+  const ul=el('listaDossie'); const atuais=new Set([...ul.children].map(li=>li.dataset.item));
+  ul.innerHTML='';
+  const itens=itensDossie();
+  itens.forEach(item=>{
+    const li=document.createElement('li'); li.dataset.item=item;
+    if(!atuais.has(item)&&atuais.size) li.classList.add('inj');
+    if(S.dossie[item]) li.classList.add('marcado');
+    li.innerHTML=`<span class="cx">${S.dossie[item]?'✓':''}</span><span>${item}</span>`;
+    li.addEventListener('click',()=>{S.dossie[item]=!S.dossie[item];renderDossie();});
+    ul.appendChild(li);
+  });
+  Object.keys(S.dossie).forEach(k=>{if(!itens.includes(k))delete S.dossie[k];});
+  const marcados=itens.filter(i=>S.dossie[i]).length;
+  el('contagem').textContent=`${marcados} de ${itens.length} documentos na pasta física`;
+  const pronto = S.ato==='TEST'
+    ? !!((S.qual['testador_nome']||'').trim() && (S.qual['testador_telefone']||'').trim())
+    : !!(el('apresNome').value.trim() && el('apresTel').value.trim() && el('parteNome').value.trim());
+  el('btnProt').disabled=!pronto;
+}
+
+/* ============================================================
+   PROTOCOLIZAR
+============================================================ */
+
+/* ====== CONFIGURAÇÃO DE PRODUÇÃO ======
+   Vazio = modo simulação (mostra recibo e payload sem enviar).
+   No go-live: 'https://SEU-SERVICO.up.railway.app' */
+const ENDPOINT_RAILWAY='';
+
+const pega=k=>{try{return sessionStorage.getItem(k)}catch(e){return null}};
+const TOKEN=pega('cn2o_token'), NOME_SESSAO=pega('cn2o_nome')||'', CARGO_SESSAO=pega('cn2o_cargo')||'';
+if(ENDPOINT_RAILWAY && !TOKEN) location.href='index.html';
+if(NOME_SESSAO){
+  const si=document.getElementById('sessaoInfo');
+  si.innerHTML=`Sessão: <b>${NOME_SESSAO}</b>${CARGO_SESSAO?' · '+CARGO_SESSAO:''} &nbsp;·&nbsp; <a href="#" id="sair" style="color:#631325">Sair</a>`;
+  document.getElementById('sair').addEventListener('click',e=>{e.preventDefault();
+    if(ENDPOINT_RAILWAY) fetch(ENDPOINT_RAILWAY+'/logout',{method:'POST',headers:{'X-Auth-Token':TOKEN}}).catch(()=>{});
+    try{sessionStorage.clear()}catch(_){}
+    location.href='index.html';});
+}
+let HUB_KEY=null;
+function chaveAcesso(){
+  if(HUB_KEY) return HUB_KEY;
+  try{ HUB_KEY=localStorage.getItem('cn2o_hub_key'); }catch(e){}
+  if(!HUB_KEY){
+    HUB_KEY=prompt('Código de acesso do cartório:');
+    try{ if(HUB_KEY) localStorage.setItem('cn2o_hub_key', HUB_KEY); }catch(e){}
+  }
+  return HUB_KEY;
+}
+// listas dinâmicas (⚙ Vendedores Corporativos e ⚙ Corretores via backend)
+if(ENDPOINT_RAILWAY){
+  fetch(ENDPOINT_RAILWAY+'/vendedores').then(r=>r.json()).then(vs=>{
+    if(Array.isArray(vs)&&vs.length){
+      VENDEDORES_CORP.length=0;
+      vs.forEach(v=>VENDEDORES_CORP.push({nome:v.nome.toUpperCase(),bandeira:v.bandeira||'verde'}));
+      preencherListas();
+    }
+  }).catch(()=>{});
+  fetch(ENDPOINT_RAILWAY+'/corretores').then(r=>r.json()).then(cs=>{
+    if(Array.isArray(cs)&&cs.length){
+      CORRETORES=cs.map(c=>c.nome.toUpperCase());
+      preencherListas();
+    }
+  }).catch(()=>{});
+}
+
+el('btnProt').addEventListener('click',async ()=>{
+  const itens=itensDossie();
+  const recebidos=itens.filter(i=>S.dossie[i]);
+  const pendentes=itens.filter(i=>!S.dossie[i]);
+  const agora=new Date().toLocaleString('pt-BR');
+  const P=PAPEIS[S.ato];
+  const ehTest = S.ato==='TEST';
+  const apres = ehTest ? (S.qual['testador_nome']||'').trim().toUpperCase() : el('apresNome').value.trim().toUpperCase();
+  const parte = ehTest ? apres : el('parteNome').value.trim().toUpperCase();
+  const telApresV = ehTest ? (S.qual['testador_telefone']||'').trim() : el('apresTel').value.trim();
+
+  const payload={
+    ato:S.ato, urgente:S.urgente,
+    apresentante:{nome:apres, telefone:telApresV},
+    vendedor: (S.ato==='CV-Urbano'||S.ato==='CV-Rural') ? {
+      nome: el('vendNome').value.trim().toUpperCase()||null,
+      categoria: vendedorCorp()? (vendedorCorp().bandeira==='rosa'?'Santa Mônica':'Loteador/Incorporador') : (S.vendCat||'Particular')
+    } : null,
+    bandeiras: bandeirasAtuais(),
+    parte_envolvida:{papel:P.ra, nome:parte, telefone: ehTest? null : (el('parteTel').value.trim()||null)},
+    qualificacao: ehTest ? (()=>{
+      const pes=pref=>({nome:S.qual[pref+'_nome']||null,estado_civil:S.qual[pref+'_estado_civil']||null,profissao:S.qual[pref+'_profissao']||null,endereco:S.qual[pref+'_endereco']||null,rg:S.qual[pref+'_rg']||null,cpf:S.qual[pref+'_cpf']||null});
+      const nb=parseInt(S.qtest.benefQtd||'1',10);
+      return {
+        testador:{...pes('testador'),estado_civil:S.qtest.civil,regime:S.qtest.regime,telefone:S.qual['testador_telefone']||null,
+          conjuge:(S.qtest.civil==='Casado(a)'||S.qtest.civil==='União estável')?{nome:S.qual['conjuge_nome']||null,profissao:S.qual['conjuge_profissao']||null}:null},
+        beneficiarios:{natureza:S.qtest.benefNat, lista:Array.from({length:nb},(_,i)=>pes('benef'+(i+1)))},
+        testamenteiro:pes('testamenteiro'),
+        testemunhas:[pes('testemunha1'),pes('testemunha2')]
+      };
+    })() : undefined,
+    manifestacao_vontade: ehTest ? (el('obs').value.trim()||null) : undefined,
+    escrevente: NOME_SESSAO || null, // informativo — o backend usa a sessão
+    triagem:S.respostas,
+    observacoes_nao_documentadas: el('obs').value.trim() || null,
+    dossie:{recebidos, pendentes},
+    titulo_modelo:`Prot. (${S.ato}) {NNNN} - ${parte}`
+  };
+
+  el('reciboTxt').textContent=
+`*CARTÓRIO DE NOTAS DO 2º OFÍCIO — ITABAIANA/SE*
+
+Recibo de protocolo — ${agora}
+Ato: ${ATO_NOME[S.ato]}
+${P.ra}: ${parte}
+${ehTest?'':'Apresentante: '+apres+'\n'}
+*Nº do protocolo: {NNNN}*
+
+Guarde este número: use-o para consultar o andamento do seu ato em cn2oita.com.br ou informe-o à atendente do cartório.`;
+
+  const telParte = ehTest ? '' : el('parteTel').value.trim();
+  payload.recibo_destinatarios = telParte ? ['apresentante','parte_envolvida'] : ['apresentante'];
+
+  let numeroReal='{NNNN}';
+  if(ENDPOINT_RAILWAY){
+    el('btnProt').disabled=true; el('btnProt').textContent='Protocolando…';
+    try{
+      const r=await fetch(ENDPOINT_RAILWAY+'/protocolo',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','X-Auth-Token':TOKEN||''},
+        body:JSON.stringify(payload)
+      });
+      const j=await r.json();
+      if(r.status===401){ try{sessionStorage.clear()}catch(_){} location.href='index.html'; return; }
+      if(!r.ok) throw new Error(j.erro||('HTTP '+r.status));
+      numeroReal=j.numero;
+      if(j.prazo) S.prazoInfo=' · Prazo p/ lavratura: '+new Date(j.prazo).toLocaleDateString('pt-BR');
+    }catch(e){
+      alert('Falha ao protocolar: '+e.message+'\nNada foi criado. Tente novamente ou avise o tabelião.');
+      el('btnProt').disabled=false; el('btnProt').textContent='Protocolizar';
+      return;
+    }
+    el('btnProt').disabled=false; el('btnProt').textContent='Protocolizar';
+  }
+
+  el('reciboDest').textContent = ehTest
+    ? `Disparo: ${telApresV} (testador)`
+    : (telParte
+      ? `Disparo duplo: ${el('apresTel').value.trim()} (apresentante) e ${telParte} (parte envolvida)`
+      : `Disparo: ${el('apresTel').value.trim()} (apresentante) — parte sem telefone cadastrado`);
+  if(S.prazoInfo){ el('reciboDest').textContent += S.prazoInfo; S.prazoInfo=null; }
+  el('reciboTxt').textContent = el('reciboTxt').textContent.split('{NNNN}').join(numeroReal);
+  el('payloadTxt').textContent='POST '+(ENDPOINT_RAILWAY||'(simulação)')+'/protocolo\n\n'+JSON.stringify(payload,null,2);
+  el('veu').classList.add('aberto');
+});
+</script>
+</body>
+</html>
