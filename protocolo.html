@@ -429,6 +429,9 @@ function perguntasInventario(){
   ];
 }
 
+const QTDS=['2','3','4','5','6'];
+const rotuloN=(papel,i)=>papel.replace(/\((es|s)\)/,'')+' '+i;
+
 function perguntasDoAto(ato){
   if(ato==='TEST') return perguntasTestamento();
   if(ato==='INV') return perguntasInventario();
@@ -461,6 +464,13 @@ function perguntasDoAto(ato){
   ]});
   }
 
+  // Múltiplos transmitentes — quantos e os nomes (na CV o 1º é o do campo Vendedor(es))
+  if(ato!=='CDH'){
+    const primeiroT = (ato==='CV-Urbano'||ato==='CV-Rural') ? 2 : 1;
+    Q.push({id:'t_qtd', titulo:`${P.t} — quantos?` + (primeiroT===2 ? ' (o 1º é o do campo Vendedor(es))' : ''), dependeDe:['t_tipo','Múltiplos transmitentes'], ops:QTDS.map(n=>({v:n}))});
+    for(let i=primeiroT;i<=6;i++) Q.push({id:'t_nome_'+i, tipo:'texto', titulo:`${rotuloN(P.t,i)} — nome completo`, placeholder:'Nome completo', dependeDe:['t_qtd', QTDS.filter(n=>parseInt(n,10)>=i)]});
+  }
+
   // Adquirente (CDH: cessionário extraído do campo ADQUIRENTE da guia de ITBI)
   if(ato!=='CDH'){
   Q.push({id:'a_civil', titulo:`${P.a} — estado civil`, ops:[
@@ -480,6 +490,9 @@ function perguntasDoAto(ato){
     {v:'Comunhão universal'},
     {v:'Separação convencional', inj:['Pacto antenupcial registrado (adquirente)']}
   ]});
+  // Múltiplos adquirentes — quantos e os nomes (o 1º é o da Parte envolvida)
+  Q.push({id:'a_qtd', titulo:`${P.a} — quantos? (o 1º é o da identificação acima)`, dependeDe:['a_civil','Múltiplos adquirentes'], ops:QTDS.map(n=>({v:n}))});
+  for(let i=2;i<=6;i++) Q.push({id:'a_nome_'+i, tipo:'texto', titulo:`${rotuloN(P.a,i)} — nome completo`, placeholder:'Nome completo', dependeDe:['a_qtd', QTDS.filter(n=>parseInt(n,10)>=i)]});
   }
 
   // Parentesco + representação
@@ -565,6 +578,16 @@ function perguntasDoAto(ato){
     ]});
   }
   if(ato==='CDH'){
+    // Múltiplos cedentes/cessionários — só os nomes; a qualificação continua saindo da guia e das certidões no Momento 3
+    Q.push({id:'t_multi', titulo:'Cedentes — mais de um?', ops:[{v:'Não'},{v:'Sim'}]});
+    Q.push({id:'t_qtd', titulo:'Cedentes — quantos?', dependeDe:['t_multi','Sim'], ops:QTDS.map(n=>({v:n}))});
+    for(let i=1;i<=6;i++) Q.push({id:'t_nome_'+i, tipo:'texto', titulo:`Cedente ${i} — nome completo`, placeholder:'Nome completo', dependeDe:['t_qtd', QTDS.filter(n=>parseInt(n,10)>=i)]});
+    Q.push({id:'a_multi', titulo:'Cessionários — mais de um?', ops:[
+      {v:'Não'},
+      {v:'Sim', inj:['RG/CPF e certidões de estado civil de TODOS os cessionários'], aviso:'Mais de um cessionário: o gerador insere a cláusula de instituição de condomínio voluntário; qualificação individual no Momento 3.'}
+    ]});
+    Q.push({id:'a_qtd', titulo:'Cessionários — quantos? (o 1º é o da identificação acima)', dependeDe:['a_multi','Sim'], ops:QTDS.map(n=>({v:n}))});
+    for(let i=2;i<=6;i++) Q.push({id:'a_nome_'+i, tipo:'texto', titulo:`Cessionário ${i} — nome completo`, placeholder:'Nome completo', dependeDe:['a_qtd', QTDS.filter(n=>parseInt(n,10)>=i)]});
     Q.push({id:'config', titulo:'Configuração do negócio — atenção', ops:[
       {v:'Cessão pura — APENAS os herdeiros cedem direitos hereditários', aviso:'Só a fração hereditária é objeto do ato; o cônjuge sobrevivente, se existir, não transmite nada aqui.'},
       {v:'Negócio misto — sobrevivente VENDE a meação + herdeiros CEDEM a herança', aviso:'Muda a nomenclatura do ato e exige cláusula especial: a meação NÃO é herança — conforme o regime, o sobrevivente já é proprietário de 50% e VENDE essa fração ideal; apenas a metade dos herdeiros é inventariada/partilhada e objeto de cessão. Seguir o padrão próprio do negócio misto (Módulo 3-B).'}
@@ -966,6 +989,16 @@ el('btnProt').addEventListener('click',async ()=>{
       categoria: vendedorCorp()? (vendedorCorp().bandeira==='rosa'?'Santa Mônica':'Loteador/Incorporador') : (S.vendCat||'Particular')
     } : null,
     bandeiras: bandeirasAtuais(),
+    partes: ehTest ? undefined : (()=>{
+      const R=S.respostas; const nomes=p=>Object.keys(R).filter(k=>k.startsWith(p)).sort().map(k=>String(R[k]||'').trim().toUpperCase()).filter(Boolean);
+      const ehCV=S.ato==='CV-Urbano'||S.ato==='CV-Rural';
+      return {
+        transmitentes:[...(ehCV?[el('vendNome').value.trim().toUpperCase()]:[]), ...nomes('t_nome_')].filter(Boolean),
+        adquirentes:[parte, ...nomes('a_nome_')].filter(Boolean),
+        qtd_transmitentes: R.t_qtd ? parseInt(R.t_qtd,10) : null,
+        qtd_adquirentes: R.a_qtd ? parseInt(R.a_qtd,10) : null
+      };
+    })(),
     assinatura_enotariado: ehTest
       ? {testador: S.qtest.enot==='Sim'}
       : {transmitente: S.ato==='INV' ? null : S.enot.t==='Sim', adquirente: S.enot.a==='Sim', papeis:{transmitente:P.t, adquirente:P.a}},
