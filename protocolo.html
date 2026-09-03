@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CN2O · Protocolo — Família Transmissão</title>
+<title>CN2O · Hub de Protocolo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
 <style>
@@ -144,13 +144,20 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--vinho);outline-o
   <section class="bloco">
     <h2 class="versalete"><span class="n">1</span>Tipo de ato</h2>
     <div class="chips" id="chipsAto">
-      <button class="chip" data-ato="CV-Urbano">CV · Urbano</button>
-      <button class="chip" data-ato="CV-Rural">CV · Rural</button>
-      <button class="chip" data-ato="CDP">CDP · Posse</button>
-      <button class="chip" data-ato="CDH">CDH · Herança</button>
-      <button class="chip" data-ato="DOA">Doação</button>
-      <button class="chip" data-ato="TEST">Testamento</button>
-      <button class="chip" data-ato="INV">Inventário</button>
+      <button class="chip" data-ato="CV-Urbano">CV-Urbano</button>
+      <button class="chip" data-ato="CV-Rural">CV-Rural</button>
+      <button class="chip" data-ato="CDP">CDP · Cessão de posse</button>
+      <button class="chip" data-ato="CDH">CDH · Cessão de herança</button>
+      <button class="chip" data-ato="DOA">DOA · Doação</button>
+      <button class="chip" data-ato="PERM">PERM · Permuta</button>
+      <button class="chip" data-ato="TEST">TEST · Testamento</button>
+      <button class="chip" data-ato="INV">INV · Inventário</button>
+      <button class="chip" data-ato="DIV">DIV · Divórcio</button>
+      <button class="chip" data-ato="UE">UE · União estável</button>
+      <button class="chip" data-ato="UE-DIS">UE-DIS · Dissolução de UE</button>
+      <button class="chip" data-ato="RERRAT">RERRAT · Re-ratificação</button>
+      <button class="chip" data-ato="ATA-USO">ATA-USO · Ata p/ usucapião</button>
+      <button class="chip" data-ato="ATA-W">ATA-W · Ata de mensagens</button>
     </div>
   </section>
 
@@ -187,6 +194,7 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--vinho);outline-o
         <label class="rotulo versalete" for="parteTel">Telefone</label>
         <input type="tel" id="parteTel" placeholder="(79) 9____-____">
       </div>
+      <div id="extrasBox" class="cel-padrao oculto" style="grid-column:1 / -1"></div>
       <div id="enotA" class="cel-padrao oculto" style="grid-column:1 / -1"></div>
     </div>
     <div class="pergunta" style="margin-top:14px">
@@ -267,10 +275,18 @@ const PAPEIS = {
   'CDH':{t:'Cedente(s)',a:'Cessionário',parte:'Cessionário(a)',ph:'Se mais de um, o primeiro',ra:'Cessionário(a)'},
   'DOA':{t:'Doador(a)',a:'Donatário(a)',parte:'Donatário(a)',ra:'Donatário(a)'},
   'TEST':{t:'Testador(a)',a:'Beneficiário(s)',parte:'Testador(a)',ra:'Testador(a)'},
-  'INV':{t:'Espólio',a:'Herdeiros',parte:'Inventariante',ra:'Inventariante',apres:'Advogado apresentante'}
+  'INV':{t:'Espólio',a:'Herdeiros',parte:'Inventariante',ra:'Inventariante',apres:'Advogado apresentante'},
+  /* t/a = papéis das perguntas de e-Notariado (null = sem pergunta); extras = nomes digitados no balcão */
+  'PERM':{t:'Permutante 1',a:'Permutante 2',parte:'Permutante 1',ra:'Permutante',extras:[['perm2','Permutante 2']]},
+  'DIV':{t:'Cônjuge 1',a:'Cônjuge 2',parte:'Cônjuge 1',ra:'Cônjuge',apres:'Advogado(a) assistente — obrigatório (CPC, art. 733 §2º)',extras:[['conjuge2','Cônjuge 2']]},
+  'UE':{t:'Companheiro(a) 1',a:'Companheiro(a) 2',parte:'Companheiro(a) 1',ra:'Companheiro(a)',extras:[['comp2','Companheiro(a) 2']]},
+  'UE-DIS':{t:'Companheiro(a) 1',a:'Companheiro(a) 2',parte:'Companheiro(a) 1',ra:'Companheiro(a)',apres:'Advogado(a) assistente — obrigatório (CPC, art. 733 §2º)',extras:[['comp2','Companheiro(a) 2']]},
+  'RERRAT':{t:'Partes do ato',a:null,parte:'Solicitante',ra:'Solicitante'},
+  'ATA-USO':{t:null,a:null,parte:'Requerente (possuidor)',ra:'Requerente',apres:'Advogado(a) — obrigatório (art. 216-A da LRP)'},
+  'ATA-W':{t:null,a:null,parte:'Solicitante (participante da conversa)',ra:'Solicitante',apres:'Apresentante — o próprio solicitante ou advogado(a)'}
 };
 const APRES_PADRAO='Apresentante';
-const ATO_NOME={'CV-Urbano':'Escritura de Compra e Venda (imóvel urbano)','CV-Rural':'Escritura de Compra e Venda (imóvel rural)','CDP':'Escritura de Cessão de Direitos Possessórios','CDH':'Escritura de Cessão de Direitos Hereditários','DOA':'Escritura de Doação','TEST':'Testamento Público','INV':'Escritura de Inventário e Partilha'};
+const ATO_NOME={'CV-Urbano':'Escritura de Compra e Venda (imóvel urbano)','CV-Rural':'Escritura de Compra e Venda (imóvel rural)','CDP':'Escritura de Cessão de Direitos Possessórios','CDH':'Escritura de Cessão de Direitos Hereditários','DOA':'Escritura de Doação','TEST':'Testamento Público','INV':'Escritura de Inventário e Partilha','PERM':'Escritura de Permuta','DIV':'Escritura de Divórcio','UE':'Escritura de União Estável','UE-DIS':'Escritura de Dissolução de União Estável','RERRAT':'Escritura de Re-ratificação','ATA-USO':'Ata Notarial para Usucapião','ATA-W':'Ata Notarial de Mensagens Eletrônicas'};
 
 /* ============================================================
    PERGUNTAS DE TRIAGEM
@@ -431,9 +447,357 @@ function perguntasInventario(){
 
 const QTDS=['2','3','4','5','6'];
 
+
+/* ===== NOVOS ATOS (03/09/2026) =====
+   DIV, UE, UE-DIS: base na Res. CNJ 35/2007 (arts. 33-36, com a Res. 571/2024) e no CPC art. 733.
+   PERM: configurações e repercussão tributária. RERRAT: ato originário e objeto.
+   ATA-USO: requisitos da ata do art. 216-A da LRP / CNN (Prov. 149/2023, arts. 401-402).
+   ATA-W: cautelas da ata de mensagens (integralidade, aparelho do próprio solicitante, o que se atesta). */
+const CIVIL_OPS=(pref)=>[
+  {v:'Solteiro(a)'},
+  {v:'Casado(a)', inj:[`Certidão de casamento (${pref})`]},
+  {v:'Divorciado(a)', inj:[`Certidão de casamento com averbação do divórcio (${pref})`]},
+  {v:'Viúvo(a)', inj:[`Certidão de casamento com averbação de óbito (${pref})`]},
+  {v:'União estável'}
+];
+const REGIME_OPS=[
+  {v:'Comunhão parcial'},
+  {v:'Comunhão universal'},
+  {v:'Separação convencional', inj:['Pacto antenupcial registrado']},
+  {v:'Separação obrigatória (art. 1.641 CC)'},
+  {v:'Participação final nos aquestos', inj:['Pacto antenupcial registrado']}
+];
+const FILHOS_Q=(quem)=>[
+  {id:'filhos', titulo:'Filhos comuns?', ops:[
+    {v:'Não'},
+    {v:'Sim — todos maiores e capazes', inj:['RG/CPF ou certidão de nascimento dos filhos'], aviso:'A escritura indica nome e data de nascimento de cada filho (Res. CNJ 35, art. 34).'},
+    {v:'Sim — há menor ou incapaz', inj:['Decisão judicial que resolveu guarda, visitação e alimentos dos filhos'], aviso:'Res. CNJ 35, art. 34 §2º (Res. 571/2024): só é possível se guarda, visitação e alimentos JÁ estiverem resolvidos judicialmente — a escritura menciona a decisão.'}
+  ]},
+  {id:'filhos_nomes', tipo:'texto', titulo:'Filhos — nomes e datas de nascimento', placeholder:'Ex.: Maria (12/03/2004); João (05/08/2010)', dependeDe:['filhos',['Sim — todos maiores e capazes','Sim — há menor ou incapaz']]},
+  {id:'gravidez', titulo:'Estado gravídico (Res. CNJ 35, art. 34 §1º)', ops:[
+    {v:'Declara não estar grávida'},
+    {v:'Declara desconhecer'},
+    {v:'Está grávida (nascituro)', inj:['Decisão judicial sobre guarda, visitação e alimentos do nascituro'], aviso:'Havendo nascituro vale a mesma regra do filho incapaz: só com as questões resolvidas judicialmente.'}
+  ]}
+];
+const BENS_Q=(quem)=>[
+  {id:'bens', titulo:'Há bens a partilhar?', ops:[
+    {v:'Sem bens'},
+    {v:'Com bens — partilha nesta escritura'},
+    {v:'Com bens — partilha fica para depois', aviso:`O ${quem} sai sem partilha; os bens continuam em condomínio até a partilha (art. 1.581 CC).`}
+  ]},
+  {id:'bens_tipos', titulo:'Quais bens?', multi:true, dependeDe:['bens','Com bens — partilha nesta escritura'], ops:[
+    {v:'Imóveis', inj:['Matrícula(s) atualizada(s) dos imóveis','CND municipal dos imóveis']},
+    {v:'Veículos', inj:['CRLV dos veículos']},
+    {v:'Contas, aplicações e quotas', inj:['Extratos / contrato social']},
+    {v:'Dívidas a partilhar'}
+  ]},
+  {id:'partilha_igual', titulo:'Partilha igualitária (50/50)?', dependeDe:['bens','Com bens — partilha nesta escritura'], ops:[
+    {v:'Sim'},
+    {v:'Não — um recebe mais', inj:['Guia de ITCMD (excesso gratuito) ou ITBI (excesso oneroso)'], aviso:'Excesso de meação é tributado: ITCMD se gratuito, ITBI se houver compensação onerosa. Discriminar os valores nas Observações.'}
+  ]}
+];
+const PROC_Q={id:'procuracao', titulo:'Alguém comparece por procuração?', ops:[
+  {v:'Não'},
+  {v:'Sim', inj:['Procuração pública com poderes especiais','RG/CPF do procurador'], aviso:'Divórcio, separação e dissolução: procuração por instrumento PÚBLICO, com poderes especiais, cláusulas essenciais e validade de 30 dias (Res. CNJ 35, art. 36).'}
+]};
+
+function perguntasDivorcio(){
+  return [
+    {id:'modalidade', titulo:'Modalidade', ops:[
+      {v:'Divórcio'},
+      {v:'Separação consensual', aviso:'A separação mantém o vínculo; a conversão em divórcio depende de nova escritura.'}
+    ]},
+    {id:'regime', titulo:'Regime de bens do casamento', ops:REGIME_OPS},
+    ...FILHOS_Q('divórcio'),
+    ...BENS_Q('divórcio'),
+    {id:'nome', titulo:'Retomada do nome de solteiro(a)?', ops:[{v:'Ninguém altera'},{v:'Cônjuge 1 retoma'},{v:'Cônjuge 2 retoma'},{v:'Ambos retomam'}]},
+    {id:'alimentos', titulo:'Alimentos entre os cônjuges?', ops:[
+      {v:'Dispensados reciprocamente'},
+      {v:'Fixados', aviso:'Consignar valor, forma de pagamento e prazo nas Observações.'}
+    ]},
+    PROC_Q
+  ];
+}
+
+function perguntasUniao(){
+  return [
+    {id:'inicio', tipo:'data', titulo:'Início da convivência'},
+    {id:'regime', titulo:'Regime de bens escolhido', ops:[
+      {v:'Comunhão parcial (regra legal — art. 1.725 CC)'},
+      {v:'Separação total de bens'},
+      {v:'Comunhão universal'},
+      {v:'Outro — detalhar nas Observações'}
+    ]},
+    {id:'civil1', titulo:'Companheiro(a) 1 — estado civil', ops:[
+      {v:'Solteiro(a)'},
+      {v:'Divorciado(a)', inj:['Certidão de casamento com averbação do divórcio (comp. 1)']},
+      {v:'Viúvo(a)', inj:['Certidão de casamento com averbação de óbito (comp. 1)']},
+      {v:'Casado(a), separado(a) de fato', aviso:'União estável de pessoa casada só com separação de fato (art. 1.723 §1º CC); a escritura consigna a separação de fato e a data.'}
+    ]},
+    {id:'civil2', titulo:'Companheiro(a) 2 — estado civil', ops:[
+      {v:'Solteiro(a)'},
+      {v:'Divorciado(a)', inj:['Certidão de casamento com averbação do divórcio (comp. 2)']},
+      {v:'Viúvo(a)', inj:['Certidão de casamento com averbação de óbito (comp. 2)']},
+      {v:'Casado(a), separado(a) de fato', aviso:'União estável de pessoa casada só com separação de fato (art. 1.723 §1º CC); a escritura consigna a separação de fato e a data.'}
+    ]},
+    {id:'filhos', titulo:'Filhos comuns?', ops:[{v:'Não'},{v:'Sim', inj:['Certidão de nascimento dos filhos']}]},
+    {id:'efeitos', titulo:'Regime diverso da comunhão parcial — a partir de quando?', dependeDe:['regime',['Separação total de bens','Comunhão universal','Outro — detalhar nas Observações']], ops:[
+      {v:'Somente a partir desta escritura'},
+      {v:'Pretendem retroagir ao início', aviso:'A escolha de regime diverso não retroage ao início da convivência (entendimento do STJ); a escritura consigna os efeitos só para o futuro.'}
+    ]},
+    {id:'bens_previos', titulo:'Há bens já adquiridos na convivência a declarar?', ops:[{v:'Não'},{v:'Sim', inj:['Documentos dos bens (matrículas, CRLV)']}]},
+    PROC_Q
+  ];
+}
+
+function perguntasDissolucaoUE(){
+  return [
+    {id:'formalizada', titulo:'A união estável está formalizada?', ops:[
+      {v:'Sim — escritura pública anterior', inj:['Escritura de união estável (serventia, livro e folhas)']},
+      {v:'Sim — contrato particular', inj:['Contrato de união estável']},
+      {v:'Não — reconhecida e dissolvida neste ato', aviso:'A escritura reconhece a união (datas e regime) e a dissolve no mesmo ato.'}
+    ]},
+    {id:'inicio', tipo:'data', titulo:'Início da convivência'},
+    {id:'fim', tipo:'data', titulo:'Fim da convivência'},
+    {id:'regime', titulo:'Regime de bens da união', ops:[
+      {v:'Comunhão parcial (regra legal — art. 1.725 CC)'},
+      {v:'Separação total de bens'},
+      {v:'Comunhão universal'},
+      {v:'Outro — detalhar nas Observações'}
+    ]},
+    ...FILHOS_Q('dissolução'),
+    ...BENS_Q('dissolução'),
+    {id:'alimentos', titulo:'Alimentos entre os companheiros?', ops:[
+      {v:'Dispensados reciprocamente'},
+      {v:'Fixados', aviso:'Consignar valor, forma de pagamento e prazo nas Observações.'}
+    ]},
+    PROC_Q
+  ];
+}
+
+function perguntasPermuta(){
+  const IMxIM=['Imóvel por imóvel — valores equivalentes','Imóvel por imóvel — com torna em dinheiro'];
+  return [
+    {id:'config', titulo:'Configuração da permuta', ops:[
+      {v:'Imóvel por imóvel — valores equivalentes', aviso:'ITBI sobre cada imóvel, no município de cada um.'},
+      {v:'Imóvel por imóvel — com torna em dinheiro', aviso:'ITBI sobre cada imóvel; a torna (diferença em dinheiro) é preço e também compõe a base — conforme o município.'},
+      {v:'Imóvel por bem móvel (veículo etc.)', inj:['Documento do bem móvel (CRLV / nota fiscal)'], aviso:'Só o imóvel gera ITBI; o bem móvel entra como preço.'},
+      {v:'Imóvel por bem móvel + dinheiro', inj:['Documento do bem móvel (CRLV / nota fiscal)'], aviso:'Móvel + dinheiro compõem o preço do imóvel; ITBI sobre o valor do imóvel.'}
+    ]},
+    {id:'municipios', titulo:'Os dois imóveis ficam no mesmo município?', dependeDe:['config',IMxIM], ops:[
+      {v:'Sim', inj:['Guia de ITBI de cada imóvel']},
+      {v:'Não — municípios diferentes', inj:['Guia de ITBI em cada município'], aviso:'Cada município cobra o ITBI do imóvel situado nele: duas guias, duas CNDs.'}
+    ]},
+    {id:'valores', tipo:'texto', titulo:'Valores atribuídos — bem 1 / bem 2 / torna', placeholder:'Ex.: 200.000 / 150.000 / torna 50.000'},
+    {id:'torna_pag', titulo:'Torna / dinheiro — forma de pagamento', dependeDe:['config',['Imóvel por imóvel — com torna em dinheiro','Imóvel por bem móvel + dinheiro']], ops:[
+      {v:'Já paga', inj:['Comprovante do pagamento da torna'], aviso:'Se por transferência ou cheque, exigir o comprovante de imediato.'},
+      {v:'No ato da lavratura'},
+      {v:'Parcelada — detalhar nas Observações'}
+    ]},
+    {id:'multi1', titulo:'Permutante 1 — mais de uma pessoa?', ops:[{v:'Não'},{v:'Sim', inj:['RG/CPF e certidões de estado civil de todos do lado 1']}]},
+    {id:'qtd1', titulo:'Permutante 1 — quantos?', dependeDe:['multi1','Sim'], ops:QTDS.map(n=>({v:n}))},
+    {id:'civil1', titulo:'Permutante 1 — estado civil', ops:CIVIL_OPS('perm. 1')},
+    {id:'multi2', titulo:'Permutante 2 — mais de uma pessoa?', ops:[{v:'Não'},{v:'Sim', inj:['RG/CPF e certidões de estado civil de todos do lado 2']}]},
+    {id:'qtd2', titulo:'Permutante 2 — quantos?', dependeDe:['multi2','Sim'], ops:QTDS.map(n=>({v:n}))},
+    {id:'civil2', titulo:'Permutante 2 — estado civil', ops:CIVIL_OPS('perm. 2')},
+    {id:'titulo_reg', titulo:'Títulos anteriores registrados nas matrículas?', ops:[
+      {v:'Sim'},
+      {v:'Não', aviso:'O gerador incluirá a cláusula de continuidade registral.'}
+    ]},
+    {id:'procuracao', titulo:'Alguém comparece por procuração?', ops:[
+      {v:'Não'},
+      {v:'Sim', inj:['Procuração com poderes específicos','RG/CPF do procurador']}
+    ]}
+  ];
+}
+
+function perguntasRerrat(){
+  return [
+    {id:'ato_ref', tipo:'texto', titulo:'Ato a re-ratificar — natureza, livro, folhas e data', placeholder:'Ex.: Escritura de compra e venda, Livro 250, fls. 120, 10/05/2024'},
+    {id:'serventia', titulo:'Onde foi lavrado o ato original?', ops:[
+      {v:'Nesta serventia (CN2O)'},
+      {v:'Em outra serventia', inj:['Certidão / traslado do ato original']}
+    ]},
+    {id:'registrado', titulo:'O ato original já foi registrado no Registro de Imóveis?', ops:[
+      {v:'Não'},
+      {v:'Sim', inj:['Matrícula com o registro do ato'], aviso:'A re-ratificação será levada a registro/averbação; conferir as exigências do registrador antes de lavrar.'}
+    ]},
+    {id:'objeto', titulo:'O que se retifica?', multi:true, ops:[
+      {v:'Qualificação das partes (nome, RG, CPF, estado civil)', inj:['Documento que prova o dado correto']},
+      {v:'Descrição do imóvel (matrícula, área, confrontações)', inj:['Matrícula atualizada']},
+      {v:'Valor ou forma de pagamento', aviso:'Alteração de valor pode gerar complemento de ITBI.'},
+      {v:'Regime de bens / anuência de cônjuge', inj:['Certidão de casamento / pacto']},
+      {v:'Outro — detalhar nas Observações'}
+    ]},
+    {id:'partes', titulo:'Todas as partes do ato original comparecem?', ops:[
+      {v:'Sim'},
+      {v:'Não', aviso:'Alteração de substância exige quem participou do ato original; erro material evidente pode ser corrigido pelo tabelião por ata retificativa. Avaliar antes de protocolar.'}
+    ]},
+    {id:'procuracao', titulo:'Alguém comparece por procuração?', ops:[
+      {v:'Não'},
+      {v:'Sim', inj:['Procuração com poderes específicos','RG/CPF do procurador']}
+    ]}
+  ];
+}
+
+function perguntasAtaUsucapiao(){
+  return [
+    {id:'modalidade', titulo:'Modalidade de usucapião pretendida (base legal vai na ata — CNN art. 402, I, d)', ops:[
+      {v:'Extraordinária — 15 anos (10 com moradia ou obras) — art. 1.238 CC'},
+      {v:'Ordinária — 10 anos com justo título e boa-fé (5 se aquisição onerosa registrada e cancelada) — art. 1.242 CC', inj:['Justo título']},
+      {v:'Especial urbana — 5 anos, até 250 m², moradia, sem outro imóvel — art. 1.240 CC / art. 183 CF', inj:['Declaração de não possuir outro imóvel']},
+      {v:'Especial rural — 5 anos, até 50 ha, moradia e trabalho — art. 1.239 CC / art. 191 CF', inj:['Declaração de não possuir outro imóvel','CCIR / ITR']},
+      {v:'Familiar — 2 anos, até 250 m², ex-cônjuge que abandonou o lar — art. 1.240-A CC', inj:['Prova do abandono do lar e da separação']},
+      {v:'Coletiva — art. 10 do Estatuto da Cidade'}
+    ]},
+    {id:'imovel', titulo:'Situação registral do imóvel', ops:[
+      {v:'Matriculado / transcrito', inj:['Certidão da matrícula ou transcrição']},
+      {v:'Sem registro conhecido', inj:['Certidão negativa de registro (RI)']},
+      {v:'Parte de imóvel maior (desmembramento)', inj:['Certidão da matrícula-mãe'], aviso:'A ata descreve a ÁREA usucapienda pela planta e memorial, não a matrícula inteira (CNN art. 402, I, a).'}
+    ]},
+    {id:'zona', titulo:'Localização', ops:[
+      {v:'Urbano'},
+      {v:'Rural', inj:['Georreferenciamento certificado pelo INCRA (SIGEF)','CCIR'], aviso:'Rural exige georreferenciamento certificado (Lei 10.267/2001; CNN art. 401, V).'}
+    ]},
+    {id:'tempo', titulo:'Tempo de posse do requerente', ops:[{v:'Menos de 5 anos'},{v:'5 a 10 anos'},{v:'10 a 15 anos'},{v:'Mais de 15 anos'}]},
+    {id:'soma', titulo:'Soma o tempo de possuidores anteriores?', ops:[
+      {v:'Não'},
+      {v:'Sim', inj:['Documentos da cadeia possessória (contratos, recibos, cessões)','Certidões negativas dos possuidores anteriores e cônjuges'], aviso:'A ata descreve a posse dos antecessores (CNN art. 402, I, b) e o requerimento leva certidões negativas de todos os possuidores anteriores (art. 401, IV).'}
+    ]},
+    {id:'origem', titulo:'Forma de aquisição da posse (CNN art. 402, I, c)', ops:[
+      {v:'Compra por contrato particular / recibo', inj:['Contrato ou recibo (justo título)']},
+      {v:'Herança / sucessão de possuidor', inj:['Certidão de óbito e documentos da sucessão da posse']},
+      {v:'Doação verbal ou cessão'},
+      {v:'Ocupação'}
+    ]},
+    {id:'benfeitorias', titulo:'Edificação ou benfeitorias no imóvel?', ops:[
+      {v:'Não'},
+      {v:'Sim — moradia do requerente', inj:['Fotos do imóvel','Comprovantes de posse (IPTU, contas, obras)']},
+      {v:'Sim — outras acessões', inj:['Fotos do imóvel','Comprovantes das benfeitorias']}
+    ]},
+    {id:'qtd_imoveis', titulo:'Imóveis atingidos (CNN art. 402, I, e)', ops:[
+      {v:'1'},
+      {v:'Mais de um', aviso:'Informar se estão em uma ou mais circunscrições imobiliárias.'}
+    ]},
+    {id:'titular', titulo:'Titular registral (dono no registro)', ops:[
+      {v:'Identificado e localizável', inj:['Qualificação, endereço e e-mail do titular registral']},
+      {v:'Falecido', inj:['Certidão de óbito do titular; herdeiros conhecidos']},
+      {v:'Desconhecido / não localizado', aviso:'O registrador notificará por edital; a ata registra a diligência feita para localizá-lo.'}
+    ]},
+    {id:'confrontantes', titulo:'Confrontantes identificados?', ops:[
+      {v:'Sim, todos', inj:['Relação de confrontantes com endereços']},
+      {v:'Parcialmente', inj:['Relação parcial de confrontantes']},
+      {v:'Não', aviso:'Sem anuência, o registrador notifica os confrontantes; identificá-los agora agiliza o procedimento.'}
+    ]},
+    {id:'litigio', titulo:'Ação judicial sobre o imóvel (possessória, reivindicatória, usucapião)?', ops:[
+      {v:'Não — posse mansa e pacífica'},
+      {v:'Sim ou já houve', aviso:'Litígio pendente inviabiliza a via extrajudicial; a ata registra a declaração do requerente sobre ações.'}
+    ]},
+    {id:'valor', tipo:'texto', titulo:'Valor atribuído ao imóvel (CNN art. 402, I, f)', placeholder:'R$'},
+    {id:'diligencia', titulo:'Diligência do tabelião ao imóvel?', ops:[
+      {v:'Sim — agendar visita', aviso:'CNN art. 402 §1º: o tabelião pode comparecer ao imóvel; combinar data e acesso com o requerente.'},
+      {v:'Não — constatação por documentos, fotos e testemunhas'}
+    ]},
+    {id:'testemunhas', titulo:'Testemunhas da posse', ops:[
+      {v:'2 testemunhas', inj:['RG/CPF das testemunhas']},
+      {v:'3 ou mais', inj:['RG/CPF das testemunhas']},
+      {v:'Nenhuma ainda', aviso:'A ata não pode se basear só na declaração do requerente (CNN art. 402 §2º): depoimentos de testemunhas ou confrontantes.'}
+    ]},
+    {id:'req_civil', titulo:'Requerente — estado civil', ops:[
+      {v:'Solteiro(a)'},
+      {v:'Casado(a)', inj:['Certidão de casamento','RG/CPF do cônjuge','Certidões negativas em nome do cônjuge'], aviso:'Cônjuge/companheiro é qualificado na ata e entra nas certidões (CNN art. 401, IV).'},
+      {v:'União estável', inj:['RG/CPF do companheiro(a)','Certidões negativas em nome do companheiro(a)']},
+      {v:'Divorciado(a)'},
+      {v:'Viúvo(a)'}
+    ]}
+  ];
+}
+
+function perguntasAtaMensagens(){
+  const PERIODO='Período delimitado — na íntegra dentro do período';
+  return [
+    {id:'meio', titulo:'Meio / aplicativo', ops:[
+      {v:'WhatsApp'},
+      {v:'Instagram / Facebook (mensagens ou publicações)'},
+      {v:'Telegram'},
+      {v:'E-mail'},
+      {v:'SMS'},
+      {v:'Site / página / anúncio'},
+      {v:'Outro — detalhar nas Observações'}
+    ]},
+    {id:'participante', titulo:'O solicitante participa da conversa (remetente ou destinatário)?', ops:[
+      {v:'Sim'},
+      {v:'Não — conversa de terceiros', aviso:'Não se lavra ata de conversa alheia obtida por intermediário: ser dono do aparelho ou da linha não basta, e a prova pode ser ilícita. Orientar que o próprio interlocutor solicite.'}
+    ]},
+    {id:'aparelho', titulo:'O solicitante trará o PRÓPRIO aparelho, desbloqueado e com o aplicativo aberto?', ops:[
+      {v:'Sim'},
+      {v:'Não — pretende trazer prints ou arquivos prontos', aviso:'A constatação é feita pelo tabelião diretamente no aparelho do solicitante (ou no aplicativo aberto a partir dele), na presença dele. Prints, encaminhamentos ou arquivos preparados por terceiros não servem de objeto da ata.'}
+    ]},
+    {id:'integralidade', titulo:'Extensão da constatação', ops:[
+      {v:'Conversa completa'},
+      {v:PERIODO, aviso:'Dentro do período a conversa é reproduzida na íntegra, sem recortes — inclusive o que não favoreça o solicitante — para preservar o contexto.'},
+      {v:'Só trechos escolhidos', aviso:'NÃO se faz: selecionar trechos altera o contexto e induz a erro. Reorientar para conversa completa ou período delimitado.'}
+    ]},
+    {id:'periodo_ini', tipo:'data', titulo:'Período — data inicial', dependeDe:['integralidade',PERIODO]},
+    {id:'periodo_fim', tipo:'data', titulo:'Período — data final', dependeDe:['integralidade',PERIODO]},
+    {id:'tipo_conversa', titulo:'Tipo de conversa', ops:[
+      {v:'Individual'},
+      {v:'Grupo', aviso:'A ata registra nome do grupo, participantes e administradores.'},
+      {v:'Publicação / status / lista de transmissão'}
+    ]},
+    {id:'conteudo', titulo:'Conteúdo a constatar', multi:true, ops:[
+      {v:'Texto'},
+      {v:'Áudios', aviso:'Áudios são reproduzidos e transcritos ou descritos; cópia do arquivo pode ser vinculada à ata.'},
+      {v:'Imagens'},
+      {v:'Vídeos', aviso:'Vídeos são descritos (cenas e duração); cópia vinculada à ata.'},
+      {v:'Documentos anexados'},
+      {v:'Registro de chamadas'},
+      {v:'Localização / contatos compartilhados'}
+    ]},
+    {id:'interlocutor', tipo:'texto', titulo:'Interlocutor(es) — número ou perfil como exibido no aplicativo', placeholder:'Ex.: +55 79 9xxxx-xxxx (salvo como "Fulano")'},
+    {id:'linha', titulo:'Titularidade da linha / conta do solicitante', ops:[
+      {v:'Própria', inj:['Fatura ou comprovante da linha (reforça a identificação)']},
+      {v:'Da empresa (PJ)', inj:['Contrato social','RG/CPF do representante']},
+      {v:'De terceiro (familiar etc.)', aviso:'O solicitante tem de ser participante da conversa; a ata registra o número exibido, o IMEI e a titularidade declarada.'}
+    ]},
+    {id:'apagadas', titulo:'Mensagens apagadas ou temporárias?', ops:[
+      {v:'Não'},
+      {v:'Sim — algumas já sumiram', aviso:'Só se constata o que está visível no aparelho no momento do ato; o que foi apagado não se atesta.'},
+      {v:'Mensagens temporárias ativas — URGENTE', aviso:'Risco de desaparecimento: priorizar a lavratura e orientar o solicitante a não mexer na conversa.'}
+    ]},
+    {id:'finalidade', titulo:'Finalidade', ops:[
+      {v:'Processo judicial em curso — informar o número nas Observações'},
+      {v:'Ação a ser proposta'},
+      {v:'Uso extrajudicial / preventivo'},
+      {v:'Notícia-crime / delegacia'}
+    ]},
+    {id:'volume', titulo:'Volume estimado', ops:[
+      {v:'Até 20 telas'},
+      {v:'20 a 100 telas'},
+      {v:'Mais de 100 telas', aviso:'Volume grande: combinar prazo e orçamento; avaliar exportação da conversa a partir do próprio aparelho, na presença do tabelião.'}
+    ]},
+    {id:'sigilo', titulo:'Conteúdo íntimo ou dados sensíveis de terceiros?', ops:[
+      {v:'Não'},
+      {v:'Sim', aviso:'Ata com publicidade restrita (só as partes e autoridades com interesse legítimo); observar a LGPD.'}
+    ]},
+    {id:'declaracao', titulo:'O solicitante declara não ter alterado a conversa?', ops:[
+      {v:'Sim'},
+      {v:'Recusa declarar', aviso:'A ata registra a recusa. O tabelião atesta apenas o que vê no aparelho — existência e teor das mensagens —, não autoria nem veracidade (CPC art. 384).'}
+    ]}
+  ];
+}
+
 function perguntasDoAto(ato){
   if(ato==='TEST') return perguntasTestamento();
   if(ato==='INV') return perguntasInventario();
+  if(ato==='DIV') return perguntasDivorcio();
+  if(ato==='UE') return perguntasUniao();
+  if(ato==='UE-DIS') return perguntasDissolucaoUE();
+  if(ato==='PERM') return perguntasPermuta();
+  if(ato==='RERRAT') return perguntasRerrat();
+  if(ato==='ATA-USO') return perguntasAtaUsucapiao();
+  if(ato==='ATA-W') return perguntasAtaMensagens();
   const P = PAPEIS[ato]; const Q=[];
 
   // Transmitente (não se aplica ao CDH: cedentes extraídos da documentação no Momento 3)
@@ -650,7 +1014,14 @@ function perguntasDoAto(ato){
 function dossieBase(ato){
   if(ato==='TEST') return ['RG/CPF do testador','Comprovante de residência do testador','Qualificação dos beneficiários (RG/CPF)','RG/CPF das 2 testemunhas'];
   if(ato==='INV') return ['Petição/minuta do advogado (nome e OAB — extraídos no Momento 3)','Procuração dos herdeiros ao advogado','Certidão de óbito do autor da herança','Certidão de casamento do falecido (com averbações)','RG/CPF de todos os herdeiros e cônjuges','Matrícula(s) atualizada(s) dos bens','Declaração(ões) de ITCMD','CND municipal dos imóveis','CND federal do espólio','Certidão negativa de testamento (CENSEC)'];
+  if(ato==='DIV') return ['Certidão de casamento atualizada (com averbações)','RG/CPF dos dois cônjuges','Comprovante de residência','Pacto antenupcial, se houver','Advogado(a) assistente — OAB (CPC art. 733 §2º)'];
+  if(ato==='UE') return ['RG/CPF dos dois companheiros','Certidões de estado civil dos dois (nascimento ou casamento com averbação)','Comprovante de residência'];
+  if(ato==='UE-DIS') return ['RG/CPF dos dois companheiros','Certidões de estado civil dos dois','Comprovante de residência','Advogado(a) assistente — OAB (CPC art. 733 §2º)'];
+  if(ato==='RERRAT') return ['Traslado ou certidão do ato original','RG/CPF das partes que comparecem','Documento que comprova o dado correto'];
+  if(ato==='ATA-USO') return ['RG/CPF, comprovante de residência e e-mail do requerente','Procuração ao advogado com poderes especiais e firma reconhecida (CNN art. 401, VI)','Planta e memorial descritivo assinados por profissional habilitado, com ART/RRT (CNN art. 401, II)','Certidões negativas dos distribuidores estadual e federal — requerente e titular registral (CNN art. 401, IV)','Comprovantes de posse (IPTU, contas, recibos, obras)','Fotos do imóvel'];
+  if(ato==='ATA-W') return ['RG/CPF do solicitante','O próprio aparelho, desbloqueado e com o aplicativo aberto (trazer carregador)'];
   const b=['RG/CPF do(s) transmitente(s)','RG/CPF do(s) adquirente(s)','Comprovante de residência'];
+  if(ato==='PERM')      b.push('Matrícula(s) atualizada(s)','Guia(s) de ITBI','CND municipal de cada imóvel');
   if(ato==='CV-Urbano') b.push('Matrícula atualizada','Guia de ITBI','CND municipal (IPTU)','Inscrição imobiliária');
   if(ato==='CV-Rural')  b.push('Matrícula atualizada','Guia de ITBI','CCIR','ITR / CND rural');
   if(ato==='CDP')       b.push('Cadastro municipal do imóvel','ITBI (conforme o município)');
@@ -694,8 +1065,8 @@ const BAND_INFO={
 function preencherListas(){
   el('vendedores').innerHTML=VENDEDORES_CORP.map(v=>`<option value="${v.nome}">`).join('');
   let aps=CORRETORES;
-  if(S.ato==='INV') aps=ADVOGADOS;
-  else if(S.ato==='CDH') aps=[...ADVOGADOS,...CORRETORES];
+  if(['INV','DIV','UE-DIS','ATA-USO','ATA-W'].includes(S.ato)) aps=ADVOGADOS;
+  else if(['CDH','UE','RERRAT'].includes(S.ato)) aps=[...ADVOGADOS,...CORRETORES];
   el('parceiros').innerHTML=aps.map(c=>`<option value="${c}">`).join('');
 }
 function advogadoCadastrado(){
@@ -749,7 +1120,7 @@ document.querySelectorAll('#chipsAto .chip').forEach(c=>{
     c.classList.add('ativo');
     S.ato=c.dataset.ato; S.respostas={}; S.dossie={};
     if(S.ato!=='TEST'){ S.qual={}; S.qtest={civil:null,regime:null,benefNat:null,benefQtd:'1',enot:null}; }
-    S.enot={t:null,a:null};
+    S.enot={t:null,a:null}; S.extras={};
     el('btnCheck').classList.add('on');
     el('blIdent').classList.remove('oculto');
     el('blTriagem').classList.remove('oculto');
@@ -760,7 +1131,7 @@ document.querySelectorAll('#chipsAto .chip').forEach(c=>{
     el('rotParte').textContent=PAPEIS[S.ato].parte;
     el('parteNome').placeholder=PAPEIS[S.ato].ph||'Nome completo';
     el('rotApres').textContent=PAPEIS[S.ato].apres||APRES_PADRAO;
-    preencherListas(); renderEnot();
+    preencherListas(); renderExtras(); renderEnot();
     const ehTest = S.ato==='TEST';
     el('blIdent').classList.toggle('modo-test', ehTest);
     el('blTestQual').classList.toggle('oculto', !ehTest);
@@ -800,11 +1171,34 @@ el('vendNome').addEventListener('input',()=>{
 /* ===== ASSINATURA PELO e-NOTARIADO =====
    Perguntado no balcão, por papel (transmitente/adquirente); vai no payload em
    assinatura_enotariado para o gerador puxar as cláusulas especiais. */
+S.extras={};
+/* campos manuais de nome (2º cônjuge / companheiro / permutante) — definidos em PAPEIS[ato].extras */
+function renderExtras(){
+  const box=el('extrasBox'); const P=PAPEIS[S.ato]||{}; const ex=P.extras||[];
+  box.classList.toggle('oculto', !ex.length); box.innerHTML='';
+  if(!ex.length) return;
+  const g=document.createElement('div'); g.className='grade';
+  ex.forEach(([id,rot])=>{
+    const cel=document.createElement('div');
+    cel.innerHTML=`<label class="rotulo versalete">${rot}</label>`;
+    const inp=document.createElement('input'); inp.type='text'; inp.autocomplete='off'; inp.placeholder='Nome completo';
+    inp.value=S.extras[id]||'';
+    inp.addEventListener('input',()=>{S.extras[id]=inp.value; renderDossie();});
+    cel.appendChild(inp); g.appendChild(cel);
+  });
+  box.appendChild(g);
+}
+function extrasOk(){ return (PAPEIS[S.ato]?.extras||[]).every(([id])=>(S.extras[id]||'').trim()); }
+function papeisEnot(){
+  const P=PAPEIS[S.ato]||{}; const ehTest=S.ato==='TEST';
+  return { t: (ehTest||S.ato==='INV') ? null : (P.t||null), a: ehTest ? null : (P.a||null) };
+}
 function renderEnot(){
   if(!S.ato) return;
-  const P=PAPEIS[S.ato]; const ehTest=S.ato==='TEST'; const ehCV=S.ato==='CV-Urbano'||S.ato==='CV-Rural';
-  [['enotT','t',P.t,ehTest||S.ato==='INV',ehCV?0:1],['enotA','a',P.a,ehTest,ehCV?0:2]].forEach(([id,k,papel,esconde,ordem])=>{
+  const pe=papeisEnot(); const ehCV=S.ato==='CV-Urbano'||S.ato==='CV-Rural';
+  [['enotT','t',pe.t,!pe.t,ehCV?0:1],['enotA','a',pe.a,!pe.a,ehCV?0:2]].forEach(([id,k,papel,esconde,ordem])=>{
     const box=el(id); box.classList.toggle('oculto',esconde); box.style.order=ordem;
+    if(esconde){ box.innerHTML=''; return; }
     box.innerHTML=`<div class="pergunta" style="margin:0"><div class="titulo-p">${papel} — assinatura pelo e-Notariado?</div><div class="opcoes"></div></div>`;
     const ops=box.querySelector('.opcoes');
     ['Sim','Não'].forEach(v=>{
@@ -816,7 +1210,8 @@ function renderEnot(){
 }
 function enotRespondido(){
   if(S.ato==='TEST') return !!S.qtest.enot;
-  return (S.ato==='INV' || !!S.enot.t) && !!S.enot.a;
+  const pe=papeisEnot();
+  return (!pe.t || !!S.enot.t) && (!pe.a || !!S.enot.a);
 }
 
 function visivel(q){
@@ -913,7 +1308,7 @@ function renderDossie(){
   const pronto = S.ato==='TEST'
     ? !!((S.qual['testador_nome']||'').trim() && (S.qual['testador_telefone']||'').trim())
     : !!(el('apresNome').value.trim() && el('apresTel').value.trim() && el('parteNome').value.trim());
-  el('btnProt').disabled=!(pronto && enotRespondido());
+  el('btnProt').disabled=!(pronto && enotRespondido() && extrasOk());
 }
 
 /* ============================================================
@@ -984,12 +1379,13 @@ el('btnProt').addEventListener('click',async ()=>{
     } : null,
     bandeiras: bandeirasAtuais(),
     partes: ehTest ? undefined : {
-      qtd_transmitentes: S.respostas.t_qtd ? parseInt(S.respostas.t_qtd,10) : 1,
-      qtd_adquirentes: S.respostas.a_qtd ? parseInt(S.respostas.a_qtd,10) : 1
+      qtd_transmitentes: S.respostas.t_qtd ? parseInt(S.respostas.t_qtd,10) : (S.respostas.qtd1 ? parseInt(S.respostas.qtd1,10) : 1),
+      qtd_adquirentes: S.respostas.a_qtd ? parseInt(S.respostas.a_qtd,10) : (S.respostas.qtd2 ? parseInt(S.respostas.qtd2,10) : 1),
+      nomeadas: P.extras ? [{papel:P.parte, nome:parte}, ...P.extras.map(([id,rot])=>({papel:rot, nome:(S.extras[id]||'').trim().toUpperCase()}))] : undefined
     },
     assinatura_enotariado: ehTest
       ? {testador: S.qtest.enot==='Sim'}
-      : {transmitente: S.ato==='INV' ? null : S.enot.t==='Sim', adquirente: S.enot.a==='Sim', papeis:{transmitente:P.t, adquirente:P.a}},
+      : (()=>{ const pe=papeisEnot(); return {transmitente: pe.t ? S.enot.t==='Sim' : null, adquirente: pe.a ? S.enot.a==='Sim' : null, papeis:{transmitente:pe.t, adquirente:pe.a}}; })(),
     parte_envolvida:{papel:P.ra, nome:parte, telefone: ehTest? null : (el('parteTel').value.trim()||null)},
     qualificacao: ehTest ? (()=>{
       const pes=pref=>({nome:S.qual[pref+'_nome']||null,estado_civil:S.qual[pref+'_estado_civil']||null,profissao:S.qual[pref+'_profissao']||null,endereco:S.qual[pref+'_endereco']||null,rg:S.qual[pref+'_rg']||null,cpf:S.qual[pref+'_cpf']||null});
