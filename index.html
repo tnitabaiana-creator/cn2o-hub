@@ -35,6 +35,7 @@ svg.topo{position:absolute;pointer-events:none}
 .pB input:focus{border-color:var(--marinho)}
 .pB .btn{background:var(--marinho)}
 .pB .restrito{color:rgba(255,255,255,.55);position:absolute;bottom:-34px;left:0;right:0;text-align:center}
+.pB .msg{margin-top:14px;background:rgba(99,19,37,.07);border-left:3px solid var(--vinho);color:var(--vinho);font-size:13px;line-height:1.4;padding:9px 12px;border-radius:4px}
 </style>
 </head>
 <body>
@@ -57,11 +58,20 @@ svg.topo{position:absolute;pointer-events:none}
         <div class="sub">Cartório de Notas<br>2º Ofício de Itabaiana</div>
       </div>
     </div>
-    <label>Usuário</label>
-    <input type="text" placeholder="nome.sobrenome">
-    <label>Senha</label>
-    <input type="password" placeholder="••••••••">
-    <button class="btn">Entrar</button>
+    <div id="msg" class="msg" style="display:none"></div>
+    <label for="login">Usuário</label>
+    <input type="text" id="login" placeholder="nome.sobrenome" autocomplete="username" autocapitalize="none" spellcheck="false">
+    <div id="blocoSenha">
+      <label for="senha">Senha</label>
+      <input type="password" id="senha" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <div id="blocoNova" style="display:none">
+      <label for="senhaNova">Nova senha</label>
+      <input type="password" id="senhaNova" placeholder="mínimo 8 caracteres" autocomplete="new-password">
+      <label for="senhaConf">Confirmar senha</label>
+      <input type="password" id="senhaConf" placeholder="repita a nova senha" autocomplete="new-password">
+    </div>
+    <button class="btn" id="btnEntrar" type="button">Entrar</button>
     <div class="restrito">Acesso restrito · uso interno da serventia</div>
   </div>
 </section>
