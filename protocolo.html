@@ -149,15 +149,15 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--vinho);outline-o
       <button class="chip" data-ato="CDP">CDP · Cessão de posse</button>
       <button class="chip" data-ato="CDH">CDH · Cessão de herança</button>
       <button class="chip" data-ato="DOA">DOA · Doação</button>
-      <button class="chip" data-ato="PERM">PERM · Permuta</button>
+      <button class="chip" data-ato="PER">PER · Permuta</button>
       <button class="chip" data-ato="TEST">TEST · Testamento</button>
       <button class="chip" data-ato="INV">INV · Inventário</button>
       <button class="chip" data-ato="DIV">DIV · Divórcio</button>
       <button class="chip" data-ato="UE">UE · União estável</button>
-      <button class="chip" data-ato="UE-DIS">UE-DIS · Dissolução de UE</button>
+      <button class="chip" data-ato="DUE">DUE · Dissolução de U.E.</button>
       <button class="chip" data-ato="RERRAT">RERRAT · Re-ratificação</button>
-      <button class="chip" data-ato="ATA-USO">ATA-USO · Ata p/ usucapião</button>
-      <button class="chip" data-ato="ATA-W">ATA-W · Ata de mensagens</button>
+      <button class="chip" data-ato="ATA-U">ATA-U · Usucapião</button>
+      <button class="chip" data-ato="ATA-W/A">ATA-W/A · Mensagens/Áudios</button>
     </div>
   </section>
 
@@ -277,16 +277,16 @@ const PAPEIS = {
   'TEST':{t:'Testador(a)',a:'Beneficiário(s)',parte:'Testador(a)',ra:'Testador(a)'},
   'INV':{t:'Espólio',a:'Herdeiros',parte:'Inventariante',ra:'Inventariante',apres:'Advogado apresentante'},
   /* t/a = papéis das perguntas de e-Notariado (null = sem pergunta); extras = nomes digitados no balcão */
-  'PERM':{t:'Permutante 1',a:'Permutante 2',parte:'Permutante 1',ra:'Permutante',extras:[['perm2','Permutante 2']]},
+  'PER':{t:'Permutante 1',a:'Permutante 2',parte:'Permutante 1',ra:'Permutante',extras:[['perm2','Permutante 2']]},
   'DIV':{t:'Cônjuge 1',a:'Cônjuge 2',parte:'Cônjuge 1',ra:'Cônjuge',apres:'Advogado(a) assistente — obrigatório (CPC, art. 733 §2º)',extras:[['conjuge2','Cônjuge 2']]},
   'UE':{t:'Companheiro(a) 1',a:'Companheiro(a) 2',parte:'Companheiro(a) 1',ra:'Companheiro(a)',extras:[['comp2','Companheiro(a) 2']]},
-  'UE-DIS':{t:'Companheiro(a) 1',a:'Companheiro(a) 2',parte:'Companheiro(a) 1',ra:'Companheiro(a)',apres:'Advogado(a) assistente — obrigatório (CPC, art. 733 §2º)',extras:[['comp2','Companheiro(a) 2']]},
+  'DUE':{t:'Companheiro(a) 1',a:'Companheiro(a) 2',parte:'Companheiro(a) 1',ra:'Companheiro(a)',apres:'Advogado(a) assistente — obrigatório (CPC, art. 733 §2º)',extras:[['comp2','Companheiro(a) 2']]},
   'RERRAT':{t:'Partes do ato',a:null,parte:'Solicitante',ra:'Solicitante'},
-  'ATA-USO':{t:null,a:null,parte:'Requerente (possuidor)',ra:'Requerente',apres:'Advogado(a) — obrigatório (art. 216-A da LRP)'},
-  'ATA-W':{t:null,a:null,parte:'Solicitante (participante da conversa)',ra:'Solicitante',apres:'Apresentante — o próprio solicitante ou advogado(a)'}
+  'ATA-U':{t:null,a:null,parte:'Requerente (possuidor)',ra:'Requerente',apres:'Advogado(a) — obrigatório (art. 216-A da LRP)'},
+  'ATA-W/A':{t:null,a:null,parte:'Solicitante (participante da conversa)',ra:'Solicitante',apres:'Apresentante — o próprio solicitante ou advogado(a)'}
 };
 const APRES_PADRAO='Apresentante';
-const ATO_NOME={'CV-Urbano':'Escritura de Compra e Venda (imóvel urbano)','CV-Rural':'Escritura de Compra e Venda (imóvel rural)','CDP':'Escritura de Cessão de Direitos Possessórios','CDH':'Escritura de Cessão de Direitos Hereditários','DOA':'Escritura de Doação','TEST':'Testamento Público','INV':'Escritura de Inventário e Partilha','PERM':'Escritura de Permuta','DIV':'Escritura de Divórcio','UE':'Escritura de União Estável','UE-DIS':'Escritura de Dissolução de União Estável','RERRAT':'Escritura de Re-ratificação','ATA-USO':'Ata Notarial para Usucapião','ATA-W':'Ata Notarial de Mensagens Eletrônicas'};
+const ATO_NOME={'CV-Urbano':'Escritura de Compra e Venda (imóvel urbano)','CV-Rural':'Escritura de Compra e Venda (imóvel rural)','CDP':'Escritura de Cessão de Direitos Possessórios','CDH':'Escritura de Cessão de Direitos Hereditários','DOA':'Escritura de Doação','TEST':'Testamento Público','INV':'Escritura de Inventário e Partilha','PER':'Escritura de Permuta','DIV':'Escritura de Divórcio','UE':'Escritura de União Estável','DUE':'Escritura de Dissolução de União Estável','RERRAT':'Escritura de Re-ratificação','ATA-U':'Ata Notarial para Usucapião','ATA-W/A':'Ata Notarial de Mensagens e Áudios'};
 
 /* ============================================================
    PERGUNTAS DE TRIAGEM
@@ -449,10 +449,10 @@ const QTDS=['2','3','4','5','6'];
 
 
 /* ===== NOVOS ATOS (03/09/2026) =====
-   DIV, UE, UE-DIS: base na Res. CNJ 35/2007 (arts. 33-36, com a Res. 571/2024) e no CPC art. 733.
-   PERM: configurações e repercussão tributária. RERRAT: ato originário e objeto.
-   ATA-USO: requisitos da ata do art. 216-A da LRP / CNN (Prov. 149/2023, arts. 401-402).
-   ATA-W: cautelas da ata de mensagens (integralidade, aparelho do próprio solicitante, o que se atesta). */
+   DIV, UE, DUE: base na Res. CNJ 35/2007 (arts. 33-36, com a Res. 571/2024) e no CPC art. 733.
+   PER: configurações e repercussão tributária. RERRAT: ato originário e objeto.
+   ATA-U: requisitos da ata do art. 216-A da LRP / CNN (Prov. 149/2023, arts. 401-402).
+   ATA-W/A: cautelas da ata de mensagens (integralidade, aparelho do próprio solicitante, o que se atesta). */
 const CIVIL_OPS=(pref)=>[
   {v:'Solteiro(a)'},
   {v:'Casado(a)', inj:[`Certidão de casamento (${pref})`]},
@@ -793,11 +793,11 @@ function perguntasDoAto(ato){
   if(ato==='INV') return perguntasInventario();
   if(ato==='DIV') return perguntasDivorcio();
   if(ato==='UE') return perguntasUniao();
-  if(ato==='UE-DIS') return perguntasDissolucaoUE();
-  if(ato==='PERM') return perguntasPermuta();
+  if(ato==='DUE') return perguntasDissolucaoUE();
+  if(ato==='PER') return perguntasPermuta();
   if(ato==='RERRAT') return perguntasRerrat();
-  if(ato==='ATA-USO') return perguntasAtaUsucapiao();
-  if(ato==='ATA-W') return perguntasAtaMensagens();
+  if(ato==='ATA-U') return perguntasAtaUsucapiao();
+  if(ato==='ATA-W/A') return perguntasAtaMensagens();
   const P = PAPEIS[ato]; const Q=[];
 
   // Transmitente (não se aplica ao CDH: cedentes extraídos da documentação no Momento 3)
@@ -1016,12 +1016,12 @@ function dossieBase(ato){
   if(ato==='INV') return ['Petição/minuta do advogado (nome e OAB — extraídos no Momento 3)','Procuração dos herdeiros ao advogado','Certidão de óbito do autor da herança','Certidão de casamento do falecido (com averbações)','RG/CPF de todos os herdeiros e cônjuges','Matrícula(s) atualizada(s) dos bens','Declaração(ões) de ITCMD','CND municipal dos imóveis','CND federal do espólio','Certidão negativa de testamento (CENSEC)'];
   if(ato==='DIV') return ['Certidão de casamento atualizada (com averbações)','RG/CPF dos dois cônjuges','Comprovante de residência','Pacto antenupcial, se houver','Advogado(a) assistente — OAB (CPC art. 733 §2º)'];
   if(ato==='UE') return ['RG/CPF dos dois companheiros','Certidões de estado civil dos dois (nascimento ou casamento com averbação)','Comprovante de residência'];
-  if(ato==='UE-DIS') return ['RG/CPF dos dois companheiros','Certidões de estado civil dos dois','Comprovante de residência','Advogado(a) assistente — OAB (CPC art. 733 §2º)'];
+  if(ato==='DUE') return ['RG/CPF dos dois companheiros','Certidões de estado civil dos dois','Comprovante de residência','Advogado(a) assistente — OAB (CPC art. 733 §2º)'];
   if(ato==='RERRAT') return ['Traslado ou certidão do ato original','RG/CPF das partes que comparecem','Documento que comprova o dado correto'];
-  if(ato==='ATA-USO') return ['RG/CPF, comprovante de residência e e-mail do requerente','Procuração ao advogado com poderes especiais e firma reconhecida (CNN art. 401, VI)','Planta e memorial descritivo assinados por profissional habilitado, com ART/RRT (CNN art. 401, II)','Certidões negativas dos distribuidores estadual e federal — requerente e titular registral (CNN art. 401, IV)','Comprovantes de posse (IPTU, contas, recibos, obras)','Fotos do imóvel'];
-  if(ato==='ATA-W') return ['RG/CPF do solicitante','O próprio aparelho, desbloqueado e com o aplicativo aberto (trazer carregador)'];
+  if(ato==='ATA-U') return ['RG/CPF, comprovante de residência e e-mail do requerente','Procuração ao advogado com poderes especiais e firma reconhecida (CNN art. 401, VI)','Planta e memorial descritivo assinados por profissional habilitado, com ART/RRT (CNN art. 401, II)','Certidões negativas dos distribuidores estadual e federal — requerente e titular registral (CNN art. 401, IV)','Comprovantes de posse (IPTU, contas, recibos, obras)','Fotos do imóvel'];
+  if(ato==='ATA-W/A') return ['RG/CPF do solicitante','O próprio aparelho, desbloqueado e com o aplicativo aberto (trazer carregador)'];
   const b=['RG/CPF do(s) transmitente(s)','RG/CPF do(s) adquirente(s)','Comprovante de residência'];
-  if(ato==='PERM')      b.push('Matrícula(s) atualizada(s)','Guia(s) de ITBI','CND municipal de cada imóvel');
+  if(ato==='PER')      b.push('Matrícula(s) atualizada(s)','Guia(s) de ITBI','CND municipal de cada imóvel');
   if(ato==='CV-Urbano') b.push('Matrícula atualizada','Guia de ITBI','CND municipal (IPTU)','Inscrição imobiliária');
   if(ato==='CV-Rural')  b.push('Matrícula atualizada','Guia de ITBI','CCIR','ITR / CND rural');
   if(ato==='CDP')       b.push('Cadastro municipal do imóvel','ITBI (conforme o município)');
@@ -1065,7 +1065,7 @@ const BAND_INFO={
 function preencherListas(){
   el('vendedores').innerHTML=VENDEDORES_CORP.map(v=>`<option value="${v.nome}">`).join('');
   let aps=CORRETORES;
-  if(['INV','DIV','UE-DIS','ATA-USO','ATA-W'].includes(S.ato)) aps=ADVOGADOS;
+  if(['INV','DIV','DUE','ATA-U','ATA-W/A'].includes(S.ato)) aps=ADVOGADOS;
   else if(['CDH','UE','RERRAT'].includes(S.ato)) aps=[...ADVOGADOS,...CORRETORES];
   el('parceiros').innerHTML=aps.map(c=>`<option value="${c}">`).join('');
 }
