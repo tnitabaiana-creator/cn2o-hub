@@ -74,6 +74,11 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--vinho);outline-o
 /* Avisos — vinho institucional, sem cor estranha à paleta */
 .aviso{background:var(--vinho-fundo);border-left:3px solid var(--vinho);border-radius:0 7px 7px 0;padding:10px 12px;font-size:12.5px;color:var(--marinho);margin-top:10px}
 .badge-parceiro{display:inline-block;margin-top:7px;background:var(--vinho);color:var(--branco);border-radius:6px;padding:5px 10px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em}
+.bola{display:inline-block;width:9px;height:9px;border-radius:50%;flex:none;margin-right:6px;box-shadow:0 0 0 1px rgba(255,255,255,.55)}
+.badge-parceiro,.dossie .titulo-prev{display:flex;align-items:center;flex-wrap:wrap;gap:0}
+.badge-parceiro.oculto{display:none}
+.bolas{display:inline-flex;align-items:center;gap:4px;margin-left:8px}
+.bolas .bola{margin-right:0}
 
 /* Trilho do dossiê — painel marinho, acentos vinho e branco */
 .rail{position:sticky;top:18px}
@@ -1070,12 +1075,15 @@ const VENDEDORES_CORP=[
 let CORRETORES=['J.C. IMÓVEIS']; // lista ⚙ Corretores
 let ADVOGADOS=['DR. JHÔNATAS LIMA','DRA. JESSICA SOUZA DOS SANTOS','DR. ALEXANDRO ARGOLO','DR. ALESSANDRO SANTOS','DR. RUAN CHAGAS','DRA. MARINA MENDONÇA','DR. MATHEUS CARVALHO','DRA. RAYANE','DR. HARRYSON LINO','DRA. ADENILTA','DRA. THAMIRYS ALMEIDA','DR. TANISSON SANTOS','DRA. ACUNENA VASCO','DRA. FLAVIA JACONIAS','DRA. ANDREZA SOUZA','DRA. ISABELLY CUNHA','DRA. YASMIN SAMPAIO','DRA. FABIANA GAMA','DRA. ANA CAROLINA','DRA. REGIENE DE SANTANA','DRA. LICIA LOPES','DRA. GENY REZENDE','DR. ALBERTO NOGUEIRA','DRA. IANE','DR. GERÔNIMO','DR. ANDREY ROCHA','DR. PEDRO MODESTO','DR. IGOR MONTEIRO','DRA. DANI ALFANO','DR. FABIO SANTANA','DR. DOUGLAS']; // lista ⚙ Advogados
 const BAND_INFO={
-  verde:{dot:'🟢',rot:'Loteador/Incorporador'},
-  rosa:{dot:'💗',rot:'Santa Mônica — cliente principal'},
-  amarelo:{dot:'🟡',rot:'Construtor (PF/pequeno PJ)'},
-  roxo:{dot:'🟣',rot:'Advogado'},
-  cinza:{dot:'⚪',rot:'Corretor/Imobiliária'}
+  verde:{cor:'#61bd4f',rot:'Loteador/Incorporador'},
+  rosa:{cor:'#ff78cb',rot:'Santa Mônica — cliente principal'},
+  amarelo:{cor:'#f2d600',rot:'Construtor (PF/pequeno PJ)'},
+  roxo:{cor:'#c377e0',rot:'Advogado'},
+  cinza:{cor:'#bdc4ce',rot:'Corretor/Imobiliária'}
 };
+// marcação uniforme das bandeiras: bolinha que muda de cor conforme a bandeira
+const bola=b=>BAND_INFO[b]?`<span class="bola" style="background:${BAND_INFO[b].cor}" title="${BAND_INFO[b].rot}"></span>`:'';
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 function preencherListas(){
   el('vendedores').innerHTML=VENDEDORES_CORP.map(v=>`<option value="${v.nome}">`).join('');
   let aps=CORRETORES;
@@ -1315,15 +1323,15 @@ function renderDossie(){
   const bands=bandeirasAtuais();
   const adv=advogadoCadastrado(), corr=corretorCadastrado();
   el('badgeParceiro').classList.toggle('oculto', !(adv||corr));
-  if(adv) el('badgeParceiro').textContent='🟣 Advogado cadastrado — bandeira roxa';
-  else if(corr) el('badgeParceiro').textContent='⚪ Corretor cadastrado — bandeira cinza';
+  if(adv) el('badgeParceiro').innerHTML=bola('roxo')+'Advogado cadastrado — bandeira roxa';
+  else if(corr) el('badgeParceiro').innerHTML=bola('cinza')+'Corretor cadastrado — bandeira cinza';
   const vc=vendedorCorp();
   const bb=el('badgeBandeira');
   const bandVend = vc? vc.bandeira : (S.vendCat==='Construtor'?'amarelo':null);
   bb.classList.toggle('oculto', !bandVend);
-  if(bandVend) bb.textContent=`${BAND_INFO[bandVend].dot} Bandeira ${bandVend} — ${BAND_INFO[bandVend].rot}`;
-  const dots=bands.map(b=>BAND_INFO[b].dot).join('');
-  el('tituloPrev').textContent = tituloCartao() + (dots?'  '+dots:'') + (S.urgente?'  ⚑':'');
+  if(bandVend) bb.innerHTML=bola(bandVend)+`Bandeira ${bandVend} — ${BAND_INFO[bandVend].rot}`;
+  const dots=bands.length?'<span class="bolas">'+bands.map(b=>bola(b)).join('')+'</span>':'';
+  el('tituloPrev').innerHTML = esc(tituloCartao()) + dots + (S.urgente?'<span class="bolas">⚑</span>':'');
   const ul=el('listaDossie'); const atuais=new Set([...ul.children].map(li=>li.dataset.item));
   ul.innerHTML='';
   const itens=itensDossie();
