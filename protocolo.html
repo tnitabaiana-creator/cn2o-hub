@@ -838,7 +838,7 @@ function renderDossie(){
 /* ====== CONFIGURAÇÃO DE PRODUÇÃO ======
    Vazio = modo simulação (mostra recibo e payload sem enviar).
    No go-live: 'https://SEU-SERVICO.up.railway.app' */
-const ENDPOINT_RAILWAY='';
+const ENDPOINT_RAILWAY='https://cn2o-hub-backend-production.up.railway.app';
 
 const pega=k=>{try{return sessionStorage.getItem(k)}catch(e){return null}};
 const TOKEN=pega('cn2o_token'), NOME_SESSAO=pega('cn2o_nome')||'', CARGO_SESSAO=pega('cn2o_cargo')||'';

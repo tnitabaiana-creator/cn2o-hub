@@ -69,7 +69,7 @@ svg.topo{position:absolute;pointer-events:none}
 
 <script>
 /* Vazio = modo demonstração. No go-live: 'https://SEU-SERVICO.up.railway.app' */
-const ENDPOINT='';
+const ENDPOINT='https://cn2o-hub-backend-production.up.railway.app';
 const el=id=>document.getElementById(id);
 const guarda=(k,v)=>{try{sessionStorage.setItem(k,v)}catch(e){}};
 function msg(t){const m=el('msg');m.textContent=t;m.style.display=t?'block':'none';}
