@@ -164,28 +164,30 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--vinho);outline-o
         <datalist id="vendedores"></datalist>
         <div id="vendCatBox" style="margin-top:8px" class="opcoes">
           <div class="op op-cat" data-cat="Particular">Particular</div>
-          <div class="op op-cat" data-cat="Construtor">Construtor — PF ou pequeno PJ</div>
+          <div class="op op-cat" data-cat="Construtor">Construtor</div>
         </div>
         <div id="badgeBandeira" class="oculto badge-parceiro" style="margin-top:7px"></div>
       </div>
+      <div id="enotT" class="cel-padrao oculto" style="grid-column:1 / -1"></div>
       <div class="cel-padrao">
-        <label class="rotulo versalete" for="apresNome" id="rotApres">Apresentante — corretor, imobiliária ou intermediário PF</label>
-        <input type="text" id="apresNome" list="parceiros" placeholder="Nome completo de quem apresenta" autocomplete="off">
+        <label class="rotulo versalete" for="apresNome" id="rotApres">Apresentante</label>
+        <input type="text" id="apresNome" list="parceiros" placeholder="Nome completo" autocomplete="off">
         <datalist id="parceiros"></datalist>
         <div class="badge-parceiro oculto" id="badgeParceiro">Corretor cadastrado — bandeira cinza</div>
       </div>
       <div class="cel-padrao">
-        <label class="rotulo versalete" for="apresTel">Telefone do apresentante (recebe o recibo)</label>
+        <label class="rotulo versalete" for="apresTel">Telefone</label>
         <input type="tel" id="apresTel" placeholder="(79) 9____-____">
       </div>
       <div class="cel-padrao">
-        <label class="rotulo versalete" for="parteNome" id="rotParte">Nome da parte envolvida</label>
+        <label class="rotulo versalete" for="parteNome" id="rotParte">Parte envolvida</label>
         <input type="text" id="parteNome" placeholder="Nome completo" autocomplete="off">
       </div>
       <div class="cel-padrao">
-        <label class="rotulo versalete" for="parteTel">Telefone da parte (se houver)</label>
+        <label class="rotulo versalete" for="parteTel">Telefone</label>
         <input type="tel" id="parteTel" placeholder="(79) 9____-____">
       </div>
+      <div id="enotA" class="cel-padrao oculto" style="grid-column:1 / -1"></div>
     </div>
     <div class="pergunta" style="margin-top:14px">
       <div class="opcoes"><div class="op tog" id="urgente">⚑ Urgente</div></div>
@@ -259,15 +261,15 @@ input:focus,select:focus,textarea:focus{outline:2px solid var(--vinho);outline-o
 const S = { ato:null, urgente:false, respostas:{}, dossie:{} };
 
 const PAPEIS = {
-  'CV-Urbano':{t:'Vendedor(es)',a:'Comprador(es)',parte:'Nome do comprador(a)',ra:'Comprador(a)'},
-  'CV-Rural' :{t:'Vendedor(es)',a:'Comprador(es)',parte:'Nome do comprador(a)',ra:'Comprador(a)'},
-  'CDP':{t:'Cedente(s)',a:'Cessionário(s)',parte:'Nome do cessionário(a)',ra:'Cessionário(a)'},
-  'CDH':{t:'Cedente(s)',a:'Cessionário',parte:'Nome do cessionário (o 1º, se mais de um)',ra:'Cessionário(a)'},
-  'DOA':{t:'Doador(a)',a:'Donatário(a)',parte:'Nome do donatário(a)',ra:'Donatário(a)'},
-  'TEST':{t:'Testador(a)',a:'Beneficiário(s)',parte:'Nome do testador(a)',ra:'Testador(a)'},
-  'INV':{t:'Espólio',a:'Herdeiros',parte:'Nome do inventariante',ra:'Inventariante',apres:'Advogado apresentante (regra do ato)'}
+  'CV-Urbano':{t:'Vendedor(es)',a:'Comprador(es)',parte:'Comprador(a)',ra:'Comprador(a)'},
+  'CV-Rural' :{t:'Vendedor(es)',a:'Comprador(es)',parte:'Comprador(a)',ra:'Comprador(a)'},
+  'CDP':{t:'Cedente(s)',a:'Cessionário(s)',parte:'Cessionário(a)',ra:'Cessionário(a)'},
+  'CDH':{t:'Cedente(s)',a:'Cessionário',parte:'Cessionário(a)',ph:'Se mais de um, o primeiro',ra:'Cessionário(a)'},
+  'DOA':{t:'Doador(a)',a:'Donatário(a)',parte:'Donatário(a)',ra:'Donatário(a)'},
+  'TEST':{t:'Testador(a)',a:'Beneficiário(s)',parte:'Testador(a)',ra:'Testador(a)'},
+  'INV':{t:'Espólio',a:'Herdeiros',parte:'Inventariante',ra:'Inventariante',apres:'Advogado apresentante'}
 };
-const APRES_PADRAO='Apresentante — corretor, imobiliária ou intermediário PF';
+const APRES_PADRAO='Apresentante';
 const ATO_NOME={'CV-Urbano':'Escritura de Compra e Venda (imóvel urbano)','CV-Rural':'Escritura de Compra e Venda (imóvel rural)','CDP':'Escritura de Cessão de Direitos Possessórios','CDH':'Escritura de Cessão de Direitos Hereditários','DOA':'Escritura de Doação','TEST':'Testamento Público','INV':'Escritura de Inventário e Partilha'};
 
 /* ============================================================
@@ -314,7 +316,8 @@ function perguntasTestamento(){
 
 /* ===== QUALIFICAÇÃO DO TESTAMENTO — 4 grupos, tudo manual ===== */
 S.qual={};
-S.qtest={civil:null,regime:null,benefNat:null,benefQtd:'1'};
+S.qtest={civil:null,regime:null,benefNat:null,benefQtd:'1',enot:null};
+S.enot={t:null,a:null};
 const QCAMPOS_PESSOA=[['nome','Nome completo'],['estado_civil','Estado civil'],['profissao','Profissão'],['endereco','Endereço completo'],['rg','RG'],['cpf','CPF']];
 
 function montarQualTest(){
@@ -350,7 +353,8 @@ function montarQualTest(){
   campo(g,'testador_rg','RG'); campo(g,'testador_cpf','CPF');
   campo(g,'testador_profissao','Profissão');
   campo(g,'testador_endereco','Endereço completo');
-  campo(g,'testador_telefone','Telefone (WhatsApp do recibo)');
+  campo(g,'testador_telefone','Telefone');
+  chips('Assinatura pelo e-Notariado?','enot',['Sim','Não']);
   chips('Estado civil','civil',['Solteiro(a)','Casado(a)','Divorciado(a)','Viúvo(a)','União estável']);
   if(S.qtest.civil==='Casado(a)')
     chips('Regime de bens','regime',['Comunhão parcial','Comunhão universal','Separação convencional','Comunhão (antes da Lei 6.515/77)']);
@@ -383,6 +387,46 @@ function montarQualTest(){
     const gx=grade();
     QCAMPOS_PESSOA.forEach(([k,rot])=>campo(gx,`testemunha${i}_${k}`,rot));
   });
+}
+
+/* ===== TRIAGEM DO INVENTÁRIO — configuração tripartite definida pelo Tabelião =====
+   (1) inventário e partilha; (2) COM cessão de direitos hereditários — cessionário
+   ganha campo próprio; (3) com ADJUDICAÇÃO — cessão anterior só referenciada e o
+   adjudicatário ganha campo próprio. Advogado, herdeiros e autor da herança NÃO são
+   digitados: saem da petição e da declaração de ITCMD no Momento 3. */
+function perguntasInventario(){
+  return [
+    {id:'config', titulo:'Configuração do inventário', ops:[
+      {v:'Inventário e partilha', aviso:'Herdeiros, cônjuge e autor da herança serão extraídos da petição do advogado e da declaração de ITCMD no Momento 3.'},
+      {v:'Inventário COM cessão de direitos hereditários', inj:['Instrumento da cessão de direitos hereditários','RG/CPF do cessionário'], aviso:'Herdeiros e inventariante saem do ITCMD; o cessionário é identificado abaixo.'},
+      {v:'Inventário com ADJUDICAÇÃO', inj:['RG/CPF do adjudicatário'], aviso:'A cessão anterior é apenas referenciada (serventia, livro e folhas); o adjudicatário é identificado abaixo.'}
+    ]},
+    {id:'cessionario_nome', tipo:'texto', titulo:'Cessionário — nome completo', placeholder:'Nome completo', dependeDe:['config','Inventário COM cessão de direitos hereditários']},
+    {id:'adjudicatario_nome', tipo:'texto', titulo:'Adjudicatário — nome completo', placeholder:'Nome completo', dependeDe:['config','Inventário com ADJUDICAÇÃO']},
+    {id:'cessao_ref', tipo:'texto', titulo:'Cessão anterior — serventia, livro e folhas', placeholder:'Ex.: 1º Ofício de Itabaiana, Livro 120, fls. 45', dependeDe:['config','Inventário com ADJUDICAÇÃO']},
+    {id:'sobrevivente', titulo:'Autor da herança deixou cônjuge ou companheiro(a) sobrevivente?', ops:[
+      {v:'Não'},
+      {v:'Sim — casamento', aviso:'Meação conforme o regime de bens; o sobrevivente participa como meeiro(a).'},
+      {v:'Sim — união estável', inj:['Prova da união estável (Tema 809 STF)'], aviso:'O gerador insere a cláusula de legitimação do(a) companheiro(a) (Tema 809 STF).'}
+    ]},
+    {id:'incapaz', titulo:'Há herdeiro menor ou incapaz?', ops:[
+      {v:'Não'},
+      {v:'Sim', aviso:'O inventário extrajudicial exige que todos os herdeiros sejam capazes (art. 610 CPC) — verificar a viabilidade antes de seguir.'}
+    ]},
+    {id:'testamento', titulo:'O falecido deixou testamento?', ops:[
+      {v:'Não'},
+      {v:'Sim', inj:['Testamento e autorização judicial para a via extrajudicial'], aviso:'Com testamento, verificar a viabilidade da via extrajudicial (Res. CNJ 35).'}
+    ]},
+    {id:'procuracao', titulo:'Alguém comparece representado por procuração?', ops:[
+      {v:'Não'},
+      {v:'Sim', inj:['Procuração com poderes específicos','RG/CPF do procurador']}
+    ]},
+    {id:'itcmd', titulo:'ITCMD', ops:[
+      {v:'Recolhido', inj:['Guia de ITCMD paga']},
+      {v:'A recolher'},
+      {v:'Isento', inj:['Declaração de isenção do ITCMD']}
+    ]}
+  ];
 }
 
 function perguntasDoAto(ato){
@@ -687,7 +731,8 @@ document.querySelectorAll('#chipsAto .chip').forEach(c=>{
     document.querySelectorAll('#chipsAto .chip').forEach(x=>x.classList.remove('ativo'));
     c.classList.add('ativo');
     S.ato=c.dataset.ato; S.respostas={}; S.dossie={};
-    if(S.ato!=='TEST'){ S.qual={}; S.qtest={civil:null,regime:null,benefNat:null,benefQtd:'1'}; }
+    if(S.ato!=='TEST'){ S.qual={}; S.qtest={civil:null,regime:null,benefNat:null,benefQtd:'1',enot:null}; }
+    S.enot={t:null,a:null};
     el('btnCheck').classList.add('on');
     el('blIdent').classList.remove('oculto');
     el('blTriagem').classList.remove('oculto');
@@ -696,8 +741,9 @@ document.querySelectorAll('#chipsAto .chip').forEach(c=>{
     el('avisoCDH').classList.toggle('oculto', S.ato!=='CDH');
     el('tituloTriagem').textContent = (S.ato==='TEST') ? '' : S.ato;
     el('rotParte').textContent=PAPEIS[S.ato].parte;
+    el('parteNome').placeholder=PAPEIS[S.ato].ph||'Nome completo';
     el('rotApres').textContent=PAPEIS[S.ato].apres||APRES_PADRAO;
-    preencherListas();
+    preencherListas(); renderEnot();
     const ehTest = S.ato==='TEST';
     el('blIdent').classList.toggle('modo-test', ehTest);
     el('blTestQual').classList.toggle('oculto', !ehTest);
@@ -733,6 +779,28 @@ el('vendNome').addEventListener('input',()=>{
 });
 
 ['apresNome','apresTel','parteNome','parteTel'].forEach(id=>el(id).addEventListener('input',renderDossie));
+
+/* ===== ASSINATURA PELO e-NOTARIADO =====
+   Perguntado no balcão, por papel (transmitente/adquirente); vai no payload em
+   assinatura_enotariado para o gerador puxar as cláusulas especiais. */
+function renderEnot(){
+  if(!S.ato) return;
+  const P=PAPEIS[S.ato]; const ehTest=S.ato==='TEST'; const ehCV=S.ato==='CV-Urbano'||S.ato==='CV-Rural';
+  [['enotT','t',P.t,ehTest||S.ato==='INV',ehCV?0:1],['enotA','a',P.a,ehTest,ehCV?0:2]].forEach(([id,k,papel,esconde,ordem])=>{
+    const box=el(id); box.classList.toggle('oculto',esconde); box.style.order=ordem;
+    box.innerHTML=`<div class="pergunta" style="margin:0"><div class="titulo-p">${papel} — assinatura pelo e-Notariado?</div><div class="opcoes"></div></div>`;
+    const ops=box.querySelector('.opcoes');
+    ['Sim','Não'].forEach(v=>{
+      const b=document.createElement('div'); b.className='op'+(S.enot[k]===v?' sel':''); b.textContent=v;
+      b.addEventListener('click',()=>{S.enot[k]=v; renderEnot(); renderDossie();});
+      ops.appendChild(b);
+    });
+  });
+}
+function enotRespondido(){
+  if(S.ato==='TEST') return !!S.qtest.enot;
+  return (S.ato==='INV' || !!S.enot.t) && !!S.enot.a;
+}
 
 function visivel(q){
   if(!q.dependeDe) return true;
@@ -828,7 +896,7 @@ function renderDossie(){
   const pronto = S.ato==='TEST'
     ? !!((S.qual['testador_nome']||'').trim() && (S.qual['testador_telefone']||'').trim())
     : !!(el('apresNome').value.trim() && el('apresTel').value.trim() && el('parteNome').value.trim());
-  el('btnProt').disabled=!pronto;
+  el('btnProt').disabled=!(pronto && enotRespondido());
 }
 
 /* ============================================================
@@ -840,6 +908,7 @@ function renderDossie(){
    No go-live: 'https://SEU-SERVICO.up.railway.app' */
 const ENDPOINT_RAILWAY='https://cn2o-hub-backend-production.up.railway.app';
 
+if(ENDPOINT_RAILWAY){ document.querySelector('.selo').textContent='Produção'; }
 const pega=k=>{try{return sessionStorage.getItem(k)}catch(e){return null}};
 const TOKEN=pega('cn2o_token'), NOME_SESSAO=pega('cn2o_nome')||'', CARGO_SESSAO=pega('cn2o_cargo')||'';
 if(ENDPOINT_RAILWAY && !TOKEN) location.href='index.html';
@@ -897,6 +966,9 @@ el('btnProt').addEventListener('click',async ()=>{
       categoria: vendedorCorp()? (vendedorCorp().bandeira==='rosa'?'Santa Mônica':'Loteador/Incorporador') : (S.vendCat||'Particular')
     } : null,
     bandeiras: bandeirasAtuais(),
+    assinatura_enotariado: ehTest
+      ? {testador: S.qtest.enot==='Sim'}
+      : {transmitente: S.ato==='INV' ? null : S.enot.t==='Sim', adquirente: S.enot.a==='Sim', papeis:{transmitente:P.t, adquirente:P.a}},
     parte_envolvida:{papel:P.ra, nome:parte, telefone: ehTest? null : (el('parteTel').value.trim()||null)},
     qualificacao: ehTest ? (()=>{
       const pes=pref=>({nome:S.qual[pref+'_nome']||null,estado_civil:S.qual[pref+'_estado_civil']||null,profissao:S.qual[pref+'_profissao']||null,endereco:S.qual[pref+'_endereco']||null,rg:S.qual[pref+'_rg']||null,cpf:S.qual[pref+'_cpf']||null});
