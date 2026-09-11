@@ -2701,7 +2701,7 @@ document.querySelectorAll('.lat-nav .nav-item').forEach(function (b) {
     else if (n === 'avisos') { irParaInicio(); document.querySelector('[data-sub="avisos"]').click(); }
     else if (n === 'metas') { irParaInicio(); document.querySelector('[data-sub="metas"]').click(); }
     else if (n === 'calendario') { marcarNav('calendario'); abrirEmbutida('agenda', false); }
-    else if (n === 'documentos') { irParaInicio(); marcarNav('documentos'); abrirClausulas(); }
+    else if (n === 'documentos') { window.open('https://drive.google.com/drive/folders/17jiEqA5ufl4L_7fKKvHzvWF23wvDnlWT', '_blank', 'noopener'); }
     else if (n === 'ajuda') { const v = el('veuAjuda'); v.hidden = false; v.classList.add('aberto'); }
   });
 });
