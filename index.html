@@ -486,6 +486,87 @@ footer{border-top:1px solid var(--linha);padding:22px 20px 30px;text-align:cente
 .painel .painel-cab{flex-wrap:wrap}
 .painel .btn-copiar{white-space:nowrap}
 
+/* ---------- v1.2 · Login em quadro flutuante ---------- */
+:root{
+  --login-pagina:linear-gradient(180deg,rgba(32,42,58,.045) 0%,rgba(32,42,58,.015) 34%,rgba(32,42,58,0) 60%);
+  --login-caixa-fundo:linear-gradient(168deg,#fffefd 0%,#faf6f2 58%,#f6f1ec 100%);
+  --login-caixa-borda:rgba(99,19,37,.15);
+  --login-caixa-sombra:0 34px 70px -30px rgba(32,42,58,.38),0 12px 30px -14px rgba(32,42,58,.18),0 2px 8px rgba(32,42,58,.06);
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --login-pagina:linear-gradient(180deg,rgba(0,0,0,.22) 0%,rgba(0,0,0,0) 55%);
+  --login-caixa-fundo:linear-gradient(168deg,#2a3547 0%,#242e3f 100%);
+  --login-caixa-borda:rgba(255,255,255,.15);
+  --login-caixa-sombra:0 34px 70px -26px rgba(0,0,0,.75),0 12px 30px -12px rgba(0,0,0,.5);
+} }
+:root[data-theme="dark"]{
+  --login-pagina:linear-gradient(180deg,rgba(0,0,0,.22) 0%,rgba(0,0,0,0) 55%);
+  --login-caixa-fundo:linear-gradient(168deg,#2a3547 0%,#242e3f 100%);
+  --login-caixa-borda:rgba(255,255,255,.15);
+  --login-caixa-sombra:0 34px 70px -26px rgba(0,0,0,.75),0 12px 30px -12px rgba(0,0,0,.5);
+}
+#telaLogin{background:var(--login-pagina)}
+.login-caixa{max-width:640px;gap:20px;background:var(--login-caixa-fundo);border:1px solid var(--login-caixa-borda);border-top:4px solid var(--vinho);border-radius:16px;padding:clamp(26px,4.5vw,42px) clamp(22px,4.5vw,46px) clamp(24px,4vw,36px);box-shadow:var(--login-caixa-sombra);animation:loginSurgir .55s cubic-bezier(.22,.7,.35,1) both}
+@keyframes loginSurgir{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: reduce){ .login-caixa{animation:none} }
+@media (max-width:520px){
+  #telaLogin{padding:20px 16px}
+  .login-caixa{border-radius:14px;gap:18px}
+  .marca-grande{gap:14px}
+  .marca-grande .logotipo{height:88px!important}
+}
+
+/* ---------- v1.2 · Mural: fichas em carrossel (estilo streaming) ---------- */
+.mural-cards{display:flex;gap:18px;overflow-x:auto;overflow-y:visible;padding:26px 2px 20px;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  -webkit-mask-image:linear-gradient(90deg,transparent 0,#000 30px,#000 calc(100% - 30px),transparent 100%);
+  mask-image:linear-gradient(90deg,transparent 0,#000 30px,#000 calc(100% - 30px),transparent 100%)}
+.mural-cards::-webkit-scrollbar{display:none}
+.mural-cards .ficha-luz{flex:0 0 min(400px,84vw);min-height:300px;transition:transform .3s ease,box-shadow .3s ease}
+.mural-cards .ficha-central{flex-basis:min(460px,86vw);margin:-14px 0}
+.mural-cards .ficha-luz:hover{animation:none;transform:translateY(-12px) scale(1.015);box-shadow:0 30px 62px rgba(0,0,0,.5)}
+@media (prefers-reduced-motion: reduce){ .mural-cards .ficha-luz:hover{transform:none} }
+@media (max-width:560px){
+  .mural-cards{-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 12px,#000 calc(100% - 12px),transparent 100%);mask-image:linear-gradient(90deg,transparent 0,#000 12px,#000 calc(100% - 12px),transparent 100%)}
+  .mural-cards .ficha-luz{flex-basis:calc(100vw - 118px)}
+  .mural-cards .ficha-central{flex-basis:calc(100vw - 118px)}
+}
+
+/* ---------- v1.2 · Ferramentas: fundos pastéis e selo de IA ---------- */
+:root{
+  --pastel-nevoa:linear-gradient(165deg,#f0f3f8 0%,#e9edf4 100%);      /* névoa marinho */
+  --pastel-areia:linear-gradient(165deg,#f8f4ed 0%,#f3ede3 100%);      /* areia quente  */
+  --pastel-rosado:linear-gradient(165deg,#f9eff1 0%,#f4e7ea 100%);     /* rosado vinho  */
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --pastel-nevoa:linear-gradient(165deg,rgba(255,255,255,.075) 0%,rgba(255,255,255,.045) 100%);
+  --pastel-areia:linear-gradient(165deg,rgba(214,186,140,.13) 0%,rgba(214,186,140,.06) 100%);
+  --pastel-rosado:linear-gradient(165deg,rgba(99,19,37,.34) 0%,rgba(99,19,37,.18) 100%);
+} }
+:root[data-theme="dark"]{
+  --pastel-nevoa:linear-gradient(165deg,rgba(255,255,255,.075) 0%,rgba(255,255,255,.045) 100%);
+  --pastel-areia:linear-gradient(165deg,rgba(214,186,140,.13) 0%,rgba(214,186,140,.06) 100%);
+  --pastel-rosado:linear-gradient(165deg,rgba(99,19,37,.34) 0%,rgba(99,19,37,.18) 100%);
+}
+.cards .card:nth-child(3n+1){background:var(--pastel-nevoa)}
+.cards .card:nth-child(3n+2){background:var(--pastel-areia)}
+.cards .card:nth-child(3n){background:var(--pastel-rosado)}
+.selo-ia{display:inline-flex;align-items:center;gap:5px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#ffffff;background:linear-gradient(135deg,#631325 0%,#3d2030 55%,#202a3a 100%);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:4px 11px 4px 9px;box-shadow:0 4px 12px rgba(99,19,37,.32);transition:box-shadow .2s,transform .2s}
+.selo-ia-faisca{font-size:11px;line-height:1;transform:translateY(-.5px)}
+.card:hover .selo-ia{box-shadow:0 6px 16px rgba(99,19,37,.5);transform:translateY(-1px)}
+
+/* ---------- v1.2 · Faixa do título FERRAMENTAS ---------- */
+.faixa-titulo{position:relative;display:block;font-size:16px;letter-spacing:.3em;color:#ffffff;background:linear-gradient(92deg,#631325 0%,#43192a 52%,#202a3a 100%);border-radius:10px;padding:14px 22px;margin-bottom:18px;box-shadow:0 12px 26px rgba(32,42,58,.16);overflow:hidden}
+.faixa-titulo::before{content:"";position:absolute;inset:0;background:linear-gradient(115deg,transparent 42%,rgba(255,255,255,.09) 50%,transparent 58%);pointer-events:none}
+.faixa-titulo::after{content:"";position:absolute;left:22px;bottom:9px;width:56px;height:2px;background:rgba(255,255,255,.55);border-radius:2px}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .faixa-titulo{color:#ffffff;border:1px solid rgba(255,255,255,.14)} }
+:root[data-theme="dark"] .faixa-titulo{color:#ffffff;border:1px solid rgba(255,255,255,.14)}
+@media (max-width:520px){ .faixa-titulo{font-size:14px;letter-spacing:.22em;padding:12px 16px} }
+
+/* ---------- v1.2 · Correção: só um logotipo por tema ---------- */
+/* .logotipo img (0,1,1) vencia .logo-escuro (0,1,0); o logo branco ficava
+   sempre renderizado — invisível no fundo branco, fantasma no quadro do login. */
+.logotipo img.logo-escuro{display:none}
+
 </style>
 </head>
 <body>
@@ -524,7 +605,7 @@ footer{border-top:1px solid var(--linha);padding:22px 20px 30px;text-align:cente
 
     <form id="formPrimeiro" class="login-form" hidden novalidate>
       <p class="login-instrucao versalete">Primeiro acesso — crie a sua senha</p>
-      <p class="login-nota">Olá, <b id="nomePrimeiro"></b>! Escolha uma senha com pelo menos 8 caracteres. Ela é só sua — nem o Tabelião a conhece — e vale também para o Protocolo Eletrônico.</p>
+      <p class="login-nota">Olá, <b id="nomePrimeiro"></b>! Escolha uma senha com pelo menos 8 caracteres. Ela é só sua — nem o Tabelião a conhece — e vale também para o e-Protocolo.</p>
       <input class="campo" type="password" id="senhaNova" autocomplete="new-password" placeholder="nova senha (mínimo 8 caracteres)">
       <input class="campo" type="password" id="senhaConf" autocomplete="new-password" placeholder="repita a nova senha">
       <div class="login-acoes">
@@ -534,7 +615,7 @@ footer{border-top:1px solid var(--linha);padding:22px 20px 30px;text-align:cente
       <p id="msgPrimeiro" class="aviso" hidden></p>
     </form>
 
-    <p class="login-nota">Acesso individual — o mesmo usuário e a mesma senha do Protocolo Eletrônico. Esqueceu a senha? Peça ao Tabelião para zerá-la: no próximo acesso você cria uma nova.</p>
+    <p class="login-nota">Acesso individual — o mesmo usuário e a mesma senha do e-Protocolo. Esqueceu a senha? Peça ao Tabelião para zerá-la: no próximo acesso você cria uma nova.</p>
   </div>
 </section>
 
@@ -627,38 +708,38 @@ footer{border-top:1px solid var(--linha);padding:22px 20px 30px;text-align:cente
       </section>
 
       <section>
-        <h2 class="versalete titulo-secao">Ferramentas</h2>
+        <h2 class="versalete titulo-secao faixa-titulo">Ferramentas</h2>
         <div class="cards">
           <button class="card" id="cardProtocolo" type="button">
             <div class="card-topo"><span class="card-num">01</span></div>
-            <h3>Protocolo Eletrônico</h3>
+            <h3>e-Protocolo</h3>
             <p>Protocolo de escrituras com triagem guiada, dossiê documental e recibo — os 14 atos do CN2O.</p>
             <span class="card-acao">Abrir aqui →</span>
           </button>
           <button class="card" id="cardCalculadora" type="button">
             <div class="card-topo"><span class="card-num">02</span></div>
-            <h3>Calculadora de Terras Rurais</h3>
-            <p>Tabela Emdagro 2026/2027 — tarefas ⇄ hectares ⇄ m² e valor de referência por município.</p>
+            <h3>Calculadora de Emolumentos</h3>
+            <p>Faixa de cobrança para imóveis rurais. Tabela Emdagro 2026/2027 — tarefas/hectares e Valor de Referência por Município.</p>
             <span class="card-acao">Abrir aqui →</span>
           </button>
           <button class="card" id="cardExtrator" type="button">
-            <div class="card-topo"><span class="card-num">03</span><span class="chip-ia">IA</span></div>
-            <h3>Extrator de Qualificação</h3>
-            <p>Fotografe ou cole os documentos das partes — RG, CNH, certidões — e receba o parágrafo pronto para a escritura.</p>
+            <div class="card-topo"><span class="card-num">03</span><span class="selo-ia"><span class="selo-ia-faisca" aria-hidden="true">✦</span>IA</span></div>
+            <h3>Not-Extrator</h3>
+            <p>Alimente com os PDFs e fotos dos documentos das partes — RG, CNH, certidões — e receba os dados extraídos no parágrafo pronto para a escritura.</p>
             <span class="card-acao">Usar aqui →</span>
           </button>
           <button class="card" id="cardAnalisador" type="button">
-            <div class="card-topo"><span class="card-num">04</span><span class="chip-ia">IA</span></div>
-            <h3>Analista de Matrículas</h3>
+            <div class="card-topo"><span class="card-num">04</span><span class="selo-ia"><span class="selo-ia-faisca" aria-hidden="true">✦</span>IA</span></div>
+            <h3>e-Analista</h3>
             <p>Envie a foto, o print ou o PDF da certidão — ou cole o texto — e receba o extrato jurídico com a descrição do imóvel pronta para colar.</p>
             <span class="card-acao">Usar aqui →</span>
           </button>
-          <a class="card" id="cardAgenda" target="_blank" rel="noopener">
+          <button class="card" id="cardAgenda" type="button">
             <div class="card-topo"><span class="card-num">05</span></div>
             <h3>Agenda do Tabelião</h3>
             <p>Consulte a agenda do César antes de marcar assinaturas, diligências e atos com hora.</p>
-            <span class="card-acao">Abrir →</span>
-          </a>
+            <span class="card-acao">Abrir aqui →</span>
+          </button>
           <button class="card" id="cardClausulas" type="button">
             <div class="card-topo"><span class="card-num">06</span><span class="chip-ia">Guia</span></div>
             <h3>Cláusulas Especiais do Guia CN2O</h3>
@@ -723,7 +804,7 @@ footer{border-top:1px solid var(--linha);padding:22px 20px 30px;text-align:cente
       <div class="ferramenta-cab">
         <span class="num-grande">03</span>
         <div style="flex:1;min-width:240px">
-          <h2>Extrator de Qualificação</h2>
+          <h2>Not-Extrator</h2>
           <p class="desc">Envie fotos ou PDF dos documentos — RG, CNH, CPF, certidões, comprovante de residência, contrato social —, cole um print com Ctrl+V ou cole o texto. A ferramenta monta a qualificação no padrão do CN2O e aponta o que falta conferir. Nada é inventado: dado ausente sai como [FALTA: …].</p>
         </div>
         <span data-chip-ia class="chip-ia">verificando IA…</span>
@@ -764,7 +845,7 @@ footer{border-top:1px solid var(--linha);padding:22px 20px 30px;text-align:cente
       <div class="ferramenta-cab">
         <span class="num-grande">04</span>
         <div style="flex:1;min-width:240px">
-          <h2>Analista de Matrículas</h2>
+          <h2>e-Analista</h2>
           <p class="desc">Envie fotos ou o PDF da certidão de inteiro teor, cole um print direto com Ctrl+V — ou cole o texto. O Analista lê a abertura e todos os R./AV. em ordem, cruza o que está vigente com o que foi cancelado e entrega o extrato em 10 seções, com a descrição do imóvel destacada para copiar e colar. Parecer preliminar — sujeito à conferência do Tabelião.</p>
         </div>
         <span data-chip-ia class="chip-ia">verificando IA…</span>
@@ -905,9 +986,13 @@ const CLAUSULAS = [
 const CONFIG = {
   endpoint: 'https://cn2o-hub-backend-production.up.railway.app',
   ferramentas: {
-    protocolo:   { url: 'protocolo.html',   titulo: 'Protocolo Eletrônico' },
-    calculadora: { url: 'https://vocal-kulfi-10c287.netlify.app', titulo: 'Calculadora de Terras Rurais' }, // site próprio, sempre na versão atual
-    agenda:      '' // pendente — o Tabelião indicará o link (Google Agenda)
+    protocolo:   { url: 'protocolo.html',   titulo: 'e-Protocolo' },
+    calculadora: { url: 'https://vocal-kulfi-10c287.netlify.app', titulo: 'Calculadora de Emolumentos' }, // site próprio, sempre na versão atual
+    agenda:      { // Google Agenda do Tabelião (tnitabaiana@gmail.com), embutida no hub
+      url: 'https://calendar.google.com/calendar/embed?src=tnitabaiana%40gmail.com&ctz=America%2FMaceio&hl=pt_BR&mode=WEEK&showTitle=0&showPrint=0&showCalendars=0&showTz=0&wkst=1',
+      abrir: 'https://calendar.google.com/calendar/u/0?cid=dG5pdGFiYWlhbmFAZ21haWwuY29t',
+      titulo: 'Agenda do Tabelião'
+    }
   },
   // Chaves de sessão compartilhadas com o protocolo.html (mesmo site, mesmo login):
   // gravadas na aba (sessionStorage, que o protocolo sempre leu) e lembradas no
@@ -1182,7 +1267,7 @@ function primeiroNome(n) {
    NAVEGAÇÃO (com botão Voltar do navegador e atalhos #protocolo etc.)
 ============================================================ */
 const PAGINAS = ['paginaHub', 'paginaExtrator', 'paginaAnalisador', 'paginaEmbutida'];
-const ROTAS = { extrator: 'paginaExtrator', analista: 'paginaAnalisador', protocolo: 'protocolo', calculadora: 'calculadora' };
+const ROTAS = { extrator: 'paginaExtrator', analista: 'paginaAnalisador', protocolo: 'protocolo', calculadora: 'calculadora', agenda: 'agenda' };
 function mostrarPagina(id, semHistorico, rota) {
   PAGINAS.forEach(function (p) { el(p).hidden = (p !== id); });
   el('wrapPrincipal').classList.toggle('largo', id === 'paginaEmbutida');
@@ -1193,7 +1278,7 @@ function mostrarPagina(id, semHistorico, rota) {
   }
 }
 function abrirRota(rota, semHistorico) {
-  if (rota === 'protocolo' || rota === 'calculadora') { abrirEmbutida(rota, semHistorico); return; }
+  if (rota === 'protocolo' || rota === 'calculadora' || rota === 'agenda') { abrirEmbutida(rota, semHistorico); return; }
   if (ROTAS[rota]) { mostrarPagina(ROTAS[rota], semHistorico, rota); return; }
   mostrarPagina('paginaHub', semHistorico);
 }
@@ -1213,7 +1298,7 @@ function abrirEmbutida(chave, semHistorico) {
   const f = CONFIG.ferramentas[chave];
   if (!f || !f.url) { toast('Esta ferramenta ainda não foi configurada — avise o Tabelião.'); return; }
   el('embutidaTitulo').textContent = f.titulo;
-  el('embutidaNovaAba').href = f.url;
+  el('embutidaNovaAba').href = f.abrir || f.url;
   const moldura = el('molduraEmbutida');
   Object.keys(EMBUTIDAS).forEach(function (k) { EMBUTIDAS[k].hidden = true; });
   if (!EMBUTIDAS[chave]) {
@@ -1222,6 +1307,7 @@ function abrirEmbutida(chave, semHistorico) {
     ifr.setAttribute('allow', 'clipboard-read; clipboard-write');
     const aguarde = document.createElement('div');
     aguarde.className = 'carregando';
+    aguarde.dataset.chave = chave;
     aguarde.textContent = 'Abrindo ' + f.titulo + '…';
     ifr.addEventListener('load', function () { aguarde.remove(); });
     moldura.appendChild(aguarde);
@@ -1229,17 +1315,13 @@ function abrirEmbutida(chave, semHistorico) {
     ifr.src = f.url;
     EMBUTIDAS[chave] = ifr;
   }
+  // o véu "Abrindo…" de uma ferramenta não pode cobrir a outra
+  moldura.querySelectorAll('.carregando').forEach(function (v) { v.hidden = (v.dataset.chave !== chave); });
   EMBUTIDAS[chave].hidden = false;
   mostrarPagina('paginaEmbutida', semHistorico, chave);
 }
 function aplicarLinks() {
-  const c = el('cardAgenda');
-  if (CONFIG.ferramentas.agenda) { c.href = CONFIG.ferramentas.agenda; return; }
-  c.classList.add('pendente');
-  c.removeAttribute('href');
-  c.setAttribute('aria-disabled', 'true');
-  c.querySelector('.card-acao').textContent = 'Aguardando o link — pedir ao Tabelião';
-  c.addEventListener('click', function (ev) { ev.preventDefault(); toast('Este link ainda não foi configurado — avise o Tabelião.'); });
+  el('cardAgenda').addEventListener('click', function () { abrirEmbutida('agenda', false); });
 }
 
 /* ============================================================
@@ -1933,7 +2015,7 @@ function pintarAbaConsumo(painel) {
   api('/hub/ia/uso').then(function (linhas) {
     if (!ED || ED.aba !== 'consumo') return;
     if (!linhas || !linhas.length) { painel.innerHTML = '<p class="ed-vazio">Nenhuma análise de IA neste mês ainda.</p>'; return; }
-    const nomes = { qualificacao: 'Extrator', matricula: 'Analista' };
+    const nomes = { qualificacao: 'Not-Extrator', matricula: 'e-Analista' };
     let total = 0, usos = 0;
     const corpo = linhas.map(function (l) {
       total += Number(l.custo_usd) || 0; usos += Number(l.usos) || 0;
@@ -2309,6 +2391,37 @@ montarFerramenta({
 
 pintarBotaoTema();
 aplicarLinks();
+
+/* ============================================================
+   CARROSSEL DO MURAL — as fichas rolam devagar para a direita,
+   como numa vitrine de streaming; pausa ao passar o mouse ou tocar.
+============================================================ */
+function iniciarCarrosselMural() {
+  const trilho = document.querySelector('.mural-cards');
+  if (!trilho) return;
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  let dir = 1, sobre = false, retomarEm = Date.now() + 2200, resto = 0;
+  trilho.addEventListener('pointerenter', function () { sobre = true; });
+  trilho.addEventListener('pointerleave', function () { sobre = false; retomarEm = Date.now() + 900; });
+  trilho.addEventListener('focusin', function () { sobre = true; });   // navegação por teclado
+  trilho.addEventListener('focusout', function () { if (!trilho.contains(document.activeElement)) { sobre = false; retomarEm = Date.now() + 900; } });
+  trilho.addEventListener('touchstart', function () { retomarEm = Date.now() + 4000; }, { passive: true });
+  trilho.addEventListener('touchend', function () { retomarEm = Date.now() + 3000; }, { passive: true });
+  trilho.addEventListener('wheel', function () { retomarEm = Date.now() + 3500; }, { passive: true });
+  function passo() {
+    const max = trilho.scrollWidth - trilho.clientWidth;
+    if (max > 8 && !sobre && !document.hidden && Date.now() > retomarEm && !el('app').hidden) {
+      resto += 0.45;                       // ~27 px/s — deslize calmo
+      const inteiro = Math.floor(resto);
+      if (inteiro) { trilho.scrollLeft += dir * inteiro; resto -= inteiro; }
+      if (trilho.scrollLeft >= max - 1) { dir = -1; retomarEm = Date.now() + 1800; }
+      else if (trilho.scrollLeft <= 1 && dir === -1) { dir = 1; retomarEm = Date.now() + 1800; }
+    }
+    requestAnimationFrame(passo);
+  }
+  requestAnimationFrame(passo);
+}
+iniciarCarrosselMural();
 preencherData();
 renderClausulas();
 pintarIA();
