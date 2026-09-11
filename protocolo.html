@@ -1360,15 +1360,18 @@ function renderDossie(){
 const ENDPOINT_RAILWAY='https://cn2o-hub-backend-production.up.railway.app';
 
 if(ENDPOINT_RAILWAY){ document.querySelector('.selo').textContent='Produção'; }
-const pega=k=>{try{return sessionStorage.getItem(k)}catch(e){return null}};
+// Sessão compartilhada com o Hub CN2O (index.html): aba atual ou login lembrado.
+const pega=k=>{try{return sessionStorage.getItem(k)||localStorage.getItem(k)}catch(e){return null}};
+const limpaSessao=()=>{try{sessionStorage.clear()}catch(_){}try{['cn2o_token','cn2o_nome','cn2o_cargo','cn2o_login'].forEach(k=>localStorage.removeItem(k))}catch(_){}};
+const EMBUTIDO=(()=>{try{return window.top!==window.self}catch(e){return true}})();
 const TOKEN=pega('cn2o_token'), NOME_SESSAO=pega('cn2o_nome')||'', CARGO_SESSAO=pega('cn2o_cargo')||'';
 if(ENDPOINT_RAILWAY && !TOKEN) location.href='index.html';
 if(NOME_SESSAO){
   const si=document.getElementById('sessaoInfo');
-  si.innerHTML=`Sessão: <b>${NOME_SESSAO}</b>${CARGO_SESSAO?' · '+CARGO_SESSAO:''} &nbsp;·&nbsp; <a href="#" id="sair" style="color:#631325">Sair</a>`;
+  si.innerHTML=`Sessão: <b>${NOME_SESSAO}</b>${CARGO_SESSAO?' · '+CARGO_SESSAO:''}${EMBUTIDO?'':' &nbsp;·&nbsp; <a href="index.html" style="color:#631325">Hub CN2O</a>'} &nbsp;·&nbsp; <a href="#" id="sair" style="color:#631325">Sair</a>`;
   document.getElementById('sair').addEventListener('click',e=>{e.preventDefault();
     if(ENDPOINT_RAILWAY) fetch(ENDPOINT_RAILWAY+'/logout',{method:'POST',headers:{'X-Auth-Token':TOKEN}}).catch(()=>{});
-    try{sessionStorage.clear()}catch(_){}
+    limpaSessao();
     location.href='index.html';});
 }
 let HUB_KEY=null;
@@ -1469,7 +1472,7 @@ Guarde este número: use-o para consultar o andamento do seu ato em cn2oita.com.
         body:JSON.stringify(payload)
       });
       const j=await r.json();
-      if(r.status===401){ try{sessionStorage.clear()}catch(_){} location.href='index.html'; return; }
+      if(r.status===401){ limpaSessao(); location.href='index.html'; return; }
       if(!r.ok) throw new Error(j.erro||('HTTP '+r.status));
       numeroReal=j.numero;
       if(j.prazo) S.prazoInfo=' · Prazo p/ lavratura: '+new Date(j.prazo).toLocaleDateString('pt-BR');
