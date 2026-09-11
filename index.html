@@ -7,6 +7,7 @@
 <meta name="description" content="Hub CN2O — ferramentas, mural e IA do Time CN2O (Cartório de Notas do 2º Ofício de Itabaiana/SE). Uso interno.">
 <meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#631325">
+<script>try{document.documentElement.setAttribute('data-theme',localStorage.getItem('cn2o_tema')==='dark'?'dark':'light')}catch(e){document.documentElement.setAttribute('data-theme','light')}</script>
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
@@ -420,7 +421,7 @@ footer{border-top:1px solid var(--linha);padding:22px 20px 30px;text-align:cente
 .ed-btn{border:1.5px solid rgba(32,42,58,.22);border-radius:6px;min-width:28px;height:28px;padding:0 7px;font-size:12px;color:rgba(32,42,58,.7);flex:none;font-weight:700}
 .ed-btn:hover{border-color:var(--vinho);color:#202a3a}
 .ed-btn.on{background:var(--vinho);border-color:var(--vinho);color:#ffffff}
-.ed-rodape{position:sticky;bottom:-20px;background:#ffffff;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px;border-top:1px solid rgba(32,42,58,.12);padding:14px 0 6px}
+.ed-rodape{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:18px;border-top:1px solid rgba(32,42,58,.12);padding:14px 0 6px}
 .ed-rodape .nota{font-size:12px;color:rgba(32,42,58,.6)}
 .ed-rodape .nota.pendente{color:var(--vinho);font-weight:700}
 .ed-chips{display:flex;gap:6px;flex-wrap:wrap}
@@ -457,6 +458,33 @@ footer{border-top:1px solid var(--linha);padding:22px 20px 30px;text-align:cente
 /* Fora do claude.ai não há reset global: garante que [hidden] sempre esconda,
    mesmo em elementos com display definido inline ou por classe. */
 [hidden]{display:none!important}
+
+/* ---------- Área de leitura das ferramentas (conforto visual) ----------
+   Texto escuro sobre fundo claro, levemente aquecido: evita o "halo" que o texto
+   claro sobre fundo escuro provoca em quem tem astigmatismo, sem o brilho do
+   branco puro. O painel escuro fica só no mural. */
+:root{
+  --leitura-fundo:#fbf8f6; --leitura-texto:#202a3a; --leitura-suave:rgba(32,42,58,.66);
+  --leitura-linha:rgba(32,42,58,.14); --leitura-caixa:#ffffff; --leitura-rotulo:#631325;
+}
+:root[data-theme="dark"]{
+  --leitura-fundo:#252e3c; --leitura-texto:#e8e4df; --leitura-suave:rgba(232,228,223,.68);
+  --leitura-linha:rgba(255,255,255,.12); --leitura-caixa:rgba(255,255,255,.045); --leitura-rotulo:rgba(232,228,223,.82);
+}
+.painel{background:var(--leitura-fundo);color:var(--leitura-texto);border:1px solid var(--leitura-linha);border-top:4px solid var(--vinho);box-shadow:0 6px 20px rgba(32,42,58,.06);padding:18px 22px}
+.painel .painel-cab{color:var(--leitura-rotulo)}
+.painel .saida{color:var(--leitura-texto);font-size:15.5px;line-height:1.8;letter-spacing:.005em}
+.painel .saida.vazia{color:var(--leitura-suave)}
+.painel .assinatura{color:var(--leitura-suave);border-top-color:var(--leitura-linha)}
+.painel .btn-copiar{border:1.5px solid rgba(99,19,37,.45);color:var(--vinho);background:transparent}
+.painel .btn-copiar:hover{background:var(--vinho);border-color:var(--vinho);color:#ffffff}
+:root[data-theme="dark"] .painel .btn-copiar{border-color:rgba(232,228,223,.45);color:var(--leitura-texto)}
+.painel .desc-box{background:var(--leitura-caixa);border:1px solid var(--leitura-linha);border-left:4px solid var(--vinho)}
+:root[data-theme="dark"] .painel .desc-box{border-left-color:#e8e4df}
+.painel .giro{border-color:rgba(99,19,37,.18);border-top-color:#631325}
+:root[data-theme="dark"] .painel .giro{border-color:rgba(232,228,223,.22);border-top-color:#e8e4df}
+.painel .painel-cab{flex-wrap:wrap}
+.painel .btn-copiar{white-space:nowrap}
 
 </style>
 </head>
@@ -528,6 +556,7 @@ footer{border-top:1px solid var(--linha);padding:22px 20px 30px;text-align:cente
     </div>
     <div class="sessao">
       <span id="saudacao"></span>
+      <button id="btnTema" class="btn-mini" type="button" title="Alternar entre tema claro e escuro">☾ Tema escuro</button>
       <button id="btnSair" class="btn-mini" type="button">Sair</button>
     </div>
   </header>
@@ -1642,7 +1671,7 @@ function htmlEditorMural() {
   return cabecalhoSub('Mural · Modo do Tabelião', 'Editar o mural') +
     '<p class="sub-data">Monte os avisos com a formatação que quiser e publique — a mudança aparece para toda a equipe na hora.</p>' +
     '<div class="ed-abas">' +
-      ['avisos:Avisos', 'aniversariantes:Aniversariantes', 'metas:Metas', 'historico:Histórico', 'consumo:Consumo de IA'].map(function (x) {
+      ['avisos:Avisos', 'aniversariantes:Aniversariantes', 'metas:Metas', 'equipe:Equipe', 'historico:Histórico', 'consumo:Consumo de IA'].map(function (x) {
         const p = x.split(':');
         return '<button type="button" class="ed-aba" data-aba="' + p[0] + '">' + p[1] + '</button>';
       }).join('') +
@@ -1672,6 +1701,7 @@ function pintarAba() {
   if (ED.aba === 'avisos') pintarAbaAvisos(painel);
   else if (ED.aba === 'aniversariantes') pintarAbaAniver(painel);
   else if (ED.aba === 'metas') pintarAbaMetas(painel);
+  else if (ED.aba === 'equipe') pintarAbaEquipe(painel);
   else if (ED.aba === 'historico') pintarAbaHistorico(painel);
   else if (ED.aba === 'consumo') pintarAbaConsumo(painel);
 }
@@ -1817,6 +1847,63 @@ function pintarAbaMetas(painel) {
     marcarSujo('Meta adicionada — desmarque “EM BREVE” e publique para a equipe ver.');
     pintarAba();
   });
+}
+
+// Equipe: quem entra no Hub (inclusive quem não é escrevente) e senha esquecida.
+function sugerirLogin(nome) {
+  const p = String(nome || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase()
+    .replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
+  return p.length > 1 ? p[0] + '.' + p[p.length - 1] : (p[0] || '');
+}
+function pintarAbaEquipe(painel) {
+  painel.innerHTML = '<p class="ed-vazio">Carregando a equipe…</p>';
+  api('/hub/admin/equipe').then(function (lista) {
+    if (!ED || ED.aba !== 'equipe') return;
+    painel.innerHTML =
+      '<p class="sub-data" style="margin-bottom:10px">Quem entra no Hub CN2O. O que você faz nesta aba vale na hora — não precisa publicar o mural.</p>' +
+      '<ul class="ed-lista">' + (lista || []).map(function (u) {
+        const situacao = u.tem_senha
+          ? (u.ultimo_acesso ? 'último acesso ' + quandoCurto(u.ultimo_acesso) : 'senha criada')
+          : 'aguardando o primeiro acesso';
+        const podeZerar = u.tem_senha && u.login !== SESSAO.login;
+        return '<li class="ed-item"><b>' + esc(u.nome) + '</b><small>' + esc(u.login) + ' · ' + esc(u.cargo) + ' · ' + situacao + '</small>' +
+          '<span class="ed-acoes">' + (podeZerar ? '<button type="button" class="ed-btn" data-zera="' + esc(u.login) + '" title="Zerar a senha desta pessoa">Zerar senha</button>' : '') + '</span></li>';
+      }).join('') + '</ul>' +
+      '<h3 class="ed-titulo versalete">Cadastrar pessoa</h3>' +
+      '<div class="ed-form ed-linha">' +
+        '<input type="text" id="edEqNome" placeholder="Nome completo" maxlength="80">' +
+        '<input type="text" id="edEqLogin" placeholder="nome.sobrenome" maxlength="60" autocapitalize="none" spellcheck="false">' +
+        '<input type="text" id="edEqCargo" placeholder="Função" maxlength="60" list="edEqCargos">' +
+        '<datalist id="edEqCargos"><option value="Escrevente"><option value="Substituta do Tabelião"><option value="Cadastro e Protocolo"><option value="Secretária"><option value="Auxiliar"><option value="Estagiário(a)"></datalist>' +
+        '<button class="btn-fantasma" id="edEqAdd" type="button">Cadastrar</button>' +
+      '</div>' +
+      '<p class="sub-data">A pessoa entra com esse usuário e cria a própria senha no primeiro acesso. Cadastre — ou zere uma senha — só quando ela for entrar em seguida.</p>';
+    const nomeEl = el('edEqNome'), loginEl = el('edEqLogin');
+    let loginMexido = false;
+    loginEl.addEventListener('input', function () { loginMexido = true; });
+    nomeEl.addEventListener('input', function () { if (!loginMexido) loginEl.value = sugerirLogin(nomeEl.value); });
+    el('edEqAdd').addEventListener('click', function () {
+      const corpo = { nome: nomeEl.value.trim(), login: loginEl.value.trim().toLowerCase(), cargo: el('edEqCargo').value.trim() };
+      if (!corpo.nome || !corpo.login) { toast('Preencha o nome e o usuário.'); return; }
+      api('/hub/admin/equipe', { corpo: corpo }).then(function () {
+        toast('✓ ' + corpo.nome + ' cadastrado(a) — usuário ' + corpo.login);
+        pintarAba();
+      }).catch(function (e) { toast(primeiraMaiuscula(e.erro) + '.', true); });
+    });
+    painel.querySelectorAll('[data-zera]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        if (b.dataset.confirma !== '1') {
+          b.dataset.confirma = '1'; b.textContent = 'Confirmar?'; b.classList.add('on');
+          setTimeout(function () { if (b.isConnected) { b.dataset.confirma = ''; b.textContent = 'Zerar senha'; b.classList.remove('on'); } }, 3500);
+          return;
+        }
+        api('/hub/admin/zerar-senha', { corpo: { login: b.dataset.zera } }).then(function () {
+          toast('✓ Senha zerada — ' + b.dataset.zera + ' cria uma nova no próximo acesso');
+          pintarAba();
+        }).catch(function (e) { toast(primeiraMaiuscula(e.erro) + '.', true); });
+      });
+    });
+  }).catch(function (e) { if (painel.isConnected) painel.innerHTML = '<p class="ed-vazio">Não consegui ler a equipe (' + esc(e.erro) + ').</p>'; });
 }
 
 function pintarAbaHistorico(painel) {
@@ -2163,12 +2250,28 @@ document.addEventListener('paste', function (ev) {
 });
 
 /* ============================================================
+   TEMA — claro por padrão (conforto de leitura); escuro só se a pessoa escolher
+============================================================ */
+function temaAtual() { return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light'; }
+function pintarBotaoTema() {
+  const b = el('btnTema');
+  if (b) b.textContent = temaAtual() === 'dark' ? '☀ Tema claro' : '☾ Tema escuro';
+}
+function alternarTema() {
+  const novo = temaAtual() === 'dark' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', novo);
+  store.set('cn2o_tema', novo);
+  pintarBotaoTema();
+}
+
+/* ============================================================
    LIGAÇÕES E INICIALIZAÇÃO
 ============================================================ */
 el('formLogin').addEventListener('submit', entrar);
 el('formPrimeiro').addEventListener('submit', criarSenha);
 el('btnVoltarLogin').addEventListener('click', function () { mostrarLogin(); });
 el('btnSair').addEventListener('click', sair);
+el('btnTema').addEventListener('click', alternarTema);
 el('cardProtocolo').addEventListener('click', function () { abrirEmbutida('protocolo'); });
 el('cardCalculadora').addEventListener('click', function () { abrirEmbutida('calculadora'); });
 el('cardExtrator').addEventListener('click', function () { mostrarPagina('paginaExtrator', false, 'extrator'); });
@@ -2204,6 +2307,7 @@ montarFerramenta({
   msgProgresso: function (n) { return n ? 'Lendo a certidão (' + n + ' arquivo(s)) e montando o extrato' : 'Analisando a matrícula'; }
 });
 
+pintarBotaoTema();
 aplicarLinks();
 preencherData();
 renderClausulas();
