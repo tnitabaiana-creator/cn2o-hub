@@ -13,7 +13,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Lato:wght@400;700&family=Caveat:wght@600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@600;700;800&family=Lato:wght@400;700&family=Caveat:wght@600&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
 <style>
 /* ============ IDENTIDADE CN2O — Brandbook jan/2026 ============
    Paleta oficial exclusiva: #631325 vinho · #202a3a marinho · #ffffff branco.
@@ -1125,6 +1125,73 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 :root[data-theme="dark"] .con-fases li::before{background:#e9a5b4;box-shadow:0 0 0 3px rgba(233,165,180,.15)}
 :root[data-theme="dark"] .con-fases li::after{background:rgba(233,165,180,.20)}
 
+/* ============================================================
+   v1.15 — conforto visual das páginas internas das ferramentas
+   (leitura em Atkinson Hyperlegible 18px quase-preta; quadro de
+   ENTRADA com fundo quente e tarja MARINHO × quadro de RESULTADO
+   branco-papel com tarja VINHO — identificação imediata)
+   ============================================================ */
+:root{
+  --entrada-fundo:#f6efe7;
+  --entrada-linha:rgba(32,42,58,.15);
+  --leitura-fundo:#ffffff;
+  --leitura-texto:#1a2230;
+  --leitura-suave:rgba(26,34,48,.60);
+  --leitura-linha:rgba(32,42,58,.16);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --entrada-fundo:#212b3b; --entrada-linha:rgba(255,255,255,.13);
+    --leitura-fundo:#2b3444; --leitura-texto:#f0f3f8; --leitura-suave:rgba(240,243,248,.66);
+    --leitura-linha:rgba(255,255,255,.13);
+  }
+}
+:root[data-theme="dark"]{
+  --entrada-fundo:#212b3b; --entrada-linha:rgba(255,255,255,.13);
+  --leitura-fundo:#2b3444; --leitura-texto:#f0f3f8; --leitura-suave:rgba(240,243,248,.66);
+  --leitura-linha:rgba(255,255,255,.13);
+}
+.painel{box-shadow:0 12px 30px rgba(32,42,58,.10)}
+.painel .painel-cab{font-size:13.5px;letter-spacing:.18em;background:rgba(99,19,37,.06);border-bottom:1px solid rgba(99,19,37,.10);margin:-18px -22px 0;padding:12px 22px;border-radius:6px 6px 0 0}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .painel .painel-cab{background:rgba(255,255,255,.055);border-bottom-color:rgba(255,255,255,.09)} }
+:root[data-theme="dark"] .painel .painel-cab{background:rgba(255,255,255,.055);border-bottom-color:rgba(255,255,255,.09)}
+/* exceção: o rótulo do quadrinho interno da descrição (desc-box do e-Analista)
+   NÃO vira faixa — o desc-box tem padding menor (12px 14px) e as margens
+   negativas vazariam além da borda; fica rótulo simples com a tipografia nova */
+.painel .desc-box .painel-cab{background:transparent;border-bottom:0;margin:0;padding:0;border-radius:0}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .painel .desc-box .painel-cab{background:transparent;border-bottom:0} }
+:root[data-theme="dark"] .painel .desc-box .painel-cab{background:transparent;border-bottom:0}
+.painel .saida{font-family:'Atkinson Hyperlegible','Lato',sans-serif;font-size:18px;line-height:1.85;letter-spacing:.012em;color:var(--leitura-texto)}
+.termo-check{font-size:16.5px}
+.col-entrada{background:var(--entrada-fundo);border:1px solid var(--entrada-linha);border-top:4px solid var(--marinho);border-radius:10px;padding:18px 22px;box-shadow:0 6px 20px rgba(32,42,58,.06)}
+.col-entrada textarea{font-size:17px;line-height:1.7;color:var(--tinta);background:var(--leitura-caixa);border-color:var(--entrada-linha)}
+.col-entrada .rotulo{font-size:12.5px;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:.16em;color:var(--marinho)}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .col-entrada{border-top-color:#9fb2cc}
+  :root:not([data-theme="light"]) .col-entrada .rotulo{color:#c7d2e2}
+  :root:not([data-theme="light"]) .col-entrada textarea{color:var(--tinta)}
+}
+:root[data-theme="dark"] .col-entrada{border-top-color:#9fb2cc}
+:root[data-theme="dark"] .col-entrada .rotulo{color:#c7d2e2}
+.ferramenta-cab .desc{font-size:17px;line-height:1.65;color:var(--tinta)}
+.nota-ia{font-size:14.5px}
+.assinatura{font-size:13.5px}
+.btn-copiar{font-size:12.5px}
+.anexo-dica{font-size:14.5px}
+.anexo-lista li{font-size:15px}
+.cont-anexos{font-size:13.5px}
+.aviso{font-size:15.5px}
+.clausula b{font-size:16.5px}
+.clausula small{font-size:14.5px}
+.min-campo{font-size:13px}
+.min-campo input,.min-campo textarea{font-size:17px}
+.con-titulo{font-size:18.5px}
+.con-fato .cf-v{font-size:16.5px}
+.con-fases li{font-size:16px}
+.con-fases .cf-fase{font-size:16px}
+.con-fases .cf-data{font-size:13.5px}
+.con-pend li{font-size:15.5px}
+
 </style>
 </head>
 <body>
@@ -1306,7 +1373,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
           <button class="card" id="cardAnalisador" type="button">
             <div class="card-topo"><span class="card-num">04</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M15.5 15.5 20 20"/><path d="M8.5 11h5M11 8.5v5"/></svg></span><span class="chip-ia">IA</span></div>
             <h3>e-Analista</h3>
-            <p>Envie a foto, o print ou o PDF da certidão — ou cole o texto — e receba o extrato jurídico com a descrição do imóvel pronta para colar.</p>
+            <p>Envie a foto, o print ou o PDF da certidão e receba o extrato jurídico com a descrição do imóvel pronta para colar.</p>
             <span class="card-acao">Usar aqui →</span>
           </button>
           <button class="card card-breve" id="cardMinutas" type="button">
@@ -1596,7 +1663,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
         <span class="num-grande">04</span>
         <div style="flex:1;min-width:240px">
           <h2>e-Analista</h2>
-          <p class="desc">Envie fotos ou o PDF da certidão de inteiro teor, cole um print direto com Ctrl+V — ou cole o texto. O Analista lê a abertura e todos os R./AV. em ordem, cruza o que está vigente com o que foi cancelado e entrega o extrato em 10 seções, com a descrição do imóvel destacada para copiar e colar. Parecer preliminar — sujeito à conferência do Tabelião.</p>
+          <p class="desc">Envie fotos ou o PDF da certidão de inteiro teor — ou cole um print direto com Ctrl+V. O Analista lê a abertura e todos os R./AV. em ordem, cruza o que está vigente com o que foi cancelado e entrega o extrato em 10 seções, com a descrição do imóvel destacada para copiar e colar. Parecer preliminar — sujeito à conferência do Tabelião.</p>
         </div>
         <span data-chip-ia class="chip-ia">verificando IA…</span>
       </div>
@@ -1613,11 +1680,10 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
             <span class="cont-anexos"></span>
             <p class="aviso" data-aviso-anexo hidden></p>
           </div>
-          <label class="rotulo versalete" for="entradaAnalisador" style="margin-top:6px">…ou cole o texto da certidão</label>
-          <textarea id="entradaAnalisador" placeholder="Cole aqui o texto completo da certidão de matrícula…"></textarea>
+          <textarea id="entradaAnalisador" hidden aria-hidden="true" tabindex="-1"></textarea>
           <div class="linha-botoes">
             <button id="btnAnalisar" class="btn-vinho" type="button">Analisar matrícula</button>
-            <button id="btnExemploAna" class="btn-fantasma" type="button">Ver exemplo</button>
+            <button id="btnExemploAna" class="btn-fantasma" type="button" hidden>Ver exemplo</button>
             <button id="btnLimparAna" class="btn-fantasma" type="button">Limpar</button>
           </div>
           <p class="nota-ia" data-nota-ia></p>
@@ -3484,7 +3550,7 @@ montarFerramenta({
   ferramenta: 'matricula', pagina: 'paginaAnalisador', exemplo: EXEMPLO_ANALISADOR,
   entrada: 'entradaAnalisador', saida: 'saidaAnalisador', meta: 'metaAna',
   btnRodar: 'btnAnalisar', rotuloRodar: 'Analisar matrícula', btnCopiar: 'btnCopiarAna', btnExemplo: 'btnExemploAna', btnLimpar: 'btnLimparAna',
-  assinatura: 'Análise solicitada por', pedirEntrada: 'Anexe a certidão ou cole o texto antes de continuar.',
+  assinatura: 'Análise solicitada por', pedirEntrada: 'Anexe a certidão em foto, print ou PDF antes de continuar.',
   processar: processarExtrato,
   aoIniciar: function () { DESC_ATUAL = ''; el('descBox').hidden = true; el('descTexto').textContent = ''; },
   msgProgresso: function (n) { return n ? 'Lendo a certidão (' + n + ' arquivo(s)) e montando o extrato' : 'Analisando a matrícula'; }
