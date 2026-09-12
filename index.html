@@ -888,7 +888,7 @@ h1#saudacao.ola b{color:var(--tinta)}
    v1.10 — mural de gente (fotos), destaques e ferramentas com ícones
    ============================================================ */
 /* título do painel: mural de funcionários, leve e manuscrito */
-.mural-titulo{font-family:'Caveat','Segoe Script',cursive;font-weight:700;font-size:clamp(40px,4.8vw,56px);letter-spacing:.015em;text-transform:none;line-height:.95}
+.mural-titulo{font-family:'Caveat','Segoe Script',cursive;font-weight:700;font-size:clamp(42px,5vw,58px);letter-spacing:.015em;text-transform:none;line-height:.95}
 .mural-titulo::after{width:92px;height:3px;border-radius:99px;margin-top:6px;transform:rotate(-1.2deg)}
 .mural-sub{margin-top:10px}
 
@@ -1000,6 +1000,54 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
   box-shadow:inset 0 0 0 2.5px rgba(141,35,64,.35);opacity:.9;
   -webkit-mask-image:radial-gradient(150% 130% at 28% 18%, #000 52%, rgba(0,0,0,.72) 70%, #000 86%);
   mask-image:radial-gradient(150% 130% at 28% 18%, #000 52%, rgba(0,0,0,.72) 70%, #000 86%)}
+
+/* ============================================================
+   v1.12 — LEITURA CONFORTÁVEL nas páginas internas das ferramentas
+   (equipe com astigmatismo/miopia: fontes maiores, sem cinza-claro)
+   ============================================================ */
+:root{--texto-suave:rgba(32,42,58,.76)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){--texto-suave:rgba(242,240,236,.78)} }
+:root[data-theme="dark"]{--texto-suave:rgba(242,240,236,.78)}
+
+/* cabeçalho e entrada das ferramentas */
+.ferramenta-cab .desc{font-size:16px;line-height:1.6;color:var(--texto-suave)}
+.voltar{font-size:13px}
+.col-entrada textarea{font-size:16px;line-height:1.65}
+.nota-ia{font-size:13.5px}
+.aviso{font-size:14.5px;line-height:1.55}
+
+/* painel de resultado (área de leitura) */
+.painel .saida{font-size:17px;line-height:1.8}
+.painel-cab{font-size:12.5px}
+.btn-copiar{font-size:12px}
+.assinatura{font-size:12.5px}
+
+/* anexos */
+.anexo-dica{font-size:13.5px}
+.anexo-item{font-size:14px}
+.cont-anexos{font-size:12.5px}
+
+/* Cláusulas CN2O */
+.clausula b{font-size:15.5px}
+.clausula small{font-size:13.5px;line-height:1.5;color:var(--texto-suave)}
+
+/* subpáginas do mural (avisos abertos, aniversariantes, metas) */
+.sub-texto{font-size:16.5px;line-height:1.7}
+.sub-texto.rico{font-size:16.5px}
+.sub-data{font-size:13.5px}
+.sub-assina{font-size:14px}
+
+/* botões um ponto acima, sem mudar o desenho */
+.btn-vinho{font-size:13px}
+.btn-fantasma{font-size:12.5px}
+.btn-mini{font-size:11.5px}
+
+/* v1.12 — Gerador PROC / UE: termo de ciência */
+.termos-minutas{display:flex;flex-direction:column;gap:12px;padding:18px 22px}
+.termo-check{display:flex;gap:12px;align-items:flex-start;font-size:15.5px;line-height:1.55;color:var(--leitura-texto);cursor:pointer}
+.termo-check input{width:19px;height:19px;flex:none;margin-top:2px;accent-color:var(--vinho)}
+#paginaMinutas .col-entrada textarea{min-height:180px}
+#paginaMinutas .linha-botoes{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 
 </style>
 </head>
@@ -1187,9 +1235,9 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
           </button>
           <button class="card card-breve" id="cardMinutas" type="button">
             <div class="card-topo"><span class="card-num">05</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L9 18l-4 1z"/><path d="M14 7l3 3"/></svg></span><span class="chip-ia">IA</span></div>
-            <h3>Gerador de Minutas</h3>
-            <p>Descreva o ato e receba a minuta no padrão CN2O, pronta para revisar. O Tabelião está calibrando o modelo.</p>
-            <span class="card-acao">Em preparação →</span>
+            <h3>Gerador PROC / UE</h3>
+            <p>Minuta somente procurações, em suas diversas variáveis, e escrituras de união estável, em suas variações. Apenas isso.</p>
+            <span class="card-acao">Abrir aqui →</span>
           </button>
           <button class="card" id="cardClausulas" type="button">
             <div class="card-topo"><span class="card-num">06</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h10v18l-5-3.5L7 21z"/></svg></span><span class="chip-ia chip-guia">Guia</span></div>
@@ -1269,6 +1317,32 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
     </div>
 
     <!-- ===== VIEW: EXTRATOR ===== -->
+    <div id="paginaMinutas" hidden style="display:flex;flex-direction:column;gap:14px">
+      <button class="voltar" data-voltar type="button">← Voltar ao hub</button>
+      <div class="ferramenta-cab">
+        <span class="num-grande">05</span>
+        <div style="flex:1;min-width:240px">
+          <h2>Gerador PROC / UE</h2>
+          <p class="desc">Esta ferramenta destina-se <b>exclusivamente</b> à minuta de <b>procurações</b>, em suas diversas variáveis, e de <b>escrituras de união estável</b>, em suas variações. Nenhum outro ato deve ser minutado por aqui.</p>
+        </div>
+        <span class="chip-ia">IA</span>
+      </div>
+      <div class="painel termos-minutas" style="border-radius:12px">
+        <p class="painel-cab versalete" style="margin-bottom:12px">Termo de ciência do escrevente</p>
+        <label class="ed-check termo-check"><input type="checkbox" id="minCiente1">
+          <span>Estou ciente de que o Gerador PROC / UE serve <b>somente</b> para minutar procurações (em suas diversas variáveis) e escrituras de união estável (em suas variações).</span></label>
+        <label class="ed-check termo-check"><input type="checkbox" id="minCiente2">
+          <span>Estou ciente de que a <b>inobservância dessa regra pode implicar responsabilidade disciplinar</b>.</span></label>
+      </div>
+      <div class="col-entrada">
+        <label class="rotulo versalete" for="minPedido">Descreva a procuração ou a união estável</label>
+        <textarea id="minPedido" disabled placeholder="Em preparação — o Tabelião está calibrando o modelo. Os termos acima já valem para o uso."></textarea>
+        <div class="linha-botoes">
+          <button class="btn-vinho" id="btnGerarMinuta" type="button" disabled>Gerar minuta</button>
+          <span class="nota-ia" id="minNota">Marque as duas caixas de ciência para liberar o botão.</span>
+        </div>
+      </div>
+    </div>
     <div id="paginaExtrator" hidden style="display:flex;flex-direction:column;gap:14px">
       <button class="voltar" data-voltar type="button">← Voltar ao hub</button>
       <div class="ferramenta-cab">
@@ -1504,7 +1578,7 @@ const CONFIG = {
   endpoint: 'https://cn2o-hub-backend-production.up.railway.app',
   ferramentas: {
     protocolo:   { url: 'protocolo.html',   titulo: 'e-Protocolo' },
-    calculadora: { url: 'https://vocal-kulfi-10c287.netlify.app', titulo: 'Calculadora de Emolumentos' }, // site próprio, sempre na versão atual
+    calculadora: { url: 'calculadora.html', titulo: 'Calculadora de Emolumentos' }, // site próprio, sempre na versão atual
     agenda:      { // Google Agenda do Tabelião (tnitabaiana@gmail.com), embutida no hub
       url: 'https://calendar.google.com/calendar/embed?src=tnitabaiana%40gmail.com&ctz=America%2FMaceio&hl=pt_BR&mode=WEEK&showTitle=0&showPrint=0&showCalendars=0&showTz=0&wkst=1',
       abrir: 'https://calendar.google.com/calendar/u/0?cid=dG5pdGFiYWlhbmFAZ21haWwuY29t',
@@ -1785,8 +1859,8 @@ function primeiroNome(n) {
 /* ============================================================
    NAVEGAÇÃO (com botão Voltar do navegador e atalhos #protocolo etc.)
 ============================================================ */
-const PAGINAS = ['paginaHub', 'paginaExtrator', 'paginaAnalisador', 'paginaEmbutida'];
-const ROTAS = { extrator: 'paginaExtrator', analista: 'paginaAnalisador', protocolo: 'protocolo', calculadora: 'calculadora', agenda: 'agenda' };
+const PAGINAS = ['paginaHub', 'paginaExtrator', 'paginaAnalisador', 'paginaMinutas', 'paginaEmbutida'];
+const ROTAS = { extrator: 'paginaExtrator', analista: 'paginaAnalisador', minutas: 'paginaMinutas', protocolo: 'protocolo', calculadora: 'calculadora', agenda: 'agenda' };
 function mostrarPagina(id, semHistorico, rota) {
   PAGINAS.forEach(function (p) { el(p).hidden = (p !== id); });
   el('wrapPrincipal').classList.toggle('largo', id === 'paginaEmbutida');
@@ -1840,9 +1914,22 @@ function abrirEmbutida(chave, semHistorico) {
   mostrarPagina('paginaEmbutida', semHistorico, chave);
 }
 function aplicarLinks() {
-  el('cardMinutas').addEventListener('click', function () {
-    toast('O Gerador de Minutas está em preparação pelo Tabelião — em breve aqui no Hub.');
-  });
+  el('cardMinutas').addEventListener('click', function () { mostrarPagina('paginaMinutas', false, 'minutas'); });
+  (function () {
+    const c1 = el('minCiente1'), c2 = el('minCiente2'), btn = el('btnGerarMinuta'), nota = el('minNota');
+    function rever() {
+      const ok = c1.checked && c2.checked;
+      btn.disabled = !ok;
+      nota.textContent = ok
+        ? 'Ciência registrada. O motor está em preparação pelo Tabelião — em breve, gera aqui mesmo.'
+        : 'Marque as duas caixas de ciência para liberar o botão.';
+    }
+    c1.addEventListener('change', rever); c2.addEventListener('change', rever);
+    btn.addEventListener('click', function () {
+      toast('O motor do Gerador PROC / UE está em preparação pelo Tabelião — em breve aqui no Hub.');
+    });
+    rever();
+  })();
 }
 
 /* ============================================================

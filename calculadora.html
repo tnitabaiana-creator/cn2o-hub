@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Terras Rurais — CN2O Itabaiana/SE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --vinho:#631325;
+    --vinho-escuro:#470c1a;
+    --marinho:#202a3a;
+    --ouro:#b98a3e;
+    --papel:#f7f5f2;
+    --branco:#ffffff;
+    --texto:#2c2c30;
+    --texto-suave:#6b6560;
+    --linha:#e4ded6;
+    --ok:#2e6b45;
+    --raio:10px;
+    --sombra:0 10px 30px rgba(32,42,58,.10);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  @media (prefers-reduced-motion: reduce){html{scroll-behavior:auto} *{transition:none!important;animation:none!important}}
+  body{
+    font-family:'Lato',sans-serif;
+    background:var(--papel);
+    color:var(--texto);
+    line-height:1.55;
+    min-height:100vh;
+  }
+  .display{font-family:'Ambient','Archivo',sans-serif;font-weight:800;letter-spacing:.2px}
+
+  /* ---------- Cabeçalho com topografia serrana ---------- */
+  header{
+    position:relative;
+    background:linear-gradient(150deg,var(--vinho) 0%,var(--vinho-escuro) 100%);
+    color:var(--branco);
+    padding:44px 20px 120px;
+    overflow:hidden;
+  }
+  header svg.topo{
+    position:absolute;inset:0;width:100%;height:100%;
+    opacity:.14;pointer-events:none;
+  }
+  .header-inner{position:relative;max-width:980px;margin:0 auto}
+  .eyebrow{
+    display:inline-block;
+    font-size:.72rem;font-weight:700;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--ouro);
+    border:1px solid rgba(185,138,62,.55);
+    padding:6px 14px;border-radius:999px;
+    margin-bottom:18px;
+  }
+  header h1{font-size:clamp(1.7rem,4.2vw,2.7rem);line-height:1.12;max-width:640px}
+  header p.sub{margin-top:12px;max-width:560px;color:rgba(255,255,255,.82);font-size:1rem}
+  .fonte-chip{
+    margin-top:18px;display:inline-flex;align-items:center;gap:8px;
+    font-size:.8rem;color:rgba(255,255,255,.75);
+  }
+  .fonte-chip b{color:var(--branco);font-weight:700}
+
+  /* ---------- Cartão principal ---------- */
+  main{max-width:980px;margin:-78px auto 0;padding:0 20px 60px;position:relative}
+  .card{
+    background:var(--branco);
+    border-radius:var(--raio);
+    box-shadow:var(--sombra);
+    border:1px solid var(--linha);
+    padding:32px clamp(20px,4vw,40px);
+  }
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px}
+  @media(max-width:720px){.grid{grid-template-columns:1fr}}
+  .campo{display:flex;flex-direction:column;gap:7px}
+  .campo label{font-size:.78rem;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--marinho)}
+  .campo .hint{font-size:.78rem;color:var(--texto-suave);font-weight:400;letter-spacing:0;text-transform:none}
+  select,input[type=text],input[type=number]{
+    font-family:'Lato',sans-serif;font-size:1rem;color:var(--texto);
+    padding:12px 14px;border:1.5px solid var(--linha);border-radius:8px;
+    background:var(--papel);width:100%;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  select:focus,input:focus{outline:none;border-color:var(--vinho);box-shadow:0 0 0 3px rgba(99,19,37,.14)}
+
+  /* Segmentado de unidade */
+  .segmento{display:flex;border:1.5px solid var(--linha);border-radius:8px;overflow:hidden;background:var(--papel)}
+  .segmento button{
+    flex:1;padding:11px 6px;border:none;background:transparent;cursor:pointer;
+    font-family:'Lato',sans-serif;font-size:.92rem;font-weight:700;color:var(--texto-suave);
+    transition:background .15s,color .15s;
+  }
+  .segmento button + button{border-left:1.5px solid var(--linha)}
+  .segmento button[aria-pressed="true"]{background:var(--vinho);color:var(--branco)}
+  .segmento button:focus-visible{outline:3px solid rgba(99,19,37,.35);outline-offset:-3px}
+
+  .tipos{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  @media(max-width:560px){.tipos{grid-template-columns:1fr}}
+  .tipo-btn{
+    text-align:left;padding:13px 14px;border:1.5px solid var(--linha);border-radius:8px;
+    background:var(--papel);cursor:pointer;font-family:'Lato',sans-serif;
+    transition:border-color .15s, background .15s;
+  }
+  .tipo-btn b{display:block;font-size:.95rem;color:var(--marinho)}
+  .tipo-btn span{font-size:.76rem;color:var(--texto-suave);display:block;margin-top:2px;line-height:1.35}
+  .tipo-btn[aria-pressed="true"]{border-color:var(--vinho);background:#faf3f4}
+  .tipo-btn[aria-pressed="true"] b{color:var(--vinho)}
+  .tipo-btn:focus-visible{outline:3px solid rgba(99,19,37,.35);outline-offset:2px}
+
+  /* ---------- Resultado ---------- */
+  .resultado{
+    margin-top:28px;border-radius:var(--raio);
+    background:var(--marinho);color:var(--branco);
+    padding:26px clamp(18px,3.5vw,32px);
+    display:none;
+  }
+  .resultado.ativo{display:block;animation:surgir .3s ease}
+  @keyframes surgir{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+  .res-topo{display:flex;flex-wrap:wrap;justify-content:space-between;gap:14px;align-items:flex-end;border-bottom:1px solid rgba(255,255,255,.16);padding-bottom:18px}
+  .res-topo .rotulo{font-size:.72rem;letter-spacing:.16em;text-transform:uppercase;color:var(--ouro);font-weight:700}
+  .res-valor{font-size:clamp(1.8rem,4.5vw,2.6rem);font-family:'Ambient','Archivo',sans-serif;font-weight:800;line-height:1.1}
+  .res-meta{font-size:.85rem;color:rgba(255,255,255,.72)}
+  .conversoes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:20px}
+  @media(max-width:560px){.conversoes{grid-template-columns:1fr}}
+  .conv{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:12px 14px}
+  .conv .u{font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(255,255,255,.6);font-weight:700}
+  .conv .v{font-size:1.15rem;font-weight:700;margin-top:2px}
+  .res-refs{margin-top:18px;font-size:.86rem;color:rgba(255,255,255,.78);display:flex;flex-direction:column;gap:4px}
+  .res-refs b{color:var(--branco)}
+  .acoes{margin-top:22px;display:flex;flex-wrap:wrap;gap:12px}
+  .btn{
+    font-family:'Lato',sans-serif;font-weight:700;font-size:.95rem;
+    padding:12px 22px;border-radius:8px;cursor:pointer;border:1.5px solid transparent;
+    transition:transform .12s, background .15s;
+  }
+  .btn:active{transform:scale(.98)}
+  .btn-ouro{background:var(--ouro);color:#231603}
+  .btn-ouro:hover{background:#caa055}
+  .btn-fantasma{background:transparent;color:var(--branco);border-color:rgba(255,255,255,.4)}
+  .btn-fantasma:hover{border-color:var(--branco)}
+  .btn:focus-visible{outline:3px solid rgba(185,138,62,.6);outline-offset:2px}
+  .copiado{color:#8fd6a8;font-size:.85rem;font-weight:700;align-self:center;display:none}
+  .copiado.mostrar{display:inline}
+
+  /* ---------- Referência do município ---------- */
+  .referencia{margin-top:28px;display:none}
+  .referencia.ativo{display:block}
+  .referencia h2{font-size:1.05rem;color:var(--marinho);margin-bottom:4px;font-family:'Ambient','Archivo',sans-serif;font-weight:700}
+  .referencia p.leg{font-size:.82rem;color:var(--texto-suave);margin-bottom:12px}
+  table{width:100%;border-collapse:collapse;font-size:.92rem}
+  th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--linha)}
+  th{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--texto-suave)}
+  td.num{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;color:var(--marinho)}
+  tr td:first-child b{color:var(--vinho)}
+
+  /* ---------- Conceitos / rodapé ---------- */
+  .conceitos{max-width:980px;margin:34px auto 0;padding:0 20px;display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+  @media(max-width:720px){.conceitos{grid-template-columns:1fr}}
+  .conceito{background:var(--branco);border:1px solid var(--linha);border-radius:var(--raio);padding:18px 20px}
+  .conceito h3{font-size:.9rem;color:var(--vinho);margin-bottom:6px;font-family:'Ambient','Archivo',sans-serif}
+  .conceito p{font-size:.84rem;color:var(--texto-suave)}
+  footer{
+    margin-top:48px;background:var(--marinho);color:rgba(255,255,255,.75);
+    padding:26px 20px;font-size:.83rem;text-align:center;line-height:1.7;
+  }
+  footer b{color:var(--branco)}
+  footer .tarefa-nota{color:var(--ouro);font-weight:700}
+</style>
+<style id="harmonia-v112">
+/* ===== v1.12 · Harmonia com o Hub CN2O — leitura e sobriedade ===== */
+:root{--papel:#f7f4ef;--texto-suave:#4c5568;--raio:12px}
+body{color:#232a35}
+header{background:linear-gradient(92deg,#631325 0%,#43192a 52%,#202a3a 100%);padding:30px 20px 92px}
+header h1{font-size:clamp(1.55rem,3.6vw,2.25rem)}
+header p.sub{font-size:1.02rem;color:rgba(255,255,255,.9)}
+.fonte-chip{font-size:.86rem;color:rgba(255,255,255,.84)}
+main{margin-top:-62px}
+.card{border-radius:14px}
+.campo label{font-size:.9rem}
+.campo .hint{font-size:.86rem;color:#4c5568}
+.card input,.card select{font-size:1.06rem}
+.segmento button{font-size:1rem}
+.card table{font-size:.98rem}
+.card th,.card td{padding:10px 12px}
+.res-topo .rotulo{font-size:.8rem}
+.res-meta{font-size:.95rem;color:rgba(255,255,255,.86)}
+.res-refs{font-size:.95rem;color:rgba(255,255,255,.86)}
+footer,.rodape{font-size:.9rem}
+</style>
+</head>
+<body>
+
+<header>
+  <!-- Linhas topográficas da serra de Itabaiana (assinatura da marca CN2O) -->
+  <svg class="topo" viewBox="0 0 1200 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <g fill="none" stroke="#ffffff" stroke-width="1.4">
+      <path d="M-20,340 C180,300 260,360 430,320 C600,280 700,340 880,300 C1040,265 1120,320 1220,290"/>
+      <path d="M-20,300 C160,255 280,315 450,272 C620,230 720,295 900,252 C1050,218 1130,270 1220,240"/>
+      <path d="M-20,258 C150,210 300,268 470,224 C640,180 740,248 920,204 C1060,170 1140,220 1220,190"/>
+      <path d="M-20,214 C140,165 320,222 490,176 C660,132 760,200 940,156 C1070,124 1150,170 1220,142"/>
+      <path d="M-20,170 C130,120 340,176 510,130 C680,86 780,152 960,108 C1080,78 1160,120 1220,94"/>
+      <path d="M-20,126 C120,78 360,130 530,86 C700,42 800,106 980,62 C1090,34 1170,72 1220,48"/>
+    </g>
+  </svg>
+  <div class="header-inner">
+    <span class="eyebrow">Cartório de Notas do 2º Ofício · Itabaiana/SE</span>
+    <h1 class="display">Calculadora de Terras Rurais</h1>
+    <p class="sub">Conversão de tarefas, hectares e metros quadrados com avaliação por município, conforme os preços de terra da Emdagro para Sergipe.</p>
+    <div class="fonte-chip">Fonte: <b>EMDAGRO/ASPLAN — Preços de Terra em Sergipe 2026/2027</b></div>
+  </div>
+</header>
+
+<main>
+  <div class="card">
+    <div class="campo">
+      <label for="municipio">Município</label>
+      <select id="municipio"></select>
+    </div>
+
+    <div class="campo" style="margin-top:22px">
+      <label>Tipo de terra <span class="hint">— conforme conceitos da Emdagro</span></label>
+      <div class="tipos" role="group" aria-label="Tipo de terra">
+        <button type="button" class="tipo-btn" data-tipo="lavouras" aria-pressed="false">
+          <b>Lavouras</b><span>Terras próprias à plantação (culturas permanentes e temporárias)</span>
+        </button>
+        <button type="button" class="tipo-btn" data-tipo="pastagens" aria-pressed="false">
+          <b>Pastagens</b><span>Terras recobertas por gramíneas cultivadas palatáveis</span>
+        </button>
+        <button type="button" class="tipo-btn" data-tipo="terraNua" aria-pressed="true">
+          <b>Terra Nua</b><span>Solo com vegetação natural, excluídas benfeitorias e culturas</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="grid" style="margin-top:22px">
+      <div class="campo">
+        <label for="area">Área do imóvel</label>
+        <input type="text" id="area" inputmode="decimal" placeholder="Ex.: 12,5" autocomplete="off">
+      </div>
+      <div class="campo">
+        <label>Unidade informada</label>
+        <div class="segmento" role="group" aria-label="Unidade de área">
+          <button type="button" data-unidade="tarefas" aria-pressed="true">Tarefas</button>
+          <button type="button" data-unidade="hectares" aria-pressed="false">Hectares</button>
+          <button type="button" data-unidade="m2" aria-pressed="false">m²</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resultado -->
+    <section class="resultado" id="resultado" aria-live="polite">
+      <div class="res-topo">
+        <div>
+          <div class="rotulo">Valor estimado do imóvel</div>
+          <div class="res-valor" id="resValor">—</div>
+        </div>
+        <div class="res-meta" id="resMeta"></div>
+      </div>
+      <div class="conversoes">
+        <div class="conv"><div class="u">Tarefas</div><div class="v" id="convTar">—</div></div>
+        <div class="conv"><div class="u">Hectares</div><div class="v" id="convHa">—</div></div>
+        <div class="conv"><div class="u">Metros quadrados</div><div class="v" id="convM2">—</div></div>
+      </div>
+      <div class="res-refs">
+        <span>Valor de referência: <b id="refHa">—</b> por hectare · <b id="refTar">—</b> por tarefa</span>
+        <span>Tarefa sergipana adotada: <b>3.052 m² (0,3052 ha)</b></span>
+      </div>
+      <div class="acoes">
+        <button type="button" class="btn btn-ouro" id="btnCopiar">Copiar resultado para a escritura</button>
+        <button type="button" class="btn btn-fantasma" id="btnLimpar">Limpar</button>
+        <span class="copiado" id="msgCopiado">✓ Copiado</span>
+      </div>
+    </section>
+
+    <!-- Referência do município -->
+    <section class="referencia ativo" id="referencia">
+      <h2 id="refTitulo">Tabela de referência</h2>
+      <p class="leg">Valores de venda de terra agrícola no município selecionado (R$/ha e equivalente por tarefa).</p>
+      <table>
+        <thead>
+          <tr><th>Tipo de terra</th><th style="text-align:right">R$ / hectare</th><th style="text-align:right">R$ / tarefa</th></tr>
+        </thead>
+        <tbody id="refCorpo"></tbody>
+      </table>
+    </section>
+  </div>
+</main>
+
+<div class="conceitos">
+  <div class="conceito"><h3>Lavouras</h3><p>Terras próprias à plantação — culturas permanentes e temporárias.</p></div>
+  <div class="conceito"><h3>Pastagens</h3><p>Terras recobertas por gramíneas cultivadas palatáveis, de boa aceitação pelo gado.</p></div>
+  <div class="conceito"><h3>Terra Nua</h3><p>Solo com vegetação natural ou pastagem nativa, excluídos os valores de construções, instalações, benfeitorias, culturas e florestas plantadas.</p></div>
+</div>
+
+<footer>
+  <b>Cartório de Notas do 2º Ofício de Itabaiana/SE</b> · Avenida Ivo de Carvalho, nº 441<br>
+  Fonte dos valores: EMDAGRO/ASPLAN — Preços de Terra em Sergipe 2026/2027 · Uso interno (equipe de escreventes)<br>
+  <span class="tarefa-nota">1 tarefa sergipana = 3.052 m² = 0,3052 ha</span>
+</footer>
+
+<script>
+/* ========= Tabela Emdagro 2026/2027 — Venda de terra agrícola (R$/ha) ========= */
+const DADOS = {
+  "Território Sul Sergipano": {
+    "Arauá":{lavouras:37400,pastagens:27000,terraNua:25000},
+    "Boquim":{lavouras:71800,pastagens:43500,terraNua:30300},
+    "Cristinápolis":{lavouras:51200,pastagens:38400,terraNua:26600},
+    "Estância":{lavouras:39000,pastagens:23000,terraNua:15000},
+    "Indiaroba":{lavouras:43000,pastagens:25000,terraNua:15000},
+    "Itabaianinha":{lavouras:60500,pastagens:33000,terraNua:19800},
+    "Pedrinhas":{lavouras:73000,pastagens:41750,terraNua:30150},
+    "Salgado":{lavouras:60000,pastagens:40000,terraNua:22000},
+    "Santa Luzia do Itanhy":{lavouras:32000,pastagens:22300,terraNua:15000},
+    "Tomar do Geru":{lavouras:35000,pastagens:28500,terraNua:25000},
+    "Umbaúba":{lavouras:38000,pastagens:29500,terraNua:26000}
+  },
+  "Território Médio Sertão": {
+    "Aquidabã":{lavouras:28400,pastagens:26400,terraNua:26100},
+    "Cumbe":{lavouras:28300,pastagens:20260,terraNua:19600},
+    "Feira Nova":{lavouras:30000,pastagens:26000,terraNua:25000},
+    "Graccho Cardoso":{lavouras:34850,pastagens:30300,terraNua:26400},
+    "Itabí":{lavouras:19000,pastagens:16000,terraNua:12500},
+    "Nossa Senhora das Dores":{lavouras:27850,pastagens:21450,terraNua:12210}
+  },
+  "Território Leste Sergipano": {
+    "Capela":{lavouras:36275,pastagens:32275,terraNua:24272.50},
+    "Carmópolis":{lavouras:35000,pastagens:33000,terraNua:30000},
+    "Divina Pastora":{lavouras:39600,pastagens:34500,terraNua:28200},
+    "General Maynard":{lavouras:33000,pastagens:32000,terraNua:29000},
+    "Japaratuba":{lavouras:35350,pastagens:32350,terraNua:26400},
+    "Pirambú":{lavouras:33000,pastagens:32000,terraNua:25000},
+    "Rosário do Catete":{lavouras:36000,pastagens:33000,terraNua:26100},
+    "Santa Rosa de Lima":{lavouras:30000,pastagens:25000,terraNua:21000},
+    "Siriri":{lavouras:26600,pastagens:23565,terraNua:21200}
+  },
+  "Território Centro Sul": {
+    "Lagarto":{lavouras:56500,pastagens:31000,terraNua:19250},
+    "Poço Verde":{lavouras:56000,pastagens:26000,terraNua:23100},
+    "Riachão do Dantas":{lavouras:55000,pastagens:30000,terraNua:27000},
+    "Simão Dias":{lavouras:60000,pastagens:29000,terraNua:25000},
+    "Tobias Barreto":{lavouras:29850,pastagens:23150,terraNua:18000}
+  },
+  "Território Baixo São Francisco": {
+    "Amparo do São Francisco":{lavouras:27500,pastagens:24420,terraNua:20625},
+    "Brejo Grande":{lavouras:16700,pastagens:12000,terraNua:7920},
+    "Canhoba":{lavouras:28000,pastagens:24420,terraNua:20625},
+    "Cedro de São João":{lavouras:39600,pastagens:36600,terraNua:25700},
+    "Ilha das Flores":{lavouras:18000,pastagens:15000,terraNua:7260},
+    "Japoatã":{lavouras:27000,pastagens:24750,terraNua:14600},
+    "Malhada dos Bois":{lavouras:30000,pastagens:28070,terraNua:23265},
+    "Muribeca":{lavouras:25500,pastagens:21400,terraNua:13250},
+    "Neópolis":{lavouras:18000,pastagens:15000,terraNua:8250},
+    "Pacatuba":{lavouras:15200,pastagens:10000,terraNua:6600},
+    "Propriá":{lavouras:30000,pastagens:28050,terraNua:23935},
+    "Santana do São Francisco":{lavouras:17300,pastagens:12000,terraNua:9590},
+    "São Francisco":{lavouras:29800,pastagens:27635,terraNua:23100},
+    "Telha":{lavouras:25500,pastagens:23100,terraNua:18150}
+  },
+  "Território Agreste Sergipano": {
+    "Areia Branca":{lavouras:77500,pastagens:72500,terraNua:40000},
+    "Campo do Brito":{lavouras:66500,pastagens:57000,terraNua:35750},
+    "Carira":{lavouras:59400,pastagens:58100,terraNua:56100},
+    "Frei Paulo":{lavouras:45000,pastagens:41000,terraNua:20000},
+    "Itabaiana":{lavouras:75000,pastagens:65000,terraNua:40000},
+    "Macambira":{lavouras:60000,pastagens:55000,terraNua:32000},
+    "Malhador":{lavouras:76500,pastagens:70000,terraNua:69000},
+    "Moita Bonita":{lavouras:71000,pastagens:66000,terraNua:49500},
+    "Nossa Senhora Aparecida":{lavouras:49500,pastagens:46000,terraNua:39600},
+    "Pedra Mole":{lavouras:46000,pastagens:45000,terraNua:20000},
+    "Pinhão":{lavouras:45000,pastagens:41100,terraNua:20000},
+    "Ribeirópolis":{lavouras:49500,pastagens:47500,terraNua:33000},
+    "São Domingos":{lavouras:42250,pastagens:33125,terraNua:16250},
+    "São Miguel do Aleixo":{lavouras:42900,pastagens:38900,terraNua:26400}
+  },
+  "Território Alto Sertão": {
+    "Canindé de São Francisco":{lavouras:18737,pastagens:6600,terraNua:6287},
+    "Gararu":{lavouras:17000,pastagens:13000,terraNua:11000},
+    "Monte Alegre de Sergipe":{lavouras:23000,pastagens:19000,terraNua:17000},
+    "Nossa Senhora da Glória":{lavouras:30000,pastagens:25000,terraNua:21000},
+    "Nossa Senhora de Lourdes":{lavouras:19000,pastagens:16000,terraNua:13000},
+    "Poço Redondo":{lavouras:13400,pastagens:6050,terraNua:4500},
+    "Porto da Folha":{lavouras:18000,pastagens:15000,terraNua:12000}
+  },
+  "Território Grande Aracaju": {
+    "Barra dos Coqueiros":{lavouras:73100,pastagens:61300,terraNua:59400},
+    "Itaporanga d'Ajuda":{lavouras:37000,pastagens:32500,terraNua:25000},
+    "Laranjeiras":{lavouras:49500,pastagens:39600,terraNua:35000},
+    "Maruim":{lavouras:39600,pastagens:38000,terraNua:32000},
+    "Nossa Senhora do Socorro":{lavouras:60700,pastagens:46000,terraNua:42500},
+    "Riachuelo":{lavouras:40000,pastagens:30000,terraNua:23100},
+    "Santo Amaro das Brotas":{lavouras:34000,pastagens:29700,terraNua:25100},
+    "São Cristóvão":{lavouras:35000,pastagens:25000,terraNua:20000}
+  }
+};
+
+/* ========= Constantes de conversão ========= */
+const TAREFA_M2 = 3052;         // 1 tarefa sergipana = 3.052 m²
+const TAREFA_HA = 0.3052;       // = 0,3052 ha
+const NOMES_TIPO = {lavouras:"Lavouras", pastagens:"Pastagens", terraNua:"Terra Nua"};
+
+/* ========= Estado ========= */
+let estado = { municipio:null, tipo:"terraNua", unidade:"tarefas", area:null };
+
+/* ========= Formatação pt-BR ========= */
+const fmtBRL = v => v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const fmtNum = (v,dec=4) => v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:dec});
+
+/* ========= Elementos ========= */
+const selMun  = document.getElementById('municipio');
+const inpArea = document.getElementById('area');
+const resSec  = document.getElementById('resultado');
+
+/* ========= Lista única de municípios (ordem alfabética) ========= */
+const MUNICIPIOS = {};
+Object.values(DADOS).forEach(grupo=>Object.assign(MUNICIPIOS,grupo));
+Object.keys(MUNICIPIOS).sort((a,b)=>a.localeCompare(b,'pt-BR')).forEach(m=>{
+  const o=document.createElement('option');o.value=m;o.textContent=m;selMun.appendChild(o);
+});
+/* Padrão: Itabaiana */
+selMun.value="Itabaiana";
+estado.municipio=selMun.value;
+
+selMun.addEventListener('change',()=>{estado.municipio=selMun.value;atualizar()});
+
+/* ========= Tipo de terra ========= */
+document.querySelectorAll('.tipo-btn').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.tipo-btn').forEach(x=>x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+    estado.tipo=b.dataset.tipo;
+    atualizar();
+  });
+});
+
+/* ========= Unidade ========= */
+document.querySelectorAll('.segmento button').forEach(b=>{
+  b.addEventListener('click',()=>{
+    document.querySelectorAll('.segmento button').forEach(x=>x.setAttribute('aria-pressed','false'));
+    b.setAttribute('aria-pressed','true');
+    estado.unidade=b.dataset.unidade;
+    atualizar();
+  });
+});
+
+/* ========= Área (aceita vírgula) ========= */
+inpArea.addEventListener('input',()=>{
+  const bruto=inpArea.value.replace(/\./g,'').replace(',','.');
+  const n=parseFloat(bruto);
+  estado.area=(isFinite(n)&&n>0)?n:null;
+  atualizar();
+});
+
+/* ========= Cálculo e renderização ========= */
+function conversoes(area,unidade){
+  let ha;
+  if(unidade==='tarefas') ha=area*TAREFA_HA;
+  else if(unidade==='hectares') ha=area;
+  else ha=area/10000;
+  return { ha, tarefas: ha/TAREFA_HA, m2: ha*10000 };
+}
+
+let ultimoTexto='';
+
+function atualizar(){
+  const dadosMun = MUNICIPIOS[estado.municipio];
+  renderReferencia(dadosMun);
+
+  if(!dadosMun || estado.area===null){ resSec.classList.remove('ativo'); return; }
+
+  const precoHa = dadosMun[estado.tipo];
+  if(precoHa==null){ resSec.classList.remove('ativo'); return; } // "..." — dado indisponível
+
+  const c = conversoes(estado.area, estado.unidade);
+  const valor = c.ha * precoHa;
+  const precoTarefa = precoHa * TAREFA_HA;
+
+  document.getElementById('resValor').textContent = fmtBRL(valor);
+  document.getElementById('resMeta').textContent =
+    `${estado.municipio}/SE · ${NOMES_TIPO[estado.tipo]}`;
+  document.getElementById('convTar').textContent = fmtNum(c.tarefas,4)+' tar.';
+  document.getElementById('convHa').textContent  = fmtNum(c.ha,4)+' ha';
+  document.getElementById('convM2').textContent  = fmtNum(c.m2,0)+' m²';
+  document.getElementById('refHa').textContent   = fmtBRL(precoHa);
+  document.getElementById('refTar').textContent  = fmtBRL(precoTarefa);
+
+  ultimoTexto =
+`Avaliação de imóvel rural — Tabela EMDAGRO/ASPLAN 2026/2027
+Município: ${estado.municipio}/SE
+Tipo de terra: ${NOMES_TIPO[estado.tipo]} — ${fmtBRL(precoHa)}/ha (${fmtBRL(precoTarefa)}/tarefa)
+Área: ${fmtNum(c.tarefas,4)} tarefas | ${fmtNum(c.ha,4)} ha | ${fmtNum(c.m2,0)} m²
+(1 tarefa sergipana = 3.052 m² = 0,3052 ha)
+VALOR ESTIMADO: ${fmtBRL(valor)}`;
+
+  resSec.classList.add('ativo');
+}
+
+function renderReferencia(dadosMun){
+  const sec=document.getElementById('referencia');
+  if(!dadosMun){sec.classList.remove('ativo');return}
+  sec.classList.add('ativo');
+  document.getElementById('refTitulo').textContent =
+    `Tabela de referência — ${estado.municipio}/SE`;
+  const corpo=document.getElementById('refCorpo');
+  corpo.innerHTML='';
+  ['lavouras','pastagens','terraNua'].forEach(t=>{
+    const v=dadosMun[t];
+    const tr=document.createElement('tr');
+    const marca = t===estado.tipo ? '<b>▸</b> ' : '';
+    tr.innerHTML =
+      `<td>${marca}${NOMES_TIPO[t]}</td>
+       <td class="num">${v==null?'— sem dados':fmtBRL(v)}</td>
+       <td class="num">${v==null?'—':fmtBRL(v*TAREFA_HA)}</td>`;
+    corpo.appendChild(tr);
+  });
+}
+
+/* ========= Copiar / limpar ========= */
+document.getElementById('btnCopiar').addEventListener('click',async()=>{
+  if(!ultimoTexto)return;
+  try{ await navigator.clipboard.writeText(ultimoTexto); }
+  catch(e){
+    const ta=document.createElement('textarea');ta.value=ultimoTexto;
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');ta.remove();
+  }
+  const msg=document.getElementById('msgCopiado');
+  msg.classList.add('mostrar');
+  setTimeout(()=>msg.classList.remove('mostrar'),2200);
+});
+document.getElementById('btnLimpar').addEventListener('click',()=>{
+  inpArea.value='';estado.area=null;atualizar();inpArea.focus();
+});
+
+/* Render inicial da referência */
+atualizar();
+</script>
+</body>
+</html>
