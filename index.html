@@ -3611,7 +3611,9 @@ function montarFerramenta(cfg) {
       clearInterval(relogio);
       if (e && e.cancelado) voltarVazio('Interrompido.');
       else if (e.status === 401) voltarVazio('Sua sessão expirou — entre de novo e repita a análise.');
+      else if (e.status === 429 && e.dados && e.dados.motivo === 'cota') voltarVazio('A cota de IA da serventia se esgotou por ora.\n\nTente de novo em alguns minutos; se persistir, avise o Tabelião. Seus anexos continuam aqui.');
       else if (e.status === 429) voltarVazio('Muitas análises seguidas. Aguarde ' + Math.ceil(((e.dados && e.dados.tente_em_s) || 60) / 60) + ' min e tente de novo.');
+      else if (e.status === 503 && e.dados && e.dados.motivo === 'congestionado') voltarVazio('O provedor da IA está congestionado neste momento (pico de uso) — não é problema do seu documento.\n\nAguarde uns 20 segundos e clique de novo: seus anexos continuam aqui.');
       else if (e.status === 503) voltarVazio('A IA ainda não foi ligada no servidor — avise o Tabelião.');
       else if (e.status === 404) voltarVazio('Esta ferramenta ainda está sendo implantada no servidor — tente daqui a pouco.');
       else if (e.status === 400 || e.status === 413) voltarVazio(primeiraMaiuscula(e.erro) + '.');
