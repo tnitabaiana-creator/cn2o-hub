@@ -3602,8 +3602,17 @@ function montarFerramenta(cfg) {
       btnCop.hidden = false;
       if (cfg.aoConcluir) cfg.aoConcluir(r, saida.textContent);
       const custo = r.custo_usd ? ' · US$ ' + Number(r.custo_usd).toFixed(4).replace('.', ',') : '';
+      // v1.23 — número sem denominador não informa nada: 462 incertas pode ser
+      // péssimo (de 500) ou normal (de 5.000). A assinatura passa a dizer a
+      // proporção, e avisa quando a leitura saiu ruim como um todo.
       const duplaLeitura = r.ocr && r.ocr.ativo
-        ? ' · Dupla leitura OCR: ' + (r.ocr.palavras_incertas ? r.ocr.palavras_incertas + ' palavra(s) incerta(s) marcada(s)' : 'sem palavras incertas')
+        ? ' · Dupla leitura OCR: ' + (
+            !r.ocr.palavras_incertas
+              ? 'nenhuma palavra incerta'
+              : (r.ocr.palavras_incertas + (r.ocr.palavras_lidas ? ' de ' + r.ocr.palavras_lidas : '') + ' palavra(s) com leitura incerta' +
+                 (r.ocr.proporcao ? ' (' + String(Math.round(r.ocr.proporcao * 1000) / 10).replace('.', ',') + '%)' : '') +
+                 (r.ocr.leitura_dificil ? ' — leitura difícil: confira o documento inteiro' : ''))
+          )
         : '';
       meta.textContent = modo.assinatura + ' ' + (SESSAO.nome || '—') + ' · ' + agoraCurto() +
         (r.modelo ? ' · ' + nomeModelo(r.modelo) : '') + ' · ' + Math.max(1, Math.round((r.ms || (Date.now() - t0)) / 1000)) + ' s' + custo + duplaLeitura;
