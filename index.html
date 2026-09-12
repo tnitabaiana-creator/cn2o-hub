@@ -959,7 +959,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 :root[data-theme="dark"] .card-ico svg{stroke:#f2d7dc}
 
 /* saudação de boas-vindas: manuscrita e calorosa */
-.topo-ola{font-family:'Caveat','Segoe Script',cursive;font-size:27px;font-weight:700;letter-spacing:.01em;line-height:1}
+.topo-ola{font-family:'Caveat','Segoe Script',cursive;font-size:29px;font-weight:700;letter-spacing:.01em;line-height:1}
 .topo-ola b{font-weight:700}
 
 /* Frase do Dia — um cumprimento humano entre a chegada e o mural */
@@ -969,15 +969,37 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
   box-shadow:0 10px 26px rgba(32,42,58,.06)}
 .fd-aspas{font-family:Georgia,serif;font-size:62px;line-height:.62;color:var(--vinho);opacity:.9;flex:none;margin-top:4px}
 .fd-miolo{min-width:0}
-.fd-texto{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:17.5px;line-height:1.6;color:var(--tinta)}
+.fd-texto{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:19.5px;line-height:1.6;color:var(--tinta)}
 .fd-autor{font-size:12.5px;color:var(--tinta-suave);margin-top:5px;letter-spacing:.08em;text-transform:uppercase}
 .fd-fecho{margin-top:10px;font-size:14px;color:var(--tinta-suave)}
-.fd-assina{font-family:'Caveat','Segoe Script',cursive;font-size:23px;font-weight:700;color:var(--vinho);margin-left:4px;white-space:nowrap}
-@media(max-width:560px){.frase-dia{padding:16px 18px 12px}.fd-aspas{font-size:44px}.fd-texto{font-size:16px}}
+.fd-assina{font-family:'Caveat','Segoe Script',cursive;font-size:19.5px;font-weight:400;color:var(--vinho);margin-left:4px;white-space:nowrap}
+@media(max-width:560px){.frase-dia{padding:16px 18px 12px}.fd-aspas{font-size:44px}.fd-texto{font-size:17.5px}}
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .frase-dia{background:linear-gradient(135deg,#2b2530 0%,#252c3c 100%);border-color:rgba(255,255,255,.09);box-shadow:none}
   :root:not([data-theme="light"]) .fd-assina{color:#f2d7dc} }
 :root[data-theme="dark"] .frase-dia{background:linear-gradient(135deg,#2b2530 0%,#252c3c 100%);border-color:rgba(255,255,255,.09);box-shadow:none}
 :root[data-theme="dark"] .fd-assina{color:#f2d7dc}
+
+/* v1.11 — Trello maior, girando em 3D inclinado, com sombra no chão */
+.t3d-palco{position:relative;perspective:640px}
+.t3d-palco::after{content:"";position:absolute;left:8%;right:8%;bottom:-13px;height:10px;border-radius:50%;
+  background:radial-gradient(closest-side, rgba(18,42,96,.38), transparent);filter:blur(2px);pointer-events:none}
+.t3d-gira{width:64px;height:64px;animation-name:t3dGira3d;animation-duration:6.5s}
+.trello-atalho:hover .t3d-gira{animation-duration:2s}
+.t3d-face{border-radius:18px;box-shadow:0 14px 28px rgba(30,90,208,.45),inset 0 2px 4px rgba(255,255,255,.5),inset 0 -4px 7px rgba(0,0,0,.3)}
+.t3d-face .tb{top:14px;width:17px;border-radius:5.5px}
+.t3d-face .tb-a{left:13px;height:38px}
+.t3d-face .tb-b{right:13px;height:26px}
+@keyframes t3dGira3d{from{transform:rotateX(11deg) rotateY(0)}to{transform:rotateX(11deg) rotateY(360deg)}}
+@media (prefers-reduced-motion: reduce){ .t3d-gira{animation:none;transform:rotateX(11deg) rotateY(18deg)} }
+
+/* v1.11 — METAS: carimbo EM BREVE grande, sem explicação (a surpresa fica no ar) */
+#muralMetas .carimbo-breve{flex:1;display:flex;align-items:center;justify-content:center;min-height:150px;padding:12px 0 6px}
+#muralMetas .carimbo-breve span{display:inline-block;transform:rotate(-8deg);
+  font-family:'Montserrat',sans-serif;font-weight:800;font-size:clamp(26px,2.4vw,31px);letter-spacing:.16em;text-transform:uppercase;
+  color:#8d2340;padding:14px 24px;border:4px solid #8d2340;border-radius:12px;
+  box-shadow:inset 0 0 0 2.5px rgba(141,35,64,.35);opacity:.9;
+  -webkit-mask-image:radial-gradient(150% 130% at 28% 18%, #000 52%, rgba(0,0,0,.72) 70%, #000 86%);
+  mask-image:radial-gradient(150% 130% at 28% 18%, #000 52%, rgba(0,0,0,.72) 70%, #000 86%)}
 
 </style>
 </head>
@@ -1076,7 +1098,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
         <div class="fd-miolo">
           <p class="fd-texto" id="fraseTexto"></p>
           <p class="fd-autor" id="fraseAutor" hidden></p>
-          <p class="fd-fecho">Um ótimo dia de trabalho! <span class="fd-assina">— Dr. César Bravo · Tabelião</span></p>
+          <p class="fd-fecho">Um ótimo dia de trabalho! <span class="fd-assina">César Bravo, Tabelião</span></p>
         </div>
       </section>
       <section>
@@ -1122,8 +1144,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
               <div class="ficha-icone" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 20h16"/><path d="M7 20v-6M12 20V7M17 20v-9"/></svg></div>
               <h3 class="ficha-titulo">Metas CN2O</h3>
               <div class="ficha-corpo" id="muralMetas">
-                <span class="pill-breve">Em breve</span>
-                <p class="ficha-texto">Todo mês, uma meta para a equipe bater — e cada meta com o seu bônus. A régua está sendo calibrada: quando a primeira chegar, já chega valendo prêmio.</p>
+                <div class="carimbo-breve" aria-label="Em breve"><span>Em breve</span></div>
               </div>
               <button class="ficha-ver" data-sub="metas" type="button"><span>Ver mais</span><span class="seta-circulo">→</span></button>
             </article>
@@ -2012,8 +2033,7 @@ function renderMural() {
   const metas = MURAL.metas || { em_breve: true, itens: [] };
   const caixaMetas = el('muralMetas');
   if (metas.em_breve || !metas.itens.length) {
-    caixaMetas.innerHTML = '<span class="pill-breve">Em breve</span>' +
-      '<p class="ficha-texto">Todo mês, uma meta para a equipe bater — e cada meta com o seu bônus. A régua está sendo calibrada: quando a primeira chegar, já chega valendo prêmio.</p>';
+    caixaMetas.innerHTML = '<div class="carimbo-breve" aria-label="Em breve"><span>Em breve</span></div>';
   } else {
     caixaMetas.innerHTML = '<div class="metas-lista">' + metas.itens.slice(0, 3).map(htmlMeta).join('') + '</div>';
   }
@@ -2026,58 +2046,123 @@ function htmlMeta(m) {
     (m.premio ? '<span class="meta-premio">🏆 ' + esc(m.premio) + '</span>' : '') + '</div>';
 }
 /* ============================================================
-   FRASE DO DIA — uma por colaborador, sorteada pelo dia + login
+   FRASE DO DIA — planilha do Drive (edite lá) + roleta por colaborador/dia
+   Coluna "fixar" com HOJE ou dd/mm/aaaa faz todos verem a mesma frase.
 ============================================================ */
+var FRASES_PLANILHA_ID = '1C5LITosUYQyagLP3vwXqklIuZgPOy8WP2T8OJ68FlBM';
+var FRASES_CSV_URL = 'https://docs.google.com/spreadsheets/d/' + FRASES_PLANILHA_ID + '/gviz/tq?tqx=out:csv&headers=1';
+var FRASES_EDITAR_URL = 'https://docs.google.com/spreadsheets/d/' + FRASES_PLANILHA_ID + '/edit';
 var FRASES_DIA = [
   ['Não é porque as coisas são difíceis que não ousamos; é porque não ousamos que elas são difíceis.', 'Sêneca'],
-  ['O que você faz hoje pode melhorar todos os seus amanhãs.', 'Ralph Marston'],
-  ['A excelência não é um ato, mas um hábito.', 'Aristóteles (por W. Durant)'],
+  ['Nenhum vento sopra a favor de quem não sabe para onde ir.', 'Sêneca'],
+  ['A felicidade da sua vida depende da qualidade dos seus pensamentos.', 'Marco Aurélio'],
+  ['Não são as coisas que nos perturbam, mas a leitura que fazemos delas.', 'Epicteto'],
+  ['A sabedoria começa na admiração.', 'Sócrates'],
+  ['Somos o que fazemos repetidamente. A excelência, então, não é um ato, mas um hábito.', 'Aristóteles, por W. Durant'],
+  ['O rio atinge seus objetivos porque aprendeu a contornar obstáculos.', 'Lao Tsé'],
+  ['Quem conhece os outros é sábio; quem conhece a si mesmo é iluminado.', 'Lao Tsé'],
+  ['Uma longa caminhada começa com o primeiro passo.', 'Lao Tsé'],
+  ['Não importa o quão devagar você vá, desde que você não pare.', 'Confúcio'],
+  ['Escolhe um trabalho de que gostes, e não terás de trabalhar nem um dia na tua vida.', 'atribuído a Confúcio'],
+  ['Põe quanto és no mínimo que fazes.', 'Fernando Pessoa'],
   ['O correr da vida embrulha tudo. A vida é assim: esquenta e esfria, aperta e daí afrouxa, sossega e depois desinquieta. O que ela quer da gente é coragem.', 'Guimarães Rosa'],
   ['Feliz aquele que transfere o que sabe e aprende o que ensina.', 'Cora Coralina'],
+  ['O saber a gente aprende com os mestres e os livros. A sabedoria se aprende é com a vida e com os humildes.', 'Cora Coralina'],
   ['A paciência é amarga, mas o seu fruto é doce.', 'Rousseau'],
-  ['Se quer ir rápido, vá sozinho; se quer ir longe, vá acompanhado.', 'provérbio africano'],
-  ['Nenhum vento sopra a favor de quem não sabe para onde ir.', 'Sêneca'],
+  ['Só se vê bem com o coração; o essencial é invisível aos olhos.', 'Antoine de Saint-Exupéry'],
+  ['Cada pessoa que passa em nossa vida leva um pouco de nós e deixa um pouco de si.', 'atribuído a Saint-Exupéry'],
   ['A gentileza é a linguagem que o surdo ouve e o cego vê.', 'Mark Twain'],
+  ['Entre o estímulo e a resposta há um espaço. Nesse espaço mora a nossa liberdade de escolher — e, na escolha, o nosso crescimento.', 'atribuído a Viktor Frankl'],
+  ['Quem tem um porquê enfrenta quase qualquer como.', 'inspirado em Nietzsche'],
+  ['Se quer ir rápido, vá sozinho; se quer ir longe, vá acompanhado.', 'provérbio africano'],
+  ['Sonho que se sonha só é só um sonho que se sonha só; mas sonho que se sonha junto é realidade.', 'Raul Seixas'],
+  ['A vida não é esperar a tempestade passar: é aprender a dançar na chuva.', 'atribuído a Vivian Greene'],
   ['Bom mesmo é ir à luta com determinação, abraçar a vida com paixão, perder com classe e vencer com ousadia.', 'atribuído a Charlie Chaplin'],
   ['O sucesso é a soma de pequenos esforços repetidos dia após dia.', 'Robert Collier'],
-  ['Quem quer fazer alguma coisa encontra um meio; quem não quer, encontra uma desculpa.', 'provérbio árabe'],
-  ['Cada pessoa que passa em nossa vida leva um pouco de nós e deixa um pouco de si.', 'atribuído a Saint-Exupéry'],
+  ['Não há atalho para lugar que valha a pena.', 'Beverly Sills'],
+  ['A verdadeira força de uma equipe está em cada pessoa; a verdadeira força de cada pessoa está na equipe.', 'Phil Jackson'],
+  ['O entusiasmo é a maior força da alma.', 'atribuído a Napoleon Hill'],
+  ['Há um tempo em que é preciso abandonar as roupas usadas, que já têm a forma do nosso corpo, e esquecer os nossos caminhos, que nos levam sempre aos mesmos lugares.', 'Fernando Teixeira de Andrade'],
+  ['Ninguém caminha sem aprender a caminhar: fazendo o caminho, refazendo e retocando o sonho pelo qual se pôs a caminhar.', 'Paulo Freire'],
+  ['Mesmo a noite mais escura terminará com o nascer do sol.', 'Victor Hugo'],
+  ['As pequenas oportunidades são o começo dos grandes empreendimentos.', 'Demóstenes'],
+  ['Aprender é a única coisa de que a mente nunca se cansa, nunca tem medo e nunca se arrepende.', 'Leonardo da Vinci'],
   ['A confiança se constrói nos detalhes: um ato bem feito de cada vez.', ''],
   ['Servir bem é a forma mais elegante de ser grande.', ''],
   ['O cuidado com o pequeno é o que dá segurança ao grande.', ''],
-  ['Há um tempo em que é preciso abandonar as roupas usadas, que já têm a forma do nosso corpo, e esquecer os nossos caminhos, que nos levam sempre aos mesmos lugares.', 'Fernando Teixeira de Andrade'],
-  ['Põe quanto és no mínimo que fazes.', 'Fernando Pessoa'],
-  ['A palavra é prata, o silêncio é ouro — mas a palavra certa, na hora certa, é diamante.', ''],
-  ['Não há atalho para lugar que valha a pena.', 'Beverly Sills'],
-  ['A vida não é esperar a tempestade passar: é aprender a dançar na chuva.', 'atribuído a Vivian Greene'],
-  ['Sonho que se sonha só é só um sonho que se sonha só; mas sonho que se sonha junto é realidade.', 'Raul Seixas'],
-  ['Escolhe um trabalho de que gostes, e não terás de trabalhar nem um dia na tua vida.', 'atribuído a Confúcio'],
-  ['A verdadeira força de uma equipe está em cada pessoa; a verdadeira força de cada pessoa está na equipe.', 'Phil Jackson'],
-  ['Onde há cuidado, há qualidade. Onde há pressa sem cuidado, há retrabalho.', ''],
+  ['Cada ato lavrado carrega a história de alguém. Trate cada história como única — porque é.', ''],
   ['Um documento bem lavrado é uma promessa cumprida com quem confiou na gente.', ''],
-  ['Age de tal modo que a tua conduta possa servir de exemplo universal.', 'inspirado em Kant'],
-  ['O rio atinge seus objetivos porque aprendeu a contornar obstáculos.', 'Lao Tsé'],
-  ['Devagar se vai ao longe — desde que não se pare.', 'provérbio'],
-  ['O entusiasmo é a maior força da alma.', 'atribuído a Napoleon Hill'],
-  ['Fazer o bem sem olhar a quem — e fazer o bem feito sem olhar o relógio.', ''],
   ['A cortesia abre portas que a competência mantém abertas.', ''],
   ['Não existe vento ruim para o barco que tem rumo e tripulação unida.', ''],
-  ['Grandes coisas nunca vêm de zonas de conforto.', ''],
-  ['Cada ato lavrado carrega a história de alguém. Trate cada história como única — porque é.', ''],
-  ['O amanhã agradece o capricho de hoje.', '']
+  ['Todo dia é uma nova chance de fazer melhor — e de fazer bem a alguém.', '']
 ];
-function fraseDoDia() {
-  var caixa = el('fraseDia');
-  if (!caixa) return;
+function csvLinhas(t) {
+  var linhas = [], linha = [], campo = '', dentro = false;
+  for (var i = 0; i < t.length; i++) {
+    var ch = t[i];
+    if (dentro) {
+      if (ch === '"') { if (t[i + 1] === '"') { campo += '"'; i++; } else dentro = false; }
+      else campo += ch;
+    } else if (ch === '"') dentro = true;
+    else if (ch === ',') { linha.push(campo); campo = ''; }
+    else if (ch === '\n' || ch === '\r') {
+      if (ch === '\r' && t[i + 1] === '\n') i++;
+      linha.push(campo); campo = '';
+      linhas.push(linha); linha = [];
+    } else campo += ch;
+  }
+  if (campo !== '' || linha.length) { linha.push(campo); linhas.push(linha); }
+  return linhas;
+}
+function listaFrasesDe(csv) {
+  return csvLinhas(csv).slice(1).map(function (l) {
+    return [String(l[0] || '').trim(), String(l[1] || '').trim(), String(l[2] || '').trim()];
+  }).filter(function (l) { return l[0].length > 3 && l[0].charAt(0) !== '#'; });
+}
+function fixadaParaHoje(v) {
+  v = String(v || '').trim().toLowerCase();
+  if (!v) return false;
+  if (v === 'hoje') return true;
+  var m = /^(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?$/.exec(v);
+  if (!m) return false;
+  var d = new Date();
+  if (+m[1] !== d.getDate() || +m[2] !== d.getMonth() + 1) return false;
+  if (m[3] && m[3].length === 4 && +m[3] !== d.getFullYear()) return false;
+  return true;
+}
+function escolherFrase(lista) {
+  for (var i = 0; i < lista.length; i++) { if (fixadaParaHoje(lista[i][2])) return lista[i]; }
   var d = new Date();
   var chave = String(SESSAO.login || 'cn2o') + '|' + d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
   var hash = 0;
-  for (var i = 0; i < chave.length; i++) { hash = (hash * 31 + chave.charCodeAt(i)) >>> 0; }
-  var f = FRASES_DIA[hash % FRASES_DIA.length];
+  for (var j = 0; j < chave.length; j++) { hash = (hash * 31 + chave.charCodeAt(j)) >>> 0; }
+  return lista[hash % lista.length];
+}
+function pintarFrase(f) {
+  if (!f) return;
   el('fraseTexto').textContent = f[0];
   var autor = el('fraseAutor');
   autor.hidden = !f[1];
   autor.textContent = f[1] ? '— ' + f[1] : '';
+}
+function fraseDoDia() {
+  if (!el('fraseDia')) return;
+  var cache = null;
+  try { cache = JSON.parse(store.get('cn2o_frases_v1') || 'null'); } catch (e) { cache = null; }
+  var local = cache && cache.csv ? listaFrasesDe(cache.csv) : [];
+  pintarFrase(escolherFrase(local.length ? local : FRASES_DIA));
+  if (cache && cache.t && Date.now() - cache.t < 6 * 3600e3) return;
+  var ctl = (typeof AbortController === 'function') ? new AbortController() : null;
+  if (ctl) setTimeout(function () { try { ctl.abort(); } catch (e) {} }, 7000);
+  fetch(FRASES_CSV_URL, ctl ? { signal: ctl.signal } : undefined)
+    .then(function (r) { if (!r.ok) throw new Error('planilha indisponível'); return r.text(); })
+    .then(function (csv) {
+      var nova = listaFrasesDe(csv);
+      if (!nova.length) return;
+      try { store.set('cn2o_frases_v1', JSON.stringify({ t: Date.now(), csv: csv })); } catch (e) {}
+      pintarFrase(escolherFrase(nova));
+    })
+    .catch(function () {});
 }
 function carregarMural(silencioso) {
   if (!SESSAO.token) return Promise.resolve();
@@ -2313,6 +2398,7 @@ function abrirEditorMural() {
 function htmlEditorMural() {
   return cabecalhoSub('Mural · Modo do Tabelião', 'Editar o mural') +
     '<p class="sub-data">Monte os avisos com a formatação que quiser e publique — a mudança aparece para toda a equipe na hora.</p>' +
+    '<p class="sub-data">Frases do Dia: <a href="' + FRASES_EDITAR_URL + '" target="_blank" rel="noopener">editar a planilha no Drive</a> · escreva HOJE na coluna \u201cfixar\u201d para todos verem a mesma frase.</p>' +
     '<div class="ed-abas">' +
       ['avisos:Avisos', 'aniversariantes:Aniversariantes', 'metas:Metas', 'equipe:Equipe', 'historico:Histórico', 'consumo:Consumo de IA'].map(function (x) {
         const p = x.split(':');
