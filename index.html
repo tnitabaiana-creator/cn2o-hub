@@ -1238,6 +1238,43 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 :root[data-theme="dark"] .anexo-drop .drop-ico{background:rgba(255,255,255,.10)}
 :root[data-theme="dark"] .anexo-drop .drop-ico svg{stroke:#e9a5b4}
 
+
+/* ============================================================
+   v1.20 — carregamento verde na zona de upload + campo reajustado
+   ============================================================ */
+.anexo-drop{position:relative;overflow:hidden}
+.drop-carga{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .22s ease}
+.anexo-drop.carregando .drop-carga{opacity:1}
+.drop-carga .dc-fundo{position:absolute;left:0;top:0;bottom:0;width:0;background:linear-gradient(90deg,rgba(34,161,92,.10),rgba(34,161,92,.22));transition:width .35s ease}
+.drop-carga .dc-barra{position:absolute;left:0;bottom:0;height:5px;width:0;border-radius:0 3px 3px 0;background:linear-gradient(90deg,#1c8a4e,#22a15c 60%,#3ec97e);box-shadow:0 0 12px rgba(34,161,92,.55);transition:width .35s ease}
+.anexo-drop.carregando .dc-barra::after{content:"";position:absolute;inset:0;border-radius:inherit;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.65),rgba(255,255,255,0));animation:cargaBrilho 1.15s linear infinite}
+@keyframes cargaBrilho{0%{transform:translateX(-100%)}100%{transform:translateX(100%)}}
+.drop-carga .dc-txt{position:absolute;left:0;right:0;bottom:12px;text-align:center;font-family:'Montserrat',sans-serif;font-weight:700;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#1c8a4e}
+.anexo-drop.carga-pronta .dc-barra::after{display:none}
+/* enquanto carrega, o conteúdo do campo recua e o verde é o protagonista */
+.anexo-drop > *:not(.drop-carga){transition:opacity .2s ease}
+.anexo-drop.carregando > *:not(.drop-carga){opacity:.14}
+.drop-carga .dc-txt{top:50%;bottom:auto;transform:translateY(-50%);font-size:12.5px}
+@media (prefers-reduced-motion: reduce){ .anexo-drop.carregando .dc-barra::after{animation:none} }
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .drop-carga .dc-txt{color:#5fd699}
+  :root:not([data-theme="light"]) .drop-carga .dc-fundo{background:linear-gradient(90deg,rgba(34,161,92,.14),rgba(34,161,92,.30))}
+}
+:root[data-theme="dark"] .drop-carga .dc-txt{color:#5fd699}
+:root[data-theme="dark"] .drop-carga .dc-fundo{background:linear-gradient(90deg,rgba(34,161,92,.14),rgba(34,161,92,.30))}
+
+/* reajuste: com arquivo na lista, a área de soltar encolhe e cede espaço */
+#paginaExtrator .zona-anexos .anexo-drop,
+#paginaAnalisador .zona-anexos .anexo-drop{padding:22px 18px;transition:padding .2s ease}
+#paginaExtrator .zona-anexos.tem-itens .anexo-drop,
+#paginaAnalisador .zona-anexos.tem-itens .anexo-drop{padding:14px 16px;gap:7px}
+#paginaExtrator .zona-anexos.tem-itens .drop-ico,
+#paginaAnalisador .zona-anexos.tem-itens .drop-ico{width:32px;height:32px}
+#paginaExtrator .zona-anexos.tem-itens .drop-ico svg,
+#paginaAnalisador .zona-anexos.tem-itens .drop-ico svg{width:19px;height:19px}
+#paginaExtrator .zona-anexos.tem-itens .anexo-dica,
+#paginaAnalisador .zona-anexos.tem-itens .anexo-dica{font-size:13px}
+
 </style>
 </head>
 <body>
@@ -3353,7 +3390,41 @@ function criarAnexos(raiz) {
   const aviso = raiz.querySelector('[data-aviso-anexo]');
   const drop = raiz.querySelector('.anexo-drop');
   const itens = [];
-  function avisar(m) { aviso.textContent = m || ''; aviso.hidden = !m; }
+
+  // v1.20 — carregamento verde: enche a zona de upload enquanto os arquivos
+  // são lidos e as fotos, otimizadas. Montado aqui para valer em todas as
+  // ferramentas que têm anexo (Extrator, e-Analista e Gerador).
+  const carga = document.createElement('div');
+  carga.className = 'drop-carga';
+  carga.setAttribute('aria-hidden', 'true');
+  carga.innerHTML = '<span class="dc-fundo"></span><span class="dc-barra"></span><span class="dc-txt"></span>';
+  drop.appendChild(carga);
+  const cargaFundo = carga.querySelector('.dc-fundo'),
+        cargaBarra = carga.querySelector('.dc-barra'),
+        cargaTexto = carga.querySelector('.dc-txt');
+  let cargaTimer = null;
+  function pintarCarga(pct, texto, pronto) {
+    if (cargaTimer) { clearTimeout(cargaTimer); cargaTimer = null; }
+    const largura = Math.max(0, Math.min(100, pct)) + '%';
+    cargaFundo.style.width = largura; cargaBarra.style.width = largura;
+    cargaTexto.textContent = texto || '';
+    drop.classList.add('carregando');
+    drop.classList.toggle('carga-pronta', !!pronto);
+  }
+  function fecharCarga(texto) {
+    pintarCarga(100, texto || '✓ pronto', true);
+    cargaTimer = setTimeout(function () {
+      drop.classList.remove('carregando', 'carga-pronta');
+      cargaFundo.style.width = '0%'; cargaBarra.style.width = '0%'; cargaTexto.textContent = '';
+    }, 1100);
+  }
+  function cancelarCarga() {
+    if (cargaTimer) { clearTimeout(cargaTimer); cargaTimer = null; }
+    drop.classList.remove('carregando', 'carga-pronta');
+    cargaFundo.style.width = '0%'; cargaBarra.style.width = '0%'; cargaTexto.textContent = '';
+  }
+
+  function avisar(m) { aviso.textContent = m || ''; aviso.hidden = !m; if (m) cancelarCarga(); }
   function total() { return itens.reduce(function (s, a) { return s + a.blob.size; }, 0); }
   function render() {
     lista.innerHTML = '';
@@ -3370,12 +3441,20 @@ function criarAnexos(raiz) {
       li.appendChild(thumb); li.appendChild(nm); li.appendChild(tm); li.appendChild(x); lista.appendChild(li);
     });
     cont.textContent = itens.length ? itens.length + ' arquivo(s) · ' + tamanhoLegivel(total()) + ' — enviados na ordem da lista' : '';
+    raiz.classList.toggle('tem-itens', itens.length > 0);
   }
   function receber(arquivos) {
     avisar('');
     const arr = Array.prototype.slice.call(arquivos || []);
-    return arr.reduce(function (p, f) {
+    const totalArq = arr.length;
+    let feitos = 0, houveErro = false;
+    if (totalArq) pintarCarga(4, totalArq === 1 ? 'Carregando o documento…' : 'Carregando 1 de ' + totalArq + '…');
+    return arr.reduce(function (p, f, indice) {
       return p.then(function () {
+        if (totalArq) {
+          pintarCarga(Math.round(((indice + 0.35) / totalArq) * 100),
+            totalArq === 1 ? 'Carregando o documento…' : 'Carregando ' + (indice + 1) + ' de ' + totalArq + '…');
+        }
         if (itens.length >= MAX_ARQUIVOS) { avisar('No máximo ' + MAX_ARQUIVOS + ' arquivos por análise — divida em duas.'); return; }
         const tipo = (f.type || '').toLowerCase();
         const ehPdf = tipo === 'application/pdf' || /\.pdf$/i.test(f.name || '');
@@ -3386,12 +3465,22 @@ function criarAnexos(raiz) {
           return;
         }
         if (!/^image\//.test(tipo)) { avisar('"' + (f.name || 'arquivo') + '" não é foto nem PDF.'); return; }
+        pintarCarga(Math.round(((indice + 0.55) / totalArq) * 100), 'Otimizando a foto…');
         return prepararImagem(f).then(function (r) {
           if (total() + r.blob.size > MAX_TOTAL) { avisar('Os anexos passaram de 13 MB somados — remova algum ou divida a análise.'); return; }
           itens.push({ nome: f.name || 'imagem', mime: r.mime, blob: r.blob, url: URL.createObjectURL(r.blob) });
         });
+      }).then(function () {
+        feitos++;
+        if (totalArq && !aviso.hidden) houveErro = true;
+        if (totalArq && !houveErro) pintarCarga(Math.round((feitos / totalArq) * 100), '');
       });
-    }, Promise.resolve()).then(render);
+    }, Promise.resolve()).then(function () {
+      render();
+      if (!totalArq) return;
+      if (aviso.hidden) fecharCarga(totalArq === 1 ? '✓ Documento carregado' : '✓ ' + totalArq + ' arquivos carregados');
+      else cancelarCarga();
+    });
   }
   raiz.querySelector('[data-anexar]').addEventListener('click', function () { input.click(); });
   input.addEventListener('change', function () { receber(this.files); this.value = ''; });
@@ -3401,7 +3490,7 @@ function criarAnexos(raiz) {
   return {
     receber: receber,
     itens: function () { return itens.slice(); },
-    limpar: function () { itens.splice(0).forEach(function (a) { if (a.url) { try { URL.revokeObjectURL(a.url); } catch (e) {} } }); avisar(''); render(); },
+    limpar: function () { itens.splice(0).forEach(function (a) { if (a.url) { try { URL.revokeObjectURL(a.url); } catch (e) {} } }); avisar(''); cancelarCarga(); render(); },
     avisar: avisar
   };
 }
