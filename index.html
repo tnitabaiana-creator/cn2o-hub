@@ -1207,6 +1207,37 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 .botoes-extrair .btn-vinho:nth-child(2){background:linear-gradient(135deg,#2b3850 0%,#202a3a 65%,#161e2b 100%)}
 .botoes-extrair .btn-vinho:nth-child(2):hover{filter:brightness(1.12)}
 
+
+/* ============================================================
+   v1.19 — Extrator só por documento (layout da coluna refeito)
+   e o selo "IA ativa" com pisca-pisca verde
+   ============================================================ */
+/* pisca-pisca do selo de status: o ponto verde respira quando a IA responde */
+@keyframes pulsoIA{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.30;transform:scale(.78)}}
+.chip-ia.ok::before{display:inline-block;color:#22a15c;text-shadow:0 0 7px rgba(34,161,92,.85);animation:pulsoIA 1.5s ease-in-out infinite}
+@media (prefers-reduced-motion: reduce){ .chip-ia.ok::before{animation:none} }
+
+/* coluna de entrada sem campo de texto: a zona de upload é a protagonista */
+#paginaExtrator .zona-unica .anexo-drop,
+#paginaAnalisador .zona-anexos .anexo-drop{display:flex;flex-direction:column;align-items:center;gap:9px;text-align:center;padding:26px 18px;border:2px dashed var(--entrada-linha);border-radius:12px;background:var(--leitura-caixa)}
+#paginaExtrator .zona-unica .anexo-drop:hover,
+#paginaAnalisador .zona-anexos .anexo-drop:hover{border-color:var(--vinho)}
+.anexo-drop .drop-ico{display:grid;place-items:center;width:42px;height:42px;border-radius:11px;background:rgba(99,19,37,.08)}
+.anexo-drop .drop-ico svg{width:24px;height:24px;fill:none;stroke:var(--vinho);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#paginaExtrator .zona-unica .anexo-dica,
+#paginaAnalisador .zona-anexos .anexo-dica{max-width:34ch;line-height:1.45}
+/* sem o campo de texto a coluna encolhe: dê mais espaço à leitura do resultado */
+@media (min-width:1180px){
+  #paginaExtrator .duas-colunas,
+  #paginaAnalisador .duas-colunas{grid-template-columns:minmax(0,.88fr) minmax(0,1.12fr)}
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .anexo-drop .drop-ico{background:rgba(255,255,255,.10)}
+  :root:not([data-theme="light"]) .anexo-drop .drop-ico svg{stroke:#e9a5b4}
+}
+:root[data-theme="dark"] .anexo-drop .drop-ico{background:rgba(255,255,255,.10)}
+:root[data-theme="dark"] .anexo-drop .drop-ico svg{stroke:#e9a5b4}
+
 </style>
 </head>
 <body>
@@ -1382,7 +1413,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
           <button class="card" id="cardExtrator" type="button">
             <div class="card-topo"><span class="card-num">03</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 12h5M10 15h5M10 9h1.5"/></svg></span><span class="chip-ia">IA</span></div>
             <h3>Extrator</h3>
-            <p>Suba a foto ou o PDF e escolha o botão: <b>qualificação</b> das partes (RG, CNH, certidões) ou <b>descrição do imóvel</b> pela matrícula — prontas para colar.</p>
+            <p>Só com o documento digitalizado: suba a foto ou o PDF e escolha o botão — <b>qualificação</b> das partes (RG, CNH, certidões) ou <b>descrição do imóvel</b> pela matrícula.</p>
             <span class="card-acao">Usar aqui →</span>
           </button>
           <button class="card" id="cardAnalisador" type="button">
@@ -1637,26 +1668,26 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
         <span class="num-grande">03</span>
         <div style="flex:1;min-width:240px">
           <h2>Extrator</h2>
-          <p class="desc">Suba o documento — foto, print (Ctrl+V) ou PDF — e <b>escolha o que extrair</b>. Cada botão é uma função: <b>Extrair qualificação</b> lê RG, CNH, CPF e certidões (nascimento, casamento, óbito) e monta a qualificação no padrão do CN2O; <b>Extrair descrição do imóvel</b> lê a matrícula ou a certidão de inteiro teor e devolve a descrição vigente, ipsis litteris, pronta para colar. Nada é inventado: dado ausente sai como [FALTA: …].</p>
+          <p class="desc">Trabalha <b>somente com documento digitalizado</b> — foto, print (Ctrl+V) ou PDF. Suba o arquivo e escolha a função: <b>Extrair qualificação</b> lê RG, CNH, CPF e certidões de nascimento, casamento ou óbito e monta a qualificação no padrão do CN2O; <b>Extrair descrição do imóvel</b> lê a matrícula ou a certidão de inteiro teor e devolve a descrição vigente, ipsis litteris. Nada é inventado: dado ausente sai como [FALTA: …].</p>
         </div>
         <span data-chip-ia class="chip-ia">verificando IA…</span>
       </div>
       <div class="duas-colunas">
         <div class="col-entrada">
-          <div class="zona-anexos" data-anexos="ext">
-            <label class="rotulo versalete">Documento em foto, print ou PDF</label>
+          <div class="zona-anexos zona-unica" data-anexos="ext">
+            <label class="rotulo versalete">1 · Documento em foto, print ou PDF</label>
             <div class="anexo-drop">
               <input type="file" accept="image/*,application/pdf" multiple hidden>
+              <span class="drop-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 16V4"/><path d="m7.5 8.5 4.5-4.5 4.5 4.5"/><path d="M4 15v3.5A1.5 1.5 0 0 0 5.5 20h13a1.5 1.5 0 0 0 1.5-1.5V15"/></svg></span>
               <button class="btn-fantasma" data-anexar type="button">Adicionar foto ou PDF</button>
-              <span class="anexo-dica">arraste aqui ou cole um print direto (Ctrl+V)</span>
+              <span class="anexo-dica">arraste o arquivo aqui ou cole um print direto (Ctrl+V) — várias páginas na ordem</span>
             </div>
             <ul class="anexo-lista" style="margin-top:8px"></ul>
             <span class="cont-anexos"></span>
             <p class="aviso" data-aviso-anexo hidden></p>
           </div>
-          <label class="rotulo versalete" for="entradaExtrator" style="margin-top:6px">…e/ou cole o texto dos documentos</label>
-          <textarea id="entradaExtrator" placeholder="Cole aqui os textos dos documentos, mesmo desordenados…"></textarea>
-          <p class="rotulo versalete" style="margin:14px 0 0">O que você quer extrair deste documento?</p>
+          <textarea id="entradaExtrator" hidden aria-hidden="true" tabindex="-1"></textarea>
+          <p class="rotulo versalete" style="margin:16px 0 0">2 · O que você quer extrair deste documento?</p>
           <div class="linha-botoes botoes-extrair">
             <button id="btnGerar" class="btn-vinho btn-extrair" type="button">
               <span class="be-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M4.5 20c.9-3.4 3.9-5.5 7.5-5.5s6.6 2.1 7.5 5.5"/></svg></span>
@@ -1667,8 +1698,8 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
               <span class="be-txt"><b>Extrair descrição do imóvel</b><small>matrícula ou certidão de inteiro teor — descrição vigente, ipsis litteris</small></span>
             </button>
           </div>
-          <div class="linha-botoes" style="margin-top:10px">
-            <button id="btnExemploExt" class="btn-fantasma" type="button">Ver exemplo</button>
+          <div class="linha-botoes" style="margin-top:12px">
+            <button id="btnExemploExt" class="btn-fantasma" type="button" hidden>Ver exemplo</button>
             <button id="btnLimparExt" class="btn-fantasma" type="button">Limpar</button>
           </div>
           <p class="nota-ia" data-nota-ia></p>
@@ -3601,7 +3632,7 @@ montarFerramenta({
     {
       btn: 'btnGerar', ferramenta: 'qualificacao', rotuloSaida: 'Qualificação',
       assinatura: 'Qualificação gerada para',
-      pedirEntrada: 'Suba o documento (foto, print ou PDF) ou cole o texto antes de extrair.',
+      pedirEntrada: 'Suba o documento (foto, print ou PDF) antes de extrair a qualificação.',
       msgProgresso: function (n) { return n ? 'Lendo ' + n + ' documento(s) e montando a qualificação' : 'Montando a qualificação'; }
     },
     {
