@@ -884,6 +884,101 @@ h1#saudacao.ola b{color:var(--tinta)}
 /* cartão Agenda Cn2o — grafia própria pedida pelo Tabelião (sem caixa alta) */
 .ficha-titulo.titulo-agenda{text-transform:none;letter-spacing:.06em;font-size:16px}
 
+/* ============================================================
+   v1.10 — mural de gente (fotos), destaques e ferramentas com ícones
+   ============================================================ */
+/* título do painel: mural de funcionários, leve e manuscrito */
+.mural-titulo{font-family:'Caveat','Segoe Script',cursive;font-weight:700;font-size:clamp(40px,4.8vw,56px);letter-spacing:.015em;text-transform:none;line-height:.95}
+.mural-titulo::after{width:92px;height:3px;border-radius:99px;margin-top:6px;transform:rotate(-1.2deg)}
+.mural-sub{margin-top:10px}
+
+/* títulos dos 3 quadros: grandes, negrito e centralizados */
+.mural-cards .ficha-titulo{font-size:20px;font-weight:800;text-align:center;letter-spacing:.07em}
+.ficha-titulo.titulo-agenda{font-size:21px;letter-spacing:.05em}
+.mural-cards .ficha-central-topo + .ficha-titulo{text-align:center}
+
+/* conteúdo dos quadros: fonte maior, com respiro para as fotos */
+.mural-lista{font-size:16px;gap:12px}
+.mural-lista li{align-items:center}
+.aviso-titulo{font-size:15.5px}
+.aviso-data{font-size:12.5px}
+.ficha-texto{font-size:15px;line-height:1.62}
+.meta-topo b{font-size:15.5px}
+.meta-premio{font-size:13.5px}
+.pill-destaque{font-size:11.5px}
+
+/* foto do aniversariante (ou inicial, enquanto não houver foto) */
+.aniv-foto{width:38px;height:38px;border-radius:50%;object-fit:cover;flex:none;border:2px solid #ffffff;box-shadow:0 3px 8px rgba(0,0,0,.28)}
+span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(150deg,#7a1a2e,#45091a);color:#fff;font-family:'Montserrat',sans-serif;font-weight:800;font-size:15px}
+.mural-lista .mural-dia{flex:none}
+
+/* aviso com imagem: miniatura na lista e imagem grande na subpágina */
+.aviso-doc{overflow:hidden}
+.aviso-doc img{width:100%;height:100%;object-fit:cover;border-radius:inherit;display:block}
+.sub-imagem{display:block;max-width:100%;max-height:420px;border-radius:12px;margin:14px 0 4px;box-shadow:0 12px 30px rgba(0,0,0,.2)}
+
+/* editor: imagem do aviso e foto do aniversariante */
+.ed-img-linha{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
+.ed-arquivo{cursor:pointer}
+.ed-img-prev{width:56px;height:56px;border-radius:10px;object-fit:cover;box-shadow:0 4px 12px rgba(0,0,0,.22)}
+.ed-item-foto{display:flex;align-items:center;gap:10px}
+.ed-item-foto .aniv-foto{width:34px;height:34px}
+
+/* Trello: só a logo 3D girando, com um palco confortável */
+.trello-atalho{gap:0;padding:6px 12px}
+.t3d-palco{transform:scale(1.12)}
+
+/* Links úteis: outra família de ferramentas, com faixa clara e fundo próprio */
+.faixa-clara{background:linear-gradient(92deg,#efe6d4 0%,#e9dfcb 48%,#dde2e9 100%)}
+.faixa-clara::before{background:linear-gradient(115deg,transparent 42%,rgba(255,255,255,.5) 50%,transparent 58%)}
+.faixa-clara .faixa-palavra{color:#202a3a}
+.faixa-clara .faixa-palavra::after{background:var(--vinho)}
+#linksUteis{background:#f3edE1;background:#f3ede1;border:1px solid rgba(32,42,58,.07);border-radius:16px;padding:16px 16px 18px;margin-top:34px}
+#linksUteis .lista-links{background:var(--card)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) #linksUteis{background:#222c3c;border-color:rgba(255,255,255,.08)}
+  :root:not([data-theme="light"]) .faixa-clara{background:linear-gradient(92deg,#33405a 0%,#2a3143 55%,#3a2a33 100%)}
+  :root:not([data-theme="light"]) .faixa-clara .faixa-palavra{color:#ffffff} }
+:root[data-theme="dark"] #linksUteis{background:#222c3c;border-color:rgba(255,255,255,.08)}
+:root[data-theme="dark"] .faixa-clara{background:linear-gradient(92deg,#33405a 0%,#2a3143 55%,#3a2a33 100%)}
+:root[data-theme="dark"] .faixa-clara .faixa-palavra{color:#ffffff}
+
+/* Ferramentas: ícone-azulejo, título +1pt e selo IA em destaque */
+#secFerramentas .card-topo{display:flex;align-items:center;justify-content:flex-start;gap:12px}
+#secFerramentas .chip-ia{margin-left:auto}
+.card-ico{width:46px;height:46px;border-radius:13px;background:radial-gradient(120% 120% at 30% 25%,#fbeef1 0%,#f4e2e7 100%);display:inline-flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 1px rgba(99,19,37,.08)}
+.card-ico svg{width:23px;height:23px;fill:none;stroke:var(--vinho);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+#secFerramentas .card h3{font-size:18.5px}
+#secFerramentas .chip-ia{background:linear-gradient(135deg,#7d1c31 0%,#631325 60%,#4a0c1d 100%);color:#ffffff;border:none;padding:5px 13px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.16em;box-shadow:0 5px 14px rgba(99,19,37,.35),inset 0 1px 2px rgba(255,255,255,.25)}
+#secFerramentas .chip-ia::before{content:"✦ "}
+#secFerramentas .chip-ia.chip-guia{background:linear-gradient(135deg,#2b3850 0%,#202a3a 65%,#161e2b 100%);box-shadow:0 5px 14px rgba(32,42,58,.35),inset 0 1px 2px rgba(255,255,255,.22)}
+#secFerramentas .chip-ia.chip-guia::before{content:"§ "}
+.card-breve .card-acao{color:var(--tinta-suave)}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .card-ico{background:radial-gradient(120% 120% at 30% 25%,rgba(99,19,37,.5) 0%,rgba(99,19,37,.3) 100%)}
+  :root:not([data-theme="light"]) .card-ico svg{stroke:#f2d7dc} }
+:root[data-theme="dark"] .card-ico{background:radial-gradient(120% 120% at 30% 25%,rgba(99,19,37,.5) 0%,rgba(99,19,37,.3) 100%)}
+:root[data-theme="dark"] .card-ico svg{stroke:#f2d7dc}
+
+/* saudação de boas-vindas: manuscrita e calorosa */
+.topo-ola{font-family:'Caveat','Segoe Script',cursive;font-size:27px;font-weight:700;letter-spacing:.01em;line-height:1}
+.topo-ola b{font-weight:700}
+
+/* Frase do Dia — um cumprimento humano entre a chegada e o mural */
+.frase-dia{position:relative;display:flex;gap:16px;align-items:flex-start;
+  background:linear-gradient(135deg,#fdf6ee 0%,#f8efe2 52%,#f2e8e4 100%);
+  border:1px solid rgba(99,19,37,.10);border-radius:16px;padding:20px 26px 15px;
+  box-shadow:0 10px 26px rgba(32,42,58,.06)}
+.fd-aspas{font-family:Georgia,serif;font-size:62px;line-height:.62;color:var(--vinho);opacity:.9;flex:none;margin-top:4px}
+.fd-miolo{min-width:0}
+.fd-texto{font-family:Georgia,'Times New Roman',serif;font-style:italic;font-size:17.5px;line-height:1.6;color:var(--tinta)}
+.fd-autor{font-size:12.5px;color:var(--tinta-suave);margin-top:5px;letter-spacing:.08em;text-transform:uppercase}
+.fd-fecho{margin-top:10px;font-size:14px;color:var(--tinta-suave)}
+.fd-assina{font-family:'Caveat','Segoe Script',cursive;font-size:23px;font-weight:700;color:var(--vinho);margin-left:4px;white-space:nowrap}
+@media(max-width:560px){.frase-dia{padding:16px 18px 12px}.fd-aspas{font-size:44px}.fd-texto{font-size:16px}}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .frase-dia{background:linear-gradient(135deg,#2b2530 0%,#252c3c 100%);border-color:rgba(255,255,255,.09);box-shadow:none}
+  :root:not([data-theme="light"]) .fd-assina{color:#f2d7dc} }
+:root[data-theme="dark"] .frase-dia{background:linear-gradient(135deg,#2b2530 0%,#252c3c 100%);border-color:rgba(255,255,255,.09);box-shadow:none}
+:root[data-theme="dark"] .fd-assina{color:#f2d7dc}
+
 </style>
 </head>
 <body>
@@ -976,6 +1071,14 @@ h1#saudacao.ola b{color:var(--tinta)}
 
     <!-- ===== PÁGINA PRINCIPAL ===== -->
     <div id="paginaHub" style="display:flex;flex-direction:column;gap:30px">
+      <section class="frase-dia" id="fraseDia" aria-label="Mensagem do dia do Tabelião">
+        <span class="fd-aspas" aria-hidden="true">“</span>
+        <div class="fd-miolo">
+          <p class="fd-texto" id="fraseTexto"></p>
+          <p class="fd-autor" id="fraseAutor" hidden></p>
+          <p class="fd-fecho">Um ótimo dia de trabalho! <span class="fd-assina">— Dr. César Bravo · Tabelião</span></p>
+        </div>
+      </section>
       <section>
         <div class="mural">
           <svg class="serra serra-mural" viewBox="0 0 1200 420" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
@@ -988,7 +1091,7 @@ h1#saudacao.ola b{color:var(--tinta)}
           </svg>
           <div class="mural-topo">
             <div>
-              <h2 class="mural-titulo">Mural CN2O</h2>
+              <h2 class="mural-titulo">Mural</h2>
               <p class="mural-sub">Novidades e avisos de todo o time · CN2O</p>
               <p class="atualizado-em" id="muralAtualizado"></p>
               <button id="btnEditarMural" class="btn-editar-mural" type="button" hidden>✎ Editar mural</button>
@@ -1032,46 +1135,44 @@ h1#saudacao.ola b{color:var(--tinta)}
         <div class="faixa-titulo">
           <h2 class="versalete faixa-palavra">Ferramentas</h2>
           <a class="trello-atalho" id="atalhoTrello" href="https://trello.com/" target="_blank" rel="noopener" title="Terminou por aqui? Vá para a sua área de trabalho no Trello">
-            <span class="t3d-cn2o" aria-hidden="true">CN<br>2O<i>.</i></span>
-            <span class="t3d-seta" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12h14M13 6l6 6-6 6"/></svg></span>
             <span class="t3d-palco" aria-hidden="true"><span class="t3d-gira"><span class="t3d-face t3d-frente"><i class="tb tb-a"></i><i class="tb tb-b"></i></span><span class="t3d-face t3d-tras"><i class="tb tb-a"></i><i class="tb tb-b"></i></span></span></span>
             <span class="visualmente-oculto">Abrir o Trello</span>
           </a>
         </div>
         <div class="cards">
           <button class="card" id="cardProtocolo" type="button">
-            <div class="card-topo"><span class="card-num">01</span></div>
+            <div class="card-topo"><span class="card-num">01</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 13l2 2 3.5-4"/></svg></span></div>
             <h3>e-Protocolo</h3>
             <p>Protocolo de escrituras com triagem guiada, dossiê documental e recibo — os 14 atos do CN2O.</p>
             <span class="card-acao">Abrir aqui →</span>
           </button>
           <button class="card" id="cardCalculadora" type="button">
-            <div class="card-topo"><span class="card-num">02</span></div>
+            <div class="card-topo"><span class="card-num">02</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 15.5h.01M12 15.5h.01M15.5 15.5h.01M8.5 12v.01"/></svg></span></div>
             <h3>Calculadora de Emolumentos</h3>
             <p>Faixa de cobrança para imóveis rurais. Tabela Emdagro 2026/2027 — tarefas/hectares e Valor de Referência por Município.</p>
             <span class="card-acao">Abrir aqui →</span>
           </button>
           <button class="card" id="cardExtrator" type="button">
-            <div class="card-topo"><span class="card-num">03</span><span class="chip-ia">IA</span></div>
-            <h3>Not-Extrator</h3>
+            <div class="card-topo"><span class="card-num">03</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 12h5M10 15h5M10 9h1.5"/></svg></span><span class="chip-ia">IA</span></div>
+            <h3>Extrator</h3>
             <p>Alimente com os PDFs e fotos dos documentos das partes — RG, CNH, certidões — e receba os dados extraídos no parágrafo pronto para a escritura.</p>
             <span class="card-acao">Usar aqui →</span>
           </button>
           <button class="card" id="cardAnalisador" type="button">
-            <div class="card-topo"><span class="card-num">04</span><span class="chip-ia">IA</span></div>
+            <div class="card-topo"><span class="card-num">04</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M15.5 15.5 20 20"/><path d="M8.5 11h5M11 8.5v5"/></svg></span><span class="chip-ia">IA</span></div>
             <h3>e-Analista</h3>
             <p>Envie a foto, o print ou o PDF da certidão — ou cole o texto — e receba o extrato jurídico com a descrição do imóvel pronta para colar.</p>
             <span class="card-acao">Usar aqui →</span>
           </button>
-          <button class="card" id="cardAgenda" type="button">
-            <div class="card-topo"><span class="card-num">05</span></div>
-            <h3>Agenda do Tabelião</h3>
-            <p>Consulte a agenda do César antes de marcar assinaturas, diligências e atos com hora.</p>
-            <span class="card-acao">Abrir aqui →</span>
+          <button class="card card-breve" id="cardMinutas" type="button">
+            <div class="card-topo"><span class="card-num">05</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L9 18l-4 1z"/><path d="M14 7l3 3"/></svg></span><span class="chip-ia">IA</span></div>
+            <h3>Gerador de Minutas</h3>
+            <p>Descreva o ato e receba a minuta no padrão CN2O, pronta para revisar. O Tabelião está calibrando o modelo.</p>
+            <span class="card-acao">Em preparação →</span>
           </button>
           <button class="card" id="cardClausulas" type="button">
-            <div class="card-topo"><span class="card-num">06</span><span class="chip-ia">Guia</span></div>
-            <h3>Cláusulas Especiais do Guia CN2O</h3>
+            <div class="card-topo"><span class="card-num">06</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h10v18l-5-3.5L7 21z"/></svg></span><span class="chip-ia chip-guia">Guia</span></div>
+            <h3>Cláusulas CN2O</h3>
             <p>Blocos prontos do Guia de Redação, por tema-tronco — um clique copia a cláusula para colar na minuta.</p>
             <span class="card-acao">Abrir cláusulas →</span>
           </button>
@@ -1079,7 +1180,7 @@ h1#saudacao.ola b{color:var(--tinta)}
       </section>
 
       <section id="linksUteis">
-        <h2 class="versalete titulo-secao">Links úteis</h2>
+        <div class="faixa-titulo faixa-clara"><h2 class="versalete faixa-palavra">Links úteis</h2></div>
         <ul class="lista-links">
           <li class="link-item">
             <a href="https://www.tjse.jus.br/cartorioextrajudicial/internet.wsp" target="_blank" rel="noopener">
@@ -1152,7 +1253,7 @@ h1#saudacao.ola b{color:var(--tinta)}
       <div class="ferramenta-cab">
         <span class="num-grande">03</span>
         <div style="flex:1;min-width:240px">
-          <h2>Not-Extrator</h2>
+          <h2>Extrator</h2>
           <p class="desc">Envie fotos ou PDF dos documentos — RG, CNH, CPF, certidões, comprovante de residência, contrato social —, cole um print com Ctrl+V ou cole o texto. A ferramenta monta a qualificação no padrão do CN2O e aponta o que falta conferir. Nada é inventado: dado ausente sai como [FALTA: …].</p>
         </div>
         <span data-chip-ia class="chip-ia">verificando IA…</span>
@@ -1643,6 +1744,7 @@ function sair() {
 }
 function mostrarApp() {
   el('saudacao').innerHTML = 'Olá, <b>' + esc(primeiroNome(SESSAO.nome)) + '</b>!';
+  fraseDoDia();
   el('avatarIni').textContent = (SESSAO.nome || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(function (n) { return n.charAt(0).toUpperCase(); }).join('') || '?';
   el('btnEditarMural').hidden = !SESSAO.admin;
   el('telaLogin').hidden = true;
@@ -1717,7 +1819,9 @@ function abrirEmbutida(chave, semHistorico) {
   mostrarPagina('paginaEmbutida', semHistorico, chave);
 }
 function aplicarLinks() {
-  el('cardAgenda').addEventListener('click', function () { abrirEmbutida('agenda', false); });
+  el('cardMinutas').addEventListener('click', function () {
+    toast('O Gerador de Minutas está em preparação pelo Tabelião — em breve aqui no Hub.');
+  });
 }
 
 /* ============================================================
@@ -1827,7 +1931,8 @@ function normalizarLocal(d) {
       data: a.data || '',
       html: a.html != null ? a.html : textoParaHtml(a.texto || ''),
       fixado: !!a.fixado,
-      estilo: a.estilo || 'padrao'
+      estilo: a.estilo || 'padrao',
+      imagem: typeof a.imagem === 'string' && a.imagem.indexOf('data:image/') === 0 ? a.imagem : ''
     };
   });
   const m = d.metas && !Array.isArray(d.metas) ? d.metas : { em_breve: true, itens: Array.isArray(d.metas) ? d.metas : [] };
@@ -1853,10 +1958,14 @@ function aniverDoMes(mes) {
     .filter(function (a) { return Number(a.mes) === mes; })
     .sort(function (a, b) { return Number(a.dia) - Number(b.dia); });
 }
+function fotoAniv(a) {
+  if (a.foto && String(a.foto).indexOf('data:image/') === 0) return '<img class="aniv-foto" src="' + esc(a.foto) + '" alt="">';
+  return '<span class="aniv-foto aniv-inicial" aria-hidden="true">' + esc((a.nome || '?').trim().charAt(0).toUpperCase()) + '</span>';
+}
 function linhaAniver(a) {
   const ag = new Date();
   const hoje = Number(a.mes) === ag.getMonth() + 1 && Number(a.dia) === ag.getDate();
-  return '<li' + (hoje ? ' class="hoje"' : '') + '><span class="mural-dia">dia ' + dd(Number(a.dia)) + '</span><span>' + esc(a.nome) + '</span></li>';
+  return '<li' + (hoje ? ' class="hoje"' : '') + '>' + fotoAniv(a) + '<span class="mural-dia">dia ' + dd(Number(a.dia)) + '</span><span>' + esc(a.nome) + '</span></li>';
 }
 const ICONE_DOC = '<svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/></svg>';
 const ICONE_PIN = '<svg viewBox="0 0 24 24"><path d="M9 3h6l-1 6 4 3v2H6v-2l4-3z"/><path d="M12 14v7"/></svg>';
@@ -1868,7 +1977,8 @@ function linhaAviso(av) {
   if (av.fixado) cls.push('fixado');
   if (av.estilo === 'importante') cls.push('importante');
   if (av.estilo === 'celebracao') cls.push('celebracao');
-  const icone = av.fixado ? ICONE_PIN : (av.estilo === 'celebracao' ? ICONE_FESTA : ICONE_DOC);
+  const icone = av.imagem ? '<img src="' + esc(av.imagem) + '" alt="">'
+    : (av.fixado ? ICONE_PIN : (av.estilo === 'celebracao' ? ICONE_FESTA : ICONE_DOC));
   return '<button class="' + cls.join(' ') + '" data-aviso="' + esc(av.id) + '" type="button">' +
     '<span class="aviso-doc">' + icone + '</span>' +
     '<span class="aviso-info"><span class="aviso-titulo">' + esc(av.titulo) + '</span><span class="aviso-data">' + esc(av.data) + (av.fixado ? ' · fixado' : '') + '</span></span>' +
@@ -1915,6 +2025,60 @@ function htmlMeta(m) {
     '<div class="meta-barra"><i style="width:' + p + '%"></i></div>' +
     (m.premio ? '<span class="meta-premio">🏆 ' + esc(m.premio) + '</span>' : '') + '</div>';
 }
+/* ============================================================
+   FRASE DO DIA — uma por colaborador, sorteada pelo dia + login
+============================================================ */
+var FRASES_DIA = [
+  ['Não é porque as coisas são difíceis que não ousamos; é porque não ousamos que elas são difíceis.', 'Sêneca'],
+  ['O que você faz hoje pode melhorar todos os seus amanhãs.', 'Ralph Marston'],
+  ['A excelência não é um ato, mas um hábito.', 'Aristóteles (por W. Durant)'],
+  ['O correr da vida embrulha tudo. A vida é assim: esquenta e esfria, aperta e daí afrouxa, sossega e depois desinquieta. O que ela quer da gente é coragem.', 'Guimarães Rosa'],
+  ['Feliz aquele que transfere o que sabe e aprende o que ensina.', 'Cora Coralina'],
+  ['A paciência é amarga, mas o seu fruto é doce.', 'Rousseau'],
+  ['Se quer ir rápido, vá sozinho; se quer ir longe, vá acompanhado.', 'provérbio africano'],
+  ['Nenhum vento sopra a favor de quem não sabe para onde ir.', 'Sêneca'],
+  ['A gentileza é a linguagem que o surdo ouve e o cego vê.', 'Mark Twain'],
+  ['Bom mesmo é ir à luta com determinação, abraçar a vida com paixão, perder com classe e vencer com ousadia.', 'atribuído a Charlie Chaplin'],
+  ['O sucesso é a soma de pequenos esforços repetidos dia após dia.', 'Robert Collier'],
+  ['Quem quer fazer alguma coisa encontra um meio; quem não quer, encontra uma desculpa.', 'provérbio árabe'],
+  ['Cada pessoa que passa em nossa vida leva um pouco de nós e deixa um pouco de si.', 'atribuído a Saint-Exupéry'],
+  ['A confiança se constrói nos detalhes: um ato bem feito de cada vez.', ''],
+  ['Servir bem é a forma mais elegante de ser grande.', ''],
+  ['O cuidado com o pequeno é o que dá segurança ao grande.', ''],
+  ['Há um tempo em que é preciso abandonar as roupas usadas, que já têm a forma do nosso corpo, e esquecer os nossos caminhos, que nos levam sempre aos mesmos lugares.', 'Fernando Teixeira de Andrade'],
+  ['Põe quanto és no mínimo que fazes.', 'Fernando Pessoa'],
+  ['A palavra é prata, o silêncio é ouro — mas a palavra certa, na hora certa, é diamante.', ''],
+  ['Não há atalho para lugar que valha a pena.', 'Beverly Sills'],
+  ['A vida não é esperar a tempestade passar: é aprender a dançar na chuva.', 'atribuído a Vivian Greene'],
+  ['Sonho que se sonha só é só um sonho que se sonha só; mas sonho que se sonha junto é realidade.', 'Raul Seixas'],
+  ['Escolhe um trabalho de que gostes, e não terás de trabalhar nem um dia na tua vida.', 'atribuído a Confúcio'],
+  ['A verdadeira força de uma equipe está em cada pessoa; a verdadeira força de cada pessoa está na equipe.', 'Phil Jackson'],
+  ['Onde há cuidado, há qualidade. Onde há pressa sem cuidado, há retrabalho.', ''],
+  ['Um documento bem lavrado é uma promessa cumprida com quem confiou na gente.', ''],
+  ['Age de tal modo que a tua conduta possa servir de exemplo universal.', 'inspirado em Kant'],
+  ['O rio atinge seus objetivos porque aprendeu a contornar obstáculos.', 'Lao Tsé'],
+  ['Devagar se vai ao longe — desde que não se pare.', 'provérbio'],
+  ['O entusiasmo é a maior força da alma.', 'atribuído a Napoleon Hill'],
+  ['Fazer o bem sem olhar a quem — e fazer o bem feito sem olhar o relógio.', ''],
+  ['A cortesia abre portas que a competência mantém abertas.', ''],
+  ['Não existe vento ruim para o barco que tem rumo e tripulação unida.', ''],
+  ['Grandes coisas nunca vêm de zonas de conforto.', ''],
+  ['Cada ato lavrado carrega a história de alguém. Trate cada história como única — porque é.', ''],
+  ['O amanhã agradece o capricho de hoje.', '']
+];
+function fraseDoDia() {
+  var caixa = el('fraseDia');
+  if (!caixa) return;
+  var d = new Date();
+  var chave = String(SESSAO.login || 'cn2o') + '|' + d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+  var hash = 0;
+  for (var i = 0; i < chave.length; i++) { hash = (hash * 31 + chave.charCodeAt(i)) >>> 0; }
+  var f = FRASES_DIA[hash % FRASES_DIA.length];
+  el('fraseTexto').textContent = f[0];
+  var autor = el('fraseAutor');
+  autor.hidden = !f[1];
+  autor.textContent = f[1] ? '— ' + f[1] : '';
+}
 function carregarMural(silencioso) {
   if (!SESSAO.token) return Promise.resolve();
   return api('/hub/mural').then(function (r) {
@@ -1957,6 +2121,7 @@ function abrirSub(tipo, chave) {
       : (av.estilo === 'celebracao' ? '<span class="sub-selo celebracao">🎉 Celebração</span>' : '');
     html = cabecalhoSub('Mural · Avisos do Tabelião', esc(av.titulo)) +
       '<p class="sub-data">Publicado em ' + esc(av.data) + (av.fixado ? ' · 📌 fixado no topo' : '') + '</p>' + selo +
+      (av.imagem ? '<img class="sub-imagem" src="' + esc(av.imagem) + '" alt="Imagem do aviso">' : '') +
       '<div class="sub-texto rico">' + limparHtml(av.html) + '</div>' +
       '<p class="sub-assina">— César Bravo, Tabelião</p>' +
       '<button class="sub-voltar" data-sub-voltar type="button">← Todos os avisos</button>';
@@ -2199,6 +2364,11 @@ function pintarAbaAvisos(painel) {
         '</div>' +
         '<label class="ed-check"><input type="checkbox" id="edAvFixado"> 📌 Fixar no topo do mural</label>' +
         '<div id="edAvEditor"></div>' +
+        '<div class="ed-img-linha">' +
+          '<label class="btn-fantasma ed-arquivo">📷 Imagem do aviso (opcional)<input type="file" id="edAvImg" accept="image/jpeg,image/png,image/webp" hidden></label>' +
+          '<img id="edAvImgPrev" class="ed-img-prev" alt="" hidden>' +
+          '<button type="button" class="btn-fantasma" id="edAvImgRm" hidden>✕ Remover imagem</button>' +
+        '</div>' +
         '<div class="linha-botoes"><button type="button" class="btn-vinho" id="edAvSalvar">' + (e.indice != null ? 'Salvar alterações do aviso' : 'Adicionar ao mural') + '</button>' +
         '<button type="button" class="btn-fantasma" id="edAvCancelar">Cancelar</button></div>' +
       '</div>';
@@ -2210,6 +2380,21 @@ function pintarAbaAvisos(painel) {
     pintarEstilo();
     ED.editor = criarEditorRico(av.html || '');
     el('edAvEditor').appendChild(ED.editor.elemento);
+    let imagemAviso = av.imagem || '';
+    function pintarImgAviso() {
+      const pv = el('edAvImgPrev'), rm = el('edAvImgRm');
+      pv.hidden = !imagemAviso; rm.hidden = !imagemAviso;
+      if (imagemAviso) pv.src = imagemAviso;
+    }
+    pintarImgAviso();
+    el('edAvImg').addEventListener('change', function () {
+      const f = this.files && this.files[0]; this.value = '';
+      if (!f) return;
+      imagemMural(f, 1400, 0.82, 1200000).then(function (d) {
+        imagemAviso = d; pintarImgAviso();
+      }).catch(function (er) { toast('Não deu para usar essa imagem: ' + er.message, true); });
+    });
+    el('edAvImgRm').addEventListener('click', function () { imagemAviso = ''; pintarImgAviso(); });
     el('edAvCancelar').addEventListener('click', function () { ED.editando = null; ED.editor = null; pintarAba(); });
     el('edAvSalvar').addEventListener('click', function () {
       const titulo = el('edAvTitulo').value.trim();
@@ -2219,9 +2404,9 @@ function pintarAbaAvisos(painel) {
       if (html.length > 30000) { toast('Aviso longo demais — divida em dois.', true); return; }
       if (e.indice != null) {
         const alvo = avisos[e.indice];
-        alvo.titulo = titulo; alvo.html = html; alvo.estilo = estilo; alvo.fixado = el('edAvFixado').checked;
+        alvo.titulo = titulo; alvo.html = html; alvo.estilo = estilo; alvo.fixado = el('edAvFixado').checked; alvo.imagem = imagemAviso;
       } else {
-        avisos.unshift({ id: 'av' + Date.now().toString(36), titulo: titulo, data: hojeBR(), html: html, estilo: estilo, fixado: el('edAvFixado').checked });
+        avisos.unshift({ id: 'av' + Date.now().toString(36), titulo: titulo, data: hojeBR(), html: html, estilo: estilo, fixado: el('edAvFixado').checked, imagem: imagemAviso });
       }
       ED.editando = null; ED.editor = null;
       marcarSujo('Aviso pronto — clique em “Publicar mural” para a equipe ver.');
@@ -2262,9 +2447,13 @@ function pintarAbaAniver(painel) {
   const ord = lista.map(function (a, i) { return { a: a, i: i }; }).sort(function (x, y) { return (x.a.mes - y.a.mes) || (x.a.dia - y.a.dia); });
   painel.innerHTML =
     '<ul class="ed-lista">' + (ord.length ? ord.map(function (x) {
-      return '<li class="ed-item"><b>' + esc(x.a.nome) + '</b><small>' + dd(Number(x.a.dia)) + ' de ' + MESES[Number(x.a.mes) - 1] + '</small>' +
-        '<span class="ed-acoes"><button type="button" class="ed-btn" data-rm="' + x.i + '" title="Remover">✕</button></span></li>';
+      return '<li class="ed-item ed-item-foto">' + fotoAniv(x.a) + '<b>' + esc(x.a.nome) + '</b><small>' + dd(Number(x.a.dia)) + ' de ' + MESES[Number(x.a.mes) - 1] + '</small>' +
+        '<span class="ed-acoes">' +
+          '<button type="button" class="ed-btn" data-foto="' + x.i + '" title="' + (x.a.foto ? 'Trocar a foto' : 'Adicionar foto') + '">📷</button>' +
+          (x.a.foto ? '<button type="button" class="ed-btn" data-fotorm="' + x.i + '" title="Remover a foto">🚫</button>' : '') +
+          '<button type="button" class="ed-btn" data-rm="' + x.i + '" title="Remover">✕</button></span></li>';
     }).join('') : '<li class="ed-vazio">Nenhum aniversariante cadastrado.</li>') + '</ul>' +
+    '<input type="file" id="edAnFoto" accept="image/jpeg,image/png,image/webp" hidden>' +
     '<div class="ed-form ed-linha">' +
       '<input type="text" id="edAnNome" placeholder="Nome" maxlength="60">' +
       '<input type="number" id="edAnDia" min="1" max="31" placeholder="Dia">' +
@@ -2275,6 +2464,19 @@ function pintarAbaAniver(painel) {
     '<div class="ed-form"><textarea id="edAnLote" rows="3" placeholder="Um por linha, no formato  Nome - dd/mm   (ex.: Josilene - 12/03)"></textarea>' +
     '<button class="btn-fantasma" id="edAnLoteAdd" type="button">Adicionar todos</button></div>';
   el('edAnMes').value = String(new Date().getMonth() + 1);
+  let fotoAlvo = null;
+  el('edAnFoto').addEventListener('change', function () {
+    const f = this.files && this.files[0]; this.value = '';
+    if (!f || fotoAlvo == null || !lista[fotoAlvo]) return;
+    const quem = fotoAlvo; fotoAlvo = null;
+    imagemMural(f, 240, 0.85, 160000).then(function (d) {
+      lista[quem].foto = d;
+      marcarSujo('Foto de ' + lista[quem].nome + ' pronta — publique para valer.');
+      pintarAba();
+    }).catch(function (er) { toast('Não deu para usar essa foto: ' + er.message, true); });
+  });
+  painel.querySelectorAll('[data-foto]').forEach(function (b) { b.addEventListener('click', function () { fotoAlvo = +b.dataset.foto; el('edAnFoto').click(); }); });
+  painel.querySelectorAll('[data-fotorm]').forEach(function (b) { b.addEventListener('click', function () { delete lista[+b.dataset.fotorm].foto; marcarSujo(); pintarAba(); }); });
   painel.querySelectorAll('[data-rm]').forEach(function (b) { b.addEventListener('click', function () { lista.splice(+b.dataset.rm, 1); marcarSujo(); pintarAba(); }); });
   el('edAnAdd').addEventListener('click', function () {
     const n = el('edAnNome').value.trim(), d = parseInt(el('edAnDia').value, 10), m = parseInt(el('edAnMes').value, 10);
@@ -2411,7 +2613,7 @@ function pintarAbaConsumo(painel) {
   api('/hub/ia/uso').then(function (linhas) {
     if (!ED || ED.aba !== 'consumo') return;
     if (!linhas || !linhas.length) { painel.innerHTML = '<p class="ed-vazio">Nenhuma análise de IA neste mês ainda.</p>'; return; }
-    const nomes = { qualificacao: 'Not-Extrator', matricula: 'e-Analista' };
+    const nomes = { qualificacao: 'Extrator', matricula: 'e-Analista' };
     let total = 0, usos = 0;
     const corpo = linhas.map(function (l) {
       total += Number(l.custo_usd) || 0; usos += Number(l.usos) || 0;
@@ -2531,6 +2733,26 @@ function prepararImagem(f) {
     g.drawImage(bmp, 0, 0, c.width, c.height);
     return new Promise(function (res) { c.toBlob(function (b) { res({ blob: b || f, mime: b ? 'image/jpeg' : mime }); }, 'image/jpeg', 0.86); });
   }).catch(function () { return { blob: f, mime: mime || 'image/jpeg' }; });
+}
+// Imagem do mural (foto de aniversariante ou imagem de aviso) vira data URL leve.
+function imagemMural(f, lado, qualidade, maxChars) {
+  if (typeof createImageBitmap !== 'function') return Promise.reject(new Error('navegador sem suporte'));
+  return createImageBitmap(f).then(function (bmp) {
+    function gerar(l, q) {
+      const escala = Math.min(1, l / Math.max(bmp.width, bmp.height));
+      const cv = document.createElement('canvas');
+      cv.width = Math.max(1, Math.round(bmp.width * escala));
+      cv.height = Math.max(1, Math.round(bmp.height * escala));
+      const g = cv.getContext('2d');
+      g.fillStyle = '#ffffff'; g.fillRect(0, 0, cv.width, cv.height);
+      g.drawImage(bmp, 0, 0, cv.width, cv.height);
+      return cv.toDataURL('image/jpeg', q);
+    }
+    let d = gerar(lado, qualidade);
+    if (d.length > maxChars) d = gerar(Math.round(lado * 0.75), 0.72);
+    if (d.length > maxChars) throw new Error('a imagem ficou pesada mesmo comprimida — use uma menor');
+    return d;
+  });
 }
 function criarAnexos(raiz) {
   const input = raiz.querySelector('input[type=file]');
