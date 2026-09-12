@@ -1192,6 +1192,21 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 .con-fases .cf-data{font-size:13.5px}
 .con-pend li{font-size:15.5px}
 
+
+/* ============================================================
+   v1.18 — Extrator por botões (uma função por botão)
+   ============================================================ */
+.botoes-extrair{display:grid;grid-template-columns:1fr;gap:10px;margin-top:8px}
+.btn-extrair{display:flex;align-items:center;gap:12px;text-align:left;padding:13px 16px;border-radius:12px;line-height:1.35;width:100%}
+.btn-extrair .be-ico{flex:0 0 auto;display:grid;place-items:center;width:34px;height:34px;border-radius:9px;background:rgba(255,255,255,.16)}
+.btn-extrair .be-ico svg{width:20px;height:20px;fill:none;stroke:#ffffff;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.btn-extrair .be-txt{display:flex;flex-direction:column;gap:2px;min-width:0}
+.btn-extrair .be-txt b{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;letter-spacing:.04em}
+.btn-extrair .be-txt small{font-family:'Lato',sans-serif;font-weight:400;font-size:12.5px;letter-spacing:0;text-transform:none;opacity:.85;white-space:normal}
+.btn-extrair:disabled{opacity:.45;cursor:not-allowed}
+.botoes-extrair .btn-vinho:nth-child(2){background:linear-gradient(135deg,#2b3850 0%,#202a3a 65%,#161e2b 100%)}
+.botoes-extrair .btn-vinho:nth-child(2):hover{filter:brightness(1.12)}
+
 </style>
 </head>
 <body>
@@ -1367,7 +1382,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
           <button class="card" id="cardExtrator" type="button">
             <div class="card-topo"><span class="card-num">03</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 12h5M10 15h5M10 9h1.5"/></svg></span><span class="chip-ia">IA</span></div>
             <h3>Extrator</h3>
-            <p>Alimente com os PDFs e fotos dos documentos das partes — RG, CNH, certidões — e receba os dados extraídos no parágrafo pronto para a escritura.</p>
+            <p>Suba a foto ou o PDF e escolha o botão: <b>qualificação</b> das partes (RG, CNH, certidões) ou <b>descrição do imóvel</b> pela matrícula — prontas para colar.</p>
             <span class="card-acao">Usar aqui →</span>
           </button>
           <button class="card" id="cardAnalisador" type="button">
@@ -1622,14 +1637,14 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
         <span class="num-grande">03</span>
         <div style="flex:1;min-width:240px">
           <h2>Extrator</h2>
-          <p class="desc">Envie fotos ou PDF dos documentos — RG, CNH, CPF, certidões, comprovante de residência, contrato social —, cole um print com Ctrl+V ou cole o texto. A ferramenta monta a qualificação no padrão do CN2O e aponta o que falta conferir. Nada é inventado: dado ausente sai como [FALTA: …].</p>
+          <p class="desc">Suba o documento — foto, print (Ctrl+V) ou PDF — e <b>escolha o que extrair</b>. Cada botão é uma função: <b>Extrair qualificação</b> lê RG, CNH, CPF e certidões (nascimento, casamento, óbito) e monta a qualificação no padrão do CN2O; <b>Extrair descrição do imóvel</b> lê a matrícula ou a certidão de inteiro teor e devolve a descrição vigente, ipsis litteris, pronta para colar. Nada é inventado: dado ausente sai como [FALTA: …].</p>
         </div>
         <span data-chip-ia class="chip-ia">verificando IA…</span>
       </div>
       <div class="duas-colunas">
         <div class="col-entrada">
           <div class="zona-anexos" data-anexos="ext">
-            <label class="rotulo versalete">Documentos em foto ou PDF</label>
+            <label class="rotulo versalete">Documento em foto, print ou PDF</label>
             <div class="anexo-drop">
               <input type="file" accept="image/*,application/pdf" multiple hidden>
               <button class="btn-fantasma" data-anexar type="button">Adicionar foto ou PDF</button>
@@ -1641,16 +1656,26 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
           </div>
           <label class="rotulo versalete" for="entradaExtrator" style="margin-top:6px">…e/ou cole o texto dos documentos</label>
           <textarea id="entradaExtrator" placeholder="Cole aqui os textos dos documentos, mesmo desordenados…"></textarea>
-          <div class="linha-botoes">
-            <button id="btnGerar" class="btn-vinho" type="button">Gerar qualificação</button>
+          <p class="rotulo versalete" style="margin:14px 0 0">O que você quer extrair deste documento?</p>
+          <div class="linha-botoes botoes-extrair">
+            <button id="btnGerar" class="btn-vinho btn-extrair" type="button">
+              <span class="be-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8z"/><path d="M4.5 20c.9-3.4 3.9-5.5 7.5-5.5s6.6 2.1 7.5 5.5"/></svg></span>
+              <span class="be-txt"><b>Extrair qualificação</b><small>RG, CNH, CPF, certidões de nascimento, casamento ou óbito</small></span>
+            </button>
+            <button id="btnDescricao" class="btn-vinho btn-extrair" type="button">
+              <span class="be-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5"/><path d="M6 10v10h12V10"/><path d="M9.5 20v-5h5v5"/></svg></span>
+              <span class="be-txt"><b>Extrair descrição do imóvel</b><small>matrícula ou certidão de inteiro teor — descrição vigente, ipsis litteris</small></span>
+            </button>
+          </div>
+          <div class="linha-botoes" style="margin-top:10px">
             <button id="btnExemploExt" class="btn-fantasma" type="button">Ver exemplo</button>
             <button id="btnLimparExt" class="btn-fantasma" type="button">Limpar</button>
           </div>
           <p class="nota-ia" data-nota-ia></p>
         </div>
         <div class="painel">
-          <div class="painel-cab versalete"><span>Qualificação</span><button id="btnCopiarExt" class="btn-copiar" type="button" hidden>Copiar</button></div>
-          <pre id="saidaExtrator" class="saida vazia" aria-live="polite">A qualificação pronta aparecerá aqui, no formato QUALIFICAÇÃO PRONTA + ⚠ CONFERIR.</pre>
+          <div class="painel-cab versalete"><span id="rotuloSaidaExt">Resultado da extração</span><button id="btnCopiarExt" class="btn-copiar" type="button" hidden>Copiar</button></div>
+          <pre id="saidaExtrator" class="saida vazia" aria-live="polite">Suba o documento e escolha um botão: a qualificação pronta ou a descrição vigente do imóvel aparece aqui, sempre com o bloco ⚠ CONFERIR.</pre>
           <div id="metaExt" class="assinatura"></div>
         </div>
       </div>
@@ -3401,43 +3426,66 @@ function processarExtrato(t) {
 const FERRAMENTAS = {};
 function montarFerramenta(cfg) {
   const pagina = el(cfg.pagina), entrada = el(cfg.entrada), saida = el(cfg.saida), meta = el(cfg.meta),
-    btn = el(cfg.btnRodar), btnCop = el(cfg.btnCopiar), btnEx = el(cfg.btnExemplo), btnLimpar = el(cfg.btnLimpar);
+    btnCop = el(cfg.btnCopiar), btnEx = el(cfg.btnExemplo), btnLimpar = el(cfg.btnLimpar);
   const anexos = criarAnexos(pagina.querySelector('[data-anexos]'));
   const textoVazio = saida.textContent;
   let ctrl = null, rodando = false, relogio = null;
 
+  // v1.18 — MODOS: cada botão é uma função da ferramenta (o Extrator tem dois:
+  // qualificação das partes e descrição do imóvel). Sem cfg.modos, segue o
+  // botão único de sempre.
+  const MODOS = (cfg.modos || [{ btn: cfg.btnRodar }]).map(function (m) {
+    const alvo = el(m.btn);
+    return {
+      el: alvo,
+      rotuloHtml: alvo.innerHTML,
+      ferramenta: m.ferramenta || cfg.ferramenta,
+      assinatura: m.assinatura || cfg.assinatura,
+      pedirEntrada: m.pedirEntrada || cfg.pedirEntrada,
+      processar: m.processar || cfg.processar,
+      rotuloSaida: m.rotuloSaida || null,
+      msgProgresso: m.msgProgresso || cfg.msgProgresso
+    };
+  });
+  function travarOutros(ativo, travar) {
+    MODOS.forEach(function (m) { if (m.el !== ativo) m.el.disabled = travar; });
+  }
+
   function voltarVazio(texto) { saida.classList.add('vazia'); saida.textContent = texto; }
-  btn.addEventListener('click', function () {
+  MODOS.forEach(function (modo) { modo.el.addEventListener('click', function () { rodar(modo); }); });
+  function rodar(modo) {
+    const btn = modo.el;
     if (rodando) { if (ctrl) ctrl.abort(); return; }
     if (cfg.validar) { const err = cfg.validar(); if (err) { toast(err, true); return; } }
     const texto = (cfg.obterTexto ? cfg.obterTexto() : entrada.value).trim();
     const arqs = anexos.itens();
-    if (!texto && !arqs.length) { toast(cfg.pedirEntrada); entrada.focus(); return; }
+    if (!texto && !arqs.length) { toast(modo.pedirEntrada); if (!entrada.hidden) entrada.focus(); return; }
     if (IA_STATUS.configurada === false) { voltarVazio('A IA ainda não foi ligada no servidor — avise o Tabelião.'); return; }
-    rodando = true; btn.textContent = 'Interromper';
+    rodando = true; btn.textContent = 'Interromper'; travarOutros(btn, true);
+    if (modo.rotuloSaida && el('rotuloSaidaExt')) el('rotuloSaidaExt').textContent = modo.rotuloSaida;
     saida.classList.remove('vazia'); btnCop.hidden = true; meta.textContent = '';
     if (cfg.aoIniciar) cfg.aoIniciar();
     const t0 = Date.now();
     function pintar() {
       const s = Math.round((Date.now() - t0) / 1000);
-      saida.innerHTML = '<span class="progresso-ia"><span class="giro"></span>' + esc(cfg.msgProgresso(arqs.length)) + ' · ' + s + ' s</span>';
+      saida.innerHTML = '<span class="progresso-ia"><span class="giro"></span>' + esc(modo.msgProgresso(arqs.length)) + ' · ' + s + ' s</span>';
     }
     pintar(); relogio = setInterval(pintar, 1000);
     ctrl = new AbortController();
     Promise.all(arqs.map(function (a) {
       return blobParaBase64(a.blob).then(function (b64) { return { nome: a.nome, mime: a.mime, base64: b64 }; });
     })).then(function (arquivos) {
-      return api('/hub/ia/' + cfg.ferramenta, { corpo: { texto: texto, arquivos: arquivos }, sinal: ctrl.signal });
+      return api('/hub/ia/' + modo.ferramenta, { corpo: { texto: texto, arquivos: arquivos }, sinal: ctrl.signal });
     }).then(function (r) {
       clearInterval(relogio);
-      saida.textContent = cfg.processar ? cfg.processar(r.texto) : r.texto;
+      saida.textContent = modo.processar ? modo.processar(r.texto) : r.texto;
       btnCop.hidden = false;
       if (cfg.aoConcluir) cfg.aoConcluir(r, saida.textContent);
       const custo = r.custo_usd ? ' · US$ ' + Number(r.custo_usd).toFixed(4).replace('.', ',') : '';
       const duplaLeitura = r.ocr && r.ocr.ativo
         ? ' · Dupla leitura OCR: ' + (r.ocr.palavras_incertas ? r.ocr.palavras_incertas + ' palavra(s) incerta(s) marcada(s)' : 'sem palavras incertas')
         : '';
-      meta.textContent = cfg.assinatura + ' ' + (SESSAO.nome || '—') + ' · ' + agoraCurto() +
+      meta.textContent = modo.assinatura + ' ' + (SESSAO.nome || '—') + ' · ' + agoraCurto() +
         (r.modelo ? ' · ' + nomeModelo(r.modelo) : '') + ' · ' + Math.max(1, Math.round((r.ms || (Date.now() - t0)) / 1000)) + ' s' + custo + duplaLeitura;
     }).catch(function (e) {
       clearInterval(relogio);
@@ -3450,9 +3498,9 @@ function montarFerramenta(cfg) {
       else if (e.status === 0) voltarVazio('Sem conexão com o servidor. Verifique a internet e tente de novo — seus anexos continuam aqui.');
       else voltarVazio('A IA não conseguiu concluir: ' + e.erro + '\n\nTente de novo em instantes; se persistir, avise o Tabelião.');
     }).then(function () {
-      rodando = false; btn.textContent = cfg.rotuloRodar; ctrl = null;
+      rodando = false; btn.innerHTML = modo.rotuloHtml; travarOutros(btn, false); ctrl = null;
     });
-  });
+  }
   btnCop.addEventListener('click', function () { copiar(saida.textContent).then(function () { toast('✓ Copiado'); }); });
   btnEx.addEventListener('click', function () {
     entrada.value = cfg.exemplo; entrada.focus();
@@ -3461,6 +3509,7 @@ function montarFerramenta(cfg) {
   btnLimpar.addEventListener('click', function () {
     if (rodando) return;
     entrada.value = ''; anexos.limpar(); btnCop.hidden = true; meta.textContent = '';
+    if (el('rotuloSaidaExt')) el('rotuloSaidaExt').textContent = 'Resultado da extração';
     voltarVazio(textoVazio);
     if (cfg.aoIniciar) cfg.aoIniciar();
   });
@@ -3545,11 +3594,23 @@ document.querySelectorAll('[data-voltar]').forEach(function (b) {
 });
 
 montarFerramenta({
-  ferramenta: 'qualificacao', pagina: 'paginaExtrator', exemplo: EXEMPLO_EXTRATOR,
+  pagina: 'paginaExtrator', exemplo: EXEMPLO_EXTRATOR,
   entrada: 'entradaExtrator', saida: 'saidaExtrator', meta: 'metaExt',
-  btnRodar: 'btnGerar', rotuloRodar: 'Gerar qualificação', btnCopiar: 'btnCopiarExt', btnExemplo: 'btnExemploExt', btnLimpar: 'btnLimparExt',
-  assinatura: 'Qualificação gerada para', pedirEntrada: 'Anexe os documentos ou cole o texto antes de continuar.',
-  msgProgresso: function (n) { return n ? 'Lendo ' + n + ' documento(s) e montando a qualificação' : 'Montando a qualificação'; }
+  btnCopiar: 'btnCopiarExt', btnExemplo: 'btnExemploExt', btnLimpar: 'btnLimparExt',
+  modos: [
+    {
+      btn: 'btnGerar', ferramenta: 'qualificacao', rotuloSaida: 'Qualificação',
+      assinatura: 'Qualificação gerada para',
+      pedirEntrada: 'Suba o documento (foto, print ou PDF) ou cole o texto antes de extrair.',
+      msgProgresso: function (n) { return n ? 'Lendo ' + n + ' documento(s) e montando a qualificação' : 'Montando a qualificação'; }
+    },
+    {
+      btn: 'btnDescricao', ferramenta: 'descricao', rotuloSaida: 'Descrição do imóvel',
+      assinatura: 'Descrição extraída para',
+      pedirEntrada: 'Suba a matrícula ou a certidão de inteiro teor (foto, print ou PDF) antes de extrair.',
+      msgProgresso: function (n) { return n ? 'Lendo ' + n + ' documento(s) e montando a descrição vigente' : 'Montando a descrição vigente'; }
+    }
+  ]
 });
 montarFerramenta({
   ferramenta: 'matricula', pagina: 'paginaAnalisador', exemplo: EXEMPLO_ANALISADOR,
