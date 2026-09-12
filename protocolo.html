@@ -465,6 +465,14 @@ function perguntasInventario(){
       {v:'Sim — casamento', aviso:'Meação conforme o regime de bens; o sobrevivente participa como meeiro(a).'},
       {v:'Sim — união estável', inj:['Prova da união estável (Tema 809 STF)'], aviso:'O gerador insere a cláusula de legitimação do(a) companheiro(a) (Tema 809 STF).'}
     ]},
+    {id:'inv_regime', titulo:'Regime de bens do casamento do falecido', dependeDe:['sobrevivente','Sim — casamento'], ops:[
+      {v:'Comunhão parcial'},
+      {v:'Comunhão universal', inj:['Pacto antenupcial — escritura ou certidão do registro no RI (do casal — se casados após a Lei 6.515/77)'], aviso:'Define a meação sobre todo o acervo; exigir o pacto se o casamento for posterior à Lei 6.515/77.'},
+      {v:'Comunhão universal (antes da Lei 6.515/77)'},
+      {v:'Separação convencional', inj:['Pacto antenupcial — escritura ou certidão do registro no RI (do casal)']},
+      {v:'Separação obrigatória (art. 1.641 CC)', aviso:'Súmula 377 do STF: comunicam-se os aquestos — verificar bens adquiridos na constância.'},
+      {v:'Participação final nos aquestos', inj:['Pacto antenupcial — escritura ou certidão do registro no RI (do casal)']}
+    ]},
     {id:'incapaz', titulo:'Há herdeiro menor ou incapaz?', ops:[
       {v:'Não'},
       {v:'Sim', aviso:'O inventário extrajudicial exige que todos os herdeiros sejam capazes (art. 610 CPC) — verificar a viabilidade antes de seguir.'}
@@ -502,10 +510,11 @@ const CIVIL_OPS=(pref)=>[
 ];
 const REGIME_OPS=[
   {v:'Comunhão parcial'},
-  {v:'Comunhão universal'},
-  {v:'Separação convencional', inj:['Pacto antenupcial registrado']},
+  {v:'Comunhão universal', inj:['Pacto antenupcial — escritura ou certidão do registro no RI (casamentos após a Lei 6.515/77)']},
+  {v:'Comunhão universal (antes da Lei 6.515/77)'},
+  {v:'Separação convencional', inj:['Pacto antenupcial — escritura ou certidão do registro no RI']},
   {v:'Separação obrigatória (art. 1.641 CC)'},
-  {v:'Participação final nos aquestos', inj:['Pacto antenupcial registrado']}
+  {v:'Participação final nos aquestos', inj:['Pacto antenupcial — escritura ou certidão do registro no RI']}
 ];
 const FILHOS_Q=(quem)=>[
   {id:'filhos', titulo:'Filhos comuns?', ops:[
@@ -638,9 +647,25 @@ function perguntasPermuta(){
     {id:'multi1', titulo:'Permutante 1 — mais de uma pessoa?', ops:[{v:'Não'},{v:'Sim', inj:['RG/CPF e certidões de estado civil de todos do lado 1']}]},
     {id:'qtd1', titulo:'Permutante 1 — quantos?', dependeDe:['multi1','Sim'], ops:QTDS.map(n=>({v:n}))},
     {id:'civil1', titulo:'Permutante 1 — estado civil', ops:CIVIL_OPS('perm. 1')},
+    {id:'regime1', titulo:'Permutante 1 — regime de bens', dependeDe:['civil1','Casado(a)'], ops:[
+      {v:'Comunhão parcial', inj:['RG/CPF do cônjuge do perm. 1 (vênia — art. 1.647 CC)']},
+      {v:'Comunhão universal', inj:['RG/CPF do cônjuge do perm. 1 (participa transmitindo)','Pacto antenupcial — escritura ou certidão do registro no RI (perm. 1)'], aviso:'Comunhão universal (pós-Lei 6.515/77) é convencional: exigir o pacto.'},
+      {v:'Separação convencional', inj:['Pacto antenupcial — escritura ou certidão do registro no RI (perm. 1)'], aviso:'Separação absoluta: dispensa a vênia (art. 1.647, caput); o pacto prova o regime.'},
+      {v:'Separação obrigatória (art. 1.641 CC)', inj:['RG/CPF do cônjuge do perm. 1 (anuência por cautela — Súmula 377 STF)']},
+      {v:'Participação final nos aquestos', inj:['Pacto antenupcial — escritura ou certidão do registro no RI (perm. 1)','RG/CPF do cônjuge do perm. 1 (anuência — art. 1.656 CC)']},
+      {v:'Comunhão (antes da Lei 6.515/77)', inj:['RG/CPF do cônjuge do perm. 1 (participa transmitindo)']}
+    ]},
     {id:'multi2', titulo:'Permutante 2 — mais de uma pessoa?', ops:[{v:'Não'},{v:'Sim', inj:['RG/CPF e certidões de estado civil de todos do lado 2']}]},
     {id:'qtd2', titulo:'Permutante 2 — quantos?', dependeDe:['multi2','Sim'], ops:QTDS.map(n=>({v:n}))},
     {id:'civil2', titulo:'Permutante 2 — estado civil', ops:CIVIL_OPS('perm. 2')},
+    {id:'regime2', titulo:'Permutante 2 — regime de bens', dependeDe:['civil2','Casado(a)'], ops:[
+      {v:'Comunhão parcial', inj:['RG/CPF do cônjuge do perm. 2 (vênia — art. 1.647 CC)']},
+      {v:'Comunhão universal', inj:['RG/CPF do cônjuge do perm. 2 (participa transmitindo)','Pacto antenupcial — escritura ou certidão do registro no RI (perm. 2)'], aviso:'Comunhão universal (pós-Lei 6.515/77) é convencional: exigir o pacto.'},
+      {v:'Separação convencional', inj:['Pacto antenupcial — escritura ou certidão do registro no RI (perm. 2)'], aviso:'Separação absoluta: dispensa a vênia (art. 1.647, caput); o pacto prova o regime.'},
+      {v:'Separação obrigatória (art. 1.641 CC)', inj:['RG/CPF do cônjuge do perm. 2 (anuência por cautela — Súmula 377 STF)']},
+      {v:'Participação final nos aquestos', inj:['Pacto antenupcial — escritura ou certidão do registro no RI (perm. 2)','RG/CPF do cônjuge do perm. 2 (anuência — art. 1.656 CC)']},
+      {v:'Comunhão (antes da Lei 6.515/77)', inj:['RG/CPF do cônjuge do perm. 2 (participa transmitindo)']}
+    ]},
     {id:'titulo_reg', titulo:'Títulos anteriores registrados nas matrículas?', ops:[
       {v:'Sim'},
       {v:'Não', aviso:'O gerador incluirá a cláusula de continuidade registral.'}
@@ -855,10 +880,12 @@ function perguntasDoAto(ato){
     {v:'União estável', inj:['Declaração/escritura de união estável (se houver)']}
   ]});
   Q.push({id:'t_regime', titulo:`${P.t} — regime de bens`, dependeDe:['t_civil','Casado(a)'], ops:[
-    {v:'Comunhão parcial', inj:['RG/CPF do cônjuge (vênia)']},
-    {v:'Comunhão universal', inj:['RG/CPF do cônjuge (participa transmitindo)']},
-    {v:'Separação convencional', inj:['Pacto antenupcial registrado']},
-    {v:'Comunhão (antes da Lei 6.515/77)', inj:['RG/CPF do cônjuge (participa transmitindo)']}
+    {v:'Comunhão parcial', inj:['RG/CPF do cônjuge (vênia — art. 1.647 CC)']},
+    {v:'Comunhão universal', inj:['RG/CPF do cônjuge (participa transmitindo)','Pacto antenupcial — escritura ou certidão do registro no RI (transmitente)'], aviso:'Comunhão universal é regime convencional (casamentos após a Lei 6.515/77): exigir o pacto antenupcial — escritura ou certidão do registro no RI.'},
+    {v:'Separação convencional', inj:['Pacto antenupcial — escritura ou certidão do registro no RI (transmitente)'], aviso:'Separação absoluta convencional: a venda dispensa a vênia conjugal (art. 1.647, caput, CC); o pacto prova o regime.'},
+    {v:'Separação obrigatória (art. 1.641 CC)', inj:['RG/CPF do cônjuge (anuência por cautela — Súmula 377 STF)'], aviso:'Regime legal: NÃO há pacto. Súmula 377 do STF: comunicam-se os aquestos — colher a anuência do cônjuge por cautela.'},
+    {v:'Participação final nos aquestos', inj:['Pacto antenupcial — escritura ou certidão do registro no RI (transmitente)','RG/CPF do cônjuge (anuência — art. 1.656 CC)'], aviso:'Exigir o pacto; a anuência do cônjuge é dispensável apenas se o pacto autorizar a livre disposição (art. 1.656 CC).'},
+    {v:'Comunhão (antes da Lei 6.515/77)', inj:['RG/CPF do cônjuge (participa transmitindo)'], aviso:'Regime legal da época: não há pacto a exigir.'}
   ]});
   Q.push({id:'t_origem_bem', titulo:'Imóvel — origem na titularidade do transmitente', dependeDe:['t_tipo','Pessoa física'], ops:[
     {v:'Adquirido no casamento'},
@@ -888,8 +915,11 @@ function perguntasDoAto(ato){
   ]});
   Q.push({id:'a_regime', titulo:`${P.a} — regime de bens`, dependeDe:['a_civil','Casado(a)'], ops:[
     {v:'Comunhão parcial'},
-    {v:'Comunhão universal'},
-    {v:'Separação convencional', inj:['Pacto antenupcial registrado (adquirente)']}
+    {v:'Comunhão universal', inj:['Pacto antenupcial — escritura ou certidão do registro no RI (adquirente)']},
+    {v:'Separação convencional', inj:['Pacto antenupcial — escritura ou certidão do registro no RI (adquirente)']},
+    {v:'Separação obrigatória (art. 1.641 CC)'},
+    {v:'Participação final nos aquestos', inj:['Pacto antenupcial — escritura ou certidão do registro no RI (adquirente)']},
+    {v:'Comunhão (antes da Lei 6.515/77)'}
   ]});
   // Múltiplos adquirentes — só a quantidade; nomes e qualificação saem da guia no Momento 3
   Q.push({id:'a_qtd', titulo:`${P.a} — quantos?`, dependeDe:['a_civil','Múltiplos adquirentes'], ops:QTDS.map(n=>({v:n}))});
@@ -991,7 +1021,7 @@ function perguntasDoAto(ato){
       {v:'Negócio misto — sobrevivente VENDE a meação + herdeiros CEDEM a herança', aviso:'Muda a nomenclatura do ato e exige cláusula especial: a meação NÃO é herança — conforme o regime, o sobrevivente já é proprietário de 50% e VENDE essa fração ideal; apenas a metade dos herdeiros é inventariada/partilhada e objeto de cessão. Seguir o padrão próprio do negócio misto (Módulo 3-B).'}
     ]});
     Q.push({id:'origem_meacao', titulo:'Origem da meação do sobrevivente', dependeDe:['config','Negócio misto — sobrevivente VENDE a meação + herdeiros CEDEM a herança'], ops:[
-      {v:'Casamento — comunhão universal', aviso:'Meação de 50% sobre todo o acervo.'},
+      {v:'Casamento — comunhão universal', inj:['Pacto antenupcial — escritura ou certidão do registro no RI (do casal — se casados após a Lei 6.515/77)'], aviso:'Meação de 50% sobre todo o acervo; exigir o pacto se o casamento for posterior à Lei 6.515/77.'},
       {v:'Casamento — comunhão parcial (bem adquirido na constância)', aviso:'Meação de 50% sobre o bem comum; conferir na matrícula/certidão a aquisição na constância.'},
       {v:'União estável', inj:['Prova da união estável (Tema 809 STF)'], aviso:'O gerador insere a cláusula de legitimação da meeira/meeiro (Tema 809 STF).'}
     ]});
@@ -1323,6 +1353,15 @@ function renderPerguntas(){
 
 function itensDossie(){
   const itens=[...dossieBase(S.ato)];
+  if(S.ato==='TEST'){
+    const civ=S.qtest.civil, reg=S.qtest.regime;
+    if(civ==='Casado(a)') itens.push('Certidão de casamento do testador');
+    if(civ==='Divorciado(a)') itens.push('Certidão de casamento do testador com averbação do divórcio');
+    if(civ==='Viúvo(a)') itens.push('Certidão de casamento do testador com averbação de óbito');
+    if(civ==='União estável') itens.push('Escritura/declaração de união estável do testador (se houver)');
+    if(civ==='Casado(a)' && (reg==='Comunhão universal'||reg==='Separação convencional'))
+      itens.push('Pacto antenupcial — escritura ou certidão do registro no RI (testador)');
+  }
   perguntasDoAto(S.ato).forEach(q=>{
     if(!visivel(q) || !q.ops) return;
     const r=S.respostas[q.id]; if(!r) return;

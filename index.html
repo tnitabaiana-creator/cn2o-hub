@@ -959,8 +959,8 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 :root[data-theme="dark"] .card-ico svg{stroke:#f2d7dc}
 
 /* saudação de boas-vindas: manuscrita e calorosa */
-.topo-ola{font-family:'Caveat','Segoe Script',cursive;font-size:29px;font-weight:700;letter-spacing:.01em;line-height:1}
-.topo-ola b{font-weight:700}
+.topo-ola{font-family:'Caveat','Segoe Script',cursive;font-size:24px;font-weight:600;letter-spacing:.01em;line-height:1}
+.topo-ola b{font-weight:700;font-size:31px}
 
 /* Frase do Dia — um cumprimento humano entre a chegada e o mural */
 .frase-dia{position:relative;display:flex;gap:16px;align-items:flex-start;
@@ -1049,6 +1049,20 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 #paginaMinutas .col-entrada textarea{min-height:180px}
 #paginaMinutas .linha-botoes{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
 
+/* v1.13 — Gerador PROC / UE: entrevista, botão grande e selo da lateral */
+.lat-tradicao{font-size:13px}
+.min-entrevista{display:flex;flex-direction:column;gap:14px;background:var(--card);border:1px solid var(--cartao-borda);border-radius:12px;padding:18px 20px}
+.min-grupo{color:var(--vinho);letter-spacing:.18em;margin-bottom:-4px}
+.grade-min{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px 16px}
+.min-campo{display:flex;flex-direction:column;gap:6px;font-family:'Montserrat',sans-serif;font-weight:600;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--tinta-suave)}
+.min-campo input,.min-campo textarea{border:1.5px solid var(--cartao-borda);border-radius:9px;padding:11px 12px;font-family:'Lato',sans-serif;font-size:16px;background:var(--card);color:var(--tinta);text-transform:none;letter-spacing:0}
+.min-campo input:focus,.min-campo textarea:focus{outline:2px solid var(--vinho);outline-offset:1px}
+.min-campo .ed-chips{display:flex;flex-wrap:wrap;gap:8px}
+.linha-gerar{margin-top:2px}
+.btn-gerar-minuta{font-size:15px;padding:16px 44px;border-radius:12px;letter-spacing:.14em;box-shadow:0 10px 24px rgba(99,19,37,.3)}
+.btn-gerar-minuta:disabled{opacity:.55;box-shadow:none}
+#minutaLinkBox{font-size:14.5px}
+
 </style>
 </head>
 <body>
@@ -1121,7 +1135,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
     </nav>
     <div class="lat-foto" aria-hidden="true">
       <div class="lat-foto-veu"></div>
-      <p class="lat-tradicao">Tradição<br>e confiança</p>
+      <p class="lat-tradicao">Tradição,<br>Confiança<br>e Disrupção</p>
     </div>
   </aside>
 
@@ -1334,14 +1348,112 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
         <label class="ed-check termo-check"><input type="checkbox" id="minCiente2">
           <span>Estou ciente de que a <b>inobservância dessa regra pode implicar responsabilidade disciplinar</b>.</span></label>
       </div>
-      <div class="col-entrada">
-        <label class="rotulo versalete" for="minPedido">Descreva a procuração ou a união estável</label>
-        <textarea id="minPedido" disabled placeholder="Em preparação — o Tabelião está calibrando o modelo. Os termos acima já valem para o uso."></textarea>
-        <div class="linha-botoes">
-          <button class="btn-vinho" id="btnGerarMinuta" type="button" disabled>Gerar minuta</button>
-          <span class="nota-ia" id="minNota">Marque as duas caixas de ciência para liberar o botão.</span>
-        </div>
+      <div class="ed-chips" id="minTipo" style="margin-top:2px">
+        <button type="button" class="ed-chip ativo" data-min-tipo="ue">Escritura de união estável</button>
+        <button type="button" class="ed-chip" data-min-tipo="proc" disabled title="Aguardando o modelo do Tabelião">Procuração — em preparação</button>
       </div>
+
+      <div id="minEntrevista" class="min-entrevista">
+        <p class="rotulo versalete min-grupo">Convivente 1</p>
+        <div class="grade-min">
+          <label class="min-campo">Nome completo *<input type="text" id="minC1Nome" autocomplete="off"></label>
+          <label class="min-campo">CPF<input type="text" id="minC1Cpf" autocomplete="off"></label>
+          <label class="min-campo">Profissão<input type="text" id="minC1Prof" autocomplete="off"></label>
+          <label class="min-campo">Estado civil
+            <span class="ed-chips" data-min-chips="c1civil">
+              <button type="button" class="ed-chip" data-v="Solteiro(a)">Solteiro(a)</button>
+              <button type="button" class="ed-chip" data-v="Divorciado(a)">Divorciado(a)</button>
+              <button type="button" class="ed-chip" data-v="Viúvo(a)">Viúvo(a)</button>
+              <button type="button" class="ed-chip" data-v="Casado(a), separado(a) de fato">Casado(a), sep. de fato</button>
+            </span></label>
+        </div>
+        <p class="rotulo versalete min-grupo">Convivente 2</p>
+        <div class="grade-min">
+          <label class="min-campo">Nome completo *<input type="text" id="minC2Nome" autocomplete="off"></label>
+          <label class="min-campo">CPF<input type="text" id="minC2Cpf" autocomplete="off"></label>
+          <label class="min-campo">Profissão<input type="text" id="minC2Prof" autocomplete="off"></label>
+          <label class="min-campo">Estado civil
+            <span class="ed-chips" data-min-chips="c2civil">
+              <button type="button" class="ed-chip" data-v="Solteiro(a)">Solteiro(a)</button>
+              <button type="button" class="ed-chip" data-v="Divorciado(a)">Divorciado(a)</button>
+              <button type="button" class="ed-chip" data-v="Viúvo(a)">Viúvo(a)</button>
+              <button type="button" class="ed-chip" data-v="Casado(a), separado(a) de fato">Casado(a), sep. de fato</button>
+            </span></label>
+        </div>
+        <p class="rotulo versalete min-grupo">A união</p>
+        <div class="grade-min">
+          <label class="min-campo">Residência comum (endereço completo)<input type="text" id="minEndereco" autocomplete="off"></label>
+          <label class="min-campo">Início da convivência *<input type="date" id="minInicio"></label>
+          <label class="min-campo">Regime de bens
+            <span class="ed-chips" data-min-chips="regime">
+              <button type="button" class="ed-chip ativo" data-v="Comunhão parcial (regra legal — art. 1.725 CC)">Comunhão parcial</button>
+              <button type="button" class="ed-chip" data-v="Separação total de bens">Separação total</button>
+              <button type="button" class="ed-chip" data-v="Comunhão universal">Comunhão universal</button>
+              <button type="button" class="ed-chip" data-v="Outro — detalhar nas observações">Outro</button>
+            </span></label>
+          <label class="min-campo">Advieram filhos da união?
+            <span class="ed-chips" data-min-chips="filhos">
+              <button type="button" class="ed-chip ativo" data-v="Não">Não</button>
+              <button type="button" class="ed-chip" data-v="Sim">Sim</button>
+            </span></label>
+        </div>
+        <label class="min-campo" id="minFilhosBox" hidden>Filhos — nomes e datas de nascimento
+          <textarea id="minFilhos" rows="2" placeholder="Ex.: Maria (12/03/2020); João (05/08/2023)"></textarea></label>
+        <label class="min-campo">Acréscimo do sobrenome do outro convivente?
+          <span class="ed-chips" data-min-chips="nome">
+            <button type="button" class="ed-chip ativo" data-v="Ninguém altera o nome">Ninguém altera</button>
+            <button type="button" class="ed-chip" data-v="Convivente 1 acrescenta">Convivente 1</button>
+            <button type="button" class="ed-chip" data-v="Convivente 2 acrescenta">Convivente 2</button>
+            <button type="button" class="ed-chip" data-v="Ambos acrescentam">Ambos</button>
+          </span></label>
+        <div class="grade-min" id="minNomesBox" hidden>
+          <label class="min-campo" id="minNome1Box" hidden>Convivente 1 — nome completo APÓS a união<input type="text" id="minNome1" autocomplete="off"></label>
+          <label class="min-campo" id="minNome2Box" hidden>Convivente 2 — nome completo APÓS a união<input type="text" id="minNome2" autocomplete="off"></label>
+        </div>
+        <p class="aviso" id="minAvisoLivroE" hidden>⚠ A escritura consignará que os efeitos da alteração do nome ficam condicionados ao registro no Livro E do Registro Civil das Pessoas Naturais (RCPN).</p>
+        <div class="grade-min">
+          <label class="min-campo">Assinatura pelo e-Notariado?
+            <span class="ed-chips" data-min-chips="enot">
+              <button type="button" class="ed-chip" data-v="Sim">Sim</button>
+              <button type="button" class="ed-chip ativo" data-v="Não">Não</button>
+            </span></label>
+        </div>
+        <label class="min-campo">Observações para a minuta<textarea id="minObs" rows="2" placeholder="Particularidades que devem constar (opcional)"></textarea></label>
+      </div>
+
+      <div class="zona-anexos" data-anexos="min">
+        <label class="rotulo versalete">Documentos apresentados — certidões de nascimento/casamento e identificação (foto ou PDF)</label>
+        <div class="anexo-drop">
+          <input type="file" accept="image/*,application/pdf" multiple hidden>
+          <button class="btn-fantasma" data-anexar type="button">Adicionar foto ou PDF</button>
+          <span class="anexo-dica">arraste aqui ou cole um print direto (Ctrl+V)</span>
+        </div>
+        <ul class="anexo-lista"></ul>
+        <p class="cont-anexos"></p>
+        <p class="aviso" data-aviso-anexo hidden></p>
+      </div>
+
+      <div class="linha-botoes linha-gerar">
+        <button class="btn-vinho btn-gerar-minuta" id="btnGerarMinuta" type="button" disabled>Gerar minuta</button>
+        <span class="nota-ia" id="minNota">Marque as duas caixas de ciência para liberar o botão.</span>
+      </div>
+
+      <div class="painel" style="border-radius:12px">
+        <div class="painel-cab"><span class="versalete">Minuta gerada</span>
+          <span>
+            <button class="btn-copiar" id="btnCopiarMin" type="button" hidden>Copiar</button>
+            <button class="btn-copiar" id="btnExemploMin" type="button" hidden>Exemplo</button>
+            <button class="btn-copiar" id="btnLimparMin" type="button">Limpar</button>
+          </span></div>
+        <div class="saida vazia" id="saidaMinuta">Preencha a entrevista, anexe os documentos apresentados e clique em GERAR MINUTA.</div>
+        <p class="assinatura" id="metaMin"></p>
+      </div>
+      <div class="aviso" id="minutaLinkBox" hidden>
+        ✓ Minuta guardada na plataforma — link permanente:
+        <a href="#" id="minutaLinkA" style="color:var(--vinho);font-weight:700;word-break:break-all"></a>
+        <button class="btn-mini" id="btnCopiarLinkMin" type="button" style="margin-left:8px">Copiar link</button>
+      </div>
+      <textarea id="minPedido" hidden></textarea>
     </div>
     <div id="paginaExtrator" hidden style="display:flex;flex-direction:column;gap:14px">
       <button class="voltar" data-voltar type="button">← Voltar ao hub</button>
@@ -1871,6 +1983,21 @@ function mostrarPagina(id, semHistorico, rota) {
   }
 }
 function abrirRota(rota, semHistorico) {
+  if (rota && rota.indexOf('minuta=') === 0) {
+    mostrarPagina('paginaMinutas', semHistorico, rota);
+    const id = rota.slice(7);
+    api('/hub/minutas/' + encodeURIComponent(id)).then(function (m) {
+      const s = el('saidaMinuta');
+      s.classList.remove('vazia'); s.textContent = m.texto;
+      el('btnCopiarMin').hidden = false;
+      el('metaMin').textContent = m.titulo + ' · guardada por ' + (m.criado_por || '—') + ' · ' + quandoCurto(m.em);
+    }).catch(function (e) {
+      const s = el('saidaMinuta');
+      s.classList.add('vazia');
+      s.textContent = e.status === 404 ? 'Minuta não encontrada — o link pode estar errado.' : 'Não consegui carregar a minuta (' + (e.erro || 'erro') + ').';
+    });
+    return;
+  }
   if (rota === 'protocolo' || rota === 'calculadora' || rota === 'agenda') { abrirEmbutida(rota, semHistorico); return; }
   if (ROTAS[rota]) { mostrarPagina(ROTAS[rota], semHistorico, rota); return; }
   mostrarPagina('paginaHub', semHistorico);
@@ -1916,19 +2043,87 @@ function abrirEmbutida(chave, semHistorico) {
 function aplicarLinks() {
   el('cardMinutas').addEventListener('click', function () { mostrarPagina('paginaMinutas', false, 'minutas'); });
   (function () {
+    const MIN = { c1civil: '', c2civil: '', regime: 'Comunhão parcial (regra legal — art. 1.725 CC)', filhos: 'Não', nome: 'Ninguém altera o nome', enot: 'Não' };
+    document.querySelectorAll('[data-min-chips]').forEach(function (grupo) {
+      grupo.querySelectorAll('.ed-chip').forEach(function (b) {
+        b.addEventListener('click', function () {
+          grupo.querySelectorAll('.ed-chip').forEach(function (x) { x.classList.remove('ativo'); });
+          b.classList.add('ativo');
+          MIN[grupo.dataset.minChips] = b.dataset.v;
+          reverCondicionais();
+        });
+      });
+    });
+    function reverCondicionais() {
+      el('minFilhosBox').hidden = MIN.filhos !== 'Sim';
+      const n = MIN.nome;
+      const um = n === 'Convivente 1 acrescenta' || n === 'Ambos acrescentam';
+      const dois = n === 'Convivente 2 acrescenta' || n === 'Ambos acrescentam';
+      el('minNomesBox').hidden = !(um || dois);
+      el('minNome1Box').hidden = !um;
+      el('minNome2Box').hidden = !dois;
+      el('minAvisoLivroE').hidden = n === 'Ninguém altera o nome';
+    }
+    function dataBR(iso) {
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+      return m ? m[3] + '/' + m[2] + '/' + m[1] : (iso || '');
+    }
+    function entrevistaTexto() {
+      const v = function (id) { return (el(id).value || '').trim(); };
+      const L = [];
+      L.push('=== ENTREVISTA — ESCRITURA DE UNIÃO ESTÁVEL (Hub CN2O) ===');
+      L.push('CONVIVENTE 1: ' + v('minC1Nome') + (v('minC1Cpf') ? ' | CPF ' + v('minC1Cpf') : '') + (v('minC1Prof') ? ' | profissão: ' + v('minC1Prof') : '') + (MIN.c1civil ? ' | estado civil: ' + MIN.c1civil : ''));
+      L.push('CONVIVENTE 2: ' + v('minC2Nome') + (v('minC2Cpf') ? ' | CPF ' + v('minC2Cpf') : '') + (v('minC2Prof') ? ' | profissão: ' + v('minC2Prof') : '') + (MIN.c2civil ? ' | estado civil: ' + MIN.c2civil : ''));
+      if (v('minEndereco')) L.push('RESIDÊNCIA COMUM: ' + v('minEndereco'));
+      L.push('INÍCIO DA CONVIVÊNCIA: ' + dataBR(v('minInicio')));
+      L.push('REGIME DE BENS: ' + MIN.regime);
+      L.push('FILHOS DA UNIÃO: ' + (MIN.filhos === 'Sim' ? 'Sim — ' + (v('minFilhos') || '[FALTA: nomes e datas]') : 'Não'));
+      if (MIN.nome === 'Ninguém altera o nome') L.push('NOME APÓS A UNIÃO: ninguém altera o nome.');
+      else {
+        L.push('NOME APÓS A UNIÃO: ' + MIN.nome + '.');
+        if (!el('minNome1Box').hidden) L.push('  Convivente 1 passará a assinar: ' + (v('minNome1') || '[FALTA: composição do nome]'));
+        if (!el('minNome2Box').hidden) L.push('  Convivente 2 passará a assinar: ' + (v('minNome2') || '[FALTA: composição do nome]'));
+        L.push('  RESSALVA OBRIGATÓRIA: efeitos da alteração do nome condicionados ao registro da escritura no Livro E do RCPN.');
+      }
+      L.push('ASSINATURA PELO e-NOTARIADO: ' + MIN.enot);
+      if (v('minObs')) L.push('OBSERVAÇÕES: ' + v('minObs'));
+      return L.join('\n');
+    }
     const c1 = el('minCiente1'), c2 = el('minCiente2'), btn = el('btnGerarMinuta'), nota = el('minNota');
     function rever() {
       const ok = c1.checked && c2.checked;
       btn.disabled = !ok;
-      nota.textContent = ok
-        ? 'Ciência registrada. O motor está em preparação pelo Tabelião — em breve, gera aqui mesmo.'
+      nota.textContent = ok ? 'Preencha a entrevista, anexe os documentos e gere a minuta.'
         : 'Marque as duas caixas de ciência para liberar o botão.';
     }
     c1.addEventListener('change', rever); c2.addEventListener('change', rever);
-    btn.addEventListener('click', function () {
-      toast('O motor do Gerador PROC / UE está em preparação pelo Tabelião — em breve aqui no Hub.');
+    rever(); reverCondicionais();
+
+    montarFerramenta({
+      ferramenta: 'minuta_ue', pagina: 'paginaMinutas', exemplo: '',
+      entrada: 'minPedido', saida: 'saidaMinuta', meta: 'metaMin',
+      btnRodar: 'btnGerarMinuta', rotuloRodar: 'Gerar minuta',
+      btnCopiar: 'btnCopiarMin', btnExemplo: 'btnExemploMin', btnLimpar: 'btnLimparMin',
+      assinatura: 'Minuta gerada para', pedirEntrada: 'Preencha a entrevista antes de gerar.',
+      obterTexto: entrevistaTexto,
+      validar: function () {
+        if (!(c1.checked && c2.checked)) return 'Marque as duas caixas de ciência.';
+        if (!el('minC1Nome').value.trim() || !el('minC2Nome').value.trim()) return 'Informe o nome completo dos dois conviventes.';
+        if (!el('minInicio').value) return 'Informe a data de início da convivência.';
+        return null;
+      },
+      aoConcluir: function (r, texto) {
+        const titulo = 'UE — ' + (el('minC1Nome').value.trim() || '…') + ' e ' + (el('minC2Nome').value.trim() || '…');
+        api('/hub/minutas', { corpo: { titulo: titulo, texto: texto } }).then(function (resp) {
+          const link = location.origin + location.pathname + '#minuta=' + resp.id;
+          el('minutaLinkA').textContent = link;
+          el('minutaLinkA').href = link;
+          el('minutaLinkBox').hidden = false;
+          el('btnCopiarLinkMin').onclick = function () { copiar(link).then(function () { toast('✓ Link copiado'); }); };
+        }).catch(function () { toast('A minuta saiu, mas não consegui guardar o link — copie o texto.', true); });
+      },
+      msgProgresso: function (n) { return n ? 'Lendo ' + n + ' documento(s) e redigindo a minuta' : 'Redigindo a minuta'; }
     });
-    rever();
   })();
 }
 
@@ -2119,7 +2314,10 @@ function renderMural() {
 
   const metas = MURAL.metas || { em_breve: true, itens: [] };
   const caixaMetas = el('muralMetas');
-  if (metas.em_breve || !metas.itens.length) {
+  const metasFechadas = metas.em_breve || !metas.itens.length;
+  const verMetas = document.querySelector('[data-sub="metas"]');
+  if (verMetas) verMetas.hidden = metasFechadas;
+  if (metasFechadas) {
     caixaMetas.innerHTML = '<div class="carimbo-breve" aria-label="Em breve"><span>Em breve</span></div>';
   } else {
     caixaMetas.innerHTML = '<div class="metas-lista">' + metas.itens.slice(0, 3).map(htmlMeta).join('') + '</div>';
@@ -2311,7 +2509,8 @@ function abrirSub(tipo, chave) {
       (seguinte.length ? '<p class="sub-eyebrow" style="margin-top:18px">Em ' + MESES[prox - 1] + '</p><ul class="mural-lista">' + seguinte.map(linhaAniver).join('') + '</ul>' : '');
   } else if (tipo === 'metas') {
     const metas = MURAL.metas || { em_breve: true, itens: [] };
-    if (metas.em_breve || !metas.itens.length) {
+    if (metas.em_breve || !metas.itens.length) return; // em breve: o cartão fica fechado, sem subpágina
+    if (false) {
       html = cabecalhoSub('Mural · Metas CN2O', 'Em breve — e valendo prêmio') +
         '<div class="sub-texto">O quadro de metas está a caminho, do jeito que uma boa promessa merece: a cada mês, um desafio claro para a equipe — e, para quem bater, premiações e bônus de verdade.\n\nO Tabelião está calibrando os primeiros indicadores. Quando a primeira meta do mês entrar aqui, ela já entra valendo. Prepare-se.</div>';
     } else {
@@ -3044,7 +3243,8 @@ function montarFerramenta(cfg) {
   function voltarVazio(texto) { saida.classList.add('vazia'); saida.textContent = texto; }
   btn.addEventListener('click', function () {
     if (rodando) { if (ctrl) ctrl.abort(); return; }
-    const texto = entrada.value.trim();
+    if (cfg.validar) { const err = cfg.validar(); if (err) { toast(err, true); return; } }
+    const texto = (cfg.obterTexto ? cfg.obterTexto() : entrada.value).trim();
     const arqs = anexos.itens();
     if (!texto && !arqs.length) { toast(cfg.pedirEntrada); entrada.focus(); return; }
     if (IA_STATUS.configurada === false) { voltarVazio('A IA ainda não foi ligada no servidor — avise o Tabelião.'); return; }
@@ -3066,6 +3266,7 @@ function montarFerramenta(cfg) {
       clearInterval(relogio);
       saida.textContent = cfg.processar ? cfg.processar(r.texto) : r.texto;
       btnCop.hidden = false;
+      if (cfg.aoConcluir) cfg.aoConcluir(r, saida.textContent);
       const custo = r.custo_usd ? ' · US$ ' + Number(r.custo_usd).toFixed(4).replace('.', ',') : '';
       meta.textContent = cfg.assinatura + ' ' + (SESSAO.nome || '—') + ' · ' + agoraCurto() +
         (r.modelo ? ' · ' + nomeModelo(r.modelo) : '') + ' · ' + Math.max(1, Math.round((r.ms || (Date.now() - t0)) / 1000)) + ' s' + custo;
