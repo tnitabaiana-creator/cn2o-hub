@@ -3356,6 +3356,8 @@ function criarAnexos(raiz) {
 let IA_STATUS = { configurada: null, modelo: null };
 function nomeModelo(m) {
   if (!m) return '';
+  var apelidos = { 'gemini-pro-latest': 'Gemini Pro (vigente)', 'gemini-flash-latest': 'Gemini Flash (vigente)', 'gemini-flash-lite-latest': 'Gemini Flash-Lite (vigente)' };
+  if (apelidos[m]) return apelidos[m];
   return String(m).replace(/^gemini-/i, 'Gemini ').replace(/-flash-lite/i, ' Flash-Lite').replace(/-flash/i, ' Flash').replace(/-pro/i, ' Pro');
 }
 function pintarIA() {
