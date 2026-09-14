@@ -1277,29 +1277,112 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 
 /* ===== Redator CN2O (v1.26) — seletor de tipo de comunicação =====
    Sete tipos, sete formalidades. O tipo escolhido muda quais campos aparecem,
-   para a escrevente não preencher cargo e órgão para mandar um WhatsApp. */
-.red-tipos{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px}
-.red-tipo{display:flex;align-items:center;gap:10px;text-align:left;width:100%;
+   para a escrevente não preencher cargo e órgão para mandar um WhatsApp.
+   (.min-atos/.min-ato: alias do Gerador de Minuta, v1.27 — mesmo desenho, sem acoplar) */
+.red-tipos,.min-atos{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px}
+.red-tipo,.min-ato{display:flex;align-items:center;gap:10px;text-align:left;width:100%;
   padding:10px 12px;border-radius:11px;line-height:1.3;cursor:pointer;
   border:1.5px solid var(--cartao-borda);background:var(--card);color:var(--tinta)}
-.red-tipo:hover{border-color:rgba(99,19,37,.45)}
-.red-tipo:focus-visible{outline:2px solid var(--vinho);outline-offset:2px}
-.red-tipo .rt-ico{flex:0 0 auto;display:grid;place-items:center;width:30px;height:30px;
+.red-tipo:hover,.min-ato:hover{border-color:rgba(99,19,37,.45)}
+.red-tipo:focus-visible,.min-ato:focus-visible{outline:2px solid var(--vinho);outline-offset:2px}
+.red-tipo .rt-ico,.min-ato .rt-ico{flex:0 0 auto;display:grid;place-items:center;width:30px;height:30px;
   border-radius:8px;background:rgba(32,42,58,.08)}
-.red-tipo .rt-ico svg{width:18px;height:18px;fill:none;stroke:var(--marinho);stroke-width:1.7;
+.red-tipo .rt-ico svg,.min-ato .rt-ico svg{width:18px;height:18px;fill:none;stroke:var(--marinho);stroke-width:1.7;
   stroke-linecap:round;stroke-linejoin:round}
-.red-tipo .rt-txt{display:flex;flex-direction:column;gap:1px;min-width:0}
-.red-tipo .rt-txt b{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13.5px;letter-spacing:.03em}
-.red-tipo .rt-txt small{font-family:'Lato',sans-serif;font-size:12px;color:var(--tinta-suave);white-space:normal}
-.red-tipo.ativo{background:var(--vinho);border-color:var(--vinho);color:#ffffff}
-.red-tipo.ativo .rt-ico{background:rgba(255,255,255,.18)}
-.red-tipo.ativo .rt-ico svg{stroke:#ffffff}
-.red-tipo.ativo .rt-txt small{color:rgba(255,255,255,.88)}
+.red-tipo .rt-txt,.min-ato .rt-txt{display:flex;flex-direction:column;gap:1px;min-width:0}
+.red-tipo .rt-txt b,.min-ato .rt-txt b{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13.5px;letter-spacing:.03em}
+.red-tipo .rt-txt small,.min-ato .rt-txt small{font-family:'Lato',sans-serif;font-size:12px;color:var(--tinta-suave);white-space:normal}
+.red-tipo.ativo,.min-ato.ativo{background:var(--vinho);border-color:var(--vinho);color:#ffffff}
+.red-tipo.ativo .rt-ico,.min-ato.ativo .rt-ico{background:rgba(255,255,255,.18)}
+.red-tipo.ativo .rt-ico svg,.min-ato.ativo .rt-ico svg{stroke:#ffffff}
+.red-tipo.ativo .rt-txt small,.min-ato.ativo .rt-txt small{color:rgba(255,255,255,.88)}
 .grade-red{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}
 .red-dica{margin:8px 0 0;font-family:'Lato',sans-serif;font-size:13.5px;color:var(--tinta-suave)}
 @media (max-width:520px){
-  .red-tipos{grid-template-columns:1fr}
-  .red-tipo .rt-txt b{font-size:14px}
+  .red-tipos,.min-atos{grid-template-columns:1fr}
+  .red-tipo .rt-txt b,.min-ato .rt-txt b{font-size:14px}
+}
+
+/* ===== Gerador de Minuta (v1.27) — entrevista dirigida por ato =====
+   Cinco atos, cinco entrevistas. A escrevente informa fatos (chips) e a vontade
+   das partes; o quadro da DECISÃO DO ROTEADOR abre a resposta. Regra da casa:
+   nunca texto claro sobre fundo escuro no que se lê; só vinho/marinho/branco. */
+.min-passo{margin:4px 0 -4px;font-size:12.5px;font-family:'Montserrat',sans-serif;font-weight:700;letter-spacing:.16em;color:var(--marinho)}
+.min-lema{font-size:15.5px;line-height:1.55;color:var(--tinta-suave);margin:-2px 0 2px}
+.min-lema b{color:var(--tinta)}
+.min-ato-bloco{display:flex;flex-direction:column;gap:14px}
+.min-sub{color:var(--marinho);letter-spacing:.14em;margin:0}
+.min-campo > span:first-child{display:block}
+.min-nota{display:block;font-family:'Lato',sans-serif;font-weight:400;font-size:13.5px;line-height:1.5;letter-spacing:0;text-transform:none;color:var(--tinta-suave)}
+.min-largo{grid-column:1 / -1}
+.min-linha{display:flex;gap:8px;flex-wrap:wrap}
+.min-linha input{flex:1 1 160px;min-width:0}
+.min-fins{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}
+.min-fins .ed-chip{border-radius:10px;padding:11px 10px;text-align:center;font-size:13px;line-height:1.3;white-space:normal}
+.min-pessoas{display:flex;flex-direction:column;gap:10px}
+.min-pessoa{border:1px dashed var(--card-borda);border-radius:10px;padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.min-pessoa-titulo{font-family:'Montserrat',sans-serif;font-weight:700;font-size:12.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--vinho);margin:0}
+.min-aviso-poderes{margin-top:0;font-weight:700}
+.min-poderes{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:6px 12px;margin-top:8px}
+.min-poder{display:flex;align-items:flex-start;gap:9px;font-family:'Lato',sans-serif;font-size:15px;line-height:1.4;color:var(--tinta);cursor:pointer;padding:5px 2px}
+.min-poder input{width:18px;height:18px;flex:none;margin-top:2px;accent-color:var(--vinho)}
+.min-poder small{color:var(--tinta-suave);font-size:12.5px}
+#paginaMinutas .ed-chip{font-size:13px;padding:7px 13px;line-height:1.25}
+#paginaMinutas .ed-chip:hover{border-color:rgba(99,19,37,.5)}
+#paginaMinutas .ed-chip:focus-visible{outline:2px solid var(--vinho);outline-offset:2px}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) #paginaMinutas .ed-chip{color:rgba(242,240,236,.85);border-color:rgba(255,255,255,.28)}
+  :root:not([data-theme="light"]) #paginaMinutas .ed-chip.ativo{background:#ffffff;border-color:#ffffff;color:#202a3a}
+  :root:not([data-theme="light"]) .min-passo{color:#c7d2e2}
+}
+:root[data-theme="dark"] #paginaMinutas .ed-chip{color:rgba(242,240,236,.85);border-color:rgba(255,255,255,.28)}
+:root[data-theme="dark"] #paginaMinutas .ed-chip.ativo{background:#ffffff;border-color:#ffffff;color:#202a3a}
+:root[data-theme="dark"] .min-passo{color:#c7d2e2}
+
+/* o quadro da decisão do roteador: fundo claro, borda marinho; vinho quando bloqueada */
+.min-decisao{background:var(--leitura-caixa);border:1.5px solid var(--marinho);border-radius:10px;padding:14px 18px;display:flex;flex-direction:column;gap:8px}
+.min-decisao .md-cab{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0}
+.min-decisao .md-cab-dev{margin-top:6px;padding-top:10px;border-top:1px solid var(--leitura-linha)}
+.min-decisao .md-rotulo{font-size:12.5px;letter-spacing:.18em;font-weight:700;color:var(--marinho)}
+.min-decisao .md-estado{font-family:'Montserrat',sans-serif;font-weight:800;font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:4px 11px;border-radius:999px;background:rgba(32,42,58,.08);color:var(--marinho)}
+.min-decisao .md-estado:empty{display:none}
+.min-decisao .md-texto{font-family:'Atkinson Hyperlegible','Lato',sans-serif;font-size:18px;line-height:1.75;letter-spacing:.012em;color:var(--leitura-texto);white-space:pre-wrap;word-break:break-word}
+.min-decisao .md-linha{padding:1px 0}
+.min-decisao .md-linha b{color:var(--marinho)}
+.min-decisao .md-cont{padding-left:18px}
+.min-decisao.bloqueada{border-color:var(--vinho);border-width:2px}
+.min-decisao.bloqueada .md-rotulo,.min-decisao.bloqueada .md-linha b{color:var(--vinho)}
+.min-decisao.bloqueada .md-estado{background:rgba(99,19,37,.09);color:var(--vinho)}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .min-decisao{border-color:rgba(255,255,255,.4)}
+  :root:not([data-theme="light"]) .min-decisao .md-rotulo,:root:not([data-theme="light"]) .min-decisao .md-linha b{color:#c7d2e2}
+  :root:not([data-theme="light"]) .min-decisao .md-estado{background:rgba(255,255,255,.12);color:#f0f3f8}
+  :root:not([data-theme="light"]) .min-decisao.bloqueada{border-color:#f2d7dc}
+  :root:not([data-theme="light"]) .min-decisao.bloqueada .md-rotulo,:root:not([data-theme="light"]) .min-decisao.bloqueada .md-linha b,:root:not([data-theme="light"]) .min-decisao.bloqueada .md-estado{color:#f2d7dc}
+}
+:root[data-theme="dark"] .min-decisao{border-color:rgba(255,255,255,.4)}
+:root[data-theme="dark"] .min-decisao .md-rotulo,:root[data-theme="dark"] .min-decisao .md-linha b{color:#c7d2e2}
+:root[data-theme="dark"] .min-decisao .md-estado{background:rgba(255,255,255,.12);color:#f0f3f8}
+:root[data-theme="dark"] .min-decisao.bloqueada{border-color:#f2d7dc}
+:root[data-theme="dark"] .min-decisao.bloqueada .md-rotulo,:root[data-theme="dark"] .min-decisao.bloqueada .md-linha b,:root[data-theme="dark"] .min-decisao.bloqueada .md-estado{color:#f2d7dc}
+#paginaMinutas .painel .saida{min-height:160px}
+#minutaLinkA{color:var(--vinho);font-weight:700;word-break:break-all}
+/* tema escuro: o vinho some sobre o marinho — rótulos de grupo, ícones dos atos e o link ganham o tom claro */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .min-grupo,:root:not([data-theme="light"]) .min-pessoa-titulo,:root:not([data-theme="light"]) .min-sub{color:#f2d7dc}
+  :root:not([data-theme="light"]) #minutaLinkA{color:#ffffff}
+  :root:not([data-theme="light"]) .red-tipo .rt-ico,:root:not([data-theme="light"]) .min-ato .rt-ico{background:rgba(255,255,255,.1)}
+  :root:not([data-theme="light"]) .red-tipo .rt-ico svg,:root:not([data-theme="light"]) .min-ato .rt-ico svg{stroke:#c7d2e2}
+}
+:root[data-theme="dark"] .min-grupo,:root[data-theme="dark"] .min-pessoa-titulo,:root[data-theme="dark"] .min-sub{color:#f2d7dc}
+:root[data-theme="dark"] #minutaLinkA{color:#ffffff}
+:root[data-theme="dark"] .red-tipo .rt-ico,:root[data-theme="dark"] .min-ato .rt-ico{background:rgba(255,255,255,.1)}
+:root[data-theme="dark"] .red-tipo .rt-ico svg,:root[data-theme="dark"] .min-ato .rt-ico svg{stroke:#c7d2e2}
+:root[data-theme="dark"] .red-tipo.ativo .rt-ico svg,:root[data-theme="dark"] .min-ato.ativo .rt-ico svg{stroke:#ffffff}
+@media (max-width:520px){
+  .min-fins{grid-template-columns:repeat(2,1fr)}
+  .min-poderes{grid-template-columns:1fr}
+  .min-decisao{padding:12px 14px}
 }
 
 </style>
@@ -1486,10 +1569,10 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
             <p>Envie a foto, o print ou o PDF da certidão e receba o extrato jurídico com a descrição do imóvel pronta para colar.</p>
             <span class="card-acao">Usar aqui →</span>
           </button>
-          <button class="card card-breve" id="cardMinutas" type="button">
+          <button class="card" id="cardMinutas" type="button">
             <div class="card-topo"><span class="card-num">05</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L9 18l-4 1z"/><path d="M14 7l3 3"/></svg></span><span class="chip-ia">IA</span></div>
-            <h3>Gerador PROC / UE</h3>
-            <p>Minuta somente procurações, em suas diversas variáveis, e escrituras de união estável, em suas variações. Apenas isso.</p>
+            <h3>Gerador de Minuta</h3>
+            <p>Cinco atos — procuração, união estável, dissolução de união estável, divórcio sem partilha e emancipação. A escrevente informa os fatos; o Gerador decide a variante correta, bloqueia o que não pode ser lavrado e devolve a qualificação ao Tabelião quando a hipótese sai do trilho.</p>
             <span class="card-acao">Abrir aqui →</span>
           </button>
           <button class="card" id="cardClausulas" type="button">
@@ -1582,99 +1665,523 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
       <div class="moldura" id="molduraEmbutida"></div>
     </div>
 
-    <!-- ===== VIEW: EXTRATOR ===== -->
+    <!-- ===== VIEW: GERADOR DE MINUTA (v1.27 — entrevista dirigida por ato) =====
+         A escrevente informa FATOS e a vontade das partes; nenhum botão se chama
+         "modelo". A tela monta a ficha do contrato (docs/GERADOR-MINUTA-SPEC.md §2)
+         e lê a resposta no formato §5 (DECISÃO DO ROTEADOR → minuta | qualificação
+         devolvida → ⚠ CONFERIR). Os blocos repetidos de outorgante/outorgado da
+         procuração são gerados pelo app.js (função montarPessoasProc). -->
     <div id="paginaMinutas" hidden style="display:flex;flex-direction:column;gap:14px">
       <button class="voltar" data-voltar type="button">← Voltar ao hub</button>
       <div class="ferramenta-cab">
         <span class="num-grande">05</span>
         <div style="flex:1;min-width:240px">
-          <h2>Gerador PROC / UE</h2>
-          <p class="desc">Esta ferramenta destina-se <b>exclusivamente</b> à minuta de <b>procurações</b>, em suas diversas variáveis, e de <b>escrituras de união estável</b>, em suas variações. Nenhum outro ato deve ser minutado por aqui.</p>
+          <h2>Gerador de Minuta</h2>
+          <p class="desc">Esta ferramenta serve <b>exclusivamente</b> a cinco atos: <b>procuração</b>, <b>união estável</b>, <b>dissolução de união estável</b>, <b>divórcio sem partilha</b> e <b>emancipação</b>. A escrevente <b>não escolhe modelo</b> — informa os fatos e a vontade das partes; o Gerador decide a variante correta, bloqueia o que não pode ser lavrado e devolve a qualificação ao Tabelião quando a hipótese sai do trilho. A resposta começa sempre pela <b>DECISÃO DO ROTEADOR</b>.</p>
         </div>
         <span class="chip-ia">IA</span>
       </div>
       <div class="painel termos-minutas" style="border-radius:12px">
         <p class="painel-cab versalete" style="margin-bottom:12px">Termo de ciência do escrevente</p>
         <label class="ed-check termo-check"><input type="checkbox" id="minCiente1">
-          <span>Estou ciente de que o Gerador PROC / UE serve <b>somente</b> para minutar procurações (em suas diversas variáveis) e escrituras de união estável (em suas variações).</span></label>
+          <span>Estou ciente de que o Gerador de Minuta serve <b>somente</b> a procuração, união estável, dissolução de união estável, divórcio sem partilha e emancipação — e de que ele pode <b>bloquear a minuta</b> e devolver a qualificação ao Tabelião.</span></label>
         <label class="ed-check termo-check"><input type="checkbox" id="minCiente2">
-          <span>Estou ciente de que a <b>inobservância dessa regra pode implicar responsabilidade disciplinar</b>.</span></label>
-      </div>
-      <div class="ed-chips" id="minTipo" style="margin-top:2px">
-        <button type="button" class="ed-chip ativo" data-min-tipo="ue">Escritura de união estável</button>
-        <button type="button" class="ed-chip" data-min-tipo="proc" disabled title="Aguardando o modelo do Tabelião">Procuração — em preparação</button>
+          <span>Estou ciente de que a <b>inobservância dessa regra pode implicar responsabilidade disciplinar</b>, e de que toda minuta é <b>rascunho</b> sujeito à conferência do Tabelião.</span></label>
       </div>
 
+      <p class="rotulo versalete min-passo">1 · Qual é o ato?</p>
+      <div class="min-atos" id="minAtos" role="group" aria-label="Ato pretendido">
+        <button type="button" class="min-ato" data-ato="PROC" aria-pressed="false">
+          <span class="rt-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v3h3"/><path d="M9 12h6M9 15.5h4"/></svg></span>
+          <span class="rt-txt"><b>Procuração</b><small>pública — os poderes só entram se marcados</small></span>
+        </button>
+        <button type="button" class="min-ato ativo" data-ato="UE" aria-pressed="true">
+          <span class="rt-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="9" cy="12" r="4.5"/><circle cx="15" cy="12" r="4.5"/></svg></span>
+          <span class="rt-txt"><b>União estável</b><small>escritura declaratória</small></span>
+        </button>
+        <button type="button" class="min-ato" data-ato="DISS_UE" aria-pressed="false">
+          <span class="rt-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="8" cy="12" r="4"/><circle cx="16" cy="12" r="4"/><path d="M4.5 19.5 19.5 4.5"/></svg></span>
+          <span class="rt-txt"><b>Dissolução de união estável</b><small>extinção consensual — sem partilha no ato</small></span>
+        </button>
+        <button type="button" class="min-ato" data-ato="DIV" aria-pressed="false">
+          <span class="rt-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 4v16"/><circle cx="6.5" cy="12" r="3.2"/><circle cx="17.5" cy="12" r="3.2"/></svg></span>
+          <span class="rt-txt"><b>Divórcio (sem partilha)</b><small>consensual — partilha diferida ou nenhuma</small></span>
+        </button>
+        <button type="button" class="min-ato" data-ato="EMANC" aria-pressed="false">
+          <span class="rt-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="7.5" r="3.2"/><path d="M5 20c.6-3.4 3-5.4 6-5.4s5.4 2 6 5.4"/><path d="M18 3.5v5M15.5 6h5"/></svg></span>
+          <span class="rt-txt"><b>Emancipação</b><small>voluntária, pelos pais — 16 anos completos</small></span>
+        </button>
+      </div>
+
+      <p class="rotulo versalete min-passo">2 · Os fatos e a vontade das partes</p>
       <div id="minEntrevista" class="min-entrevista">
-        <p class="rotulo versalete min-grupo">Convivente 1</p>
-        <div class="grade-min">
-          <label class="min-campo">Nome completo *<input type="text" id="minC1Nome" autocomplete="off"></label>
-          <label class="min-campo">CPF<input type="text" id="minC1Cpf" autocomplete="off"></label>
-          <label class="min-campo">Profissão<input type="text" id="minC1Prof" autocomplete="off"></label>
-          <label class="min-campo">Estado civil
-            <span class="ed-chips" data-min-chips="c1civil">
-              <button type="button" class="ed-chip" data-v="Solteiro(a)">Solteiro(a)</button>
-              <button type="button" class="ed-chip" data-v="Divorciado(a)">Divorciado(a)</button>
-              <button type="button" class="ed-chip" data-v="Viúvo(a)">Viúvo(a)</button>
-              <button type="button" class="ed-chip" data-v="Casado(a), separado(a) de fato">Casado(a), sep. de fato</button>
-            </span></label>
+        <p class="min-lema">Informe <b>fatos</b>, não o modelo. O que ninguém souber, deixe como <b>não informado</b>: o Gerador trata o desconhecido como desconhecido — nunca como “não”.</p>
+
+        <!-- ================= PROC ================= -->
+        <div data-entrevista="PROC" hidden class="min-ato-bloco">
+          <p class="rotulo versalete min-grupo">Finalidade — o que o cliente quer</p>
+          <div class="min-fins" data-min-chips="proc.finalidade" role="group" aria-label="Finalidade da procuração">
+            <button type="button" class="ed-chip" data-v="imovel_administrar">Administrar imóvel</button>
+            <button type="button" class="ed-chip" data-v="imovel_vender">Vender imóvel</button>
+            <button type="button" class="ed-chip" data-v="imovel_comprar">Comprar imóvel</button>
+            <button type="button" class="ed-chip" data-v="bancaria">Bancária</button>
+            <button type="button" class="ed-chip" data-v="financiamento">Financiamento com garantia</button>
+            <button type="button" class="ed-chip" data-v="veiculo_regularizar">Regularizar veículo</button>
+            <button type="button" class="ed-chip" data-v="veiculo_vender">Vender veículo</button>
+            <button type="button" class="ed-chip" data-v="inventario">Inventário</button>
+            <button type="button" class="ed-chip" data-v="previdenciaria">INSS / benefício</button>
+            <button type="button" class="ed-chip" data-v="ad_judicia">Ad judicia (foro)</button>
+            <button type="button" class="ed-chip" data-v="casamento">Casamento</button>
+            <button type="button" class="ed-chip" data-v="divorcio_ue">Divórcio / dissolução de UE</button>
+            <button type="button" class="ed-chip" data-v="outra">Outra finalidade</button>
+          </div>
+          <label class="min-campo">O que o cliente quer, nas suas palavras
+            <textarea id="minPFinDesc" rows="2" placeholder="ex.: quer que o filho venda o apartamento da Rua X e assine a escritura"></textarea></label>
+
+          <p class="rotulo versalete min-grupo">Outorgantes — quem dá os poderes</p>
+          <div class="min-campo"><span>Quantos outorgantes?</span>
+            <span class="ed-chips" data-min-chips="proc.n_outorgantes">
+              <button type="button" class="ed-chip ativo" data-v="1">1</button>
+              <button type="button" class="ed-chip" data-v="2">2</button>
+              <button type="button" class="ed-chip" data-v="3">3</button>
+              <button type="button" class="ed-chip" data-v="4">4</button>
+            </span></div>
+          <div id="minPOutorgantes" class="min-pessoas"></div>
+
+          <p class="rotulo versalete min-grupo">Outorgados — quem recebe os poderes</p>
+          <div class="min-campo"><span>Quantos outorgados?</span>
+            <span class="ed-chips" data-min-chips="proc.n_outorgados">
+              <button type="button" class="ed-chip ativo" data-v="1">1</button>
+              <button type="button" class="ed-chip" data-v="2">2</button>
+              <button type="button" class="ed-chip" data-v="3">3</button>
+            </span></div>
+          <div id="minPOutorgados" class="min-pessoas"></div>
+          <div class="min-campo" id="minPAtuacaoBox" hidden><span>Os outorgados atuam</span>
+            <span class="ed-chips" data-min-chips="proc.atuacao">
+              <button type="button" class="ed-chip" data-v="conjunta">Em conjunto</button>
+              <button type="button" class="ed-chip" data-v="separadamente">Separadamente</button>
+              <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+            </span></div>
+
+          <p class="rotulo versalete min-grupo">Objeto e poderes</p>
+          <label class="min-campo"><span id="minPObjetoRot">Objeto (imóvel, veículo, conta, espólio ou processo — se houver)</span>
+            <input type="text" id="minPObjeto" autocomplete="off"></label>
+          <div id="minPPoderesBox" hidden>
+            <p class="rotulo versalete min-sub">Poderes de alto risco — marque só o que as partes autorizam</p>
+            <p class="aviso min-aviso-poderes">⚠ Nada disto entra na procuração se não estiver marcado aqui — pedido em texto livre não vale.</p>
+            <div class="min-poderes" id="minPPoderes">
+              <label class="min-poder" data-poder="vender"><input type="checkbox" value="vender"><span>vender</span></label>
+              <label class="min-poder" data-poder="receber_preco"><input type="checkbox" value="receber_preco"><span>receber o preço</span></label>
+              <label class="min-poder" data-poder="dar_quitacao"><input type="checkbox" value="dar_quitacao"><span>dar quitação</span></label>
+              <label class="min-poder" data-poder="doar"><input type="checkbox" value="doar"><span>doar</span></label>
+              <label class="min-poder" data-poder="hipotecar_gravar"><input type="checkbox" value="hipotecar_gravar"><span>hipotecar / dar em garantia</span></label>
+              <label class="min-poder" data-poder="contrair_emprestimo"><input type="checkbox" value="contrair_emprestimo"><span>contrair empréstimo</span></label>
+              <label class="min-poder" data-poder="confessar_divida"><input type="checkbox" value="confessar_divida"><span>confessar dívida</span></label>
+              <label class="min-poder" data-poder="transigir"><input type="checkbox" value="transigir"><span>transigir</span></label>
+              <label class="min-poder" data-poder="renunciar"><input type="checkbox" value="renunciar"><span>renunciar</span></label>
+              <label class="min-poder" data-poder="receber_citacao"><input type="checkbox" value="receber_citacao"><span>receber citação</span></label>
+              <label class="min-poder" data-poder="ceder_direitos_hereditarios"><input type="checkbox" value="ceder_direitos_hereditarios"><span>ceder direitos hereditários</span></label>
+              <label class="min-poder" data-poder="substabelecer"><input type="checkbox" value="substabelecer"><span>substabelecer</span></label>
+              <label class="min-poder min-poder-cpc" data-poder="confessar"><input type="checkbox" value="confessar"><span>confessar <small>(CPC 105)</small></span></label>
+              <label class="min-poder min-poder-cpc" data-poder="reconhecer_procedencia"><input type="checkbox" value="reconhecer_procedencia"><span>reconhecer a procedência do pedido <small>(CPC 105)</small></span></label>
+              <label class="min-poder min-poder-cpc" data-poder="desistir"><input type="checkbox" value="desistir"><span>desistir <small>(CPC 105)</small></span></label>
+              <label class="min-poder min-poder-cpc" data-poder="firmar_compromisso"><input type="checkbox" value="firmar_compromisso"><span>firmar compromisso <small>(CPC 105)</small></span></label>
+              <label class="min-poder min-poder-cpc" data-poder="declarar_hipossuficiencia"><input type="checkbox" value="declarar_hipossuficiencia"><span>declarar hipossuficiência <small>(CPC 105)</small></span></label>
+            </div>
+          </div>
+          <div class="grade-min">
+            <div class="min-campo" id="minPAutoBox" hidden><span>O procurador pode contratar consigo mesmo (autocontrato)?</span>
+              <span class="ed-chips" data-min-chips="proc.autocontrato">
+                <button type="button" class="ed-chip" data-v="sim">Sim</button>
+                <button type="button" class="ed-chip" data-v="nao">Não</button>
+                <button type="button" class="ed-chip ativo" data-v="nao_informado">Não informado</button>
+              </span></div>
+            <div class="min-campo" id="minPPrecoBox" hidden><span>Preço</span>
+              <span class="ed-chips" data-min-chips="proc.preco">
+                <button type="button" class="ed-chip" data-v="livre">Livre (a critério do procurador)</button>
+                <button type="button" class="ed-chip" data-v="fixado">Fixado</button>
+                <button type="button" class="ed-chip" data-v="nao_se_aplica">Não se aplica</button>
+              </span>
+              <input type="text" id="minPPrecoValor" hidden inputmode="decimal" placeholder="R$ — valor fixado" aria-label="Valor fixado"></div>
+            <div class="min-campo"><span>Prazo da procuração</span>
+              <span class="ed-chips" data-min-chips="proc.prazo">
+                <button type="button" class="ed-chip" data-v="indeterminado">Indeterminado</button>
+                <button type="button" class="ed-chip" data-v="ate">Até uma data</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span>
+              <input type="date" id="minPPrazoData" hidden aria-label="Válida até">
+              <small class="min-nota" id="minPPrazoNota" hidden>A lei impõe o prazo: 90 dias para casamento (CC, art. 1.542, §3º) e 30 dias para divórcio / dissolução de UE (Res. CNJ 35, art. 36) — o Gerador aplica o prazo legal.</small></div>
+            <div class="min-campo"><span>Substabelecimento</span>
+              <span class="ed-chips" data-min-chips="proc.substab">
+                <button type="button" class="ed-chip" data-v="vedado">Vedado</button>
+                <button type="button" class="ed-chip" data-v="com_reserva">Com reserva</button>
+                <button type="button" class="ed-chip" data-v="sem_reserva">Sem reserva</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span>
+              <small class="min-nota">Só produz cláusula se “substabelecer” estiver marcado nos poderes acima.</small></div>
+          </div>
         </div>
-        <p class="rotulo versalete min-grupo">Convivente 2</p>
-        <div class="grade-min">
-          <label class="min-campo">Nome completo *<input type="text" id="minC2Nome" autocomplete="off"></label>
-          <label class="min-campo">CPF<input type="text" id="minC2Cpf" autocomplete="off"></label>
-          <label class="min-campo">Profissão<input type="text" id="minC2Prof" autocomplete="off"></label>
-          <label class="min-campo">Estado civil
-            <span class="ed-chips" data-min-chips="c2civil">
-              <button type="button" class="ed-chip" data-v="Solteiro(a)">Solteiro(a)</button>
-              <button type="button" class="ed-chip" data-v="Divorciado(a)">Divorciado(a)</button>
-              <button type="button" class="ed-chip" data-v="Viúvo(a)">Viúvo(a)</button>
-              <button type="button" class="ed-chip" data-v="Casado(a), separado(a) de fato">Casado(a), sep. de fato</button>
-            </span></label>
+
+        <!-- ================= UE ================= -->
+        <div data-entrevista="UE" class="min-ato-bloco">
+          <p class="rotulo versalete min-grupo">Convivente 1</p>
+          <div class="grade-min">
+            <label class="min-campo">Nome completo *<input type="text" id="minC1Nome" autocomplete="off"></label>
+            <label class="min-campo">CPF<input type="text" id="minC1Cpf" autocomplete="off"></label>
+            <label class="min-campo">Profissão<input type="text" id="minC1Prof" autocomplete="off"></label>
+            <label class="min-campo">Data de nascimento<input type="date" id="minC1Nasc"></label>
+            <div class="min-campo"><span>Estado civil registral</span>
+              <span class="ed-chips" data-min-chips="ue.c1civil">
+                <button type="button" class="ed-chip" data-v="solteiro">Solteiro(a)</button>
+                <button type="button" class="ed-chip" data-v="divorciado">Divorciado(a)</button>
+                <button type="button" class="ed-chip" data-v="viuvo">Viúvo(a)</button>
+                <button type="button" class="ed-chip" data-v="casado">Casado(a)</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span></div>
+          </div>
+          <p class="rotulo versalete min-grupo">Convivente 2</p>
+          <div class="grade-min">
+            <label class="min-campo">Nome completo *<input type="text" id="minC2Nome" autocomplete="off"></label>
+            <label class="min-campo">CPF<input type="text" id="minC2Cpf" autocomplete="off"></label>
+            <label class="min-campo">Profissão<input type="text" id="minC2Prof" autocomplete="off"></label>
+            <label class="min-campo">Data de nascimento<input type="date" id="minC2Nasc"></label>
+            <div class="min-campo"><span>Estado civil registral</span>
+              <span class="ed-chips" data-min-chips="ue.c2civil">
+                <button type="button" class="ed-chip" data-v="solteiro">Solteiro(a)</button>
+                <button type="button" class="ed-chip" data-v="divorciado">Divorciado(a)</button>
+                <button type="button" class="ed-chip" data-v="viuvo">Viúvo(a)</button>
+                <button type="button" class="ed-chip" data-v="casado">Casado(a)</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span></div>
+          </div>
+          <p class="aviso" id="minAvisoCasado" hidden>⚠ Convivente casado(a): a união estável só é lícita se houver separação de fato (CC, art. 1.723, §1º) — declare a separação e a data nas Observações. A escritura não será registrável no Livro E e o nome não poderá ser alterado.</p>
+          <p class="rotulo versalete min-grupo">A união</p>
+          <div class="grade-min">
+            <label class="min-campo">Residência comum (endereço completo)<input type="text" id="minEndereco" autocomplete="off"></label>
+            <div class="min-campo"><span>Início da convivência</span>
+              <span class="ed-chips" data-min-chips="ue.inicio_modo">
+                <button type="button" class="ed-chip ativo" data-v="data">Em data certa</button>
+                <button type="button" class="ed-chip" data-v="nao_sabem_precisar">Não sabem precisar</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span>
+              <input type="date" id="minInicio" aria-label="Data de início da convivência"></div>
+            <div class="min-campo"><span>Regime de bens</span>
+              <span class="ed-chips" data-min-chips="ue.regime">
+                <button type="button" class="ed-chip" data-v="legal_comunhao_parcial">Comunhão parcial (regra legal)</button>
+                <button type="button" class="ed-chip" data-v="convencao: separação total de bens">Separação total</button>
+                <button type="button" class="ed-chip" data-v="convencao: comunhão universal de bens">Comunhão universal</button>
+                <button type="button" class="ed-chip" data-v="convencao_outro">Outro</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span>
+              <input type="text" id="minRegimeOutro" hidden placeholder="qual regime?" aria-label="Regime escolhido"></div>
+            <div class="min-campo"><span>Algum convivente tem 70 anos ou mais?</span>
+              <span class="ed-chips" data-min-chips="ue.maior70">
+                <button type="button" class="ed-chip" data-v="sim">Sim</button>
+                <button type="button" class="ed-chip" data-v="nao">Não</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span>
+              <span class="ed-chips" id="minMaior70Quem" data-min-chips="ue.maior70_quem" hidden>
+                <button type="button" class="ed-chip" data-v="convivente 1">Convivente 1</button>
+                <button type="button" class="ed-chip" data-v="convivente 2">Convivente 2</button>
+                <button type="button" class="ed-chip" data-v="ambos">Ambos</button>
+              </span></div>
+            <div class="min-campo"><span>Filhos em comum</span>
+              <span class="ed-chips" data-min-chips="ue.filhos">
+                <button type="button" class="ed-chip" data-v="nenhum">Nenhum</button>
+                <button type="button" class="ed-chip" data-v="sim">Sim</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span></div>
+          </div>
+          <label class="min-campo" id="minFilhosBox" hidden>Filhos — nomes e datas de nascimento
+            <textarea id="minFilhos" rows="2" placeholder="Ex.: Maria (12/03/2020); João (05/08/2023)"></textarea></label>
+          <div class="min-campo"><span>Acréscimo do sobrenome do outro convivente?</span>
+            <span class="ed-chips" data-min-chips="ue.nome">
+              <button type="button" class="ed-chip ativo" data-v="ninguem_altera">Ninguém altera</button>
+              <button type="button" class="ed-chip" data-v="convivente_1_acrescenta">Convivente 1 acrescenta</button>
+              <button type="button" class="ed-chip" data-v="convivente_2_acrescenta">Convivente 2 acrescenta</button>
+              <button type="button" class="ed-chip" data-v="ambos">Ambos</button>
+            </span></div>
+          <div class="grade-min" id="minNomesBox" hidden>
+            <label class="min-campo" id="minNome1Box" hidden>Convivente 1 — nome completo APÓS a união<input type="text" id="minNome1" autocomplete="off"></label>
+            <label class="min-campo" id="minNome2Box" hidden>Convivente 2 — nome completo APÓS a união<input type="text" id="minNome2" autocomplete="off"></label>
+          </div>
+          <p class="aviso" id="minAvisoLivroE" hidden>⚠ A escritura consignará que os efeitos da alteração do nome ficam condicionados ao registro no Livro E do Registro Civil das Pessoas Naturais (RCPN).</p>
+          <div class="grade-min">
+            <div class="min-campo"><span>Já existe título anterior da união?</span>
+              <span class="ed-chips" data-min-chips="ue.titulo">
+                <button type="button" class="ed-chip" data-v="nenhum">Nenhum</button>
+                <button type="button" class="ed-chip" data-v="escritura_anterior">Escritura anterior</button>
+                <button type="button" class="ed-chip" data-v="contrato_particular">Contrato particular</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span>
+              <input type="text" id="minTituloDados" hidden placeholder="serventia, livro, folhas, data" aria-label="Dados da escritura anterior"></div>
+            <div class="min-campo" id="minLivroEBox" hidden><span>A união está registrada no Livro E?</span>
+              <span class="ed-chips" data-min-chips="ue.livro_e">
+                <button type="button" class="ed-chip" data-v="registrada">Registrada</button>
+                <button type="button" class="ed-chip" data-v="nao_registrada">Não registrada</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span></div>
+          </div>
         </div>
-        <p class="rotulo versalete min-grupo">A união</p>
-        <div class="grade-min">
-          <label class="min-campo">Residência comum (endereço completo)<input type="text" id="minEndereco" autocomplete="off"></label>
-          <label class="min-campo">Início da convivência *<input type="date" id="minInicio"></label>
-          <label class="min-campo">Regime de bens
-            <span class="ed-chips" data-min-chips="regime">
-              <button type="button" class="ed-chip ativo" data-v="Comunhão parcial (regra legal — art. 1.725 CC)">Comunhão parcial</button>
-              <button type="button" class="ed-chip" data-v="Separação total de bens">Separação total</button>
-              <button type="button" class="ed-chip" data-v="Comunhão universal">Comunhão universal</button>
-              <button type="button" class="ed-chip" data-v="Outro — detalhar nas observações">Outro</button>
-            </span></label>
-          <label class="min-campo">Advieram filhos da união?
-            <span class="ed-chips" data-min-chips="filhos">
-              <button type="button" class="ed-chip ativo" data-v="Não">Não</button>
-              <button type="button" class="ed-chip" data-v="Sim">Sim</button>
-            </span></label>
+
+        <!-- ================= DISS_UE ================= -->
+        <div data-entrevista="DISS_UE" hidden class="min-ato-bloco">
+          <p class="rotulo versalete min-grupo">Conviventes</p>
+          <div class="grade-min">
+            <label class="min-campo">Convivente 1 — nome completo *<input type="text" id="minDsC1Nome" autocomplete="off"></label>
+            <div class="min-campo"><span>Estado civil registral (convivente 1)</span>
+              <span class="ed-chips" data-min-chips="dss.c1civil">
+                <button type="button" class="ed-chip" data-v="solteiro">Solteiro(a)</button>
+                <button type="button" class="ed-chip" data-v="divorciado">Divorciado(a)</button>
+                <button type="button" class="ed-chip" data-v="viuvo">Viúvo(a)</button>
+                <button type="button" class="ed-chip" data-v="casado">Casado(a)</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span></div>
+            <label class="min-campo">Convivente 2 — nome completo *<input type="text" id="minDsC2Nome" autocomplete="off"></label>
+            <div class="min-campo"><span>Estado civil registral (convivente 2)</span>
+              <span class="ed-chips" data-min-chips="dss.c2civil">
+                <button type="button" class="ed-chip" data-v="solteiro">Solteiro(a)</button>
+                <button type="button" class="ed-chip" data-v="divorciado">Divorciado(a)</button>
+                <button type="button" class="ed-chip" data-v="viuvo">Viúvo(a)</button>
+                <button type="button" class="ed-chip" data-v="casado">Casado(a)</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span></div>
+          </div>
+          <p class="rotulo versalete min-grupo">A união e os bens</p>
+          <div class="grade-min">
+            <div class="min-campo"><span>Título anterior da união</span>
+              <span class="ed-chips" data-min-chips="dss.titulo">
+                <button type="button" class="ed-chip" data-v="nenhum">Nenhum</button>
+                <button type="button" class="ed-chip" data-v="escritura">Escritura</button>
+                <button type="button" class="ed-chip" data-v="contrato_particular">Contrato particular</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span>
+              <input type="text" id="minDsTituloDados" hidden placeholder="serventia, livro, folhas, data" aria-label="Dados da escritura"></div>
+            <div class="min-campo" id="minDsLivroEBox" hidden><span>A união está registrada no Livro E?</span>
+              <span class="ed-chips" data-min-chips="dss.livro_e">
+                <button type="button" class="ed-chip" data-v="registrada">Registrada</button>
+                <button type="button" class="ed-chip" data-v="nao_registrada">Não registrada</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span></div>
+            <div class="min-campo"><span>Há bens comuns?</span>
+              <span class="ed-chips" data-min-chips="dss.bens">
+                <button type="button" class="ed-chip" data-v="nao">Não</button>
+                <button type="button" class="ed-chip" data-v="sim">Sim</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span></div>
+            <div class="min-campo"><span>Partilha</span>
+              <span class="ed-chips" data-min-chips="dss.partilha">
+                <button type="button" class="ed-chip" data-v="nenhuma_a_fazer">Nenhuma a fazer</button>
+                <button type="button" class="ed-chip" data-v="diferida">Diferida (ato próprio)</button>
+                <button type="button" class="ed-chip" data-v="agora">Agora, neste ato</button>
+              </span>
+              <small class="min-nota">Partilha agora = fora do escopo do Gerador: a escritura com partilha é lavrada fora do Hub.</small></div>
+          </div>
+          <p class="rotulo versalete min-grupo">Filhos, gravidez e alimentos</p>
+          <div class="grade-min">
+            <div class="min-campo"><span>Filhos</span>
+              <span class="ed-chips" data-min-chips="dss.filhos">
+                <button type="button" class="ed-chip" data-v="nenhum">Nenhum</button>
+                <button type="button" class="ed-chip" data-v="capazes">Só capazes</button>
+                <button type="button" class="ed-chip" data-v="incapazes">Há incapaz</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span></div>
+            <div class="min-campo" id="minDsDecisaoBox" hidden><span>Decisão judicial sobre guarda, convivência e alimentos</span>
+              <span class="ed-chips" data-min-chips="dss.decisao">
+                <button type="button" class="ed-chip" data-v="cobre_guarda_convivencia_alimentos">Cobre tudo</button>
+                <button type="button" class="ed-chip" data-v="parcial">Parcial</button>
+                <button type="button" class="ed-chip" data-v="nao_ha">Não há</button>
+              </span>
+              <input type="text" id="minDsDecisaoDados" hidden placeholder="juízo, autos e data" aria-label="Dados da decisão judicial"></div>
+            <div class="min-campo"><span>Gravidez</span>
+              <span class="ed-chips" data-min-chips="dss.gravidez">
+                <button type="button" class="ed-chip" data-v="nao">Não</button>
+                <button type="button" class="ed-chip" data-v="sim">Sim</button>
+                <button type="button" class="ed-chip" data-v="desconhece">Desconhecem</button>
+              </span></div>
+            <div class="min-campo"><span>Alimentos entre os conviventes</span>
+              <span class="ed-chips" data-min-chips="dss.alimentos">
+                <button type="button" class="ed-chip" data-v="dispensa_reciproca">Dispensa recíproca</button>
+                <button type="button" class="ed-chip" data-v="fixados">Fixados</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span>
+              <input type="text" id="minDsAlimentosDados" hidden placeholder="valor e forma" aria-label="Alimentos fixados"></div>
+          </div>
+          <p class="rotulo versalete min-grupo">Nome, advogado e representação</p>
+          <div class="grade-min">
+            <div class="min-campo"><span>Nome</span>
+              <span class="ed-chips" data-min-chips="dss.nome">
+                <button type="button" class="ed-chip" data-v="cada_um_mantem">Cada um mantém</button>
+                <button type="button" class="ed-chip" data-v="retoma_nome_anterior">Retoma o nome anterior</button>
+              </span>
+              <span class="ed-chips" id="minDsNomeQuem" data-min-chips="dss.nome_quem" hidden>
+                <button type="button" class="ed-chip" data-v="convivente 1">Convivente 1</button>
+                <button type="button" class="ed-chip" data-v="convivente 2">Convivente 2</button>
+                <button type="button" class="ed-chip" data-v="ambos">Ambos</button>
+              </span></div>
+            <label class="min-campo">Advogado(a) — nome<input type="text" id="minDsAdvNome" autocomplete="off"></label>
+            <label class="min-campo">OAB<input type="text" id="minDsAdvOab" autocomplete="off" placeholder="ex.: OAB/SE 1234"></label>
+            <div class="min-campo"><span>Representação</span>
+              <span class="ed-chips" data-min-chips="dss.repr">
+                <button type="button" class="ed-chip" data-v="pessoal">Pessoal</button>
+                <button type="button" class="ed-chip" data-v="por_procuracao">Por procuração</button>
+              </span>
+              <span class="min-linha" id="minDsProcBox" hidden>
+                <input type="date" id="minDsProcData" aria-label="Data da outorga da procuração">
+                <input type="text" id="minDsProcServ" placeholder="serventia da procuração" aria-label="Serventia da procuração">
+              </span></div>
+          </div>
         </div>
-        <label class="min-campo" id="minFilhosBox" hidden>Filhos — nomes e datas de nascimento
-          <textarea id="minFilhos" rows="2" placeholder="Ex.: Maria (12/03/2020); João (05/08/2023)"></textarea></label>
-        <label class="min-campo">Acréscimo do sobrenome do outro convivente?
-          <span class="ed-chips" data-min-chips="nome">
-            <button type="button" class="ed-chip ativo" data-v="Ninguém altera o nome">Ninguém altera</button>
-            <button type="button" class="ed-chip" data-v="Convivente 1 acrescenta">Convivente 1</button>
-            <button type="button" class="ed-chip" data-v="Convivente 2 acrescenta">Convivente 2</button>
-            <button type="button" class="ed-chip" data-v="Ambos acrescentam">Ambos</button>
-          </span></label>
-        <div class="grade-min" id="minNomesBox" hidden>
-          <label class="min-campo" id="minNome1Box" hidden>Convivente 1 — nome completo APÓS a união<input type="text" id="minNome1" autocomplete="off"></label>
-          <label class="min-campo" id="minNome2Box" hidden>Convivente 2 — nome completo APÓS a união<input type="text" id="minNome2" autocomplete="off"></label>
+
+        <!-- ================= DIV ================= -->
+        <div data-entrevista="DIV" hidden class="min-ato-bloco">
+          <p class="rotulo versalete min-grupo">Cônjuges e casamento</p>
+          <div class="grade-min">
+            <label class="min-campo">Cônjuge 1 — nome completo *<input type="text" id="minDvC1Nome" autocomplete="off"></label>
+            <label class="min-campo">Cônjuge 2 — nome completo *<input type="text" id="minDvC2Nome" autocomplete="off"></label>
+            <label class="min-campo">Data do casamento<input type="date" id="minDvCasData"></label>
+            <label class="min-campo">Serventia do casamento<input type="text" id="minDvCasServ" autocomplete="off" placeholder="ex.: RCPN de Itabaiana/SE"></label>
+            <label class="min-campo">Matrícula da certidão<input type="text" id="minDvCasMatr" autocomplete="off"></label>
+            <label class="min-campo">Certidão emitida em<input type="date" id="minDvCertData"></label>
+            <div class="min-campo min-largo"><span>Regime de bens</span>
+              <span class="ed-chips" data-min-chips="div.regime">
+                <button type="button" class="ed-chip" data-v="comunhão parcial de bens">Comunhão parcial</button>
+                <button type="button" class="ed-chip" data-v="comunhão universal de bens">Comunhão universal</button>
+                <button type="button" class="ed-chip" data-v="separação convencional de bens">Separação convencional</button>
+                <button type="button" class="ed-chip" data-v="separação obrigatória de bens">Separação obrigatória</button>
+                <button type="button" class="ed-chip" data-v="participação final nos aquestos">Participação final nos aquestos</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span></div>
+          </div>
+          <p class="rotulo versalete min-grupo">Bens</p>
+          <div class="grade-min">
+            <div class="min-campo"><span>Há bens comuns?</span>
+              <span class="ed-chips" data-min-chips="div.bens">
+                <button type="button" class="ed-chip" data-v="nao">Não</button>
+                <button type="button" class="ed-chip" data-v="sim">Sim</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span></div>
+            <div class="min-campo"><span>Partilha</span>
+              <span class="ed-chips" data-min-chips="div.partilha">
+                <button type="button" class="ed-chip" data-v="nenhuma_a_fazer">Nenhuma a fazer</button>
+                <button type="button" class="ed-chip" data-v="diferida">Diferida (ato próprio)</button>
+                <button type="button" class="ed-chip" data-v="agora">Agora, neste ato</button>
+              </span>
+              <small class="min-nota">Partilha agora = fora do escopo do Gerador: a escritura com partilha é lavrada fora do Hub.</small></div>
+          </div>
+          <p class="rotulo versalete min-grupo">Filhos, gravidez e pensão</p>
+          <div class="grade-min">
+            <div class="min-campo"><span>Filhos</span>
+              <span class="ed-chips" data-min-chips="div.filhos">
+                <button type="button" class="ed-chip" data-v="nenhum">Nenhum</button>
+                <button type="button" class="ed-chip" data-v="maiores_capazes">Só maiores e capazes</button>
+                <button type="button" class="ed-chip" data-v="menores_ou_incapazes">Há menor ou incapaz</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span></div>
+            <div class="min-campo" id="minDvDecisaoBox" hidden><span>Decisão judicial sobre guarda, convivência e alimentos</span>
+              <span class="ed-chips" data-min-chips="div.decisao">
+                <button type="button" class="ed-chip" data-v="cobre_guarda_convivencia_alimentos">Cobre tudo</button>
+                <button type="button" class="ed-chip" data-v="parcial">Parcial</button>
+                <button type="button" class="ed-chip" data-v="nao_ha">Não há</button>
+              </span>
+              <input type="text" id="minDvDecisaoDados" hidden placeholder="juízo, autos e data" aria-label="Dados da decisão judicial"></div>
+            <div class="min-campo"><span>Gravidez</span>
+              <span class="ed-chips" data-min-chips="div.gravidez">
+                <button type="button" class="ed-chip" data-v="nao">Não</button>
+                <button type="button" class="ed-chip" data-v="sim">Sim</button>
+                <button type="button" class="ed-chip" data-v="desconhece">Desconhecem</button>
+              </span></div>
+            <div class="min-campo"><span>Pensão entre os cônjuges</span>
+              <span class="ed-chips" data-min-chips="div.pensao">
+                <button type="button" class="ed-chip" data-v="dispensa_reciproca">Dispensa recíproca</button>
+                <button type="button" class="ed-chip" data-v="fixada">Fixada</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span>
+              <input type="text" id="minDvPensaoDados" hidden placeholder="valor e forma" aria-label="Pensão fixada"></div>
+          </div>
+          <p class="rotulo versalete min-grupo">Nome, advogado e representação</p>
+          <div class="grade-min">
+            <div class="min-campo"><span>Nome</span>
+              <span class="ed-chips" data-min-chips="div.nome">
+                <button type="button" class="ed-chip" data-v="cada_um_mantem">Cada um mantém</button>
+                <button type="button" class="ed-chip" data-v="retoma_nome_de_solteiro">Retoma o nome de solteiro</button>
+              </span>
+              <span class="ed-chips" id="minDvNomeQuem" data-min-chips="div.nome_quem" hidden>
+                <button type="button" class="ed-chip" data-v="cônjuge 1">Cônjuge 1</button>
+                <button type="button" class="ed-chip" data-v="cônjuge 2">Cônjuge 2</button>
+                <button type="button" class="ed-chip" data-v="ambos">Ambos</button>
+              </span></div>
+            <label class="min-campo">Advogado(a) — nome<input type="text" id="minDvAdvNome" autocomplete="off"></label>
+            <label class="min-campo">OAB<input type="text" id="minDvAdvOab" autocomplete="off" placeholder="ex.: OAB/SE 1234"></label>
+            <div class="min-campo"><span>Representação</span>
+              <span class="ed-chips" data-min-chips="div.repr">
+                <button type="button" class="ed-chip" data-v="pessoal">Pessoal</button>
+                <button type="button" class="ed-chip" data-v="por_procuracao">Por procuração</button>
+              </span>
+              <span class="min-linha" id="minDvProcBox" hidden>
+                <input type="date" id="minDvProcData" aria-label="Data da outorga da procuração">
+                <input type="text" id="minDvProcServ" placeholder="serventia da procuração" aria-label="Serventia da procuração">
+              </span></div>
+          </div>
         </div>
-        <p class="aviso" id="minAvisoLivroE" hidden>⚠ A escritura consignará que os efeitos da alteração do nome ficam condicionados ao registro no Livro E do Registro Civil das Pessoas Naturais (RCPN).</p>
-        <div class="grade-min">
-          <label class="min-campo">Assinatura pelo e-Notariado?
-            <span class="ed-chips" data-min-chips="enot">
-              <button type="button" class="ed-chip" data-v="Sim">Sim</button>
-              <button type="button" class="ed-chip ativo" data-v="Não">Não</button>
-            </span></label>
+
+        <!-- ================= EMANC ================= -->
+        <div data-entrevista="EMANC" hidden class="min-ato-bloco">
+          <p class="rotulo versalete min-grupo">O emancipando</p>
+          <div class="grade-min">
+            <label class="min-campo">Nome completo do menor *<input type="text" id="minEmNome" autocomplete="off"></label>
+            <label class="min-campo">Data de nascimento *<input type="date" id="minEmNasc"></label>
+          </div>
+          <p class="rotulo versalete min-grupo">Quem outorga e a guarda</p>
+          <div class="grade-min">
+            <div class="min-campo"><span>Quem outorga a emancipação</span>
+              <span class="ed-chips" data-min-chips="em.quem">
+                <button type="button" class="ed-chip" data-v="ambos_os_pais">Ambos os pais</button>
+                <button type="button" class="ed-chip" data-v="um_dos_pais">Um dos pais</button>
+                <button type="button" class="ed-chip" data-v="tutor">Tutor</button>
+              </span>
+              <span class="ed-chips" id="minEmQual" data-min-chips="em.qual" hidden>
+                <button type="button" class="ed-chip" data-v="pai">O pai</button>
+                <button type="button" class="ed-chip" data-v="mãe">A mãe</button>
+              </span></div>
+            <div class="min-campo" id="minEmMotivoBox" hidden><span>Por que só um dos pais?</span>
+              <span class="ed-chips" data-min-chips="em.motivo">
+                <button type="button" class="ed-chip" data-v="outro_falecido">O outro faleceu</button>
+                <button type="button" class="ed-chip" data-v="filiacao_unica">Filiação única</button>
+                <button type="button" class="ed-chip" data-v="destituido_ou_suspenso_por_decisao">Destituído / suspenso por decisão</button>
+                <button type="button" class="ed-chip" data-v="outro_nao_localizado">O outro não é localizado</button>
+                <button type="button" class="ed-chip" data-v="outro_discorda">O outro discorda</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span>
+              <input type="text" id="minEmDecisaoDados" hidden placeholder="juízo, autos e data da decisão" aria-label="Dados da decisão"></div>
+            <div class="min-campo"><span>Guarda</span>
+              <span class="ed-chips" data-min-chips="em.guarda">
+                <button type="button" class="ed-chip" data-v="compartilhada">Compartilhada</button>
+                <button type="button" class="ed-chip" data-v="unilateral">Unilateral</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span>
+              <span class="ed-chips" id="minEmGuardaQuem" data-min-chips="em.guarda_quem" hidden>
+                <button type="button" class="ed-chip" data-v="pai">Com o pai</button>
+                <button type="button" class="ed-chip" data-v="mãe">Com a mãe</button>
+              </span></div>
+            <div class="min-campo"><span>Já houve emancipação anterior?</span>
+              <span class="ed-chips" data-min-chips="em.anterior">
+                <button type="button" class="ed-chip" data-v="nao">Não</button>
+                <button type="button" class="ed-chip" data-v="sim">Sim</button>
+                <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
+              </span>
+              <input type="text" id="minEmAnteriorComo" hidden placeholder="como? (casamento, emprego público, escritura…)" aria-label="Como se deu a emancipação anterior"></div>
+          </div>
+          <p class="aviso" id="minEmAvisoTutor" hidden>⚠ Emancipação por tutor é judicial (“por sentença do juiz, ouvido o tutor”) — o Gerador vai bloquear e devolver a qualificação ao Tabelião.</p>
+          <label class="min-campo">Finalidade (opcional)<input type="text" id="minEmFinalidade" autocomplete="off" placeholder="ex.: abrir empresa, trabalhar"></label>
         </div>
-        <label class="min-campo">Observações para a minuta<textarea id="minObs" rows="2" placeholder="Particularidades que devem constar (opcional)"></textarea></label>
+
+        <label class="min-campo">Observações — declarações das partes e particularidades
+          <textarea id="minObs" rows="3" placeholder="o que as partes declararam e não coube nos campos acima (ex.: separação de fato desde 2019; cláusulas essenciais do divórcio para a procuração)"></textarea></label>
       </div>
 
       <div class="zona-anexos" data-anexos="min">
-        <label class="rotulo versalete">Documentos apresentados — certidões de nascimento/casamento e identificação (foto ou PDF)</label>
+        <label class="rotulo versalete" id="minAnexosRot">Documentos apresentados — identidade, certidões, matrícula, decisões (foto ou PDF)</label>
         <div class="anexo-drop">
           <input type="file" accept="image/*,application/pdf" multiple hidden>
           <button class="btn-fantasma" data-anexar type="button">Adicionar foto ou PDF</button>
@@ -1691,18 +2198,26 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
       </div>
 
       <div class="painel" style="border-radius:12px">
-        <div class="painel-cab"><span class="versalete">Minuta gerada</span>
+        <div class="painel-cab"><span class="versalete">Resultado do Gerador</span>
           <span>
-            <button class="btn-copiar" id="btnCopiarMin" type="button" hidden>Copiar</button>
+            <button class="btn-copiar" id="btnCopiarMin" type="button" hidden>Copiar minuta</button>
             <button class="btn-copiar" id="btnExemploMin" type="button" hidden>Exemplo</button>
             <button class="btn-copiar" id="btnLimparMin" type="button">Limpar</button>
           </span></div>
-        <div class="saida vazia" id="saidaMinuta">Preencha a entrevista, anexe os documentos apresentados e clique em GERAR MINUTA.</div>
+        <div class="min-decisao" id="minDecisao" hidden>
+          <p class="md-cab"><span class="md-rotulo versalete">DECISÃO DO ROTEADOR</span><span class="md-estado" id="minDecisaoEstado"></span></p>
+          <div class="md-texto" id="minDecisaoTexto"></div>
+          <div id="minDevolvida" hidden>
+            <p class="md-cab md-cab-dev"><span class="md-rotulo versalete">QUALIFICAÇÃO DEVOLVIDA AO TABELIÃO</span></p>
+            <div class="md-texto" id="minDevolvidaTexto"></div>
+          </div>
+        </div>
+        <div class="saida vazia" id="saidaMinuta">Escolha o ato, informe os fatos, anexe os documentos apresentados e clique em GERAR MINUTA.</div>
         <p class="assinatura" id="metaMin"></p>
       </div>
       <div class="aviso" id="minutaLinkBox" hidden>
-        ✓ Minuta guardada na plataforma — link permanente:
-        <a href="#" id="minutaLinkA" style="color:var(--vinho);font-weight:700;word-break:break-all"></a>
+        ✓ Resultado guardado na plataforma — link permanente:
+        <a href="#" id="minutaLinkA"></a>
         <button class="btn-mini" id="btnCopiarLinkMin" type="button" style="margin-left:8px">Copiar link</button>
       </div>
       <textarea id="minPedido" hidden></textarea>
@@ -2393,9 +2908,12 @@ function abrirRota(rota, semHistorico) {
     mostrarPagina('paginaMinutas', semHistorico, rota);
     const id = rota.slice(7);
     api('/hub/minutas/' + encodeURIComponent(id)).then(function (m) {
+      // v1.27 — o link guarda a resposta INTEIRA do Gerador; ao reabrir, ela passa
+      // pelo mesmo processar da ferramenta (quadro da decisão + minuta copiável).
       const s = el('saidaMinuta');
-      s.classList.remove('vazia'); s.textContent = m.texto;
-      el('btnCopiarMin').hidden = false;
+      s.classList.remove('vazia'); s.textContent = processarMinuta(m.texto);
+      el('btnCopiarMin').hidden = !MINUTA_COPIAVEL;
+      el('minutaLinkBox').hidden = true;
       el('metaMin').textContent = m.titulo + ' · guardada por ' + (m.criado_por || '—') + ' · ' + quandoCurto(m.em);
     }).catch(function (e) {
       const s = el('saidaMinuta');
@@ -2456,89 +2974,6 @@ function aplicarLinks() {
     mostrarPagina('paginaRedator', false, 'redator');
     setTimeout(function () { try { el('redDest').focus(); } catch (e) {} }, 80);
   });
-  (function () {
-    const MIN = { c1civil: '', c2civil: '', regime: 'Comunhão parcial (regra legal — art. 1.725 CC)', filhos: 'Não', nome: 'Ninguém altera o nome', enot: 'Não' };
-    document.querySelectorAll('[data-min-chips]').forEach(function (grupo) {
-      grupo.querySelectorAll('.ed-chip').forEach(function (b) {
-        b.addEventListener('click', function () {
-          grupo.querySelectorAll('.ed-chip').forEach(function (x) { x.classList.remove('ativo'); });
-          b.classList.add('ativo');
-          MIN[grupo.dataset.minChips] = b.dataset.v;
-          reverCondicionais();
-        });
-      });
-    });
-    function reverCondicionais() {
-      el('minFilhosBox').hidden = MIN.filhos !== 'Sim';
-      const n = MIN.nome;
-      const um = n === 'Convivente 1 acrescenta' || n === 'Ambos acrescentam';
-      const dois = n === 'Convivente 2 acrescenta' || n === 'Ambos acrescentam';
-      el('minNomesBox').hidden = !(um || dois);
-      el('minNome1Box').hidden = !um;
-      el('minNome2Box').hidden = !dois;
-      el('minAvisoLivroE').hidden = n === 'Ninguém altera o nome';
-    }
-    function dataBR(iso) {
-      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
-      return m ? m[3] + '/' + m[2] + '/' + m[1] : (iso || '');
-    }
-    function entrevistaTexto() {
-      const v = function (id) { return (el(id).value || '').trim(); };
-      const L = [];
-      L.push('=== ENTREVISTA — ESCRITURA DE UNIÃO ESTÁVEL (Hub CN2O) ===');
-      L.push('CONVIVENTE 1: ' + v('minC1Nome') + (v('minC1Cpf') ? ' | CPF ' + v('minC1Cpf') : '') + (v('minC1Prof') ? ' | profissão: ' + v('minC1Prof') : '') + (MIN.c1civil ? ' | estado civil: ' + MIN.c1civil : ''));
-      L.push('CONVIVENTE 2: ' + v('minC2Nome') + (v('minC2Cpf') ? ' | CPF ' + v('minC2Cpf') : '') + (v('minC2Prof') ? ' | profissão: ' + v('minC2Prof') : '') + (MIN.c2civil ? ' | estado civil: ' + MIN.c2civil : ''));
-      if (v('minEndereco')) L.push('RESIDÊNCIA COMUM: ' + v('minEndereco'));
-      L.push('INÍCIO DA CONVIVÊNCIA: ' + dataBR(v('minInicio')));
-      L.push('REGIME DE BENS: ' + MIN.regime);
-      L.push('FILHOS DA UNIÃO: ' + (MIN.filhos === 'Sim' ? 'Sim — ' + (v('minFilhos') || '[FALTA: nomes e datas]') : 'Não'));
-      if (MIN.nome === 'Ninguém altera o nome') L.push('NOME APÓS A UNIÃO: ninguém altera o nome.');
-      else {
-        L.push('NOME APÓS A UNIÃO: ' + MIN.nome + '.');
-        if (!el('minNome1Box').hidden) L.push('  Convivente 1 passará a assinar: ' + (v('minNome1') || '[FALTA: composição do nome]'));
-        if (!el('minNome2Box').hidden) L.push('  Convivente 2 passará a assinar: ' + (v('minNome2') || '[FALTA: composição do nome]'));
-        L.push('  RESSALVA OBRIGATÓRIA: efeitos da alteração do nome condicionados ao registro da escritura no Livro E do RCPN.');
-      }
-      L.push('ASSINATURA PELO e-NOTARIADO: ' + MIN.enot);
-      if (v('minObs')) L.push('OBSERVAÇÕES: ' + v('minObs'));
-      return L.join('\n');
-    }
-    const c1 = el('minCiente1'), c2 = el('minCiente2'), btn = el('btnGerarMinuta'), nota = el('minNota');
-    function rever() {
-      const ok = c1.checked && c2.checked;
-      btn.disabled = !ok;
-      nota.textContent = ok ? 'Preencha a entrevista, anexe os documentos e gere a minuta.'
-        : 'Marque as duas caixas de ciência para liberar o botão.';
-    }
-    c1.addEventListener('change', rever); c2.addEventListener('change', rever);
-    rever(); reverCondicionais();
-
-    montarFerramenta({
-      ferramenta: 'minuta_ue', pagina: 'paginaMinutas', exemplo: '',
-      entrada: 'minPedido', saida: 'saidaMinuta', meta: 'metaMin',
-      btnRodar: 'btnGerarMinuta', rotuloRodar: 'Gerar minuta',
-      btnCopiar: 'btnCopiarMin', btnExemplo: 'btnExemploMin', btnLimpar: 'btnLimparMin',
-      assinatura: 'Minuta gerada para', pedirEntrada: 'Preencha a entrevista antes de gerar.',
-      obterTexto: entrevistaTexto,
-      validar: function () {
-        if (!(c1.checked && c2.checked)) return 'Marque as duas caixas de ciência.';
-        if (!el('minC1Nome').value.trim() || !el('minC2Nome').value.trim()) return 'Informe o nome completo dos dois conviventes.';
-        if (!el('minInicio').value) return 'Informe a data de início da convivência.';
-        return null;
-      },
-      aoConcluir: function (r, texto) {
-        const titulo = 'UE — ' + (el('minC1Nome').value.trim() || '…') + ' e ' + (el('minC2Nome').value.trim() || '…');
-        api('/hub/minutas', { corpo: { titulo: titulo, texto: texto } }).then(function (resp) {
-          const link = location.origin + location.pathname + '#minuta=' + resp.id;
-          el('minutaLinkA').textContent = link;
-          el('minutaLinkA').href = link;
-          el('minutaLinkBox').hidden = false;
-          el('btnCopiarLinkMin').onclick = function () { copiar(link).then(function () { toast('✓ Link copiado'); }); };
-        }).catch(function () { toast('A minuta saiu, mas não consegui guardar o link — copie o texto.', true); });
-      },
-      msgProgresso: function (n) { return n ? 'Lendo ' + n + ' documento(s) e redigindo a minuta' : 'Redigindo a minuta'; }
-    });
-  })();
 }
 
 /* ============================================================
@@ -3809,7 +4244,7 @@ function montarFerramenta(cfg) {
 
 /* Colar print (Ctrl+V) em qualquer ponto da ferramenta aberta */
 document.addEventListener('paste', function (ev) {
-  const ativa = ['paginaExtrator', 'paginaAnalisador', 'paginaRedator'].filter(function (p) { return !el(p).hidden; })[0];
+  const ativa = ['paginaExtrator', 'paginaAnalisador', 'paginaRedator', 'paginaMinutas'].filter(function (p) { return !el(p).hidden; })[0];
   if (!ativa || !ev.clipboardData || el('app').hidden) return;
   const alvo = ev.target;
   const emCampo = alvo && (alvo.tagName === 'TEXTAREA' || alvo.tagName === 'INPUT' || alvo.isContentEditable);
@@ -3831,7 +4266,8 @@ document.addEventListener('paste', function (ev) {
     catch (e) { return f; }
   })).then(function () {
     const acao = ativa === 'paginaExtrator' ? 'Gerar qualificação'
-      : ativa === 'paginaRedator' ? 'Escrever' : 'Analisar matrícula';
+      : ativa === 'paginaRedator' ? 'Escrever'
+      : ativa === 'paginaMinutas' ? 'Gerar minuta' : 'Analisar matrícula';
     toast('✓ Print anexado — é só clicar em ' + acao);
   });
 });
@@ -4112,6 +4548,535 @@ montarFerramenta({
   aplicarTipo('email');
   // o rótulo em branco do exemplo: o Redator não tem exemplo pronto
   el('btnExemploRed').remove();
+})();
+
+/* ============================================================
+   05 · GERADOR DE MINUTA (v1.27) — entrevista dirigida por ato
+   Princípio (docs/GERADOR-MINUTA-SPEC.md §0): a escrevente informa FATOS e a
+   vontade das partes; o roteador (prompt do servidor) escolhe a variante.
+   Nenhum botão se chama "modelo". A tela monta a ficha do contrato §2 — uma
+   chave por linha, `nao_informado` quando não se sabe (UNKNOWN ≠ FALSE) — e
+   lê a resposta no formato §5: DECISÃO DO ROTEADOR (quadro próprio) →
+   ===MINUTA_COPIAVEL=== (só quando PRONTA; é o que o botão Copiar leva) ou
+   QUALIFICAÇÃO DEVOLVIDA AO TABELIÃO (bloqueada / fora do escopo) → ⚠ CONFERIR.
+============================================================ */
+const RE_MINUTA_COPIAVEL = /===MINUTA_COPIAVEL===([\s\S]*?)(?:===FIM_MINUTA===|$)/;
+let MINUTA_COPIAVEL = '';   // o que o botão Copiar leva (vazio = sem minuta = botão escondido)
+let MINUTA_ESTADO = '';     // "PRONTA PARA MINUTA" | "BLOQUEADA — …" | "FORA DO ESCOPO — …"
+function processarMinuta(bruto) {
+  let texto = String(bruto || '').replace(/\r/g, '').trim();
+  function primeiroIndice(t, marcas) {
+    let i = t.length;
+    marcas.forEach(function (m) { const j = t.indexOf(m); if (j >= 0 && j < i) i = j; });
+    return i;
+  }
+  function tirarSecao(titulo, fins) {
+    const i = texto.indexOf(titulo);
+    if (i < 0) return '';
+    // pula o espaço logo após o título (o modelo pode ou não deixar linha em branco ali)
+    const bruto = texto.slice(i + titulo.length);
+    const resto = bruto.replace(/^\s+/, '');
+    const fim = primeiroIndice(resto, fins);
+    texto = (texto.slice(0, i) + resto.slice(fim)).trim();
+    return resto.slice(0, fim).trim();
+  }
+  const m = texto.match(RE_MINUTA_COPIAVEL);
+  MINUTA_COPIAVEL = m ? m[1].trim() : '';
+  // a decisão vai até a linha em branco ou até a próxima seção conhecida
+  const decisao = tirarSecao('DECISÃO DO ROTEADOR', ['\n\n', '===MINUTA_COPIAVEL===', 'QUALIFICAÇÃO DEVOLVIDA', '⚠ CONFERIR']);
+  const mEstado = /^\s*-?\s*Estado:\s*(.+)$/m.exec(decisao);
+  MINUTA_ESTADO = mEstado ? mEstado[1].trim() : '';
+  const devolvida = tirarSecao('QUALIFICAÇÃO DEVOLVIDA AO TABELIÃO', ['===MINUTA_COPIAVEL===', '⚠ CONFERIR', 'Minuta de rascunho gerada']);
+  // bloqueio fecha, nunca abre: se o modelo devolveu a qualificação ao Tabelião,
+  // a resposta é bloqueada mesmo que a linha "Estado:" tenha faltado
+  const bloqueada = /BLOQUEADA|FORA DO ESCOPO/.test(MINUTA_ESTADO || decisao) || !!devolvida;
+  // sem marcadores e não bloqueada (resposta legada, ou modelo que esqueceu os
+  // marcadores): copia-se o que sobrou, menos o ⚠ CONFERIR e o rodapé
+  if (!m && !bloqueada) {
+    MINUTA_COPIAVEL = texto.split('⚠ CONFERIR')[0].replace(/Minuta de rascunho gerada pelo Hub CN2O[^\n]*/g, '').trim();
+  }
+  if (bloqueada) MINUTA_COPIAVEL = '';
+
+  const box = el('minDecisao');
+  if (box) {
+    box.hidden = !decisao && !devolvida;
+    box.classList.toggle('bloqueada', bloqueada);
+    el('minDecisaoEstado').textContent = MINUTA_ESTADO ? MINUTA_ESTADO.split(/\s+[—–-]\s+/)[0] : (bloqueada ? 'BLOQUEADA' : '');
+    linhasDecisao(el('minDecisaoTexto'), decisao);
+    el('minDevolvida').hidden = !devolvida;
+    linhasDecisao(el('minDevolvidaTexto'), devolvida);
+  }
+  // na tela, os marcadores viram título; o ⚠ CONFERIR e o rodapé seguem visíveis
+  return texto
+    .replace('===MINUTA_COPIAVEL===', '— MINUTA —')
+    .replace('===FIM_MINUTA===', '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim();
+}
+// "- Chave: valor" vira linha com a chave em negrito; o resto, linha comum.
+// Só nós de texto (createElement + textContent): o texto do modelo nunca vira HTML.
+function linhasDecisao(alvo, txt) {
+  alvo.textContent = '';
+  String(txt || '').split('\n').filter(function (l) { return l.trim(); }).forEach(function (l) {
+    const div = document.createElement('div');
+    const mm = /^\s*-?\s*([A-Za-zÀ-ú][A-Za-zÀ-ú0-9 _?]{1,40}):\s*(.*)$/.exec(l);
+    if (mm) {
+      div.className = 'md-linha';
+      const b = document.createElement('b');
+      b.textContent = mm[1] + ':';
+      div.appendChild(b);
+      div.appendChild(document.createTextNode(' ' + mm[2]));
+    } else {
+      div.className = 'md-linha md-cont';
+      div.textContent = l.replace(/^\s*-\s*/, '');
+    }
+    alvo.appendChild(div);
+  });
+}
+
+(function () {
+  const pag = el('paginaMinutas');
+  if (!pag) return;
+  const ATOS = ['PROC', 'UE', 'DISS_UE', 'DIV', 'EMANC'];
+  const NOME_ATO = { PROC: 'PROC', UE: 'UE', DISS_UE: 'DISS_UE', DIV: 'DIV', EMANC: 'EMANC' };
+  const ANEXOS_ROT = {
+    PROC: 'Documentos apresentados — identidade do outorgante e do outorgado, matrícula, CRV, contrato social (foto ou PDF)',
+    UE: 'Documentos apresentados — identidade, certidões de nascimento/casamento, escritura anterior (foto ou PDF)',
+    DISS_UE: 'Documentos apresentados — identidade, escritura/contrato da união, certidão do Livro E, decisão judicial dos filhos (foto ou PDF)',
+    DIV: 'Documentos apresentados — identidade, certidão de casamento atualizada, decisão judicial dos filhos (foto ou PDF)',
+    EMANC: 'Documentos apresentados — certidão de nascimento do menor, identidade dos pais, certidão de óbito ou decisão judicial (foto ou PDF)'
+  };
+  // PROC — rótulo do objeto por finalidade (spec §2.1: OBJETO)
+  const OBJETO_ROT = {
+    imovel_administrar: 'Matrícula e CRI do imóvel', imovel_vender: 'Matrícula e CRI do imóvel', imovel_comprar: 'Matrícula e CRI do imóvel (se já definido)',
+    financiamento: 'Matrícula e CRI do imóvel dado em garantia',
+    veiculo_regularizar: 'Placa / RENAVAM', veiculo_vender: 'Placa / RENAVAM',
+    bancaria: 'Banco e agência', inventario: 'Autor da herança', ad_judicia: 'Nº do processo e juízo (se houver)',
+    previdenciaria: 'Benefício / NB (se houver)', casamento: 'Nubente com quem se casa', divorcio_ue: 'Cônjuge / convivente e serventia do ato',
+    outra: 'Objeto (imóvel, veículo, conta, espólio ou processo — se houver)'
+  };
+  // PROC — poderes de alto risco mostrados por finalidade (spec §3.1: os proibidos
+  // da variante nem aparecem — doar só em "outra"; ceder direitos só em inventário;
+  // vender/transferir nunca em veiculo_regularizar; CPC 105 só em ad_judicia).
+  const PODERES_POR_FIN = {
+    imovel_administrar: ['vender', 'receber_preco', 'dar_quitacao', 'hipotecar_gravar', 'contrair_emprestimo', 'transigir', 'receber_citacao', 'substabelecer'],
+    imovel_vender: ['vender', 'receber_preco', 'dar_quitacao', 'hipotecar_gravar', 'transigir', 'substabelecer'],
+    imovel_comprar: ['hipotecar_gravar', 'contrair_emprestimo', 'confessar_divida', 'dar_quitacao', 'transigir', 'substabelecer'],
+    bancaria: ['receber_preco', 'dar_quitacao', 'contrair_emprestimo', 'confessar_divida', 'hipotecar_gravar', 'substabelecer'],
+    financiamento: ['hipotecar_gravar', 'contrair_emprestimo', 'confessar_divida', 'substabelecer'],
+    veiculo_regularizar: ['dar_quitacao', 'transigir', 'substabelecer'],
+    veiculo_vender: ['vender', 'receber_preco', 'dar_quitacao', 'transigir', 'substabelecer'],
+    inventario: ['ceder_direitos_hereditarios', 'receber_preco', 'dar_quitacao', 'renunciar', 'transigir', 'receber_citacao', 'substabelecer'],
+    previdenciaria: ['receber_preco', 'dar_quitacao', 'substabelecer'],
+    ad_judicia: ['receber_citacao', 'confessar', 'reconhecer_procedencia', 'transigir', 'desistir', 'renunciar', 'receber_preco', 'dar_quitacao', 'firmar_compromisso', 'declarar_hipossuficiencia', 'substabelecer'],
+    casamento: ['substabelecer'],
+    divorcio_ue: ['transigir', 'renunciar', 'dar_quitacao', 'substabelecer'],
+    outra: ['vender', 'receber_preco', 'dar_quitacao', 'doar', 'hipotecar_gravar', 'contrair_emprestimo', 'confessar_divida', 'transigir', 'renunciar', 'receber_citacao', 'substabelecer']
+  };
+  const FINS_AUTOCONTRATO = ['imovel_vender', 'imovel_comprar', 'veiculo_vender', 'inventario', 'outra'];
+  const FINS_PRECO = ['imovel_vender', 'imovel_comprar', 'veiculo_vender'];
+  const FINS_PRAZO_LEGAL = ['casamento', 'divorcio_ue'];
+
+  let ATO = 'UE';
+  function v(id) { const n = el(id); return n ? (n.value || '').replace(/\r/g, '').trim() : ''; }
+  // a ficha é UMA chave por linha: texto livre com quebra de linha não pode virar
+  // "chave" (ex.: "PARTILHA: agora" digitado nas observações). Valor de chave
+  // simples vira uma linha só; nas OBSERVACOES as linhas seguintes ficam recuadas.
+  function umaLinha(s) { return String(s || '').replace(/\s*\n+\s*/g, '; '); }
+  function chip(chave) {
+    const b = pag.querySelector('[data-min-chips="' + chave + '"] .ed-chip.ativo');
+    return b ? b.dataset.v : '';
+  }
+  function ou(x) { return x || 'nao_informado'; }
+  function dataBR(iso) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(iso || '');
+    return m ? m[3] + '/' + m[2] + '/' + m[1] : (iso || '');
+  }
+  function mostrar(id, sim) { const n = el(id); if (n) n.hidden = !sim; }
+
+  /* ---- chips: qualquer grupo [data-min-chips] da página, inclusive os gerados ---- */
+  function ligarChips(raiz) {
+    raiz.querySelectorAll('[data-min-chips]').forEach(function (grupo) {
+      if (grupo.dataset.ligado) return;
+      grupo.dataset.ligado = '1';
+      grupo.querySelectorAll('.ed-chip').forEach(function (b) {
+        b.setAttribute('aria-pressed', b.classList.contains('ativo') ? 'true' : 'false');
+        b.addEventListener('click', function () {
+          grupo.querySelectorAll('.ed-chip').forEach(function (x) { x.classList.remove('ativo'); x.setAttribute('aria-pressed', 'false'); });
+          b.classList.add('ativo'); b.setAttribute('aria-pressed', 'true');
+          reverCondicionais();
+        });
+      });
+    });
+  }
+
+  /* ---- PROC: blocos repetidos de outorgante (1–4) e outorgado (1–3) ---- */
+  const CIVIL = [['solteiro', 'Solteiro(a)'], ['casado', 'Casado(a)'], ['divorciado', 'Divorciado(a)'], ['viuvo', 'Viúvo(a)'], ['uniao_estavel', 'União estável'], ['nao_informado', 'Não informado']];
+  const REGIMES = [['comunhão parcial de bens', 'Comunhão parcial'], ['comunhão universal de bens', 'Comunhão universal'], ['separação convencional de bens', 'Separação convencional'], ['separação obrigatória de bens', 'Separação obrigatória'], ['participação final nos aquestos', 'Participação final nos aquestos'], ['nao_informado', 'Não informado']];
+  function chips(chave, opcoes, ativo) {
+    return '<span class="ed-chips" data-min-chips="' + chave + '">' + opcoes.map(function (o) {
+      return '<button type="button" class="ed-chip' + (o[0] === ativo ? ' ativo' : '') + '" data-v="' + esc(o[0]) + '">' + esc(o[1]) + '</button>';
+    }).join('') + '</span>';
+  }
+  function montarPessoasProc() {
+    let h = '';
+    for (let i = 1; i <= 4; i++) {
+      h += '<div class="min-pessoa" id="minPOut' + i + '"' + (i > 1 ? ' hidden' : '') + '>' +
+        '<p class="min-pessoa-titulo">Outorgante ' + i + '</p><div class="grade-min">' +
+        '<label class="min-campo">Nome completo *<input type="text" id="minPOutNome' + i + '" autocomplete="off"></label>' +
+        '<div class="min-campo"><span>Pessoa</span>' + chips('proc.out' + i + '.tipo', [['PF', 'Física'], ['PJ', 'Jurídica']], 'PF') + '</div>' +
+        '<div class="min-campo" data-pf><span>Estado civil</span>' + chips('proc.out' + i + '.civil', CIVIL, '') + '</div>' +
+        '<div class="min-campo" id="minPOutRegime' + i + '" hidden><span>Regime de bens</span>' + chips('proc.out' + i + '.regime', REGIMES, '') + '</div>' +
+        '<div class="min-campo" data-pf><span>Capacidade</span>' + chips('proc.out' + i + '.cap', [['capaz', 'Capaz'], ['representado', 'Representado(a)']], 'capaz') + '</div>' +
+        '<label class="min-campo" id="minPOutRepBox' + i + '" hidden><span id="minPOutRepRot' + i + '">Representado(a) por — nome e fundamento</span>' +
+        '<input type="text" id="minPOutRep' + i + '" autocomplete="off"></label>' +
+        '</div></div>';
+    }
+    el('minPOutorgantes').innerHTML = h;
+    h = '';
+    for (let i = 1; i <= 3; i++) {
+      h += '<div class="min-pessoa" id="minPDado' + i + '"' + (i > 1 ? ' hidden' : '') + '>' +
+        '<p class="min-pessoa-titulo">Outorgado ' + i + '</p><div class="grade-min">' +
+        '<label class="min-campo">Nome completo *<input type="text" id="minPDadoNome' + i + '" autocomplete="off"></label>' +
+        '<label class="min-campo">Vínculo com o outorgante (parentesco, advogado, despachante…)<input type="text" id="minPDadoVinc' + i + '" autocomplete="off"></label>' +
+        '</div></div>';
+    }
+    el('minPOutorgados').innerHTML = h;
+  }
+
+  /* ---- condicionais: o que aparece depende do que já foi informado ---- */
+  function reverCondicionais() {
+    // PROC
+    const fin = chip('proc.finalidade');
+    const nOut = parseInt(chip('proc.n_outorgantes'), 10) || 1;
+    const nDad = parseInt(chip('proc.n_outorgados'), 10) || 1;
+    for (let i = 1; i <= 4; i++) {
+      const bloco = el('minPOut' + i);
+      if (!bloco) continue;
+      bloco.hidden = i > nOut;
+      const pf = chip('proc.out' + i + '.tipo') !== 'PJ';
+      bloco.querySelectorAll('[data-pf]').forEach(function (n) { n.hidden = !pf; });
+      const civil = chip('proc.out' + i + '.civil');
+      mostrar('minPOutRegime' + i, pf && (civil === 'casado' || civil === 'uniao_estavel'));
+      const rep = !pf || chip('proc.out' + i + '.cap') === 'representado';
+      mostrar('minPOutRepBox' + i, rep);
+      el('minPOutRepRot' + i).textContent = pf ? 'Representado(a) por — nome e fundamento (curatela, tutela…)' : 'Representante e fundamento (contrato social / ata / procuração)';
+    }
+    for (let i = 1; i <= 3; i++) mostrar('minPDado' + i, i <= nDad);
+    mostrar('minPAtuacaoBox', nDad >= 2);
+    el('minPObjetoRot').textContent = OBJETO_ROT[fin] || OBJETO_ROT.outra;
+    const lista = PODERES_POR_FIN[fin] || [];
+    mostrar('minPPoderesBox', lista.length > 0);
+    pag.querySelectorAll('#minPPoderes .min-poder').forEach(function (l) { l.hidden = lista.indexOf(l.dataset.poder) < 0; });
+    mostrar('minPAutoBox', FINS_AUTOCONTRATO.indexOf(fin) >= 0);
+    mostrar('minPPrecoBox', FINS_PRECO.indexOf(fin) >= 0);
+    mostrar('minPPrecoValor', chip('proc.preco') === 'fixado');
+    mostrar('minPPrazoData', chip('proc.prazo') === 'ate');
+    mostrar('minPPrazoNota', FINS_PRAZO_LEGAL.indexOf(fin) >= 0);
+    // UE
+    mostrar('minInicio', chip('ue.inicio_modo') === 'data');
+    mostrar('minRegimeOutro', chip('ue.regime') === 'convencao_outro');
+    mostrar('minMaior70Quem', chip('ue.maior70') === 'sim');
+    mostrar('minFilhosBox', chip('ue.filhos') === 'sim');
+    const n = chip('ue.nome') || 'ninguem_altera';
+    const um = n === 'convivente_1_acrescenta' || n === 'ambos';
+    const dois = n === 'convivente_2_acrescenta' || n === 'ambos';
+    mostrar('minNomesBox', um || dois); mostrar('minNome1Box', um); mostrar('minNome2Box', dois);
+    mostrar('minAvisoLivroE', n !== 'ninguem_altera');
+    const tit = chip('ue.titulo');
+    mostrar('minTituloDados', tit === 'escritura_anterior');
+    mostrar('minLivroEBox', !!tit && tit !== 'nenhum');
+    mostrar('minAvisoCasado', chip('ue.c1civil') === 'casado' || chip('ue.c2civil') === 'casado');
+    // DISS_UE
+    const titD = chip('dss.titulo');
+    mostrar('minDsTituloDados', titD === 'escritura');
+    mostrar('minDsLivroEBox', !!titD && titD !== 'nenhum');
+    mostrar('minDsDecisaoBox', chip('dss.filhos') === 'incapazes');
+    const decD = chip('dss.decisao');
+    mostrar('minDsDecisaoDados', decD === 'cobre_guarda_convivencia_alimentos' || decD === 'parcial');
+    el('minDsDecisaoDados').placeholder = decD === 'parcial' ? 'o que falta na decisão' : 'juízo, autos e data';
+    mostrar('minDsAlimentosDados', chip('dss.alimentos') === 'fixados');
+    mostrar('minDsNomeQuem', chip('dss.nome') === 'retoma_nome_anterior');
+    mostrar('minDsProcBox', chip('dss.repr') === 'por_procuracao');
+    // DIV
+    mostrar('minDvDecisaoBox', chip('div.filhos') === 'menores_ou_incapazes');
+    const decV = chip('div.decisao');
+    mostrar('minDvDecisaoDados', decV === 'cobre_guarda_convivencia_alimentos' || decV === 'parcial');
+    el('minDvDecisaoDados').placeholder = decV === 'parcial' ? 'o que falta na decisão' : 'juízo, autos e data';
+    mostrar('minDvPensaoDados', chip('div.pensao') === 'fixada');
+    mostrar('minDvNomeQuem', chip('div.nome') === 'retoma_nome_de_solteiro');
+    mostrar('minDvProcBox', chip('div.repr') === 'por_procuracao');
+    // EMANC
+    const quem = chip('em.quem');
+    mostrar('minEmQual', quem === 'um_dos_pais');
+    mostrar('minEmMotivoBox', quem === 'um_dos_pais');
+    mostrar('minEmAvisoTutor', quem === 'tutor');
+    mostrar('minEmDecisaoDados', chip('em.motivo') === 'destituido_ou_suspenso_por_decisao');
+    mostrar('minEmGuardaQuem', chip('em.guarda') === 'unilateral');
+    mostrar('minEmAnteriorComo', chip('em.anterior') === 'sim');
+  }
+
+  function aplicarAto(novo) {
+    ATO = ATOS.indexOf(novo) >= 0 ? novo : 'UE';
+    pag.querySelectorAll('.min-ato').forEach(function (b) {
+      const on = b.dataset.ato === ATO;
+      b.classList.toggle('ativo', on);
+      b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    pag.querySelectorAll('[data-entrevista]').forEach(function (d) { d.hidden = d.dataset.entrevista !== ATO; });
+    el('minAnexosRot').textContent = ANEXOS_ROT[ATO];
+    reverCondicionais();
+  }
+  pag.querySelectorAll('.min-ato').forEach(function (b) {
+    b.addEventListener('click', function () { aplicarAto(b.dataset.ato); });
+  });
+
+  /* ---- a ficha (contrato da spec §2): uma chave por linha, na ordem da spec ---- */
+  function poderesMarcados() {
+    const out = [];
+    pag.querySelectorAll('#minPPoderes .min-poder').forEach(function (l) {
+      const c = l.querySelector('input');
+      if (!l.hidden && c && c.checked) out.push(c.value);
+    });
+    return out;
+  }
+  function fichaPROC(L) {
+    const fin = chip('proc.finalidade');
+    L.push('FINALIDADE: ' + ou(fin));
+    L.push('FINALIDADE_DESCRICAO: ' + ou(umaLinha(v('minPFinDesc'))));
+    const nOut = parseInt(chip('proc.n_outorgantes'), 10) || 1;
+    L.push('OUTORGANTES: ' + nOut);
+    for (let i = 1; i <= nOut; i++) {
+      const tipo = chip('proc.out' + i + '.tipo') || 'PF';
+      const partes = [ou(v('minPOutNome' + i)), tipo];
+      if (tipo === 'PJ') partes.push('representada por ' + ou(v('minPOutRep' + i)));
+      else {
+        const civil = chip('proc.out' + i + '.civil');
+        partes.push(ou(civil));
+        if (civil === 'casado' || civil === 'uniao_estavel') partes.push('regime: ' + ou(chip('proc.out' + i + '.regime')));
+        partes.push(chip('proc.out' + i + '.cap') === 'representado' ? 'representado por ' + ou(v('minPOutRep' + i)) : 'capaz');
+      }
+      L.push('OUTORGANTE_' + i + ': ' + partes.join(' · '));
+    }
+    const nDad = parseInt(chip('proc.n_outorgados'), 10) || 1;
+    L.push('OUTORGADOS: ' + nDad);
+    for (let i = 1; i <= nDad; i++) {
+      L.push('OUTORGADO_' + i + ': ' + ou(v('minPDadoNome' + i)) + (v('minPDadoVinc' + i) ? ' · ' + v('minPDadoVinc' + i) : ''));
+    }
+    L.push('ATUACAO: ' + (nDad >= 2 ? ou(chip('proc.atuacao')) : 'nao_informado'));
+    L.push('OBJETO: ' + ou(v('minPObjeto')));
+    L.push('PODERES_ALTO_RISCO: ' + poderesMarcados().join(', '));
+    L.push('AUTOCONTRATO: ' + (FINS_AUTOCONTRATO.indexOf(fin) >= 0 ? ou(chip('proc.autocontrato')) : 'nao_informado'));
+    const preco = chip('proc.preco');
+    L.push('PRECO: ' + (FINS_PRECO.indexOf(fin) < 0 ? 'nao_se_aplica' : preco === 'fixado' ? 'fixado: R$ ' + ou(v('minPPrecoValor').replace(/^R\$\s*/i, '')) : ou(preco)));
+    const prazo = chip('proc.prazo');
+    L.push('PRAZO: ' + (prazo === 'ate' ? 'ate ' + ou(dataBR(v('minPPrazoData'))) : ou(prazo)));
+    L.push('SUBSTABELECIMENTO: ' + ou(chip('proc.substab')));
+  }
+  function fichaUE(L) {
+    function conv(i) {
+      const partes = [ou(v('minC' + i + 'Nome')), ou(chip('ue.c' + i + 'civil'))];
+      const nasc = dataBR(v('minC' + i + 'Nasc'));
+      if (nasc) partes.push('nascido(a) em ' + nasc);
+      if (v('minC' + i + 'Cpf')) partes.push('CPF ' + v('minC' + i + 'Cpf'));
+      if (v('minC' + i + 'Prof')) partes.push('profissão: ' + v('minC' + i + 'Prof'));
+      return partes.join(' · ');
+    }
+    L.push('CONVIVENTE_1: ' + conv(1));
+    L.push('CONVIVENTE_2: ' + conv(2));
+    const modo = chip('ue.inicio_modo') || 'data';
+    L.push('INICIO_CONVIVENCIA: ' + (modo === 'data' ? ou(dataBR(v('minInicio'))) : modo));
+    const reg = chip('ue.regime');
+    L.push('REGIME: ' + (reg === 'convencao_outro' ? 'convencao: ' + ou(v('minRegimeOutro')) : ou(reg)));
+    const m70 = chip('ue.maior70');
+    L.push('MAIOR_70: ' + (m70 === 'sim' ? 'sim (' + ou(chip('ue.maior70_quem')) + ')' : ou(m70)));
+    const filhos = chip('ue.filhos');
+    L.push('FILHOS: ' + (filhos === 'sim' ? 'sim: ' + ou(umaLinha(v('minFilhos'))) : ou(filhos)));
+    const n = chip('ue.nome') || 'ninguem_altera';
+    L.push('NOME: ' + (n === 'convivente_1_acrescenta' ? n + ': ' + ou(v('minNome1'))
+      : n === 'convivente_2_acrescenta' ? n + ': ' + ou(v('minNome2'))
+      : n === 'ambos' ? 'ambos: convivente 1 → ' + ou(v('minNome1')) + '; convivente 2 → ' + ou(v('minNome2'))
+      : n));
+    const tit = chip('ue.titulo');
+    L.push('TITULO_ANTERIOR: ' + (tit === 'escritura_anterior' ? tit + ': ' + ou(v('minTituloDados')) : ou(tit)));
+    L.push('LIVRO_E: ' + (tit && tit !== 'nenhum' ? ou(chip('ue.livro_e')) : 'nao_informado'));
+    L.push('ENDERECO_COMUM: ' + ou(v('minEndereco')));
+  }
+  function decisaoFilhos(prefixo, idDados, incapazes, filhos) {
+    if (filhos === 'nenhum' || filhos === 'capazes' || filhos === 'maiores_capazes') return 'nao_se_aplica';
+    if (filhos !== incapazes) return 'nao_informado';
+    const d = chip(prefixo + '.decisao');
+    if (d === 'cobre_guarda_convivencia_alimentos' || d === 'parcial') return d + ': ' + ou(v(idDados));
+    return ou(d);
+  }
+  function advogado(idNome, idOab) {
+    if (!v(idNome)) return 'nao_informado';
+    return v(idNome) + ' · ' + (v(idOab) || 'OAB nao_informado');
+  }
+  function representacao(prefixo, idData, idServ) {
+    const r = chip(prefixo + '.repr');
+    if (r !== 'por_procuracao') return ou(r);
+    return 'por_procuracao: ' + ou(dataBR(v(idData))) + ', ' + ou(v(idServ));
+  }
+  function fichaDISS(L) {
+    L.push('CONVIVENTE_1: ' + ou(v('minDsC1Nome')) + ' · ' + ou(chip('dss.c1civil')));
+    L.push('CONVIVENTE_2: ' + ou(v('minDsC2Nome')) + ' · ' + ou(chip('dss.c2civil')));
+    const tit = chip('dss.titulo');
+    L.push('TITULO_ANTERIOR: ' + (tit === 'escritura' ? 'escritura: ' + ou(v('minDsTituloDados')) : ou(tit)));
+    L.push('LIVRO_E: ' + (tit && tit !== 'nenhum' ? ou(chip('dss.livro_e')) : 'nao_informado'));
+    L.push('BENS_COMUNS: ' + ou(chip('dss.bens')));
+    L.push('PARTILHA: ' + ou(chip('dss.partilha')));
+    const filhos = chip('dss.filhos');
+    L.push('FILHOS: ' + ou(filhos));
+    L.push('DECISAO_JUDICIAL_FILHOS: ' + decisaoFilhos('dss', 'minDsDecisaoDados', 'incapazes', filhos));
+    L.push('GRAVIDEZ: ' + ou(chip('dss.gravidez')));
+    const al = chip('dss.alimentos');
+    L.push('ALIMENTOS_ENTRE_CONVIVENTES: ' + (al === 'fixados' ? 'fixados: ' + ou(v('minDsAlimentosDados')) : ou(al)));
+    const n = chip('dss.nome');
+    L.push('NOME: ' + (n === 'retoma_nome_anterior' ? n + ': ' + ou(chip('dss.nome_quem')) : ou(n)));
+    L.push('ADVOGADO: ' + advogado('minDsAdvNome', 'minDsAdvOab'));
+    L.push('REPRESENTACAO: ' + representacao('dss', 'minDsProcData', 'minDsProcServ'));
+  }
+  function fichaDIV(L) {
+    L.push('CONJUGE_1: ' + ou(v('minDvC1Nome')));
+    L.push('CONJUGE_2: ' + ou(v('minDvC2Nome')));
+    const cas = [dataBR(v('minDvCasData')), v('minDvCasServ'), v('minDvCasMatr') ? 'matrícula ' + v('minDvCasMatr') : ''].filter(Boolean);
+    const emitida = dataBR(v('minDvCertData'));
+    L.push('CASAMENTO: ' + (cas.length || emitida ? (cas.length ? cas.join(' · ') : 'nao_informado') + ' · certidão emitida em ' + ou(emitida) : 'nao_informado'));
+    L.push('REGIME: ' + ou(chip('div.regime')));
+    L.push('BENS_COMUNS: ' + ou(chip('div.bens')));
+    L.push('PARTILHA: ' + ou(chip('div.partilha')));
+    const filhos = chip('div.filhos');
+    L.push('FILHOS: ' + ou(filhos));
+    L.push('DECISAO_JUDICIAL_FILHOS: ' + decisaoFilhos('div', 'minDvDecisaoDados', 'menores_ou_incapazes', filhos));
+    L.push('GRAVIDEZ: ' + ou(chip('div.gravidez')));
+    const pe = chip('div.pensao');
+    L.push('PENSAO_ENTRE_CONJUGES: ' + (pe === 'fixada' ? 'fixada: ' + ou(v('minDvPensaoDados')) : ou(pe)));
+    const n = chip('div.nome');
+    L.push('NOME: ' + (n === 'retoma_nome_de_solteiro' ? n + ': ' + ou(chip('div.nome_quem')) : ou(n)));
+    L.push('ADVOGADO: ' + advogado('minDvAdvNome', 'minDvAdvOab'));
+    L.push('REPRESENTACAO: ' + representacao('div', 'minDvProcData', 'minDvProcServ'));
+  }
+  function fichaEMANC(L) {
+    L.push('MENOR: ' + ou(v('minEmNome')) + ' · nascido em ' + ou(dataBR(v('minEmNasc'))));
+    const quem = chip('em.quem');
+    L.push('QUEM_OUTORGA: ' + (quem === 'um_dos_pais' ? 'um_dos_pais: ' + ou(chip('em.qual')) : ou(quem)));
+    const mot = chip('em.motivo');
+    L.push('MOTIVO_UM_SO: ' + (quem !== 'um_dos_pais' ? 'nao_informado'
+      : mot === 'destituido_ou_suspenso_por_decisao' ? mot + ': ' + ou(v('minEmDecisaoDados')) : ou(mot)));
+    const g = chip('em.guarda');
+    L.push('GUARDA: ' + (g === 'unilateral' ? 'unilateral: ' + ou(chip('em.guarda_quem')) : ou(g)));
+    const ant = chip('em.anterior');
+    L.push('EMANCIPACAO_ANTERIOR: ' + (ant === 'sim' ? 'sim: ' + ou(v('minEmAnteriorComo')) : ou(ant)));
+    L.push('FINALIDADE: ' + ou(v('minEmFinalidade')));
+  }
+  function entrevistaTexto() {
+    const L = ['=== ENTREVISTA DIRIGIDA — GERADOR DE MINUTA ===', 'ATO: ' + NOME_ATO[ATO]];
+    ({ PROC: fichaPROC, UE: fichaUE, DISS_UE: fichaDISS, DIV: fichaDIV, EMANC: fichaEMANC })[ATO](L);
+    L.push('OBSERVACOES: ' + ou(v('minObs')).replace(/\n/g, '\n  '));
+    return L.join('\n');
+  }
+
+  function validar() {
+    if (!(c1.checked && c2.checked)) return 'Marque as duas caixas de ciência.';
+    if (ATO === 'PROC') {
+      if (!chip('proc.finalidade')) return 'Escolha a finalidade da procuração — o que o cliente quer.';
+      if (!v('minPOutNome1')) return 'Informe o nome completo do outorgante.';
+      if (!v('minPDadoNome1')) return 'Informe o nome completo do outorgado.';
+    } else if (ATO === 'UE') {
+      if (!v('minC1Nome') || !v('minC2Nome')) return 'Informe o nome completo dos dois conviventes.';
+    } else if (ATO === 'DISS_UE') {
+      if (!v('minDsC1Nome') || !v('minDsC2Nome')) return 'Informe o nome completo dos dois conviventes.';
+    } else if (ATO === 'DIV') {
+      if (!v('minDvC1Nome') || !v('minDvC2Nome')) return 'Informe o nome completo dos dois cônjuges.';
+    } else if (ATO === 'EMANC') {
+      if (!v('minEmNome')) return 'Informe o nome completo do menor.';
+      if (!v('minEmNasc')) return 'Informe a data de nascimento do menor — é ela que decide se há 16 anos completos.';
+    }
+    return null;
+  }
+  function tituloDaMinuta() {
+    const e = function (id) { return v(id) || '…'; };
+    let t = ATO === 'PROC' ? 'PROC — ' + e('minPOutNome1') + ' → ' + e('minPDadoNome1')
+      : ATO === 'UE' ? 'UE — ' + e('minC1Nome') + ' e ' + e('minC2Nome')
+      : ATO === 'DISS_UE' ? 'DISS_UE — ' + e('minDsC1Nome') + ' e ' + e('minDsC2Nome')
+      : ATO === 'DIV' ? 'DIV — ' + e('minDvC1Nome') + ' e ' + e('minDvC2Nome')
+      : 'EMANC — ' + e('minEmNome');
+    if (/FORA DO ESCOPO/.test(MINUTA_ESTADO)) t += ' · FORA DO ESCOPO';
+    else if (/BLOQUEADA/.test(MINUTA_ESTADO)) t += ' · BLOQUEADA';
+    return t;
+  }
+
+  const c1 = el('minCiente1'), c2 = el('minCiente2'), btn = el('btnGerarMinuta'), nota = el('minNota');
+  function reverCiencia() {
+    const ok = c1.checked && c2.checked;
+    btn.disabled = !ok;
+    nota.textContent = ok ? 'Escolha o ato, informe os fatos, anexe os documentos e gere a minuta.'
+      : 'Marque as duas caixas de ciência para liberar o botão.';
+  }
+  c1.addEventListener('change', reverCiencia); c2.addEventListener('change', reverCiencia);
+
+  function esconderDecisao() {
+    MINUTA_COPIAVEL = ''; MINUTA_ESTADO = '';
+    el('minDecisao').hidden = true;
+    el('minDecisao').classList.remove('bloqueada');
+    el('minDevolvida').hidden = true;
+    el('minutaLinkBox').hidden = true;
+  }
+
+  montarPessoasProc();
+  ligarChips(pag);
+  reverCiencia();
+  aplicarAto('UE');
+
+  montarFerramenta({
+    ferramenta: 'minuta', pagina: 'paginaMinutas', exemplo: '',
+    entrada: 'minPedido', saida: 'saidaMinuta', meta: 'metaMin',
+    btnRodar: 'btnGerarMinuta', rotuloRodar: 'Gerar minuta',
+    btnCopiar: 'btnCopiarMin', btnExemplo: 'btnExemploMin', btnLimpar: 'btnLimparMin',
+    assinatura: 'Resultado gerado para', pedirEntrada: 'Preencha a entrevista antes de gerar.',
+    obterTexto: entrevistaTexto,
+    validar: validar,
+    processar: processarMinuta,
+    textoParaCopiar: function () { return MINUTA_COPIAVEL || el('saidaMinuta').textContent; },
+    aoIniciar: esconderDecisao,
+    aoConcluir: function (r) {
+      // sem minuta (bloqueada / fora do escopo) não há o que copiar
+      el('btnCopiarMin').hidden = !MINUTA_COPIAVEL;
+      // o link guarda a resposta inteira — a decisão do roteador faz parte do resultado
+      api('/hub/minutas', { corpo: { titulo: tituloDaMinuta(), texto: r.texto } }).then(function (resp) {
+        const link = location.origin + location.pathname + '#minuta=' + resp.id;
+        el('minutaLinkA').textContent = link;
+        el('minutaLinkA').href = link;
+        el('minutaLinkBox').hidden = false;
+        el('btnCopiarLinkMin').onclick = function () { copiar(link).then(function () { toast('✓ Link copiado'); }); };
+      }).catch(function () { toast('O resultado saiu, mas não consegui guardar o link — copie o texto.', true); });
+    },
+    msgProgresso: function (n) { return n ? 'Lendo ' + n + ' documento(s), roteando o ato e redigindo a minuta' : 'Roteando o ato e redigindo a minuta'; }
+  });
+
+  // Limpar: além da saída e dos anexos (montarFerramenta), zera a entrevista do ato aberto
+  el('btnLimparMin').addEventListener('click', function () {
+    const bloco = pag.querySelector('[data-entrevista="' + ATO + '"]');
+    if (bloco) {
+      bloco.querySelectorAll('input[type=text], input[type=date], textarea').forEach(function (n) { n.value = ''; });
+      bloco.querySelectorAll('input[type=checkbox]').forEach(function (n) { n.checked = false; });
+      bloco.querySelectorAll('[data-min-chips]').forEach(function (g) {
+        g.querySelectorAll('.ed-chip').forEach(function (x) { x.classList.remove('ativo'); x.setAttribute('aria-pressed', 'false'); });
+        const padrao = g.dataset.padrao ? g.querySelector('.ed-chip[data-v="' + g.dataset.padrao + '"]') : null;
+        if (padrao) { padrao.classList.add('ativo'); padrao.setAttribute('aria-pressed', 'true'); }
+      });
+    }
+    el('minObs').value = '';
+    esconderDecisao();
+    reverCondicionais();
+  });
+  // guarda o chip padrão de cada grupo (o que nasce ativo) para o Limpar restaurar
+  pag.querySelectorAll('[data-min-chips]').forEach(function (g) {
+    const a = g.querySelector('.ed-chip.ativo');
+    if (a) g.dataset.padrao = a.dataset.v;
+  });
+  el('btnExemploMin').remove();
 })();
 
 pintarBotaoTema();
