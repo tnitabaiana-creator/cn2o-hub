@@ -1710,6 +1710,27 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 :root[data-theme="dark"] .pi-brilho{background:linear-gradient(90deg,#c7d2e2,#f2d7dc)}
 @media (max-width:520px){ .pi-caixa{gap:12px} .pi-icone{width:52px;height:52px} .pi-emoji{font-size:30px} }
 
+/* ===== v1.31 — cartão 05 "Em breve": o Gerador de Minuta fica fechado à equipe até o
+   Tabelião liberar (curadoria das variáveis). Sombreado, hachurado de leve, selo EM BREVE,
+   sem hover; para o Tabelião (admin) o cartão continua clicável, só com o selo. ===== */
+#secFerramentas .card.em-breve{opacity:.6;filter:saturate(.3);cursor:not-allowed;
+  background:repeating-linear-gradient(135deg,transparent 0 14px,rgba(32,42,58,.045) 14px 28px),var(--card)}
+#secFerramentas .card.em-breve:hover{transform:none;box-shadow:0 4px 14px rgba(32,42,58,.07);border-color:var(--card-borda)}
+#secFerramentas .card.em-breve .card-acao{color:var(--texto-suave)}
+#secFerramentas .card.em-breve.em-breve-admin{opacity:1;filter:none;cursor:pointer;background:var(--card)}
+#secFerramentas .card.em-breve.em-breve-admin:hover{border-color:var(--vinho);transform:translateY(-2px);box-shadow:var(--sombra)}
+#secFerramentas .card.em-breve.em-breve-admin .card-acao{color:var(--vinho)}
+.card-em-breve{display:inline-block;font-family:'Montserrat',sans-serif;font-weight:800;font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--vinho);border:1.5px solid rgba(99,19,37,.55);border-radius:999px;padding:3px 9px;background:#ffffff;white-space:nowrap}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) #secFerramentas .card.em-breve{background:repeating-linear-gradient(135deg,transparent 0 14px,rgba(255,255,255,.05) 14px 28px),var(--card)}
+  :root:not([data-theme="light"]) #secFerramentas .card.em-breve.em-breve-admin{background:var(--card)}
+  :root:not([data-theme="light"]) .card-em-breve{color:#f2d7dc;border-color:rgba(242,215,220,.6);background:transparent}
+}
+:root[data-theme="dark"] #secFerramentas .card.em-breve{background:repeating-linear-gradient(135deg,transparent 0 14px,rgba(255,255,255,.05) 14px 28px),var(--card)}
+:root[data-theme="dark"] #secFerramentas .card.em-breve.em-breve-admin{background:var(--card)}
+:root[data-theme="dark"] .card-em-breve{color:#f2d7dc;border-color:rgba(242,215,220,.6);background:transparent}
+
 </style>
 </head>
 <body>
@@ -1895,7 +1916,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
             <span class="card-acao">Usar aqui →</span>
           </button>
           <button class="card" id="cardMinutas" type="button">
-            <div class="card-topo"><span class="card-num">05</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L9 18l-4 1z"/><path d="M14 7l3 3"/></svg></span><span class="chip-ia">IA</span></div>
+            <div class="card-topo"><span class="card-num">05</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L9 18l-4 1z"/><path d="M14 7l3 3"/></svg></span><span class="chip-ia">IA</span><span class="card-em-breve" id="minSeloEmBreve" hidden>Em breve</span></div>
             <h3>Gerador de Minuta</h3>
             <p>Cinco atos — procuração, união estável, dissolução de união estável, divórcio sem partilha e emancipação. A escrevente informa os fatos; o Gerador decide a variante correta, bloqueia o que não pode ser lavrado e devolve a qualificação ao Tabelião quando a hipótese sai do trilho.</p>
             <span class="card-acao">Abrir aqui →</span>
@@ -3669,6 +3690,7 @@ function mostrarApp() {
   fraseDoDia();
   el('avatarIni').textContent = (SESSAO.nome || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(function (n) { return n.charAt(0).toUpperCase(); }).join('') || '?';
   el('btnEditarMural').hidden = !SESSAO.admin;
+  pintarCardMinutas();   // v1.31 — cartão 05 "Em breve" (aberto só ao Tabelião)
   el('telaLogin').hidden = true;
   el('app').hidden = false;
   abrirPorEndereco();
@@ -3697,7 +3719,38 @@ function mostrarPagina(id, semHistorico, rota) {
     try { history.pushState({ pagina: id, rota: rota || '' }, '', location.pathname + location.search + hash); } catch (e) {}
   }
 }
+/* ============================================================
+   v1.31 — GERADOR DE MINUTA "EM BREVE" (decisão do Tabelião, 15/09/2026)
+   O Hub entra em uso com a equipe em 17/09, mas a inauguração do Gerador de Minuta fica
+   adiada até o Tabelião terminar a curadoria das variáveis (união estável, divórcio).
+   Tudo o que foi construído continua no código; só a ENTRADA é fechada: o cartão 05 sai
+   sombreado com o selo EM BREVE e os atalhos #minutas e #minuta=ID voltam ao hub.
+   O Tabelião (admin) continua entrando, para testar e curar. Para liberar à equipe:
+   GERADOR_LIBERADO = true (uma linha) e publicar.
+============================================================ */
+const GERADOR_LIBERADO = false;
+function geradorDisponivel() { return GERADOR_LIBERADO || !!SESSAO.admin; }
+function pintarCardMinutas() {
+  const card = el('cardMinutas');
+  if (!card) return;
+  const ok = geradorDisponivel();
+  card.classList.toggle('em-breve', !GERADOR_LIBERADO);
+  card.classList.toggle('em-breve-admin', !GERADOR_LIBERADO && ok);
+  card.setAttribute('aria-disabled', ok ? 'false' : 'true');
+  const selo = el('minSeloEmBreve');
+  if (selo) selo.hidden = GERADOR_LIBERADO;
+  const acao = card.querySelector('.card-acao');
+  if (acao) acao.textContent = GERADOR_LIBERADO ? 'Abrir aqui →' : (ok ? 'Aberto só ao Tabelião →' : 'Em curadoria pelo Tabelião');
+}
+function avisarGeradorEmBreve() {
+  toast('Gerador de Minuta: em breve — o Tabelião está concluindo a curadoria das minutas.');
+}
 function abrirRota(rota, semHistorico) {
+  if ((rota === 'minutas' || (rota && rota.indexOf('minuta=') === 0)) && !geradorDisponivel()) {
+    avisarGeradorEmBreve();
+    mostrarPagina('paginaHub', semHistorico);
+    return;
+  }
   if (rota && rota.indexOf('minuta=') === 0) {
     mostrarPagina('paginaMinutas', semHistorico, rota);
     const id = rota.slice(7);
@@ -3761,7 +3814,10 @@ function abrirEmbutida(chave, semHistorico) {
   mostrarPagina('paginaEmbutida', semHistorico, chave);
 }
 function aplicarLinks() {
-  el('cardMinutas').addEventListener('click', function () { mostrarPagina('paginaMinutas', false, 'minutas'); });
+  el('cardMinutas').addEventListener('click', function () {
+    if (!geradorDisponivel()) { avisarGeradorEmBreve(); return; }   // v1.31 — em breve
+    mostrarPagina('paginaMinutas', false, 'minutas');
+  });
   el('cardConsulta').addEventListener('click', function () {
     mostrarPagina('paginaConsulta', false, 'consulta');
     setTimeout(function () { try { el('conNumero').focus(); } catch (e) {} }, 80);
@@ -6197,12 +6253,15 @@ function linhasPendencias(alvo, txt) {
     return ficha;
   }
 
-  // v1.30 — o que barra a geração leva a escrevente à fase do campo que falta
+  // v1.30 — o que barra a geração leva a escrevente à fase do campo que falta (o foco vai
+  // depois da rolagem; se ela navegar antes, o foco pendente é cancelado — ver irFase)
+  let focoPendente = null;
   function faltou(sel, msg) {
     const n = pag.querySelector(sel);
     const i = n ? FASES.indexOf(n.closest('.min-fase')) : -1;
     if (i >= 0) irFase(i);
-    if (n && n.focus) setTimeout(function () { try { n.focus({ preventScroll: true }); } catch (e) { n.focus(); } }, 320);
+    clearTimeout(focoPendente);
+    if (n && n.focus) focoPendente = setTimeout(function () { try { n.focus({ preventScroll: true }); } catch (e) { n.focus(); } }, 320);
     return msg;
   }
   function validar() {
@@ -6844,6 +6903,7 @@ function linhasPendencias(alvo, txt) {
   let alvoRolagem = null;   // { x, ate }: para onde o trilho está indo por comando nosso (o scroll não reinterpreta no caminho)
   function irFase(i, imediato) {
     if (!FASES.length) return;
+    clearTimeout(focoPendente);   // navegou: o foco pendente da validação não rouba a fase nova
     FASE = Math.max(0, Math.min(FASES.length - 1, i));
     const sec = FASES[FASE];
     pintarFases();
