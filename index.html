@@ -1437,6 +1437,75 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
   .min-decisao .md-rotulo,.min-decisao .md-estado{font-size:18px;letter-spacing:.06em}
 }
 
+/* ===== Gerador de Minuta (v1.29) — Documentos das partes + transposição de dados
+   (spec §9) e a minuta no Google Docs =====
+   Regra da casa mantida: só vinho / marinho / branco (+ transparências); nunca texto
+   claro sobre fundo escuro no que se lê; 18 px nas caixas de saída (linhas do painel
+   "Dados transpostos", mensagens e progresso); alertas e notas nunca abaixo de 16 px. */
+/* a zona "Documentos das partes" vira um quadro próprio, logo depois do passo 1 */
+.min-docs{display:flex;flex-direction:column;gap:12px;background:var(--card);border:1px solid var(--card-borda);border-radius:12px;padding:18px 20px}
+.min-docs .zona-anexos{display:flex;flex-direction:column;gap:10px}
+.min-docs .zona-anexos .min-grupo{margin-bottom:0}
+.min-docs-ajuda{margin:-4px 0 0;font-size:15.5px;line-height:1.5;color:var(--tinta-suave)}
+.min-docs .anexo-drop{border:2px dashed var(--entrada-linha);border-radius:12px;background:var(--leitura-caixa);padding:14px 16px}
+.min-docs .anexo-drop:hover{border-color:var(--vinho)}
+.min-docs .anexo-lista:empty,.min-docs .cont-anexos:empty{display:none}
+.min-transpor-linha{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.min-transpor-linha .nota-ia{flex:1 1 280px;font-size:14.5px;line-height:1.5}
+/* painel "Dados transpostos": mesmo desenho do quadro da decisão (caixa clara, borda marinho) */
+.min-transposto{background:var(--leitura-caixa);border:1.5px solid var(--marinho);border-radius:10px;padding:14px 18px;display:flex;flex-direction:column;gap:10px}
+.min-transposto .mt-cab{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:0}
+.min-transposto .mt-rotulo{font-size:18px;letter-spacing:.12em;font-weight:700;color:var(--marinho)}
+.min-transposto .mt-resumo{font-family:'Montserrat',sans-serif;font-weight:800;font-size:16px;letter-spacing:.06em;text-transform:uppercase;padding:4px 12px;border-radius:999px;background:rgba(32,42,58,.08);color:var(--marinho)}
+.min-transposto .mt-resumo:empty{display:none}
+.min-transposto .mt-texto{font-family:'Atkinson Hyperlegible','Lato',sans-serif;font-size:18px;line-height:1.75;letter-spacing:.012em;color:var(--leitura-texto);white-space:pre-wrap;word-break:break-word}
+.min-transposto .mt-texto.erro{color:var(--vinho);font-weight:700}
+.min-transposto .mt-linhas{display:flex;flex-direction:column;gap:4px}
+.min-transposto .mt-linha{display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-family:'Atkinson Hyperlegible','Lato',sans-serif;font-size:18px;line-height:1.5;color:var(--leitura-texto);padding-top:6px}
+.min-transposto .mt-linha + .mt-linha{border-top:1px solid var(--leitura-linha)}
+.min-transposto .mt-nome{font-weight:700}
+.min-transposto .mt-seta{color:var(--marinho);font-weight:700}
+.min-transposto .mt-fixo{color:var(--leitura-texto)}
+.min-transposto .mt-destino{font-family:'Lato',sans-serif;font-size:16px;padding:7px 10px;border:1.5px solid var(--card-borda);border-radius:9px;background:var(--card);color:var(--tinta);max-width:100%}
+.min-transposto .mt-destino:focus{outline:2px solid var(--vinho);outline-offset:1px}
+.min-transposto .mt-marca{font-family:'Montserrat',sans-serif;font-style:normal;font-weight:700;font-size:12.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--vinho);border:1px solid rgba(99,19,37,.35);border-radius:999px;padding:2px 9px}
+.min-transposto .mt-detalhe{margin:0 0 6px;padding-left:2px;font-size:16px;line-height:1.5;color:var(--leitura-suave)}
+.min-transposto .mt-detalhe + .mt-linha{border-top:1px solid var(--leitura-linha)}
+.min-transposto .mt-botoes{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.min-transposto .mt-botoes .btn-mini{font-size:12.5px;padding:8px 14px}
+.min-transposto .mt-botoes .btn-mini:disabled{opacity:.5;cursor:not-allowed}
+.min-transposto .mt-dica{flex:1 1 260px;font-size:14.5px;line-height:1.5;color:var(--leitura-suave)}
+.min-transposto .mt-alertas{margin:0;padding-left:22px;font-size:16px;line-height:1.6;color:var(--vinho);font-weight:700}
+.min-transposto .mt-alertas li{padding:1px 0}
+.min-transposto .mt-meta{margin:0;padding-top:8px;border-top:1px solid var(--leitura-linha);font-size:13.5px;letter-spacing:.04em;color:var(--leitura-suave)}
+/* minuta no Google Docs: caixa em destaque no topo do resultado, antes do quadro da decisão */
+.min-docbox{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--leitura-caixa);border:1.5px solid var(--marinho);border-left:5px solid var(--vinho);border-radius:0 10px 10px 0;padding:12px 16px}
+.min-docbtn{display:inline-block;text-decoration:none;font-size:13.5px;padding:13px 22px;white-space:nowrap}
+.min-docbtn:hover{filter:brightness(1.18)}
+.min-doctitulo{flex:1 1 240px;font-family:'Atkinson Hyperlegible','Lato',sans-serif;font-size:18px;line-height:1.5;font-weight:700;color:var(--leitura-texto);word-break:break-word}
+.min-doctitulo:empty{display:none}
+.min-docnota{flex-basis:100%;margin:0;font-size:16px;line-height:1.55;color:var(--leitura-texto)}
+.min-docerro{margin:0;font-size:16px;line-height:1.55;font-weight:700;color:var(--vinho)}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .min-transposto,:root:not([data-theme="light"]) .min-docbox{border-color:rgba(255,255,255,.4)}
+  :root:not([data-theme="light"]) .min-transposto .mt-rotulo,:root:not([data-theme="light"]) .min-transposto .mt-seta{color:#c7d2e2}
+  :root:not([data-theme="light"]) .min-transposto .mt-resumo{background:rgba(255,255,255,.12);color:#f0f3f8}
+  :root:not([data-theme="light"]) .min-transposto .mt-texto.erro,:root:not([data-theme="light"]) .min-transposto .mt-alertas,:root:not([data-theme="light"]) .min-transposto .mt-marca,:root:not([data-theme="light"]) .min-docerro{color:#f2d7dc}
+  :root:not([data-theme="light"]) .min-transposto .mt-marca{border-color:rgba(242,215,220,.5)}
+  :root:not([data-theme="light"]) .min-docbox{border-left-color:#f2d7dc}
+}
+:root[data-theme="dark"] .min-transposto,:root[data-theme="dark"] .min-docbox{border-color:rgba(255,255,255,.4)}
+:root[data-theme="dark"] .min-transposto .mt-rotulo,:root[data-theme="dark"] .min-transposto .mt-seta{color:#c7d2e2}
+:root[data-theme="dark"] .min-transposto .mt-resumo{background:rgba(255,255,255,.12);color:#f0f3f8}
+:root[data-theme="dark"] .min-transposto .mt-texto.erro,:root[data-theme="dark"] .min-transposto .mt-alertas,:root[data-theme="dark"] .min-transposto .mt-marca,:root[data-theme="dark"] .min-docerro{color:#f2d7dc}
+:root[data-theme="dark"] .min-transposto .mt-marca{border-color:rgba(242,215,220,.5)}
+:root[data-theme="dark"] .min-docbox{border-left-color:#f2d7dc}
+@media (max-width:520px){
+  .min-docs{padding:14px 14px}
+  .min-transposto{padding:12px 14px}
+  .min-transposto .mt-linha,.min-transposto .mt-texto{font-size:18px}
+}
+
 </style>
 </head>
 <body>
@@ -1768,6 +1837,43 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
           <span class="rt-txt"><b>Emancipação</b><small>voluntária, pelos pais — 16 anos completos</small></span>
         </button>
       </div>
+      <!-- v1.29 — Documentos das partes + transposição (spec §9). É a MESMA zona de anexos que
+           a geração usa ([data-anexos="min"] — montarFerramenta a encontra por esse atributo):
+           os documentos alimentam a transposição e seguem, depois, na chamada de geração
+           (o Gerador os recebe como SOURCE). O botão chama POST /hub/ia/transpor só com os
+           arquivos; o painel "Dados transpostos" (montado pelo app.js) traz uma linha por
+           pessoa com o destino alterável, Reaplicar, Desfazer, os alertas do modelo e a
+           linha de custo. Nada do modelo vira HTML: só nós de texto. -->
+      <div class="min-docs" id="minDocs">
+        <div class="zona-anexos" data-anexos="min">
+          <label class="rotulo versalete min-grupo">Documentos das partes</label>
+          <p class="min-docs-ajuda" id="minAnexosRot"></p>
+          <div class="anexo-drop">
+            <input type="file" accept="image/*,application/pdf" multiple hidden>
+            <button class="btn-fantasma" data-anexar type="button">Adicionar foto ou PDF</button>
+            <span class="anexo-dica">arraste aqui ou cole um print direto (Ctrl+V)</span>
+          </div>
+          <ul class="anexo-lista"></ul>
+          <p class="cont-anexos"></p>
+          <p class="aviso" data-aviso-anexo hidden></p>
+        </div>
+        <div class="linha-botoes min-transpor-linha">
+          <button class="btn-vinho" id="btnTranspor" type="button">Extrair e transpor dados</button>
+          <span class="nota-ia">Lê RG/CNH, certidões e comprovantes anexados e preenche os campos abaixo — confira antes de gerar. Os mesmos documentos seguem com a minuta.</span>
+        </div>
+        <div class="min-transposto" id="minTransposto" hidden>
+          <p class="mt-cab"><span class="mt-rotulo versalete">Dados transpostos</span><span class="mt-resumo" id="minTranspostoResumo"></span></p>
+          <div class="mt-texto" id="minTranspostoTexto" hidden></div>
+          <div class="mt-linhas" id="minTranspostoLinhas" hidden></div>
+          <div class="linha-botoes mt-botoes" id="minTranspostoBotoes" hidden>
+            <button class="btn-mini" id="btnReaplicarTransp" type="button">Reaplicar</button>
+            <button class="btn-mini" id="btnDesfazerTransp" type="button">Desfazer</button>
+            <span class="mt-dica">Troque o destino de uma pessoa e clique em Reaplicar. Desfazer devolve aos campos os valores que existiam antes da transposição.</span>
+          </div>
+          <ul class="mt-alertas" id="minTranspostoAlertas" hidden></ul>
+          <p class="mt-meta" id="minTranspostoMeta" hidden></p>
+        </div>
+      </div>
       <!-- v1.28 — FORMA_DO_ATO (camada de integração, item 2.1): vale para os cinco atos;
            só muda o fecho e a forma de assinar. Nenhum chip nasce marcado. -->
       <div class="min-campo min-forma"><span>Forma do ato</span>
@@ -1932,6 +2038,9 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
                 <button type="button" class="ed-chip" data-v="casado">Casado(a)</button>
                 <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
               </span></div>
+            <!-- v1.29 — QUALIFICACAO_CONVIVENTE_1 (spec §2.2 / §9): preenchida pela transposição, editável -->
+            <label class="min-campo min-largo">Qualificação (dos documentos)
+              <textarea id="minC1Qual" rows="2" placeholder="Preenchida pela transposição dos documentos; edite se preciso"></textarea></label>
           </div>
           <p class="rotulo versalete min-grupo">Convivente 2</p>
           <div class="grade-min">
@@ -1947,6 +2056,8 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
                 <button type="button" class="ed-chip" data-v="casado">Casado(a)</button>
                 <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
               </span></div>
+            <label class="min-campo min-largo">Qualificação (dos documentos)
+              <textarea id="minC2Qual" rows="2" placeholder="Preenchida pela transposição dos documentos; edite se preciso"></textarea></label>
           </div>
           <p class="aviso" id="minAvisoCasado" hidden>⚠ Convivente casado(a): a união estável só é lícita se houver separação de fato (CC, art. 1.723, §1º) — declare a separação e a data nas Observações. A escritura não será registrável no Livro E e o nome não poderá ser alterado.</p>
           <p class="rotulo versalete min-grupo">A união</p>
@@ -2060,6 +2171,9 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
                 <button type="button" class="ed-chip" data-v="casado">Casado(a)</button>
                 <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
               </span></div>
+            <!-- v1.29 — QUALIFICACAO_CONVIVENTE_1/2 (spec §2.3 / §9): preenchidas pela transposição, editáveis -->
+            <label class="min-campo min-largo">Qualificação do convivente 1 (dos documentos)
+              <textarea id="minDsC1Qual" rows="2" placeholder="Preenchida pela transposição dos documentos; edite se preciso"></textarea></label>
             <label class="min-campo">Convivente 2 — nome completo *<input type="text" id="minDsC2Nome" autocomplete="off"></label>
             <div class="min-campo"><span>Estado civil registral (convivente 2)</span>
               <span class="ed-chips" data-min-chips="dss.c2civil">
@@ -2069,6 +2183,8 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
                 <button type="button" class="ed-chip" data-v="casado">Casado(a)</button>
                 <button type="button" class="ed-chip" data-v="nao_informado">Não informado</button>
               </span></div>
+            <label class="min-campo min-largo">Qualificação do convivente 2 (dos documentos)
+              <textarea id="minDsC2Qual" rows="2" placeholder="Preenchida pela transposição dos documentos; edite se preciso"></textarea></label>
           </div>
           <p class="rotulo versalete min-grupo">A união e os bens</p>
           <div class="grade-min">
@@ -2208,6 +2324,11 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
           <div class="grade-min">
             <label class="min-campo">Cônjuge 1 — nome completo *<input type="text" id="minDvC1Nome" autocomplete="off"></label>
             <label class="min-campo">Cônjuge 2 — nome completo *<input type="text" id="minDvC2Nome" autocomplete="off"></label>
+            <!-- v1.29 — QUALIFICACAO_CONJUGE_1/2 (spec §2.4 / §9): preenchidas pela transposição, editáveis -->
+            <label class="min-campo min-largo">Qualificação do cônjuge 1 (dos documentos)
+              <textarea id="minDvC1Qual" rows="2" placeholder="Preenchida pela transposição dos documentos; edite se preciso"></textarea></label>
+            <label class="min-campo min-largo">Qualificação do cônjuge 2 (dos documentos)
+              <textarea id="minDvC2Qual" rows="2" placeholder="Preenchida pela transposição dos documentos; edite se preciso"></textarea></label>
             <label class="min-campo">Data do casamento<input type="date" id="minDvCasData"></label>
             <label class="min-campo">Serventia do casamento<input type="text" id="minDvCasServ" autocomplete="off" placeholder="ex.: RCPN de Itabaiana/SE"></label>
             <label class="min-campo">Matrícula da certidão<input type="text" id="minDvCasMatr" autocomplete="off"></label>
@@ -2372,8 +2493,25 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
             <label class="min-campo">Nome completo do menor *<input type="text" id="minEmNome" autocomplete="off"></label>
             <label class="min-campo">Data de nascimento *<input type="date" id="minEmNasc"></label>
             <label class="min-campo">Domicílio do menor (município/UF)<input type="text" id="minEmDomicilio" autocomplete="off" placeholder="ex.: Itabaiana/SE"></label>
+            <!-- v1.29 — QUALIFICACAO_MENOR e CERTIDAO_NASCIMENTO (spec §2.5 / §9): preenchidos pela
+                 transposição da certidão de nascimento, editáveis -->
+            <label class="min-campo min-largo">Qualificação do menor (dos documentos)
+              <textarea id="minEmMenorQual" rows="2" placeholder="Preenchida pela transposição dos documentos; edite se preciso"></textarea></label>
+            <label class="min-campo min-largo">Certidão de nascimento — serventia · matrícula · emitida em
+              <input type="text" id="minEmCertidao" autocomplete="off" placeholder="ex.: 1º Ofício de Itabaiana/SE · matrícula 0000… · emitida em dd/mm/aaaa"></label>
           </div>
           <small class="min-nota">O registro da emancipação é no Livro E do 1º Ofício da comarca do domicílio do menor — e só depois dele a emancipação produz efeito.</small>
+          <!-- v1.29 — PAI e MAE (spec §2.5): nomes pela filiação da certidão; a qualificação de cada
+               um vem do RG/CNH do genitor, quando anexado -->
+          <p class="rotulo versalete min-grupo">Os pais</p>
+          <div class="grade-min">
+            <label class="min-campo">Pai — nome completo<input type="text" id="minEmPai" autocomplete="off" placeholder="conforme a filiação na certidão"></label>
+            <label class="min-campo">Mãe — nome completo<input type="text" id="minEmMae" autocomplete="off" placeholder="conforme a filiação na certidão"></label>
+            <label class="min-campo min-largo">Qualificação do pai (dos documentos)
+              <textarea id="minEmPaiQual" rows="2" placeholder="Preenchida pela transposição dos documentos; edite se preciso"></textarea></label>
+            <label class="min-campo min-largo">Qualificação da mãe (dos documentos)
+              <textarea id="minEmMaeQual" rows="2" placeholder="Preenchida pela transposição dos documentos; edite se preciso"></textarea></label>
+          </div>
           <p class="rotulo versalete min-grupo">Quem outorga e a guarda</p>
           <div class="grade-min">
             <div class="min-campo"><span>Quem outorga a emancipação</span>
@@ -2445,18 +2583,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
           <textarea id="minObs" rows="3" placeholder="o que as partes declararam e não coube nos campos acima (ex.: separação de fato desde 2019; cláusulas essenciais do divórcio para a procuração)"></textarea></label>
       </div>
 
-      <div class="zona-anexos" data-anexos="min">
-        <label class="rotulo versalete" id="minAnexosRot">Documentos apresentados — identidade, certidões, matrícula, decisões (foto ou PDF)</label>
-        <div class="anexo-drop">
-          <input type="file" accept="image/*,application/pdf" multiple hidden>
-          <button class="btn-fantasma" data-anexar type="button">Adicionar foto ou PDF</button>
-          <span class="anexo-dica">arraste aqui ou cole um print direto (Ctrl+V)</span>
-        </div>
-        <ul class="anexo-lista"></ul>
-        <p class="cont-anexos"></p>
-        <p class="aviso" data-aviso-anexo hidden></p>
-      </div>
-
+      <!-- v1.29 — a zona de anexos ("Documentos das partes") fica logo depois do passo 1 -->
       <div class="linha-botoes linha-gerar">
         <button class="btn-vinho btn-gerar-minuta" id="btnGerarMinuta" type="button" disabled>Gerar minuta</button>
         <span class="nota-ia" id="minNota">Marque as duas caixas de ciência para liberar o botão.</span>
@@ -2469,6 +2596,16 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
             <button class="btn-copiar" id="btnExemploMin" type="button" hidden>Exemplo</button>
             <button class="btn-copiar" id="btnLimparMin" type="button">Limpar</button>
           </span></div>
+        <!-- v1.29 — Minuta no Google Docs: com a ponte ligada no servidor, a resposta traz
+             doc { url, id, titulo } (Doc criado na pasta do Gerador, formatado pelo Apps
+             Script) ou doc_erro. A caixa fica no topo do resultado, antes do quadro da
+             decisão; só URL https entra no href (mostrarDocMinuta, app.js). -->
+        <div class="min-docbox" id="minDocBox" hidden>
+          <a class="btn-vinho min-docbtn" id="minDocLink" href="#" target="_blank" rel="noopener">Abrir no Google Docs</a>
+          <span class="min-doctitulo" id="minDocTitulo"></span>
+          <p class="min-docnota">A minuta foi criada na pasta do Gerador (Drive) com a formatação da casa — ajuste no Docs e lance no Extra Digital.</p>
+        </div>
+        <p class="min-docerro" id="minDocErro" hidden></p>
         <!-- v1.28 — o quadro da decisão conhece os cinco estados (spec §5): PRONTA, PRELIMINAR
              (faixa + bloco PENDÊNCIAS), BLOQUEADA / DECISÃO DO TABELIÃO / FORA DO ESCOPO
              (quadro vinho com a QUALIFICAÇÃO DEVOLVIDA). Só nós de texto: nada do modelo vira HTML. -->
@@ -3187,6 +3324,8 @@ function abrirRota(rota, semHistorico) {
       s.classList.remove('vazia'); s.textContent = processarMinuta(m.texto);
       el('btnCopiarMin').hidden = !MINUTA_COPIAVEL;
       el('minutaLinkBox').hidden = true;
+      // v1.29 — a minuta guardada com doc_url reabre com o botão do Google Docs
+      mostrarDocMinuta(m.doc_url ? { url: m.doc_url, titulo: '' } : null, '');
       el('metaMin').textContent = m.titulo + ' · guardada por ' + (m.criado_por || '—') + ' · ' + quandoCurto(m.em);
     }).catch(function (e) {
       const s = el('saidaMinuta');
@@ -4363,7 +4502,9 @@ function criarAnexos(raiz) {
 /* ============================================================
    FERRAMENTAS DE IA (Gemini, pelo servidor do cartório)
 ============================================================ */
-let IA_STATUS = { configurada: null, modelo: null };
+// v1.29 — docs_ativo: o servidor informa se a ponte Minuta → Google Docs está ligada
+// (a tela do Gerador só ajusta o texto de ajuda; o link vem na resposta da geração)
+let IA_STATUS = { configurada: null, modelo: null, docs_ativo: false };
 function nomeModelo(m) {
   if (!m) return '';
   var apelidos = { 'gemini-pro-latest': 'Gemini Pro (vigente)', 'gemini-flash-latest': 'Gemini Flash (vigente)', 'gemini-flash-lite-latest': 'Gemini Flash-Lite (vigente)' };
@@ -4382,15 +4523,51 @@ function pintarIA() {
       ? 'A IA ainda não foi ligada no servidor — avise o Tabelião.'
       : 'Os documentos vão para o servidor do cartório só para esta análise e não ficam gravados. Confira sempre o resultado antes de usar.';
   });
+  // quem quiser reagir ao status (o Gerador ajusta a nota sobre o Google Docs) escuta este evento
+  document.dispatchEvent(new Event('cn2o-ia-status'));
 }
 function verificarIA() {
   api('/hub/ia/status').then(function (r) {
-    IA_STATUS = { configurada: !!(r && r.configurada), modelo: r && r.modelo };
+    IA_STATUS = { configurada: !!(r && r.configurada), modelo: r && r.modelo, docs_ativo: !!(r && r.docs_ativo) };
     pintarIA();
   }).catch(function (e) {
-    if (e.status === 404) IA_STATUS = { configurada: false, modelo: null };
+    if (e.status === 404) IA_STATUS = { configurada: false, modelo: null, docs_ativo: false };
     pintarIA();
   });
+}
+// v1.29 — a assinatura das ferramentas de IA (quem, quando, modelo, tempo, custo e a dupla
+// leitura OCR), compartilhada pelo montarFerramenta e pela transposição do Gerador.
+function assinaturaIA(rotulo, r, t0) {
+  const custo = r.custo_usd ? ' · US$ ' + Number(r.custo_usd).toFixed(4).replace('.', ',') : '';
+  // v1.23 — número sem denominador não informa nada: 462 incertas pode ser
+  // péssimo (de 500) ou normal (de 5.000). A assinatura passa a dizer a
+  // proporção, e avisa quando a leitura saiu ruim como um todo.
+  const duplaLeitura = r.ocr && r.ocr.ativo
+    ? ' · Dupla leitura OCR: ' + (
+        !r.ocr.palavras_incertas
+          ? 'nenhuma palavra incerta'
+          : (r.ocr.palavras_incertas + (r.ocr.palavras_lidas ? ' de ' + r.ocr.palavras_lidas : '') + ' palavra(s) com leitura incerta' +
+             (r.ocr.proporcao ? ' (' + String(Math.round(r.ocr.proporcao * 1000) / 10).replace('.', ',') + '%)' : '') +
+             (r.ocr.leitura_dificil ? ' — leitura difícil: confira o documento inteiro' : ''))
+      )
+    : '';
+  return rotulo + ' ' + (SESSAO.nome || '—') + ' · ' + agoraCurto() +
+    (r.modelo ? ' · ' + nomeModelo(r.modelo) : '') + ' · ' + Math.max(1, Math.round((r.ms || (Date.now() - t0)) / 1000)) + ' s' + custo + duplaLeitura;
+}
+// v1.29 — a mensagem de balcão para cada falha de uma chamada de IA (compartilhada):
+// o escrevente precisa saber o que fazer, não o código de erro de quem hospeda o modelo.
+function mensagemErroIA(e) {
+  e = e || {};
+  if (e.cancelado) return 'Interrompido.';
+  if (e.status === 401) return 'Sua sessão expirou — entre de novo e repita a análise.';
+  if (e.status === 429 && e.dados && e.dados.motivo === 'cota') return 'A cota de IA da serventia se esgotou por ora.\n\nTente de novo em alguns minutos; se persistir, avise o Tabelião. Seus anexos continuam aqui.';
+  if (e.status === 429) return 'Muitas análises seguidas. Aguarde ' + Math.ceil(((e.dados && e.dados.tente_em_s) || 60) / 60) + ' min e tente de novo.';
+  if (e.status === 503 && e.dados && e.dados.motivo === 'congestionado') return 'O provedor da IA está congestionado neste momento (pico de uso) — não é problema do seu documento.\n\nAguarde uns 20 segundos e clique de novo: seus anexos continuam aqui.';
+  if (e.status === 503) return 'A IA ainda não foi ligada no servidor — avise o Tabelião.';
+  if (e.status === 404) return 'Esta ferramenta ainda está sendo implantada no servidor — tente daqui a pouco.';
+  if (e.status === 400 || e.status === 413) return primeiraMaiuscula(e.erro) + '.';
+  if (e.status === 0) return 'Sem conexão com o servidor. Verifique a internet e tente de novo — seus anexos continuam aqui.';
+  return 'A IA não conseguiu concluir: ' + e.erro + '\n\nTente de novo em instantes; se persistir, avise o Tabelião.';
 }
 
 const EXEMPLO_EXTRATOR = '== EXEMPLO FICTÍCIO — apenas para testar a ferramenta ==\nREPUBLICA FEDERATIVA DO BRASIL  SECRETARIA DE SEGURANCA PUBLICA  SSP SE\nCARTEIRA DE IDENTIDADE  RG 3.845.216  MARILIA FONTES DE JESUS\nFILIACAO JOSE ARNALDO DE JESUS / MARIA APARECIDA FONTES DE JESUS   NASC 12/04/1991  ITABAIANA SE\nCPF 054 318 276 90\nENERGISA SERGIPE - FATURA   TITULAR: MARILIA F DE JESUS\nRUA BOANERGES PINHEIRO 214  CENTRO  ITABAIANA SE  CEP 49500-121\ncertidao de nascimento: MARÍLIA FONTES DE JESUS, solteira\nprofissao declarada no balcao: farmaceutica';
@@ -4468,33 +4645,10 @@ function montarFerramenta(cfg) {
       saida.textContent = modo.processar ? modo.processar(r.texto) : r.texto;
       btnCop.hidden = false;
       if (cfg.aoConcluir) cfg.aoConcluir(r, saida.textContent);
-      const custo = r.custo_usd ? ' · US$ ' + Number(r.custo_usd).toFixed(4).replace('.', ',') : '';
-      // v1.23 — número sem denominador não informa nada: 462 incertas pode ser
-      // péssimo (de 500) ou normal (de 5.000). A assinatura passa a dizer a
-      // proporção, e avisa quando a leitura saiu ruim como um todo.
-      const duplaLeitura = r.ocr && r.ocr.ativo
-        ? ' · Dupla leitura OCR: ' + (
-            !r.ocr.palavras_incertas
-              ? 'nenhuma palavra incerta'
-              : (r.ocr.palavras_incertas + (r.ocr.palavras_lidas ? ' de ' + r.ocr.palavras_lidas : '') + ' palavra(s) com leitura incerta' +
-                 (r.ocr.proporcao ? ' (' + String(Math.round(r.ocr.proporcao * 1000) / 10).replace('.', ',') + '%)' : '') +
-                 (r.ocr.leitura_dificil ? ' — leitura difícil: confira o documento inteiro' : ''))
-          )
-        : '';
-      meta.textContent = modo.assinatura + ' ' + (SESSAO.nome || '—') + ' · ' + agoraCurto() +
-        (r.modelo ? ' · ' + nomeModelo(r.modelo) : '') + ' · ' + Math.max(1, Math.round((r.ms || (Date.now() - t0)) / 1000)) + ' s' + custo + duplaLeitura;
+      meta.textContent = assinaturaIA(modo.assinatura, r, t0);
     }).catch(function (e) {
       clearInterval(relogio);
-      if (e && e.cancelado) voltarVazio('Interrompido.');
-      else if (e.status === 401) voltarVazio('Sua sessão expirou — entre de novo e repita a análise.');
-      else if (e.status === 429 && e.dados && e.dados.motivo === 'cota') voltarVazio('A cota de IA da serventia se esgotou por ora.\n\nTente de novo em alguns minutos; se persistir, avise o Tabelião. Seus anexos continuam aqui.');
-      else if (e.status === 429) voltarVazio('Muitas análises seguidas. Aguarde ' + Math.ceil(((e.dados && e.dados.tente_em_s) || 60) / 60) + ' min e tente de novo.');
-      else if (e.status === 503 && e.dados && e.dados.motivo === 'congestionado') voltarVazio('O provedor da IA está congestionado neste momento (pico de uso) — não é problema do seu documento.\n\nAguarde uns 20 segundos e clique de novo: seus anexos continuam aqui.');
-      else if (e.status === 503) voltarVazio('A IA ainda não foi ligada no servidor — avise o Tabelião.');
-      else if (e.status === 404) voltarVazio('Esta ferramenta ainda está sendo implantada no servidor — tente daqui a pouco.');
-      else if (e.status === 400 || e.status === 413) voltarVazio(primeiraMaiuscula(e.erro) + '.');
-      else if (e.status === 0) voltarVazio('Sem conexão com o servidor. Verifique a internet e tente de novo — seus anexos continuam aqui.');
-      else voltarVazio('A IA não conseguiu concluir: ' + e.erro + '\n\nTente de novo em instantes; se persistir, avise o Tabelião.');
+      voltarVazio(mensagemErroIA(e));
     }).then(function () {
       rodando = false; btn.innerHTML = modo.rotuloHtml; travarOutros(btn, false); ctrl = null;
       if (cfg.aoTerminar) cfg.aoTerminar();
@@ -4512,7 +4666,9 @@ function montarFerramenta(cfg) {
     voltarVazio(textoVazio);
     if (cfg.aoIniciar) cfg.aoIniciar();
   });
-  FERRAMENTAS[cfg.pagina] = { anexos: anexos, entrada: entrada, rodar: rodar, modos: MODOS };
+  // ocupada(): a chamada de IA está em curso (v1.29 — a transposição do Gerador não
+  // dispara enquanto a minuta está sendo gerada com os mesmos anexos)
+  FERRAMENTAS[cfg.pagina] = { anexos: anexos, entrada: entrada, rodar: rodar, modos: MODOS, ocupada: function () { return rodando; } };
 }
 
 /* Colar print (Ctrl+V) em qualquer ponto da ferramenta aberta */
@@ -4540,7 +4696,7 @@ document.addEventListener('paste', function (ev) {
   })).then(function () {
     const acao = ativa === 'paginaExtrator' ? 'Gerar qualificação'
       : ativa === 'paginaRedator' ? 'Escrever'
-      : ativa === 'paginaMinutas' ? 'Gerar minuta' : 'Analisar matrícula';
+      : ativa === 'paginaMinutas' ? 'Extrair e transpor dados ou Gerar minuta' : 'Analisar matrícula';
     toast('✓ Print anexado — é só clicar em ' + acao);
   });
 });
@@ -4981,6 +5137,19 @@ function processarMinuta(bruto) {
     .replace(/\n{3,}/g, '\n\n')
     .trim();
 }
+// v1.29 — Minuta no Google Docs: a resposta da geração pode trazer doc { url, id, titulo }
+// (documento criado na pasta do Gerador) ou doc_erro. A caixa com o botão-link fica no
+// topo do resultado; a falha vira uma nota discreta ("use o Copiar"). Só URL https entra
+// no href; sem doc nem doc_erro, as duas somem.
+function mostrarDocMinuta(doc, erro) {
+  const url = doc && typeof doc.url === 'string' && /^https:\/\/[^\s"'<>\\]+$/.test(doc.url) ? doc.url : '';
+  el('minDocBox').hidden = !url;
+  el('minDocLink').href = url || '#';
+  el('minDocTitulo').textContent = url && doc.titulo ? String(doc.titulo) : '';
+  const nota = el('minDocErro');
+  nota.hidden = !erro;
+  nota.textContent = erro ? 'Google Docs: não foi possível criar o documento — use o Copiar. (' + String(erro).replace(/^Google Docs:\s*/i, '').trim() + ')' : '';
+}
 // "- Chave: valor" vira linha com a chave em negrito ("Rota", "Módulos autorizados",
 // "Por quê"…); o resto, linha comum. Só nós de texto (createElement + textContent):
 // o texto do modelo nunca vira HTML.
@@ -5026,12 +5195,13 @@ function linhasPendencias(alvo, txt) {
   if (!pag) return;
   const ATOS = ['PROC', 'UE', 'DISS_UE', 'DIV', 'EMANC'];
   const NOME_ATO = { PROC: 'PROC', UE: 'UE', DISS_UE: 'DISS_UE', DIV: 'DIV', EMANC: 'EMANC' };
+  // v1.29 — texto de ajuda da zona "Documentos das partes", por ato (o título é fixo)
   const ANEXOS_ROT = {
-    PROC: 'Documentos apresentados — identidade do outorgante e do outorgado, matrícula, CRV, contrato social (foto ou PDF)',
-    UE: 'Documentos apresentados — identidade, certidões de nascimento/casamento, escritura anterior (foto ou PDF)',
-    DISS_UE: 'Documentos apresentados — identidade, escritura/contrato da união, certidão do Livro E, decisão judicial dos filhos (foto ou PDF)',
-    DIV: 'Documentos apresentados — identidade, certidão de casamento atualizada, decisão judicial dos filhos (foto ou PDF)',
-    EMANC: 'Documentos apresentados — certidão de nascimento do menor, identidade dos pais, certidão de óbito ou decisão judicial (foto ou PDF)'
+    PROC: 'Identidade (RG ou CNH) e CPF do outorgante e do outorgado; matrícula, CRV ou contrato social conforme o objeto — foto ou PDF.',
+    UE: 'Identidade (RG ou CNH) e certidões de nascimento ou casamento dos conviventes; escritura anterior, se houver — foto ou PDF.',
+    DISS_UE: 'Identidade (RG ou CNH) dos conviventes, escritura ou contrato da união, certidão do Livro E, decisão judicial sobre os filhos — foto ou PDF.',
+    DIV: 'Identidade (RG ou CNH) dos cônjuges, certidão de casamento atualizada (até 90 dias), decisão judicial sobre os filhos — foto ou PDF.',
+    EMANC: 'Certidão de nascimento do menor, identidade (RG ou CNH) dos pais, certidão de óbito ou decisão judicial, se for o caso — foto ou PDF.'
   };
   // PROC — rótulo do objeto por finalidade (spec §2.1: OBJETO)
   const OBJETO_ROT = {
@@ -5187,6 +5357,7 @@ function linhasPendencias(alvo, txt) {
   /* ---- PROC: blocos repetidos de outorgante (1–4) e outorgado (1–3) ---- */
   const CIVIL = [['solteiro', 'Solteiro(a)'], ['casado', 'Casado(a)'], ['divorciado', 'Divorciado(a)'], ['viuvo', 'Viúvo(a)'], ['uniao_estavel', 'União estável'], ['nao_informado', 'Não informado']];
   const REGIMES = [['comunhão parcial de bens', 'Comunhão parcial'], ['comunhão universal de bens', 'Comunhão universal'], ['separação convencional de bens', 'Separação convencional'], ['separação obrigatória de bens', 'Separação obrigatória'], ['participação final nos aquestos', 'Participação final nos aquestos'], ['nao_informado', 'Não informado']];
+  const QUAL_PLACEHOLDER = 'Preenchida pela transposição dos documentos; edite se preciso';
   function chips(chave, opcoes, ativo) {
     return '<span class="ed-chips" data-min-chips="' + chave + '">' + opcoes.map(function (o) {
       return '<button type="button" class="ed-chip' + (o[0] === ativo ? ' ativo' : '') + '" data-v="' + esc(o[0]) + '">' + esc(o[1]) + '</button>';
@@ -5204,6 +5375,9 @@ function linhasPendencias(alvo, txt) {
         '<div class="min-campo" data-pf><span>Capacidade</span>' + chips('proc.out' + i + '.cap', [['capaz', 'Capaz'], ['representado', 'Representado(a)']], 'capaz') + '</div>' +
         '<label class="min-campo" id="minPOutRepBox' + i + '" hidden><span id="minPOutRepRot' + i + '">Representado(a) por — nome e fundamento</span>' +
         '<input type="text" id="minPOutRep' + i + '" autocomplete="off"></label>' +
+        // v1.29 — QUALIFICACAO_OUTORGANTE_i (spec §2.1 / §9): preenchida pela transposição, editável
+        '<label class="min-campo min-largo">Qualificação (dos documentos)' +
+        '<textarea id="minPOutQual' + i + '" rows="2" placeholder="' + QUAL_PLACEHOLDER + '"></textarea></label>' +
         '</div></div>';
     }
     el('minPOutorgantes').innerHTML = h;
@@ -5213,6 +5387,9 @@ function linhasPendencias(alvo, txt) {
         '<p class="min-pessoa-titulo">Outorgado ' + i + '</p><div class="grade-min">' +
         '<label class="min-campo">Nome completo *<input type="text" id="minPDadoNome' + i + '" autocomplete="off"></label>' +
         '<label class="min-campo">Vínculo com o outorgante (parentesco, advogado, despachante…)<input type="text" id="minPDadoVinc' + i + '" autocomplete="off"></label>' +
+        // v1.29 — QUALIFICACAO_OUTORGADO_i
+        '<label class="min-campo min-largo">Qualificação (dos documentos)' +
+        '<textarea id="minPDadoQual' + i + '" rows="2" placeholder="' + QUAL_PLACEHOLDER + '"></textarea></label>' +
         '</div></div>';
     }
     el('minPOutorgados').innerHTML = h;
@@ -5383,6 +5560,9 @@ function linhasPendencias(alvo, txt) {
     });
     pag.querySelectorAll('[data-entrevista]').forEach(function (d) { d.hidden = d.dataset.entrevista !== ATO; });
     el('minAnexosRot').textContent = ANEXOS_ROT[ATO];
+    // v1.29 — o painel "Dados transpostos" é do ato em que a transposição foi aplicada:
+    // trocar de ato o esconde (os anexos ficam); voltar ao mesmo ato o traz de volta
+    el('minTransposto').hidden = !(TRANSP && TRANSP.ato === ATO && !transpRodando);
     reverCondicionais();
   }
   pag.querySelectorAll('.min-ato').forEach(function (b) {
@@ -5422,11 +5602,14 @@ function linhasPendencias(alvo, txt) {
         partes.push(chip('proc.out' + i + '.cap') === 'representado' ? 'representado por ' + ou(t('minPOutRep' + i)) : 'capaz');
       }
       L.push('OUTORGANTE_' + i + ': ' + partes.join(' · '));
+      // v1.29 — spec §2.1: a qualificação transposta vem logo após a linha da pessoa
+      L.push('QUALIFICACAO_OUTORGANTE_' + i + ': ' + ou(t('minPOutQual' + i)));
     }
     const nDad = parseInt(chip('proc.n_outorgados'), 10) || 1;
     L.push('OUTORGADOS: ' + nDad);
     for (let i = 1; i <= nDad; i++) {
       L.push('OUTORGADO_' + i + ': ' + ou(t('minPDadoNome' + i)) + (t('minPDadoVinc' + i) ? ' · ' + t('minPDadoVinc' + i) : ''));
+      L.push('QUALIFICACAO_OUTORGADO_' + i + ': ' + ou(t('minPDadoQual' + i)));
     }
     const atu = chip('proc.atuacao');
     L.push('ATUACAO: ' + (nDad < 2 ? 'nao_informado' : atu === 'por_atribuicoes' ? 'por_atribuicoes: ' + ou(t('minPAtuacaoQuem')) : ou(atu)));
@@ -5451,8 +5634,11 @@ function linhasPendencias(alvo, txt) {
       if (t('minC' + i + 'Prof')) partes.push('profissão: ' + t('minC' + i + 'Prof'));
       return partes.join(' · ');
     }
+    // v1.29 — spec §2.2: QUALIFICACAO_CONVIVENTE_i logo após a linha da pessoa
     L.push('CONVIVENTE_1: ' + conv(1));
+    L.push('QUALIFICACAO_CONVIVENTE_1: ' + ou(t('minC1Qual')));
     L.push('CONVIVENTE_2: ' + conv(2));
+    L.push('QUALIFICACAO_CONVIVENTE_2: ' + ou(t('minC2Qual')));
     const modo = chip('ue.inicio_modo') || 'data';
     L.push('INICIO_CONVIVENCIA: ' + (modo === 'data' ? ou(dataBR(v('minInicio'))) : modo));
     const reg = chip('ue.regime');
@@ -5501,8 +5687,11 @@ function linhasPendencias(alvo, txt) {
     return 'por_procuracao: ' + ou(dataBR(v(idData))) + ', ' + ou(t(idServ));
   }
   function fichaDISS(L) {
+    // v1.29 — spec §2.3: QUALIFICACAO_CONVIVENTE_i logo após a linha da pessoa
     L.push('CONVIVENTE_1: ' + ou(t('minDsC1Nome')) + ' · ' + ou(chip('dss.c1civil')));
+    L.push('QUALIFICACAO_CONVIVENTE_1: ' + ou(t('minDsC1Qual')));
     L.push('CONVIVENTE_2: ' + ou(t('minDsC2Nome')) + ' · ' + ou(chip('dss.c2civil')));
+    L.push('QUALIFICACAO_CONVIVENTE_2: ' + ou(t('minDsC2Qual')));
     const tit = chip('dss.titulo');
     L.push('TITULO_ANTERIOR: ' + (tit === 'escritura' || tit === 'decisao_judicial' ? tit + ': ' + ou(t('minDsTituloDados'))
       : tit === 'contrato_particular' ? 'contrato_particular: ' + ou(dataBR(v('minDsTituloData')))
@@ -5528,8 +5717,11 @@ function linhasPendencias(alvo, txt) {
     L.push('REPRESENTACAO: ' + representacao('dss', 'minDsProcData', 'minDsProcServ'));
   }
   function fichaDIV(L) {
+    // v1.29 — spec §2.4: QUALIFICACAO_CONJUGE_i logo após a linha da pessoa
     L.push('CONJUGE_1: ' + ou(t('minDvC1Nome')));
+    L.push('QUALIFICACAO_CONJUGE_1: ' + ou(t('minDvC1Qual')));
     L.push('CONJUGE_2: ' + ou(t('minDvC2Nome')));
+    L.push('QUALIFICACAO_CONJUGE_2: ' + ou(t('minDvC2Qual')));
     const cas = [dataBR(v('minDvCasData')), t('minDvCasServ'), t('minDvCasMatr') ? 'matrícula ' + t('minDvCasMatr') : ''].filter(Boolean);
     const emitida = dataBR(v('minDvCertData'));
     L.push('CASAMENTO: ' + (cas.length || emitida ? (cas.length ? cas.join(' · ') : 'nao_informado') + ' · certidão emitida em ' + ou(emitida) : 'nao_informado'));
@@ -5572,6 +5764,12 @@ function linhasPendencias(alvo, txt) {
   }
   function fichaEMANC(L) {
     L.push('MENOR: ' + ou(t('minEmNome')) + ' · nascido em ' + ou(dataBR(v('minEmNasc'))) + ' · domicílio: ' + ou(t('minEmDomicilio')));
+    // v1.29 — spec §2.5: QUALIFICACAO_MENOR, CERTIDAO_NASCIMENTO, PAI e MAE entre MENOR e
+    // QUEM_OUTORGA. PAI/MAE = "<nome> · <qualificação em uma linha>"; sem nada, nao_informado.
+    L.push('QUALIFICACAO_MENOR: ' + ou(t('minEmMenorQual')));
+    L.push('CERTIDAO_NASCIMENTO: ' + ou(t('minEmCertidao')));
+    L.push('PAI: ' + ([t('minEmPai'), t('minEmPaiQual')].filter(Boolean).join(' · ') || 'nao_informado'));
+    L.push('MAE: ' + ([t('minEmMae'), t('minEmMaeQual')].filter(Boolean).join(' · ') || 'nao_informado'));
     const quem = chip('em.quem');
     L.push('QUEM_OUTORGA: ' + (quem === 'um_dos_pais' ? 'um_dos_pais: ' + ou(chip('em.qual')) : ou(quem)));
     const mot = chip('em.motivo');
@@ -5615,25 +5813,35 @@ function linhasPendencias(alvo, txt) {
     }
     return null;
   }
-  function tituloDaMinuta() {
+  // v1.29 — o título nu (ato + partes) vai ao servidor como titulo_base, para o nome do
+  // Google Doc; o link permanente recebe o sufixo do estado quando não for PRONTA
+  function tituloBase() {
     const e = function (id) { return v(id) || '…'; };
-    const titulo = ATO === 'PROC' ? 'PROC — ' + e('minPOutNome1') + ' → ' + e('minPDadoNome1')
+    return ATO === 'PROC' ? 'PROC — ' + e('minPOutNome1') + ' → ' + e('minPDadoNome1')
       : ATO === 'UE' ? 'UE — ' + e('minC1Nome') + ' e ' + e('minC2Nome')
       : ATO === 'DISS_UE' ? 'DISS_UE — ' + e('minDsC1Nome') + ' e ' + e('minDsC2Nome')
       : ATO === 'DIV' ? 'DIV — ' + e('minDvC1Nome') + ' e ' + e('minDvC2Nome')
       : 'EMANC — ' + e('minEmNome');
+  }
+  function tituloDaMinuta() {
     const sufixo = { PRELIMINAR: ' · PRELIMINAR', BLOQUEADA: ' · BLOQUEADA', DECISAO: ' · DECISÃO DO TABELIÃO', FORA: ' · FORA DO ESCOPO' }[MINUTA_ESTADO_COD];
-    return titulo + (sufixo || '');
+    return tituloBase() + (sufixo || '');
   }
 
   const c1 = el('minCiente1'), c2 = el('minCiente2'), btn = el('btnGerarMinuta'), nota = el('minNota');
   function reverCiencia() {
     const ok = c1.checked && c2.checked;
-    btn.disabled = !ok;
-    nota.textContent = ok ? 'Escolha o ato, informe os fatos, anexe os documentos e gere a minuta.'
+    btn.disabled = !ok || transpRodando;
+    // v1.29 — com a ponte do Google Docs ligada no servidor, a nota avisa que a minuta
+    // nasce também como documento na pasta do Gerador
+    nota.textContent = ok
+      ? (IA_STATUS.docs_ativo
+          ? 'Escolha o ato, anexe os documentos, transponha os dados, informe os fatos e gere a minuta — ela nasce também como Google Doc na pasta do Gerador (Drive).'
+          : 'Escolha o ato, anexe os documentos, transponha os dados, informe os fatos e gere a minuta.')
       : 'Marque as duas caixas de ciência para liberar o botão.';
   }
   c1.addEventListener('change', reverCiencia); c2.addEventListener('change', reverCiencia);
+  document.addEventListener('cn2o-ia-status', reverCiencia);
 
   function esconderDecisao() {
     MINUTA_COPIAVEL = ''; MINUTA_ESTADO = ''; MINUTA_ESTADO_COD = '';
@@ -5644,7 +5852,445 @@ function linhasPendencias(alvo, txt) {
     el('minPendencias').hidden = true;
     el('minDevolvida').hidden = true;
     el('minutaLinkBox').hidden = true;
+    mostrarDocMinuta(null, '');   // v1.29 — some a caixa do Google Docs (e a nota de falha)
   }
+
+  /* ============================================================
+     v1.29 — TRANSPOSIÇÃO DE DADOS DOS DOCUMENTOS PARA A FICHA (spec §9)
+     O botão "Extrair e transpor dados" manda SÓ os anexos a POST /hub/ia/transpor e
+     recebe { dados: { pessoas[], casamento|null, alertas[] }, modelo, ms, custo_usd, ocr }.
+     Cada pessoa vai para um DESTINO do ato aberto (convivente 1/2; cônjuge 1/2;
+     emancipando/pai/mãe; outorgante i/outorgado i); o painel "Dados transpostos" deixa
+     trocar o destino e Reaplicar, ou Desfazer (os campos voltam ao que eram antes).
+     Regras: valor vazio do modelo não altera campo; estado civil só quando comprovado
+     (chip só se o grupo tiver o valor); nada do modelo vira HTML — só nós de texto.
+  ============================================================ */
+  let TRANSP = null;                      // { ato, dados, destinos[], antes, marcas[], casamento[], notas[], meta, preenchidos, aplicado }
+  let transpRodando = false, transpCtrl = null, transpRelogio = null;
+  const btnTr = el('btnTranspor'), painelTr = el('minTransposto');
+  const ROTULO_TRANSPOR = btnTr.textContent;
+  // estado civil do contrato → valor do chip (uniao_estavel só existe nos chips do PROC;
+  // onde o grupo não tem o valor, aplicarChip não altera nada)
+  const CIVIL_CHIP = { casado: 'casado', divorciado: 'divorciado', viuvo: 'viuvo', solteiro: 'solteiro', uniao_estavel: 'uniao_estavel' };
+  const CIVIL_ROTULO = { casado: 'casado(a)', divorciado: 'divorciado(a)', viuvo: 'viúvo(a)', solteiro: 'solteiro(a)', uniao_estavel: 'união estável' };
+  const DESTINOS = {
+    UE: [['c1', 'Convivente 1'], ['c2', 'Convivente 2']],
+    DISS_UE: [['c1', 'Convivente 1'], ['c2', 'Convivente 2']],
+    DIV: [['c1', 'Cônjuge 1'], ['c2', 'Cônjuge 2']],
+    EMANC: [['menor', 'Emancipando'], ['pai', 'Pai'], ['mae', 'Mãe']],
+    PROC: [['out1', 'Outorgante 1'], ['out2', 'Outorgante 2'], ['out3', 'Outorgante 3'], ['out4', 'Outorgante 4'], ['dado1', 'Outorgado 1'], ['dado2', 'Outorgado 2'], ['dado3', 'Outorgado 3']]
+  };
+  function rotuloDestino(d) {
+    const o = (DESTINOS[ATO] || []).filter(function (x) { return x[0] === d; })[0];
+    return o ? o[1] : d;
+  }
+  // tudo o que a transposição pode tocar em cada ato — é o que a foto guarda e o Desfazer devolve
+  const CAMPOS_TRANSP = {
+    UE: { valores: ['minC1Nome', 'minC1Cpf', 'minC1Prof', 'minC1Nasc', 'minC1Qual', 'minC2Nome', 'minC2Cpf', 'minC2Prof', 'minC2Nasc', 'minC2Qual'], chips: ['ue.c1civil', 'ue.c2civil'], multi: [] },
+    DISS_UE: { valores: ['minDsC1Nome', 'minDsC1Qual', 'minDsC2Nome', 'minDsC2Qual'], chips: ['dss.c1civil', 'dss.c2civil'], multi: [] },
+    DIV: { valores: ['minDvC1Nome', 'minDvC1Qual', 'minDvC2Nome', 'minDvC2Qual', 'minDvCasData', 'minDvCasServ', 'minDvCasMatr', 'minDvCertData', 'minDvSolteiro1', 'minDvSolteiro2'], chips: ['div.regime'], multi: ['div.solteiro1', 'div.solteiro2'] },
+    EMANC: { valores: ['minEmNome', 'minEmNasc', 'minEmMenorQual', 'minEmCertidao', 'minEmPai', 'minEmPaiQual', 'minEmMae', 'minEmMaeQual'], chips: [], multi: [] },
+    PROC: { valores: [], chips: ['proc.n_outorgantes', 'proc.n_outorgados'], multi: [] }
+  };
+  for (let i = 1; i <= 4; i++) { CAMPOS_TRANSP.PROC.valores.push('minPOutNome' + i, 'minPOutQual' + i); CAMPOS_TRANSP.PROC.chips.push('proc.out' + i + '.civil', 'proc.out' + i + '.regime'); }
+  for (let i = 1; i <= 3; i++) CAMPOS_TRANSP.PROC.valores.push('minPDadoNome' + i, 'minPDadoQual' + i);
+
+  function fotografar(ato) {
+    const c = CAMPOS_TRANSP[ato], foto = { valores: {}, chips: {}, multi: {} };
+    c.valores.forEach(function (id) { const n = el(id); foto.valores[id] = n ? n.value : ''; });
+    c.chips.forEach(function (k) { foto.chips[k] = chip(k); });
+    c.multi.forEach(function (k) { foto.multi[k] = chipsMulti(k); });
+    return foto;
+  }
+  // marca UM chip do grupo (valor vazio = nenhum marcado); devolve se o valor existe no grupo
+  function marcarChip(chave, valor) {
+    const grupo = pag.querySelector('[data-min-chips="' + chave + '"]');
+    if (!grupo) return false;
+    let achou = false;
+    grupo.querySelectorAll('.ed-chip').forEach(function (b) {
+      const on = !!valor && b.dataset.v === valor;
+      if (on) achou = true;
+      b.classList.toggle('ativo', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    return achou;
+  }
+  function marcarMulti(chave, valores) {
+    pag.querySelectorAll('[data-min-multi="' + chave + '"] .ed-chip').forEach(function (b) {
+      const on = valores.indexOf(b.dataset.v) >= 0;
+      b.classList.toggle('ativo', on); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+  }
+  function restaurar(foto) {
+    Object.keys(foto.valores).forEach(function (id) { const n = el(id); if (n) n.value = foto.valores[id]; });
+    Object.keys(foto.chips).forEach(function (k) { marcarChip(k, foto.chips[k]); });
+    Object.keys(foto.multi).forEach(function (k) { marcarMulti(k, foto.multi[k]); });
+  }
+  // só marca se o grupo tiver o valor (ex.: uniao_estavel não existe nos chips da UE)
+  function aplicarChip(chave, valor) {
+    if (!valor || !pag.querySelector('[data-min-chips="' + chave + '"] .ed-chip[data-v="' + valor + '"]')) return false;
+    return marcarChip(chave, valor);
+  }
+  // dd/mm/aaaa (contrato §9.2) → aaaa-mm-dd do <input type=date>; inválida ⇒ '' (não altera)
+  function isoDe(ddmm) {
+    const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(String(ddmm || '').trim());
+    if (!m) return '';
+    const d = +m[1], mes = +m[2];
+    return d >= 1 && d <= 31 && mes >= 1 && mes <= 12 ? m[3] + '-' + m[2] + '-' + m[1] : '';
+  }
+  function normNome(s) {
+    return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[^A-Z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+  }
+  function mesmoNome(a, b) { return !!normNome(a) && normNome(a) === normNome(b); }
+  // regime transcrito ("comunhão parcial de bens", "comunhao parcial"…) → valor exato do chip
+  function regimeChip(texto) {
+    const alvo = normNome(texto);
+    if (!alvo) return '';
+    for (let k = 0; k < REGIMES.length; k++) {
+      const val = REGIMES[k][0], n = normNome(val);
+      if (val !== 'nao_informado' && (n === alvo || n.indexOf(alvo) === 0 || alvo.indexOf(n) === 0)) return val;
+    }
+    return '';
+  }
+  // "NOME DO PAI e NOME DA MÃE" → { pai, mae }; sem separador reconhecível, null (nunca se adivinha)
+  function separarFiliacao(f) {
+    f = String(f || '').replace(/\s+/g, ' ').trim();
+    if (!f) return null;
+    const m = /^(.+?)\s+e\s+(?:de\s+)?(.+)$/.exec(f) || /^(.+?)\s+E\s+(?:DE\s+)?(.+)$/.exec(f) || /^(.+?)\s*[;/]\s*(.+)$/.exec(f);
+    if (!m) return null;
+    const pai = m[1].trim(), mae = m[2].trim();
+    return pai && mae ? { pai: pai, mae: mae } : null;
+  }
+  function nomeSolteiroDe(mapa, nome) {
+    if (!mapa || !nome) return '';
+    if (mapa[nome]) return mapa[nome];
+    const chaves = Object.keys(mapa).filter(function (k) { return mesmoNome(k, nome); });
+    return chaves.length ? mapa[chaves[0]] : '';
+  }
+  // "serventia · matrícula … · emitida em dd/mm/aaaa" (ou livro/folha/termo nas certidões antigas)
+  function certidaoNascimento(p) {
+    const c = p.certidao || {};
+    if (c.tipo && c.tipo !== 'nascimento') return '';
+    const ident = c.matricula ? 'matrícula ' + c.matricula
+      : [c.livro ? 'livro ' + c.livro : '', c.folha ? 'fls. ' + c.folha : '', c.termo ? 'termo ' + c.termo : ''].filter(Boolean).join(', ');
+    return [c.serventia, ident, c.data_emissao ? 'emitida em ' + c.data_emissao : ''].filter(Boolean).join(' · ');
+  }
+  // escreve num campo de texto/data; anota o rótulo quando substituiu um valor diferente
+  function por(id, valor, rotulo, res) {
+    valor = String(valor || '').trim();
+    if (!valor) return;
+    const n = el(id);
+    if (!n) return;
+    const antes = (n.value || '').trim();
+    n.value = valor;
+    // <input type=date> recusa data impossível (31/02): o campo volta ao que era e nada é contado
+    if (n.type === 'date' && n.value !== valor) { n.value = antes; return; }
+    res.preenchidos++;
+    if (antes && antes !== valor) res.substituidos.push(rotulo);
+  }
+  function porData(id, ddmm, rotulo, res) { const iso = isoDe(ddmm); if (iso) por(id, iso, rotulo, res); }
+  function porChip(chave, valor, rotulo, res) {
+    if (!valor) return;
+    const antes = chip(chave);
+    if (!aplicarChip(chave, valor)) return;
+    res.preenchidos++;
+    if (antes && antes !== valor && antes !== 'nao_informado') res.substituidos.push(rotulo);
+  }
+  // PROC: destino além das pessoas existentes acrescenta outorgante/outorgado (o chip da contagem)
+  function garantirContagem(chave, n) {
+    if ((parseInt(chip(chave), 10) || 1) < n) marcarChip(chave, String(n));
+  }
+  function aplicarPessoa(p, destino, res, dados) {
+    if (ATO === 'UE' || ATO === 'DISS_UE') {
+      const i = destino === 'c1' ? 1 : 2;
+      if (ATO === 'UE') {
+        por('minC' + i + 'Nome', p.nome, 'nome', res);
+        por('minC' + i + 'Cpf', p.cpf, 'CPF', res);
+        por('minC' + i + 'Prof', p.profissao, 'profissão', res);
+        porData('minC' + i + 'Nasc', p.data_nascimento, 'nascimento', res);
+        porChip('ue.c' + i + 'civil', CIVIL_CHIP[p.estado_civil], 'estado civil', res);
+        por('minC' + i + 'Qual', p.qualificacao, 'qualificação', res);
+      } else {
+        por('minDsC' + i + 'Nome', p.nome, 'nome', res);
+        porChip('dss.c' + i + 'civil', CIVIL_CHIP[p.estado_civil], 'estado civil', res);
+        por('minDsC' + i + 'Qual', p.qualificacao, 'qualificação', res);
+      }
+    } else if (ATO === 'DIV') {
+      const i = destino === 'c1' ? 1 : 2;
+      por('minDvC' + i + 'Nome', p.nome, 'nome', res);
+      por('minDvC' + i + 'Qual', p.qualificacao, 'qualificação', res);
+      const solteiro = dados.casamento ? nomeSolteiroDe(dados.casamento.nome_solteiro, p.nome) : '';
+      if (solteiro) { marcarMulti('div.solteiro' + i, []); por('minDvSolteiro' + i, solteiro, 'nome de solteiro', res); }
+    } else if (ATO === 'EMANC') {
+      if (destino === 'menor') {
+        por('minEmNome', p.nome, 'nome', res);
+        porData('minEmNasc', p.data_nascimento, 'nascimento', res);
+        por('minEmMenorQual', p.qualificacao, 'qualificação', res);
+        por('minEmCertidao', certidaoNascimento(p), 'certidão de nascimento', res);
+        const f = separarFiliacao(p.filiacao);
+        if (f) { por('minEmPai', f.pai, 'pai', res); por('minEmMae', f.mae, 'mãe', res); }
+        else if (p.filiacao) res.notas.push('Filiação lida na certidão — «' + p.filiacao + '» — sem o "e" entre os dois nomes: não deu para separar pai e mãe; preencha os dois campos à mão.');
+      } else if (destino === 'pai') {
+        por('minEmPai', p.nome, 'pai', res);
+        por('minEmPaiQual', p.qualificacao, 'qualificação do pai', res);
+      } else if (destino === 'mae') {
+        por('minEmMae', p.nome, 'mãe', res);
+        por('minEmMaeQual', p.qualificacao, 'qualificação da mãe', res);
+      }
+    } else if (ATO === 'PROC') {
+      const m = /^(out|dado)(\d)$/.exec(destino);
+      if (!m) return;
+      const i = parseInt(m[2], 10);
+      if (m[1] === 'out') {
+        garantirContagem('proc.n_outorgantes', i);
+        por('minPOutNome' + i, p.nome, 'nome', res);
+        if (chip('proc.out' + i + '.tipo') !== 'PJ') {
+          porChip('proc.out' + i + '.civil', CIVIL_CHIP[p.estado_civil], 'estado civil', res);
+          const civil = chip('proc.out' + i + '.civil');
+          if (civil === 'casado' || civil === 'uniao_estavel') porChip('proc.out' + i + '.regime', regimeChip(p.regime_bens), 'regime de bens', res);
+        }
+        por('minPOutQual' + i, p.qualificacao, 'qualificação', res);
+      } else {
+        garantirContagem('proc.n_outorgados', i);
+        por('minPDadoNome' + i, p.nome, 'nome', res);
+        por('minPDadoQual' + i, p.qualificacao, 'qualificação', res);
+      }
+    }
+  }
+  // DIV: a certidão de casamento preenche data, serventia, matrícula, emissão e o regime (chip)
+  function aplicarCasamento(cas, res) {
+    porData('minDvCasData', cas.data, 'data do casamento', res);
+    por('minDvCasServ', cas.serventia, 'serventia', res);
+    por('minDvCasMatr', cas.matricula, 'matrícula', res);
+    porData('minDvCertData', cas.data_emissao_certidao, 'emissão da certidão', res);
+    porChip('div.regime', regimeChip(cas.regime), 'regime', res);
+  }
+  // destinos padrão, na ordem das pessoas devolvidas (spec §9.3)
+  function destinosPadrao(pessoas) {
+    if (ATO === 'PROC') {
+      const fila = [];
+      const nOut = parseInt(chip('proc.n_outorgantes'), 10) || 1, nDad = parseInt(chip('proc.n_outorgados'), 10) || 1;
+      for (let i = 1; i <= nOut; i++) fila.push('out' + i);
+      for (let i = 1; i <= nDad; i++) fila.push('dado' + i);
+      return pessoas.map(function (_, k) { return fila[k] || ''; });
+    }
+    if (ATO === 'EMANC') {
+      // emancipando = a pessoa mais nova (pela data de nascimento); sem datas, a primeira;
+      // pai e mãe = quem tiver documento próprio com o nome da filiação do emancipando
+      const dest = pessoas.map(function () { return ''; });
+      let idx = -1, maisNovo = '';
+      pessoas.forEach(function (p, k) { const iso = isoDe(p.data_nascimento); if (iso && iso > maisNovo) { maisNovo = iso; idx = k; } });
+      if (idx < 0) idx = 0;
+      dest[idx] = 'menor';
+      const f = separarFiliacao(pessoas[idx].filiacao);
+      if (f) pessoas.forEach(function (p, k) {
+        if (k === idx) return;
+        if (mesmoNome(p.nome, f.pai) && dest.indexOf('pai') < 0) dest[k] = 'pai';
+        else if (mesmoNome(p.nome, f.mae) && dest.indexOf('mae') < 0) dest[k] = 'mae';
+      });
+      return dest;
+    }
+    return pessoas.map(function (_, k) { return k === 0 ? 'c1' : k === 1 ? 'c2' : ''; });
+  }
+  // aplica (ou reaplica) a transposição: devolve os campos e chips à foto e escreve de novo
+  function aplicarTransp(T) {
+    const usados = {};
+    for (let k = 0; k < T.destinos.length; k++) {
+      const d = T.destinos[k];
+      if (d && usados[d]) return { erro: 'Duas pessoas apontam para o mesmo destino (' + rotuloDestino(d) + ') — escolha destinos diferentes.' };
+      if (d) usados[d] = true;
+    }
+    restaurar(T.antes);
+    const res = { preenchidos: 0, porPessoa: [], casamento: [], notas: [] };
+    // no EMANC o emancipando entra primeiro: a filiação preenche pai e mãe, e o documento
+    // próprio do genitor, aplicado depois, prevalece sobre a grafia da certidão
+    const ordem = T.dados.pessoas.map(function (_, k) { return k; })
+      .sort(function (a, b) { return (T.destinos[a] === 'menor' ? 0 : 1) - (T.destinos[b] === 'menor' ? 0 : 1); });
+    ordem.forEach(function (k) {
+      const r = { preenchidos: 0, substituidos: [], notas: [] };
+      if (T.destinos[k]) aplicarPessoa(T.dados.pessoas[k], T.destinos[k], r, T.dados);
+      res.porPessoa[k] = r.substituidos;
+      res.preenchidos += r.preenchidos;
+      res.notas = res.notas.concat(r.notas);
+    });
+    if (ATO === 'DIV' && T.dados.casamento) {
+      const r = { preenchidos: 0, substituidos: [], notas: [] };
+      aplicarCasamento(T.dados.casamento, r);
+      res.casamento = r.substituidos;
+      res.preenchidos += r.preenchidos;
+    }
+    reverCondicionais();
+    return res;
+  }
+  function resumoPessoa(p, destino) {
+    const partes = [];
+    if (p.documentos && p.documentos.length) partes.push(p.documentos.join(', '));
+    if (p.estado_civil && CIVIL_ROTULO[p.estado_civil]) partes.push(CIVIL_ROTULO[p.estado_civil] + (p.regime_bens ? ' — ' + p.regime_bens : ''));
+    else if (destino !== 'menor') partes.push('estado civil não comprovado');
+    if (p.profissao) partes.push(p.profissao);
+    if (p.data_nascimento) partes.push('nascimento ' + p.data_nascimento);
+    if (p.cpf) partes.push('CPF ' + p.cpf);
+    return partes.join(' · ');
+  }
+  function resumoCasamento(c) {
+    const partes = [c.data, c.serventia, c.matricula ? 'matrícula ' + c.matricula : '', c.data_emissao_certidao ? 'emitida em ' + c.data_emissao_certidao : '', c.regime, c.pacto ? 'pacto: ' + c.pacto : ''].filter(Boolean);
+    Object.keys(c.nome_solteiro || {}).forEach(function (n) { partes.push('nome de solteiro de ' + n + ': ' + c.nome_solteiro[n]); });
+    if (c.averbacoes) partes.push('averbações: ' + c.averbacoes);
+    return partes.join(' · ');
+  }
+  function textoTransp(msg, erro) {
+    const t = el('minTranspostoTexto');
+    t.hidden = !msg; t.classList.toggle('erro', !!erro); t.textContent = msg || '';
+  }
+  function marca(subs) {
+    const em = document.createElement('em');
+    em.className = 'mt-marca'; em.hidden = !subs.length;
+    em.textContent = subs.length ? 'substituído: ' + subs.join(', ') : '';
+    return em;
+  }
+  // o painel a partir do estado (TRANSP): linhas, casamento, alertas, custo
+  function renderTransp() {
+    const T = TRANSP;
+    painelTr.hidden = false;
+    textoTransp('', false);
+    const linhas = el('minTranspostoLinhas');
+    linhas.textContent = '';
+    T.dados.pessoas.forEach(function (p, k) {
+      const div = document.createElement('div'); div.className = 'mt-linha'; div.dataset.pessoa = String(k);
+      const nome = document.createElement('span'); nome.className = 'mt-nome'; nome.textContent = p.nome || '(nome não lido)';
+      const seta = document.createElement('span'); seta.className = 'mt-seta'; seta.setAttribute('aria-hidden', 'true'); seta.textContent = '→';
+      const sel = document.createElement('select'); sel.className = 'mt-destino';
+      sel.setAttribute('aria-label', 'Destino de ' + (p.nome || 'pessoa ' + (k + 1)));
+      DESTINOS[T.ato].concat([['', '(não usar)']]).forEach(function (o) {
+        const op = document.createElement('option'); op.value = o[0]; op.textContent = o[1];
+        if (o[0] === (T.destinos[k] || '')) op.selected = true;
+        sel.appendChild(op);
+      });
+      sel.addEventListener('change', function () { T.destinos[k] = sel.value; });
+      div.appendChild(nome); div.appendChild(seta); div.appendChild(sel); div.appendChild(marca((T.aplicado && T.marcas[k]) || []));
+      linhas.appendChild(div);
+      const det = document.createElement('p'); det.className = 'mt-detalhe'; det.textContent = resumoPessoa(p, T.destinos[k]);
+      linhas.appendChild(det);
+    });
+    if (T.dados.casamento) {
+      const div = document.createElement('div'); div.className = 'mt-linha mt-cas';
+      const nome = document.createElement('span'); nome.className = 'mt-nome'; nome.textContent = 'Certidão de casamento';
+      const seta = document.createElement('span'); seta.className = 'mt-seta'; seta.setAttribute('aria-hidden', 'true'); seta.textContent = '→';
+      const fixo = document.createElement('span'); fixo.className = 'mt-fixo';
+      fixo.textContent = T.ato === 'DIV' ? 'dados do casamento e nomes de solteiro' : 'só informativa neste ato (o estado civil vai pelos chips)';
+      div.appendChild(nome); div.appendChild(seta); div.appendChild(fixo); div.appendChild(marca((T.aplicado && T.casamento) || []));
+      linhas.appendChild(div);
+      const det = document.createElement('p'); det.className = 'mt-detalhe'; det.textContent = resumoCasamento(T.dados.casamento);
+      linhas.appendChild(det);
+    }
+    linhas.hidden = false;
+    const ul = el('minTranspostoAlertas');
+    ul.textContent = '';
+    (T.dados.alertas || []).concat(T.notas || []).forEach(function (a) { const li = document.createElement('li'); li.textContent = a; ul.appendChild(li); });
+    ul.hidden = !ul.children.length;
+    el('minTranspostoMeta').textContent = T.meta || '';
+    el('minTranspostoMeta').hidden = !T.meta;
+    el('minTranspostoBotoes').hidden = false;
+    el('btnReaplicarTransp').textContent = T.aplicado ? 'Reaplicar' : 'Aplicar de novo';
+    el('btnDesfazerTransp').disabled = !T.aplicado;
+    el('minTranspostoResumo').textContent = T.aplicado
+      ? T.dados.pessoas.length + ' pessoa(s) · ' + T.preenchidos + ' campo(s) preenchido(s)'
+      : 'desfeita — os campos voltaram ao que eram';
+  }
+  function progressoTransp(n, s) {
+    painelTr.hidden = false;
+    el('minTranspostoResumo').textContent = '';
+    const t = el('minTranspostoTexto');
+    t.hidden = false; t.classList.remove('erro');
+    t.innerHTML = '<span class="progresso-ia"><span class="giro"></span>' + esc('Lendo ' + n + ' documento(s) e transcrevendo os dados das partes') + ' · ' + s + ' s</span>';
+    ['minTranspostoLinhas', 'minTranspostoBotoes', 'minTranspostoAlertas', 'minTranspostoMeta'].forEach(function (id) { el(id).hidden = true; });
+  }
+  // falha: a mensagem no painel (nunca alert); os campos não foram tocados; se havia uma
+  // transposição deste ato, as linhas dela voltam abaixo da mensagem (Desfazer continua valendo)
+  function erroTransp(msg, alertas) {
+    if (TRANSP && TRANSP.ato === ATO) renderTransp();
+    else {
+      painelTr.hidden = false;
+      ['minTranspostoLinhas', 'minTranspostoBotoes', 'minTranspostoAlertas', 'minTranspostoMeta'].forEach(function (id) { el(id).hidden = true; });
+      if (alertas && alertas.length) {
+        const ul = el('minTranspostoAlertas');
+        ul.textContent = '';
+        alertas.forEach(function (a) { const li = document.createElement('li'); li.textContent = a; ul.appendChild(li); });
+        ul.hidden = false;
+      }
+    }
+    el('minTranspostoResumo').textContent = 'não concluída';
+    textoTransp(msg, true);
+  }
+  function concluirTransp(r, t0) {
+    const dados = r && r.dados && typeof r.dados === 'object' ? r.dados : {};
+    const pessoas = (Array.isArray(dados.pessoas) ? dados.pessoas : []).filter(function (p) { return p && typeof p === 'object'; });
+    const alertas = Array.isArray(dados.alertas) ? dados.alertas.map(String) : [];
+    if (!pessoas.length) {
+      erroTransp('Nenhuma pessoa foi identificada nos documentos anexados — confira as fotos (nitidez, página certa) e tente de novo. Os campos não foram alterados.', alertas);
+      return;
+    }
+    TRANSP = {
+      ato: ATO, dados: { pessoas: pessoas, casamento: dados.casamento && typeof dados.casamento === 'object' ? dados.casamento : null, alertas: alertas },
+      destinos: destinosPadrao(pessoas), antes: fotografar(ATO), meta: assinaturaIA('Transposição feita para', r, t0),
+      marcas: [], casamento: [], notas: [], preenchidos: 0, aplicado: false
+    };
+    const res = aplicarTransp(TRANSP);
+    TRANSP.marcas = res.porPessoa; TRANSP.casamento = res.casamento; TRANSP.notas = res.notas; TRANSP.preenchidos = res.preenchidos; TRANSP.aplicado = true;
+    renderTransp();
+  }
+  let transpDescartada = false;   // Limpar no meio de uma chamada: o resultado (ou o "Interrompido.") não volta ao painel
+  function limparTransposicao() {
+    if (transpRodando && transpCtrl) { transpDescartada = true; transpCtrl.abort(); }
+    TRANSP = null;
+    painelTr.hidden = true;
+    textoTransp('', false);
+    el('minTranspostoLinhas').textContent = ''; el('minTranspostoAlertas').textContent = ''; el('minTranspostoMeta').textContent = ''; el('minTranspostoResumo').textContent = '';
+  }
+  btnTr.addEventListener('click', function () {
+    if (transpRodando) { if (transpCtrl) transpCtrl.abort(); return; }
+    const ferr = FERRAMENTAS.paginaMinutas;
+    if (ferr && ferr.ocupada()) { toast('Aguarde a minuta terminar para transpor os dados.'); return; }
+    const arqs = ferr ? ferr.anexos.itens() : [];
+    if (!arqs.length) { toast('Anexe os documentos das partes'); return; }
+    if (IA_STATUS.configurada === false) { erroTransp('A IA ainda não foi ligada no servidor — avise o Tabelião.'); return; }
+    transpRodando = true; btnTr.textContent = 'Interromper'; reverCiencia();
+    const t0 = Date.now();
+    function pintar() { progressoTransp(arqs.length, Math.round((Date.now() - t0) / 1000)); }
+    pintar(); transpRelogio = setInterval(pintar, 1000);
+    transpCtrl = new AbortController();
+    Promise.all(arqs.map(function (a) {
+      return blobParaBase64(a.blob).then(function (b64) { return { nome: a.nome, mime: a.mime, base64: b64 }; });
+    })).then(function (arquivos) {
+      return api('/hub/ia/transpor', { corpo: { arquivos: arquivos }, sinal: transpCtrl.signal });
+    }).then(function (r) {
+      clearInterval(transpRelogio);
+      concluirTransp(r, t0);
+    }).catch(function (e) {
+      clearInterval(transpRelogio);
+      if (e && e.cancelado && transpDescartada) return;   // foi o Limpar: o painel já fechou
+      erroTransp(e && e.status === 502 && e.dados && e.dados.motivo === 'json'
+        ? 'O modelo não devolveu dados estruturados — tente de novo. Os campos não foram alterados.'
+        : mensagemErroIA(e));
+    }).then(function () {
+      transpRodando = false; transpCtrl = null; transpDescartada = false; btnTr.textContent = ROTULO_TRANSPOR; reverCiencia();
+    });
+  });
+  el('btnReaplicarTransp').addEventListener('click', function () {
+    if (!TRANSP || TRANSP.ato !== ATO || transpRodando) return;
+    const res = aplicarTransp(TRANSP);
+    if (res.erro) { toast(res.erro, true); return; }
+    TRANSP.marcas = res.porPessoa; TRANSP.casamento = res.casamento; TRANSP.notas = res.notas; TRANSP.preenchidos = res.preenchidos; TRANSP.aplicado = true;
+    renderTransp();
+    toast('✓ Dados reaplicados nos destinos escolhidos');
+  });
+  el('btnDesfazerTransp').addEventListener('click', function () {
+    if (!TRANSP || TRANSP.ato !== ATO || transpRodando || !TRANSP.aplicado) return;
+    restaurar(TRANSP.antes);
+    reverCondicionais();
+    TRANSP.aplicado = false; TRANSP.marcas = []; TRANSP.casamento = []; TRANSP.notas = []; TRANSP.preenchidos = 0;
+    renderTransp();
+    toast('Transposição desfeita — os campos voltaram ao que eram');
+  });
 
   montarPessoasProc();
   montarModulosProc();
@@ -5663,13 +6309,21 @@ function linhasPendencias(alvo, txt) {
     validar: validar,
     processar: processarMinuta,
     textoParaCopiar: function () { return MINUTA_COPIAVEL || el('saidaMinuta').textContent; },
+    // v1.29 — titulo_base: o servidor nomeia o Google Doc com ele (≤ 120 caracteres)
+    corpoExtra: function () { return { titulo_base: tituloBase().slice(0, 120) }; },
     aoIniciar: esconderDecisao,
     aoConcluir: function (r) {
       // sem minuta (bloqueada / decisão do Tabelião / fora do escopo) não há o que copiar;
       // PRONTA e PRELIMINAR copiam a minuta (a preliminar leva os [FALTA: …])
       el('btnCopiarMin').hidden = !MINUTA_COPIAVEL;
+      // v1.29 — Minuta no Google Docs: botão-link em destaque (doc) ou nota de falha (doc_erro)
+      const doc = r.doc && typeof r.doc.url === 'string' ? r.doc : null;
+      mostrarDocMinuta(doc, r.doc_erro || '');
       // o link guarda a resposta inteira — a decisão do roteador faz parte do resultado
-      api('/hub/minutas', { corpo: { titulo: tituloDaMinuta(), texto: r.texto } }).then(function (resp) {
+      // (e a URL do Google Doc, quando houver, para reabrir com o botão)
+      const guardar = { titulo: tituloDaMinuta(), texto: r.texto };
+      if (doc && !el('minDocBox').hidden) guardar.doc_url = doc.url;
+      api('/hub/minutas', { corpo: guardar }).then(function (resp) {
         const link = location.origin + location.pathname + '#minuta=' + resp.id;
         el('minutaLinkA').textContent = link;
         el('minutaLinkA').href = link;
@@ -5698,6 +6352,7 @@ function linhasPendencias(alvo, txt) {
     });
     el('minObs').value = '';
     esconderDecisao();
+    limparTransposicao();   // v1.29 — o painel "Dados transpostos" e o seu estado também zeram
     reverCondicionais();
   });
   // guarda o chip padrão de cada grupo (o que nasce ativo) para o Limpar restaurar
