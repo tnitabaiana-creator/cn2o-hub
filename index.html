@@ -1710,25 +1710,25 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 :root[data-theme="dark"] .pi-brilho{background:linear-gradient(90deg,#c7d2e2,#f2d7dc)}
 @media (max-width:520px){ .pi-caixa{gap:12px} .pi-icone{width:52px;height:52px} .pi-emoji{font-size:30px} }
 
-/* ===== v1.31 — cartão 05 "Em breve": o Gerador de Minuta fica fechado à equipe até o
+/* ===== v1.31 — mini-quadro 3.3 "Em breve": o Gerador de Minuta fica fechado à equipe até o
    Tabelião liberar (curadoria das variáveis). Sombreado, hachurado de leve, selo EM BREVE,
    sem hover; para o Tabelião (admin) o cartão continua clicável, só com o selo. ===== */
-#secFerramentas .card.em-breve{opacity:.6;filter:saturate(.3);cursor:not-allowed;
+#secFerramentas .card.em-breve,#paginaIA .card.em-breve{opacity:.6;filter:saturate(.3);cursor:not-allowed;
   background:repeating-linear-gradient(135deg,transparent 0 14px,rgba(32,42,58,.045) 14px 28px),var(--card)}
-#secFerramentas .card.em-breve:hover{transform:none;box-shadow:0 4px 14px rgba(32,42,58,.07);border-color:var(--card-borda)}
-#secFerramentas .card.em-breve .card-acao{color:var(--texto-suave)}
-#secFerramentas .card.em-breve.em-breve-admin{opacity:1;filter:none;cursor:pointer;background:var(--card)}
-#secFerramentas .card.em-breve.em-breve-admin:hover{border-color:var(--vinho);transform:translateY(-2px);box-shadow:var(--sombra)}
-#secFerramentas .card.em-breve.em-breve-admin .card-acao{color:var(--vinho)}
+#secFerramentas .card.em-breve:hover,#paginaIA .card.em-breve:hover{transform:none;box-shadow:0 4px 14px rgba(32,42,58,.07);border-color:var(--card-borda)}
+#secFerramentas .card.em-breve .card-acao,#paginaIA .card.em-breve .card-acao{color:var(--texto-suave)}
+#secFerramentas .card.em-breve.em-breve-admin,#paginaIA .card.em-breve.em-breve-admin{opacity:1;filter:none;cursor:pointer;background:var(--card)}
+#secFerramentas .card.em-breve.em-breve-admin:hover,#paginaIA .card.em-breve.em-breve-admin:hover{border-color:var(--vinho);transform:translateY(-2px);box-shadow:var(--sombra)}
+#secFerramentas .card.em-breve.em-breve-admin .card-acao,#paginaIA .card.em-breve.em-breve-admin .card-acao{color:var(--vinho)}
 .card-em-breve{display:inline-block;font-family:'Montserrat',sans-serif;font-weight:800;font-size:11px;letter-spacing:.16em;text-transform:uppercase;
   color:var(--vinho);border:1.5px solid rgba(99,19,37,.55);border-radius:999px;padding:3px 9px;background:#ffffff;white-space:nowrap}
 @media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]) #secFerramentas .card.em-breve{background:repeating-linear-gradient(135deg,transparent 0 14px,rgba(255,255,255,.05) 14px 28px),var(--card)}
-  :root:not([data-theme="light"]) #secFerramentas .card.em-breve.em-breve-admin{background:var(--card)}
+  :root:not([data-theme="light"]) #secFerramentas .card.em-breve,:root:not([data-theme="light"]) #paginaIA .card.em-breve{background:repeating-linear-gradient(135deg,transparent 0 14px,rgba(255,255,255,.05) 14px 28px),var(--card)}
+  :root:not([data-theme="light"]) #secFerramentas .card.em-breve.em-breve-admin,:root:not([data-theme="light"]) #paginaIA .card.em-breve.em-breve-admin{background:var(--card)}
   :root:not([data-theme="light"]) .card-em-breve{color:#f2d7dc;border-color:rgba(242,215,220,.6);background:transparent}
 }
-:root[data-theme="dark"] #secFerramentas .card.em-breve{background:repeating-linear-gradient(135deg,transparent 0 14px,rgba(255,255,255,.05) 14px 28px),var(--card)}
-:root[data-theme="dark"] #secFerramentas .card.em-breve.em-breve-admin{background:var(--card)}
+:root[data-theme="dark"] #secFerramentas .card.em-breve,:root[data-theme="dark"] #paginaIA .card.em-breve{background:repeating-linear-gradient(135deg,transparent 0 14px,rgba(255,255,255,.05) 14px 28px),var(--card)}
+:root[data-theme="dark"] #secFerramentas .card.em-breve.em-breve-admin,:root[data-theme="dark"] #paginaIA .card.em-breve.em-breve-admin{background:var(--card)}
 :root[data-theme="dark"] .card-em-breve{color:#f2d7dc;border-color:rgba(242,215,220,.6);background:transparent}
 
 /* ============================================================
@@ -1949,7 +1949,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 .ma-depois-mais{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13.5px;letter-spacing:.04em;color:var(--vinho);margin-left:6px;text-transform:none}
 
 /* ============================================================
-   v1.33 — GUIA DE ITBI (cartão 09 e página #paginaItbi)
+   v1.33 — GUIA DE ITBI (cartão 06 e página #paginaItbi)
    ------------------------------------------------------------
    Página de composição da guia de ITBI da Prefeitura de Itabaiana.
    Regra da casa mantida (astigmatismo do Tabelião): só vinho #631325,
@@ -2216,7 +2216,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 }
 
 /* ============================================================
-   v1.33 — PESQUISA / ACERVO (cartão 10 e página #paginaAcervo)
+   v1.33 — PESQUISA / ACERVO (cartão 07 e página #paginaAcervo)
    ------------------------------------------------------------
    Subpágina de pesquisa no índice do acervo de notas (planilha do Tabelião lida
    pelo servidor). Regra da casa mantida (astigmatismo do Tabelião): só vinho
@@ -2470,6 +2470,78 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 :root[data-theme="dark"] .num-info{color:var(--leitura-texto)}
 :root[data-theme="dark"] .num-info b{color:#f2d7dc}
 
+/* ==========================================================================
+   v1.34 — IA NOTARIAL (quadro único + subpágina dos assistentes)
+   Pedido do Tabelião: em vez de dez quadros no hub, um só para toda a IA da casa.
+   O quadro 03 · IA Notarial é o ÚNICO em cor própria (marinho-pastel #e9eef6 sobre
+   os brancos), com número, ícone, título e ação em marinho #202a3a — texto escuro
+   sobre fundo claro, sempre. O clique abre #paginaIA, que traz os quatro assistentes
+   (3.1 Extrator · 3.2 e-Analista · 3.3 Gerador de Minuta · 3.4 Redator) como
+   mini-quadros: mesma família visual dos do hub, só que mais enxutos.
+   ATENÇÃO (lição da v1.32): todo bloco @media abaixo está fechado — uma at-rule sem
+   fecho aninha o resto da folha e o Chrome ignora tudo daqui para baixo.
+   ========================================================================== */
+
+/* ---- 03 · o quadro da IA no hub (cor diferente dos demais) ---- */
+.card-ia{background:#e4eaf4;border-color:rgba(32,42,58,.35);box-shadow:0 4px 14px rgba(32,42,58,.10)}
+.card-ia h3{color:#202a3a}
+#secFerramentas .card.card-ia p{color:rgba(32,42,58,.82)}
+.card-ia .card-num{color:#202a3a}
+.card-ia .card-acao{color:#202a3a}
+.card-ia .card-ico{background:radial-gradient(120% 120% at 30% 25%,#ffffff 0%,#dbe4f1 100%);box-shadow:inset 0 0 0 1px rgba(32,42,58,.14)}
+.card-ia .card-ico svg{stroke:#202a3a}
+#secFerramentas .card.card-ia:hover{border-color:rgba(32,42,58,.78);box-shadow:0 12px 30px rgba(32,42,58,.20)}
+
+/* ---- página 03 · IA Notarial: grade dos mini-quadros ---- */
+#paginaIA .cards{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:13px;align-items:stretch}
+#paginaIA .card{min-height:206px;padding:15px 16px 14px;gap:9px}
+#paginaIA .card:hover{transform:translateY(-3px)}
+#paginaIA .card-topo{display:flex;align-items:center;justify-content:flex-start;gap:10px}
+#paginaIA .card h3{font-size:16px;line-height:1.32;color:var(--texto)}
+#paginaIA .card p{font-size:13.5px;line-height:1.6;color:rgba(32,42,58,.78)}
+#paginaIA .card .card-num{font-size:13px;letter-spacing:.1em;font-variant-numeric:tabular-nums}
+#paginaIA .card .card-acao{font-size:12px}
+#paginaIA .card .card-ico{width:40px;height:40px;border-radius:11px;flex:none}
+#paginaIA .card .card-ico svg{width:21px;height:21px}
+#paginaIA .card .chip-ia{margin-left:auto;background:linear-gradient(135deg,#7d1c31 0%,#631325 60%,#4a0c1d 100%);color:#ffffff;border:none;padding:4px 11px;border-radius:999px;font-size:10.5px;font-weight:800;letter-spacing:.16em;white-space:nowrap;box-shadow:0 4px 11px rgba(99,19,37,.32),inset 0 1px 2px rgba(255,255,255,.25)}
+#paginaIA .card .chip-ia::before{content:"✦ "}
+#paginaIA .card .card-em-breve{font-size:10.5px;padding:3px 8px}
+
+/* 2 colunas na tela média; 1 coluna no telefone (400 px) */
+@media (max-width:1240px){
+  #paginaIA .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (max-width:620px){
+  #paginaIA .cards{grid-template-columns:1fr}
+  #paginaIA .card{min-height:0}
+  #paginaIA .card h3{font-size:17px}
+  #paginaIA .card p{font-size:14.5px}
+}
+
+/* ---- tema escuro: variante discreta do quadro da IA e dos mini-quadros ---- */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .card-ia{background:rgba(199,210,226,.13);border-color:rgba(199,210,226,.42);box-shadow:0 4px 14px rgba(0,0,0,.28)}
+  :root:not([data-theme="light"]) .card-ia h3{color:#ffffff}
+  :root:not([data-theme="light"]) #secFerramentas .card.card-ia p{color:rgba(255,255,255,.80)}
+  :root:not([data-theme="light"]) .card-ia .card-num{color:#dfe7f2}
+  :root:not([data-theme="light"]) .card-ia .card-acao{color:#ffffff}
+  :root:not([data-theme="light"]) .card-ia .card-ico{background:radial-gradient(120% 120% at 30% 25%,rgba(199,210,226,.34) 0%,rgba(199,210,226,.17) 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.20)}
+  :root:not([data-theme="light"]) .card-ia .card-ico svg{stroke:#dfe7f2}
+  :root:not([data-theme="light"]) #secFerramentas .card.card-ia:hover{border-color:rgba(223,231,242,.85);box-shadow:0 12px 30px rgba(0,0,0,.40)}
+  :root:not([data-theme="light"]) #paginaIA .card p{color:rgba(255,255,255,.78)}
+  :root:not([data-theme="light"]) #paginaIA .card .card-num{color:#dfe7f2}
+}
+:root[data-theme="dark"] .card-ia{background:rgba(199,210,226,.13);border-color:rgba(199,210,226,.42);box-shadow:0 4px 14px rgba(0,0,0,.28)}
+:root[data-theme="dark"] .card-ia h3{color:#ffffff}
+:root[data-theme="dark"] #secFerramentas .card.card-ia p{color:rgba(255,255,255,.80)}
+:root[data-theme="dark"] .card-ia .card-num{color:#dfe7f2}
+:root[data-theme="dark"] .card-ia .card-acao{color:#ffffff}
+:root[data-theme="dark"] .card-ia .card-ico{background:radial-gradient(120% 120% at 30% 25%,rgba(199,210,226,.34) 0%,rgba(199,210,226,.17) 100%);box-shadow:inset 0 0 0 1px rgba(255,255,255,.20)}
+:root[data-theme="dark"] .card-ia .card-ico svg{stroke:#dfe7f2}
+:root[data-theme="dark"] #secFerramentas .card.card-ia:hover{border-color:rgba(223,231,242,.85);box-shadow:0 12px 30px rgba(0,0,0,.40)}
+:root[data-theme="dark"] #paginaIA .card p{color:rgba(255,255,255,.78)}
+:root[data-theme="dark"] #paginaIA .card .card-num{color:#dfe7f2}
+
 </style>
 </head>
 <body>
@@ -2666,51 +2738,37 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
             <p>Faixa de cobrança para imóveis rurais. Tabela Emdagro 2026/2027 — tarefas/hectares e Valor de Referência por Município.</p>
             <span class="card-acao">Abrir aqui →</span>
           </button>
-          <button class="card" id="cardExtrator" type="button">
-            <div class="card-topo"><span class="card-num">03</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 12h5M10 15h5M10 9h1.5"/></svg></span><span class="chip-ia">IA</span></div>
-            <h3>Extrator</h3>
-            <p>Só com o documento digitalizado: suba a foto ou o PDF e escolha o botão — <b>qualificação</b> das partes (RG, CNH, certidões) ou <b>descrição do imóvel</b> pela matrícula.</p>
-            <span class="card-acao">Usar aqui →</span>
-          </button>
-          <button class="card" id="cardAnalisador" type="button">
-            <div class="card-topo"><span class="card-num">04</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M15.5 15.5 20 20"/><path d="M8.5 11h5M11 8.5v5"/></svg></span><span class="chip-ia">IA</span></div>
-            <h3>e-Analista</h3>
-            <p>Envie a foto, o print ou o PDF da certidão e receba o extrato jurídico com a descrição do imóvel pronta para colar.</p>
-            <span class="card-acao">Usar aqui →</span>
-          </button>
-          <button class="card" id="cardMinutas" type="button">
-            <div class="card-topo"><span class="card-num">05</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L9 18l-4 1z"/><path d="M14 7l3 3"/></svg></span><span class="chip-ia">IA</span><span class="card-em-breve" id="minSeloEmBreve" hidden>Em breve</span></div>
-            <h3>Gerador de Minuta</h3>
-            <p>Cinco atos — procuração, união estável, dissolução de união estável, divórcio sem partilha e emancipação. A escrevente informa os fatos; o Gerador decide a variante correta, bloqueia o que não pode ser lavrado e devolve a qualificação ao Tabelião quando a hipótese sai do trilho.</p>
-            <span class="card-acao">Abrir aqui →</span>
+          <!-- v1.34 — QUADRO ÚNICO DA IA. Os quatro assistentes (Extrator, e-Analista,
+               Gerador de Minuta e Redator) saíram do quadro geral e passaram a viver
+               dentro de #paginaIA, em mini-quadros 3.1–3.4. Este cartão é o único em
+               cor própria (marinho-pastel), para se distinguir dos brancos. -->
+          <button class="card card-ia" id="cardIA" type="button">
+            <div class="card-topo"><span class="card-num">03</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M11 3.2l1.5 3.9 3.9 1.5-3.9 1.5L11 14l-1.5-3.9L5.6 8.6l3.9-1.5z"/><path d="M18.3 13.6l.8 2.1 2.1.8-2.1.8-.8 2.1-.8-2.1-2.1-.8 2.1-.8z"/><path d="M4.5 17h7M4.5 20h4.5"/></svg></span><span class="chip-ia">IA</span></div>
+            <h3>IA-Not</h3>
+            <p><b>IA Notarial</b> — os quatro assistentes de IA da serventia (<b>Extrator</b>, <b>e-Analista</b>, <b>Gerador de Minuta</b> e <b>Redator</b>) num só lugar.</p>
+            <span class="card-acao">Abrir os assistentes →</span>
           </button>
           <button class="card" id="cardClausulas" type="button">
-            <div class="card-topo"><span class="card-num">06</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h10v18l-5-3.5L7 21z"/></svg></span><span class="chip-ia chip-guia">Guia</span></div>
+            <div class="card-topo"><span class="card-num">04</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h10v18l-5-3.5L7 21z"/></svg></span><span class="chip-ia chip-guia">Guia</span></div>
             <h3>Cláusulas CN2O</h3>
             <p>Blocos prontos do Guia de Redação, por tema-tronco — um clique copia a cláusula para colar na minuta.</p>
             <span class="card-acao">Abrir cláusulas →</span>
           </button>
 
           <button class="card" id="cardConsulta" type="button">
-            <div class="card-topo"><span class="card-num">07</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="5.5"/><path d="M14.6 14.6 20 20"/><path d="M8 9.2h5M8 11.8h3.2"/></svg></span><span class="chip-ia chip-trello">Trello</span></div>
+            <div class="card-topo"><span class="card-num">05</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="5.5"/><path d="M14.6 14.6 20 20"/><path d="M8 9.2h5M8 11.8h3.2"/></svg></span><span class="chip-ia chip-trello">Trello</span></div>
             <h3>T-Consulta</h3>
             <p>Digite o número do protocolo de entrada e receba o extrato do andamento: partes, tipo de ato, fases percorridas e com quem a escritura está agora.</p>
             <span class="card-acao">Consultar aqui →</span>
           </button>
-          <button class="card" id="cardRedator" type="button">
-            <div class="card-topo"><span class="card-num">08</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16v11H8l-4 3z"/><path d="M8 10h8M8 13h5"/></svg></span><span class="chip-ia">IA</span></div>
-            <h3>Redator CN2O</h3>
-            <p>Redator oficial das comunicações da serventia: e-mails a partes e advogados, ofícios a órgãos públicos, mensagens de WhatsApp, avisos de pendência e comunicados à equipe. Escolha o tipo, diga o assunto — o texto sai pronto para copiar.</p>
-            <span class="card-acao">Escrever aqui →</span>
-          </button>
           <button class="card" id="cardItbi" type="button">
-            <div class="card-topo"><span class="card-num">09</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v3h3"/><path d="M9 11h6M9 14h6M9 17h3.5"/></svg></span><span class="chip-ia chip-pdf">PDF</span></div>
+            <div class="card-topo"><span class="card-num">06</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v3h3"/><path d="M9 11h6M9 14h6M9 17h3.5"/></svg></span><span class="chip-ia chip-pdf">PDF</span></div>
             <h3>Guia de ITBI</h3>
             <p>Gera a guia de ITBI da Prefeitura de Itabaiana no layout oficial — com a profissão das partes e o botão “não consta” em cada campo. Sai em PDF, numa página A4, pronta para imprimir e assinar.</p>
             <span class="card-acao">Preencher aqui →</span>
           </button>
           <button class="card" id="cardAcervo" type="button">
-            <div class="card-topo"><span class="card-num">10</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4.5h3.2v15H4zM8.6 4.5h3v15h-3z"/><path d="M13.6 5.2 16.5 4.6l1.6 7.3"/><circle cx="16.4" cy="16.2" r="3.4"/><path d="m18.9 18.7 2.4 2.4"/></svg></span><span class="chip-ia chip-acervo">Acervo</span></div>
+            <div class="card-topo"><span class="card-num">07</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4.5h3.2v15H4zM8.6 4.5h3v15h-3z"/><path d="M13.6 5.2 16.5 4.6l1.6 7.3"/><circle cx="16.4" cy="16.2" r="3.4"/><path d="m18.9 18.7 2.4 2.4"/></svg></span><span class="chip-ia chip-acervo">Acervo</span></div>
             <h3>Pesquisa / Acervo</h3>
             <p>Pesquisa no <b>acervo da serventia</b> — os dois: o <b>antigo do 1º Ofício</b> e o do <b>2º Ofício</b>. Acha o <b>livro</b> (onde está guardado, se está digitalizado) e o <b>ato</b> (folhas, data, partes) e abre o arquivo no Drive.</p>
             <span class="card-acao">Pesquisar →</span>
@@ -2786,6 +2844,52 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
       <div class="moldura" id="molduraEmbutida"></div>
     </div>
 
+    <!-- ===== VIEW: 03 · IA NOTARIAL (v1.34) =====
+         Pedido do Tabelião: um quadro só no hub para toda a IA da casa. Este é o "hall"
+         dos assistentes: os quatro cartões que antes ficavam soltos no quadro geral
+         (03 Extrator, 04 e-Analista, 05 Gerador de Minuta e 08 Redator) vivem aqui como
+         mini-quadros 3.1 a 3.4 — MESMOS ids, mesmos ícones, mesmas descrições, para que
+         pintarCardMinutas() e tudo o mais continuem funcionando onde o cartão estiver.
+         O "← Voltar" de cada ferramenta aberta daqui volta para esta página (VOLTAR_PARA
+         no app.js); pelos atalhos #extrator, #analista, #minutas e #redator volta ao hub. -->
+    <div id="paginaIA" hidden style="display:flex;flex-direction:column;gap:14px">
+      <button class="voltar" data-voltar type="button">← Voltar ao hub</button>
+      <div class="ferramenta-cab">
+        <span class="num-grande">03</span>
+        <div style="flex:1;min-width:240px">
+          <h2>IA-Not</h2>
+          <p class="desc"><b>IA-Not</b> é a <b>IA Notarial</b> do CN2O: os <b>quatro assistentes de inteligência artificial</b> da serventia, reunidos num só lugar — o <b>Extrator</b> (qualificação das partes e descrição do imóvel), o <b>e-Analista</b> (extrato jurídico da matrícula), o <b>Gerador de Minuta</b> (cinco atos, entrevista dirigida) e o <b>Redator CN2O</b> (as comunicações da casa). Escolha o assistente abaixo — ao terminar, o botão <b>Voltar</b> traz você de volta a esta página.</p>
+        </div>
+        <span class="chip-ia">IA</span>
+      </div>
+      <div class="cards cards-ia">
+        <button class="card" id="cardExtrator" type="button">
+          <div class="card-topo"><span class="card-num">3.1</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M10 12h5M10 15h5M10 9h1.5"/></svg></span><span class="chip-ia">IA</span></div>
+          <h3>Extrator</h3>
+          <p>Só com o documento digitalizado: suba a foto ou o PDF e escolha o botão — <b>qualificação</b> das partes (RG, CNH, certidões) ou <b>descrição do imóvel</b> pela matrícula.</p>
+          <span class="card-acao">Usar aqui →</span>
+        </button>
+        <button class="card" id="cardAnalisador" type="button">
+          <div class="card-topo"><span class="card-num">3.2</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6"/><path d="M15.5 15.5 20 20"/><path d="M8.5 11h5M11 8.5v5"/></svg></span><span class="chip-ia">IA</span></div>
+          <h3>e-Analista</h3>
+          <p>Envie a foto, o print ou o PDF da certidão e receba o extrato jurídico com a descrição do imóvel pronta para colar.</p>
+          <span class="card-acao">Usar aqui →</span>
+        </button>
+        <button class="card" id="cardMinutas" type="button">
+          <div class="card-topo"><span class="card-num">3.3</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M5 19l1-4L16.5 4.5a2.1 2.1 0 0 1 3 3L9 18l-4 1z"/><path d="M14 7l3 3"/></svg></span><span class="chip-ia">IA</span><span class="card-em-breve" id="minSeloEmBreve" hidden>Em breve</span></div>
+          <h3>Gerador de Minuta</h3>
+          <p>Cinco atos — procuração, união estável, dissolução de união estável, divórcio sem partilha e emancipação. A escrevente informa os fatos; o Gerador decide a variante correta, bloqueia o que não pode ser lavrado e devolve a qualificação ao Tabelião quando a hipótese sai do trilho.</p>
+          <span class="card-acao">Abrir aqui →</span>
+        </button>
+        <button class="card" id="cardRedator" type="button">
+          <div class="card-topo"><span class="card-num">3.4</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 6h16v11H8l-4 3z"/><path d="M8 10h8M8 13h5"/></svg></span><span class="chip-ia">IA</span></div>
+          <h3>Redator CN2O</h3>
+          <p>Redator oficial das comunicações da serventia: e-mails a partes e advogados, ofícios a órgãos públicos, mensagens de WhatsApp, avisos de pendência e comunicados à equipe. Escolha o tipo, diga o assunto — o texto sai pronto para copiar.</p>
+          <span class="card-acao">Escrever aqui →</span>
+        </button>
+      </div>
+    </div>
+
     <!-- ===== VIEW: GERADOR DE MINUTA (v1.28 — entrevista dirigida por ato sobre o
          Prompt-Mestre BV 4.0 + camada de integração) =====
          A escrevente informa FATOS e a vontade das partes; nenhum botão se chama
@@ -2799,7 +2903,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
     <div id="paginaMinutas" hidden style="display:flex;flex-direction:column;gap:14px">
       <button class="voltar" data-voltar type="button">← Voltar ao hub</button>
       <div class="ferramenta-cab">
-        <span class="num-grande">05</span>
+        <span class="num-grande">3.3</span>
         <div style="flex:1;min-width:240px">
           <h2>Gerador de Minuta</h2>
           <p class="desc">Esta ferramenta serve <b>exclusivamente</b> a cinco atos: <b>procuração</b>, <b>união estável</b>, <b>dissolução de união estável</b>, <b>divórcio sem partilha</b> e <b>emancipação</b>. A escrevente <b>não escolhe modelo</b> — informa os fatos e a vontade das partes; o Gerador decide a variante correta, bloqueia o que não pode ser lavrado e devolve a qualificação ao Tabelião quando a hipótese sai do trilho. A resposta começa sempre pela <b>DECISÃO DO ROTEADOR</b>, que diz em que estado a minuta saiu: <b>pronta</b>, <b>preliminar</b> (com pendências, não apta à assinatura), <b>bloqueada</b>, <b>decisão do Tabelião</b> ou <b>fora do escopo</b>.</p>
@@ -3817,7 +3921,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
     <div id="paginaConsulta" hidden style="display:flex;flex-direction:column;gap:14px">
       <button class="voltar" data-voltar type="button">← Voltar ao hub</button>
       <div class="ferramenta-cab">
-        <span class="num-grande">07</span>
+        <span class="num-grande">05</span>
         <div style="flex:1;min-width:240px">
           <h2>T-Consulta</h2>
           <p class="desc">Digite o <b>número do protocolo de entrada</b> do título e receba o extrato do andamento: partes, tipo de ato, data de entrada, fases já percorridas e <b>com quem a escritura está agora</b> — com o atalho para abrir o cartão no Trello.</p>
@@ -3840,7 +3944,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
     <div id="paginaExtrator" hidden style="display:flex;flex-direction:column;gap:14px">
       <button class="voltar" data-voltar type="button">← Voltar ao hub</button>
       <div class="ferramenta-cab">
-        <span class="num-grande">03</span>
+        <span class="num-grande">3.1</span>
         <div style="flex:1;min-width:240px">
           <h2>Extrator</h2>
           <p class="desc">Trabalha <b>somente com documento digitalizado</b> — foto, print (Ctrl+V) ou PDF. Suba o arquivo e escolha a função: <b>Extrair qualificação</b> lê RG, CNH, CPF e certidões de nascimento, casamento ou óbito e monta a qualificação no padrão do CN2O; <b>Extrair descrição do imóvel</b> lê a matrícula ou a certidão de inteiro teor e devolve a descrição vigente, ipsis litteris. Nada é inventado: dado ausente sai como [FALTA: …].</p>
@@ -3891,7 +3995,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
     <div id="paginaRedator" hidden style="display:flex;flex-direction:column;gap:14px">
       <button class="voltar" data-voltar type="button">← Voltar ao hub</button>
       <div class="ferramenta-cab">
-        <span class="num-grande">08</span>
+        <span class="num-grande">3.4</span>
         <div style="flex:1;min-width:240px">
           <h2>Redator CN2O</h2>
           <p class="desc">Redator oficial das comunicações da serventia. Escolha o <b>tipo</b> — cada um tem a sua formalidade —, diga <b>para quem</b> e <b>o que precisa ser dito</b>, e receba o texto pronto para copiar. Informando o <b>nº do protocolo</b>, o Redator já sabe o ato, as partes e o que falta no dossiê. Nada é inventado: dado que falta sai como [FALTA: …].</p>
@@ -4007,11 +4111,11 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
       </div>
     </div>
 
-    <!-- ===== VIEW: 09 · GUIA DE ITBI (v1.33) ===== -->
+    <!-- ===== VIEW: 06 · GUIA DE ITBI (v1.33; renumerado na v1.34) ===== -->
     <div id="paginaItbi" hidden style="display:flex;flex-direction:column;gap:14px">
       <button class="voltar" data-voltar type="button">← Voltar ao hub</button>
       <div class="ferramenta-cab">
-        <span class="num-grande">09</span>
+        <span class="num-grande">06</span>
         <div style="flex:1;min-width:240px">
           <h2>Guia de ITBI</h2>
           <p class="desc">Monta a <b>guia de ITBI da Prefeitura Municipal de Itabaiana-SE</b> no layout oficial. Preencha os campos — cada um traz ao lado o botão <b>“não consta”</b> para o que não estiver nos documentos — e clique em <b>Gerar guia (PDF)</b>: a guia abre numa aba nova, em <b>uma página A4</b>, pronta para imprimir e assinar. <b>Nada é enviado ao servidor</b>: os dados só vivem nesta tela e somem quando você sai.</p>
@@ -4189,11 +4293,11 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
       </div>
     </div>
 
-    <!-- ===== VIEW: 10 · PESQUISA / ACERVO (v1.33) ===== -->
+    <!-- ===== VIEW: 07 · PESQUISA / ACERVO (v1.33; renumerado na v1.34) ===== -->
     <div id="paginaAcervo" hidden style="display:flex;flex-direction:column;gap:14px">
       <button class="voltar" data-voltar type="button">← Voltar ao hub</button>
       <div class="ferramenta-cab">
-        <span class="num-grande">10</span>
+        <span class="num-grande">07</span>
         <div style="flex:1;min-width:240px">
           <h2>Pesquisa / Acervo</h2>
           <p class="desc">Pesquisa no <b>acervo da serventia</b> — os <b>livros</b> (onde cada um está guardado, se já foi digitalizado, o que falta conferir) e os <b>atos lavrados</b> (livro, folhas, data, partes e o arquivo digital). Escolha primeiro <b>qual acervo</b>, embaixo; depois procure pelo número do livro, pelo tipo de livro, pelas folhas, pelo nome das partes, pela data ou pelo tipo de ato — combine quantos campos quiser ou use só um.</p>
@@ -4294,7 +4398,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
     <div id="paginaAnalisador" hidden style="display:flex;flex-direction:column;gap:14px">
       <button class="voltar" data-voltar type="button">← Voltar ao hub</button>
       <div class="ferramenta-cab">
-        <span class="num-grande">04</span>
+        <span class="num-grande">3.2</span>
         <div style="flex:1;min-width:240px">
           <h2>e-Analista</h2>
           <p class="desc">Envie fotos ou o PDF da certidão de inteiro teor — ou cole um print direto com Ctrl+V. O Analista lê a abertura e todos os R./AV. em ordem, cruza o que está vigente com o que foi cancelado e entrega o extrato em 10 seções, com a descrição do imóvel destacada para copiar e colar. Parecer preliminar — sujeito à conferência do Tabelião.</p>
@@ -4352,7 +4456,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
     </div>
     <ul class="lista-links lista-cnj">
       <li class="link-item"><span class="ajuda-linha"><b>Esqueceu a senha?</b> Peça ao Tabelião para zerá-la — no próximo acesso você cria uma nova, válida também para o e-Protocolo.</span></li>
-      <li class="link-item"><span class="ajuda-linha"><b>Atalhos:</b> #protocolo, #calculadora, #extrator, #analista e #agenda abrem a ferramenta direto (ex.: cn2o-hub.netlify.app/#protocolo).</span></li>
+      <li class="link-item"><span class="ajuda-linha"><b>Atalhos:</b> #protocolo, #calculadora, #ia, #extrator, #analista e #agenda abrem a ferramenta direto (ex.: cn2o-hub.netlify.app/#protocolo). O quadro <b>03 · IA-Not</b> (IA Notarial) reúne os quatro assistentes de IA.</span></li>
       <li class="link-item"><span class="ajuda-linha"><b>Instalar como aplicativo:</b> no Chrome, menu ⋮ → “Instalar Hub CN2O” — vira atalho na área de trabalho.</span></li>
       <li class="link-item"><span class="ajuda-linha"><b>Dúvidas e melhorias:</b> fale com o Tabelião — os pedidos entram na fila de versões do Hub.</span></li>
     </ul>
@@ -4751,7 +4855,7 @@ function mostrarApp() {
   fraseDoDia();
   el('avatarIni').textContent = (SESSAO.nome || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(function (n) { return n.charAt(0).toUpperCase(); }).join('') || '?';
   el('btnEditarMural').hidden = !SESSAO.admin;
-  pintarCardMinutas();   // v1.31 — cartão 05 "Em breve" (aberto só ao Tabelião)
+  pintarCardMinutas();   // v1.31 — mini-quadro 3.3 "Em breve" (aberto só ao Tabelião)
   el('telaLogin').hidden = true;
   el('app').hidden = false;
   abrirPorEndereco();
@@ -4771,22 +4875,51 @@ function primeiroNome(n) {
 /* ============================================================
    NAVEGAÇÃO (com botão Voltar do navegador e atalhos #protocolo etc.)
 ============================================================ */
-const PAGINAS = ['paginaHub', 'paginaExtrator', 'paginaAnalisador', 'paginaMinutas', 'paginaConsulta', 'paginaRedator', 'paginaItbi', 'paginaAcervo', 'paginaEmbutida'];
-const ROTAS = { extrator: 'paginaExtrator', analista: 'paginaAnalisador', minutas: 'paginaMinutas', consulta: 'paginaConsulta', redator: 'paginaRedator', itbi: 'paginaItbi', acervo: 'paginaAcervo', protocolo: 'protocolo', calculadora: 'calculadora', agenda: 'agenda' };
+const PAGINAS = ['paginaHub', 'paginaIA', 'paginaExtrator', 'paginaAnalisador', 'paginaMinutas', 'paginaConsulta', 'paginaRedator', 'paginaItbi', 'paginaAcervo', 'paginaEmbutida'];
+const ROTAS = { ia: 'paginaIA', extrator: 'paginaExtrator', analista: 'paginaAnalisador', minutas: 'paginaMinutas', consulta: 'paginaConsulta', redator: 'paginaRedator', itbi: 'paginaItbi', acervo: 'paginaAcervo', protocolo: 'protocolo', calculadora: 'calculadora', agenda: 'agenda' };
+/* ============================================================
+   v1.34 — IA NOTARIAL (quadro 03): as quatro ferramentas de IA saíram do quadro geral
+   e passaram a morar numa subpágina (#paginaIA, rota #ia). Quem entra numa delas PELA
+   subpágina volta para a subpágina; quem entra pelo atalho direto (#extrator, #analista,
+   #minutas, #redator) volta ao hub, como sempre. VOLTAR_PARA guarda esse destino.
+============================================================ */
+const PAGINAS_IA = ['paginaExtrator', 'paginaAnalisador', 'paginaMinutas', 'paginaRedator'];
+const VOLTAR_HUB = '← Voltar ao hub';
+const VOLTAR_IA = '← Voltar aos assistentes';
+let VOLTAR_PARA = '';
+function paginaAtual() {
+  for (let i = 0; i < PAGINAS.length; i++) { const p = el(PAGINAS[i]); if (p && !p.hidden) return PAGINAS[i]; }
+  return '';
+}
+function voltarPelaIA(id) { return VOLTAR_PARA === 'paginaIA' && PAGINAS_IA.indexOf(id) >= 0; }
+function pintarVoltar(id) {
+  const alvo = el(id);
+  if (!alvo) return;
+  const rotulo = voltarPelaIA(id) ? VOLTAR_IA : VOLTAR_HUB;
+  alvo.querySelectorAll('[data-voltar]').forEach(function (b) { if (b.textContent.indexOf('Voltar') >= 0) b.textContent = rotulo; });
+}
 function mostrarPagina(id, semHistorico, rota) {
   PAGINAS.forEach(function (p) { el(p).hidden = (p !== id); });
   el('wrapPrincipal').classList.toggle('largo', id === 'paginaEmbutida');
+  if (!voltarPelaIA(id)) VOLTAR_PARA = '';
+  pintarVoltar(id);
   window.scrollTo({ top: 0 });
   if (!semHistorico) {
     const hash = id === 'paginaHub' ? '' : '#' + (rota || '');
     try { history.pushState({ pagina: id, rota: rota || '' }, '', location.pathname + location.search + hash); } catch (e) {}
   }
 }
+/* abre uma ferramenta a partir do quadro 03 · IA Notarial (o Voltar dela volta para lá) */
+function abrirDaIA(pagina, rota, depois) {
+  VOLTAR_PARA = 'paginaIA';
+  mostrarPagina(pagina, false, rota);
+  if (typeof depois === 'function') depois();
+}
 /* ============================================================
    v1.31 — GERADOR DE MINUTA "EM BREVE" (decisão do Tabelião, 15/09/2026)
    O Hub entra em uso com a equipe em 17/09, mas a inauguração do Gerador de Minuta fica
    adiada até o Tabelião terminar a curadoria das variáveis (união estável, divórcio).
-   Tudo o que foi construído continua no código; só a ENTRADA é fechada: o cartão 05 sai
+   Tudo o que foi construído continua no código; só a ENTRADA é fechada: o cartão sai
    sombreado com o selo EM BREVE e os atalhos #minutas e #minuta=ID voltam ao hub.
    O Tabelião (admin) continua entrando, para testar e curar. Para liberar à equipe:
    GERADOR_LIBERADO = true (uma linha) e publicar.
@@ -4809,6 +4942,7 @@ function avisarGeradorEmBreve() {
   toast('Gerador de Minuta: em breve — o Tabelião está concluindo a curadoria das minutas.');
 }
 function abrirRota(rota, semHistorico) {
+  VOLTAR_PARA = '';   // v1.34 — atalho pelo endereço (#extrator, #minutas…) volta ao hub
   if ((rota === 'minutas' || (rota && rota.indexOf('minuta=') === 0)) && !geradorDisponivel()) {
     avisarGeradorEmBreve();
     mostrarPagina('paginaHub', semHistorico);
@@ -4835,7 +4969,7 @@ function abrirRota(rota, semHistorico) {
     return;
   }
   if (rota === 'protocolo' || rota === 'calculadora' || rota === 'agenda') { abrirEmbutida(rota, semHistorico); return; }
-  // v1.33 — #acervo=antigo1 / #acervo=cn2o abre o quadro 10 já no submódulo pedido
+  // v1.33 — #acervo=antigo1 / #acervo=cn2o abre o quadro 07 já no submódulo pedido
   // (mesma ideia do #minuta=ID do Gerador). #acervo sozinho abre o último escolhido.
   if (rota && rota.indexOf('acervo=') === 0) {
     mostrarPagina('paginaAcervo', semHistorico, rota);
@@ -4845,7 +4979,7 @@ function abrirRota(rota, semHistorico) {
   if (ROTAS[rota]) {
     mostrarPagina(ROTAS[rota], semHistorico, rota);
     // v1.33 — o atalho #acervo (e o Voltar do navegador) também consulta qual planilha
-    // mostrar e se ela já foi vinculada, como faz o clique no cartão 10.
+    // mostrar e se ela já foi vinculada, como faz o clique no cartão 07.
     if (rota === 'acervo' && typeof acervoAoAbrir === 'function') acervoAoAbrir();
     return;
   }
@@ -4890,23 +5024,25 @@ function abrirEmbutida(chave, semHistorico) {
   mostrarPagina('paginaEmbutida', semHistorico, chave);
 }
 function aplicarLinks() {
+  // v1.34 — mini-quadro 3.3, dentro de #paginaIA
   el('cardMinutas').addEventListener('click', function () {
     if (!geradorDisponivel()) { avisarGeradorEmBreve(); return; }   // v1.31 — em breve
-    mostrarPagina('paginaMinutas', false, 'minutas');
+    abrirDaIA('paginaMinutas', 'minutas');
   });
   el('cardConsulta').addEventListener('click', function () {
     mostrarPagina('paginaConsulta', false, 'consulta');
     setTimeout(function () { try { el('conNumero').focus(); } catch (e) {} }, 80);
   });
-  el('cardRedator').addEventListener('click', function () {
-    mostrarPagina('paginaRedator', false, 'redator');
-    setTimeout(function () { try { el('redDest').focus(); } catch (e) {} }, 80);
+  el('cardRedator').addEventListener('click', function () {   // v1.34 — mini-quadro 3.4
+    abrirDaIA('paginaRedator', 'redator', function () {
+      setTimeout(function () { try { el('redDest').focus(); } catch (e) {} }, 80);
+    });
   });
   el('cardItbi').addEventListener('click', function () {
     mostrarPagina('paginaItbi', false, 'itbi');
     setTimeout(function () { try { el('paginaItbi').querySelector('input, textarea').focus(); } catch (e) {} }, 80);
   });
-  el('cardAcervo').addEventListener('click', function () {   // v1.33 — 10 · Pesquisa / Acervo
+  el('cardAcervo').addEventListener('click', function () {   // 07 · Pesquisa / Acervo
     mostrarPagina('paginaAcervo', false, 'acervo');
     if (typeof acervoAoAbrir === 'function') acervoAoAbrir();
     setTimeout(function () { try { el('acvLivro').focus(); } catch (e) {} }, 80);
@@ -7291,8 +7427,9 @@ el('btnSair').addEventListener('click', sair);
 el('btnTema').addEventListener('click', alternarTema);
 el('cardProtocolo').addEventListener('click', function () { abrirEmbutida('protocolo'); });
 el('cardCalculadora').addEventListener('click', function () { abrirEmbutida('calculadora'); });
-el('cardExtrator').addEventListener('click', function () { mostrarPagina('paginaExtrator', false, 'extrator'); });
-el('cardAnalisador').addEventListener('click', function () { mostrarPagina('paginaAnalisador', false, 'analista'); });
+el('cardIA').addEventListener('click', function () { mostrarPagina('paginaIA', false, 'ia'); });   // v1.34 — quadro 03
+el('cardExtrator').addEventListener('click', function () { abrirDaIA('paginaExtrator', 'extrator'); });     // 3.1
+el('cardAnalisador').addEventListener('click', function () { abrirDaIA('paginaAnalisador', 'analista'); }); // 3.2
 el('cardClausulas').addEventListener('click', abrirClausulas);
 el('fecharClausulas').addEventListener('click', fecharTelaClausulas);
 el('veuClausulas').addEventListener('click', function (ev) { if (ev.target === el('veuClausulas')) fecharTelaClausulas(); });
@@ -7305,7 +7442,13 @@ el('btnCopiarDesc').addEventListener('click', function () {
   if (DESC_ATUAL) copiar(DESC_ATUAL).then(function () { toast('✓ Descrição copiada — cole na escritura'); });
 });
 document.querySelectorAll('[data-voltar]').forEach(function (b) {
-  b.addEventListener('click', function () { mostrarPagina('paginaHub'); });
+  b.addEventListener('click', function () {
+    // v1.34 — quem entrou na ferramenta pelo quadro 03 · IA Notarial volta para lá;
+    // quem veio do atalho direto (#extrator, #analista, #minutas, #redator) volta ao hub.
+    // O Voltar da própria página IA sempre volta ao hub.
+    if (voltarPelaIA(paginaAtual())) { VOLTAR_PARA = ''; mostrarPagina('paginaIA', false, 'ia'); return; }
+    mostrarPagina('paginaHub');
+  });
 });
 
 montarFerramenta({
@@ -7338,7 +7481,7 @@ montarFerramenta({
 });
 
 /* ============================================================
-   08 · REDATOR CN2O — o texto que a serventia envia
+   3.4 · REDATOR CN2O — o texto que a serventia envia
    Sete tipos, sete formalidades. O tipo escolhido decide quais campos aparecem
    (não se pede cargo e órgão para mandar um WhatsApp), qual é o rótulo do botão
    e o que o servidor acrescenta. A escrevente nunca digita quem assina: isso
@@ -7535,7 +7678,7 @@ montarFerramenta({
 })();
 
 /* ============================================================
-   05 · GERADOR DE MINUTA (v1.28) — entrevista dirigida por ato sobre o
+   3.3 · GERADOR DE MINUTA (v1.28) — entrevista dirigida por ato sobre o
    Prompt-Mestre BV 4.0 + camada de integração (docs/hub-camada-integracao.txt)
    Princípio (docs/GERADOR-MINUTA-SPEC.md §0): a escrevente informa FATOS e a
    vontade das partes; o Prompt-Mestre escolhe o especialista, a rota, os
@@ -9319,7 +9462,7 @@ restaurarSessao();
 })();
 
 /* ============================================================
-   10 · PESQUISA / ACERVO (v1.33) — os dois acervos da serventia
+   07 · PESQUISA / ACERVO (v1.33) — os dois acervos da serventia
    ------------------------------------------------------------
    Pedido do Tabelião: o quadro abre uma subpágina de pesquisa com DOIS SUBMÓDULOS,
    um para cada planilha do Google Sheets dele (cópias do modelo "PAINEL DO ACERVO
@@ -9549,7 +9692,7 @@ restaurarSessao();
       pintarFonte();
     });
   }
-  // Chamada pelo clique no cartão 10 e pelos atalhos #acervo / #acervo=<fonte>.
+  // Chamada pelo clique no cartão 07 e pelos atalhos #acervo / #acervo=<fonte>.
   window.acervoAoAbrir = function (fonte) {
     const nova = fonte ? fonteValida(fonte) : fonteLembrada();
     if (nova !== ESTADO.fonte) { ESTADO.fonte = nova; zerarResultado(); }
@@ -10139,7 +10282,7 @@ restaurarSessao();
 })(typeof window !== 'undefined' ? window : this);
 
 /* ============================================================
-   09 · GUIA DE ITBI  ·  v1.33
+   06 · GUIA DE ITBI  ·  v1.33
    ------------------------------------------------------------
    Gerador da guia de ITBI da Prefeitura Municipal de Itabaiana-SE.
    Página interna de composição: o escrevente preenche, aperta o
