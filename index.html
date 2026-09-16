@@ -2444,6 +2444,32 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
   .acv-grupo-tit{font-size:18px}
 }
 
+/* ==========================================================================
+   v1.34 — NUMERAÇÃO DO E-PROTOCOLO (aba do editor, só o Tabelião)
+   O próximo número em destaque (caixa de decisão: ≥ 18 px, texto escuro sobre
+   claro), a informação do maior protocolo gravado e o formulário de ajuste.
+   ========================================================================== */
+.num-quadro{display:flex;flex-wrap:wrap;align-items:center;gap:14px 22px;margin:4px 0 6px;padding:14px 18px;border:1.5px solid rgba(99,19,37,.28);border-radius:12px;background:#fbf5f6}
+.num-atual{display:flex;flex-direction:column;gap:2px;min-width:180px}
+.num-atual span{font-size:13.5px;letter-spacing:.06em;text-transform:uppercase;color:rgba(32,42,58,.78);font-weight:700}
+.num-atual b{font-size:34px;line-height:1.1;color:var(--vinho);font-weight:900;font-variant-numeric:tabular-nums}
+.num-info{flex:1 1 240px;font-size:16px;line-height:1.45;color:#202a3a}
+.num-info b{color:var(--vinho)}
+#edNumNovo{max-width:150px;flex:0 1 150px;font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+#edNumAplicar.on{background:#202a3a}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .num-quadro{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.3)}
+  :root:not([data-theme="light"]) .num-atual span{color:rgba(240,243,248,.78)}
+  :root:not([data-theme="light"]) .num-atual b{color:#f2d7dc}
+  :root:not([data-theme="light"]) .num-info{color:var(--leitura-texto)}
+  :root:not([data-theme="light"]) .num-info b{color:#f2d7dc}
+}
+:root[data-theme="dark"] .num-quadro{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.3)}
+:root[data-theme="dark"] .num-atual span{color:rgba(240,243,248,.78)}
+:root[data-theme="dark"] .num-atual b{color:#f2d7dc}
+:root[data-theme="dark"] .num-info{color:var(--leitura-texto)}
+:root[data-theme="dark"] .num-info b{color:#f2d7dc}
+
 </style>
 </head>
 <body>
@@ -6418,7 +6444,7 @@ function htmlEditorMural() {
     '<p class="sub-data">Monte os avisos com a formatação que quiser e publique — a mudança aparece para toda a equipe na hora.</p>' +
     '<p class="sub-data">Frases do Dia: <a href="' + FRASES_EDITAR_URL + '" target="_blank" rel="noopener">editar a planilha no Drive</a> · escreva HOJE na coluna \u201cfixar\u201d para todos verem a mesma frase.</p>' +
     '<div class="ed-abas">' +
-      ['avisos:Avisos', 'aniversariantes:Aniversariantes', 'metas:Metas', 'equipe:Equipe', 'historico:Histórico', 'consumo:Consumo de IA'].map(function (x) {
+      ['avisos:Avisos', 'aniversariantes:Aniversariantes', 'metas:Metas', 'equipe:Equipe', 'numeracao:Numeração', 'historico:Histórico', 'consumo:Consumo de IA'].map(function (x) {
         const p = x.split(':');
         return '<button type="button" class="ed-aba" data-aba="' + p[0] + '">' + p[1] + '</button>';
       }).join('') +
@@ -6449,6 +6475,7 @@ function pintarAba() {
   else if (ED.aba === 'aniversariantes') pintarAbaAniver(painel);
   else if (ED.aba === 'metas') pintarAbaMetas(painel);
   else if (ED.aba === 'equipe') pintarAbaEquipe(painel);
+  else if (ED.aba === 'numeracao') pintarAbaNumeracao(painel);
   else if (ED.aba === 'historico') pintarAbaHistorico(painel);
   else if (ED.aba === 'consumo') pintarAbaConsumo(painel);
 }
@@ -6688,6 +6715,62 @@ function pintarAbaEquipe(painel) {
       });
     });
   }).catch(function (e) { if (painel.isConnected) painel.innerHTML = '<p class="ed-vazio">Não consegui ler a equipe (' + esc(e.erro) + ').</p>'; });
+}
+
+// v1.34 — Numeração do e-Protocolo: o próximo número que o Hub vai dar e o ajuste
+// pelo Tabelião (corte de numeração quando ela vinha de outro lugar — ex.: o Zapier do
+// Trello parou no 1449 e o Hub continua do 1450). Vale na hora; tudo fica no registro.
+function pintarAbaNumeracao(painel) {
+  painel.innerHTML = '<p class="ed-vazio">Lendo a numeração…</p>';
+  api('/hub/admin/numeracao').then(function (n) {
+    if (!ED || ED.aba !== 'numeracao') return;
+    const g = n.gravados || {};
+    const proximo = n.proximo == null ? '—' : String(n.proximo);
+    painel.innerHTML =
+      '<p class="sub-data" style="margin-bottom:10px">O <b>próximo número</b> que o e-Protocolo vai dar. Ajuste aqui quando a numeração vier de outro lugar — por exemplo, se a automação antiga parou no 1449, informe 1450. Vale na hora, não precisa publicar o mural.</p>' +
+      '<div class="num-quadro">' +
+        '<div class="num-atual"><span>Próximo protocolo</span><b id="edNumProximo">' + esc(proximo) + '</b></div>' +
+        '<div class="num-info">' +
+          (g.maior != null
+            ? 'Maior protocolo já gravado pelo Hub: <b>' + esc(String(g.maior)) + '</b> · ' + esc(String(g.total || 0)) + ' no total' + (g.ultimo_em ? ' · último em ' + esc(quandoCurto(g.ultimo_em)) : '')
+            : 'O Hub ainda não gravou nenhum protocolo.') +
+        '</div>' +
+      '</div>' +
+      '<h3 class="ed-titulo versalete">Ajustar o próximo número</h3>' +
+      '<div class="ed-form ed-linha">' +
+        '<input type="text" id="edNumNovo" inputmode="numeric" placeholder="ex.: 1450" maxlength="7" autocomplete="off">' +
+        '<input type="text" id="edNumMotivo" placeholder="Motivo (ex.: automação do Trello desligada no 1449)" maxlength="200">' +
+        '<button class="btn-vinho" id="edNumAplicar" type="button">Aplicar</button>' +
+      '</div>' +
+      '<p class="sub-data">Só é aceito um número <b>maior</b> que o maior protocolo já gravado pelo Hub — assim nenhum número se repete. Cada ajuste fica registrado abaixo.</p>' +
+      '<h3 class="ed-titulo versalete">Ajustes feitos</h3>' +
+      ((n.historico || []).length
+        ? '<ul class="ed-lista">' + n.historico.map(function (h) {
+            return '<li class="ed-item"><b>' + esc(h.de == null ? '—' : String(h.de)) + ' → ' + esc(String(h.para)) + '</b><small>' +
+              esc(quandoCurto(h.em)) + ' · ' + esc(h.por || '') + (h.motivo ? ' · ' + esc(h.motivo) : '') + '</small></li>';
+          }).join('') + '</ul>'
+        : '<p class="ed-vazio">Nenhum ajuste feito até agora.</p>');
+    const novo = el('edNumNovo'), motivo = el('edNumMotivo'), btn = el('edNumAplicar');
+    novo.addEventListener('input', function () {
+      novo.value = novo.value.replace(/\D/g, '');
+      btn.dataset.confirma = ''; btn.textContent = 'Aplicar'; btn.classList.remove('on');
+    });
+    btn.addEventListener('click', function () {
+      const valor = parseInt(novo.value, 10);
+      if (!(valor >= 1)) { toast('Informe o próximo número (só dígitos).'); novo.focus(); return; }
+      if (g.maior != null && valor <= g.maior) { toast('Precisa ser maior que ' + g.maior + ', o maior protocolo já gravado pelo Hub.', true); return; }
+      if (btn.dataset.confirma !== String(valor)) {
+        btn.dataset.confirma = String(valor); btn.textContent = 'Confirmar ' + valor + '?'; btn.classList.add('on');
+        setTimeout(function () { if (btn.isConnected && btn.dataset.confirma === String(valor)) { btn.dataset.confirma = ''; btn.textContent = 'Aplicar'; btn.classList.remove('on'); } }, 6000);
+        return;
+      }
+      btn.disabled = true;
+      api('/hub/admin/numeracao', { corpo: { proximo: valor, motivo: motivo.value.trim() } }).then(function (r) {
+        toast('✓ Próximo protocolo: ' + r.para + ' (antes ' + (r.de == null ? '—' : r.de) + ')');
+        pintarAba();
+      }).catch(function (e) { btn.disabled = false; btn.dataset.confirma = ''; btn.textContent = 'Aplicar'; btn.classList.remove('on'); toast(primeiraMaiuscula(e.erro) + '.', true); });
+    });
+  }).catch(function (e) { if (painel.isConnected) painel.innerHTML = '<p class="ed-vazio">Não consegui ler a numeração (' + esc(e.erro) + ').</p>'; });
 }
 
 function pintarAbaHistorico(painel) {
