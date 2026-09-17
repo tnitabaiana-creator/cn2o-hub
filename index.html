@@ -2457,18 +2457,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 .num-info b{color:var(--vinho)}
 #edNumNovo{max-width:150px;flex:0 1 150px;font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
 #edNumAplicar.on{background:#202a3a}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]) .num-quadro{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.3)}
-  :root:not([data-theme="light"]) .num-atual span{color:rgba(240,243,248,.78)}
-  :root:not([data-theme="light"]) .num-atual b{color:#f2d7dc}
-  :root:not([data-theme="light"]) .num-info{color:var(--leitura-texto)}
-  :root:not([data-theme="light"]) .num-info b{color:#f2d7dc}
-}
-:root[data-theme="dark"] .num-quadro{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.3)}
-:root[data-theme="dark"] .num-atual span{color:rgba(240,243,248,.78)}
-:root[data-theme="dark"] .num-atual b{color:#f2d7dc}
-:root[data-theme="dark"] .num-info{color:var(--leitura-texto)}
-:root[data-theme="dark"] .num-info b{color:#f2d7dc}
+/* (o editor do Tabelião é branco nos dois temas: sem variante escura aqui — v1.34, achado da auditoria) */
 
 /* ==========================================================================
    v1.34 — IA NOTARIAL (quadro único + subpágina dos assistentes)
@@ -2541,6 +2530,113 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 :root[data-theme="dark"] #secFerramentas .card.card-ia:hover{border-color:rgba(223,231,242,.85);box-shadow:0 12px 30px rgba(0,0,0,.40)}
 :root[data-theme="dark"] #paginaIA .card p{color:rgba(255,255,255,.78)}
 :root[data-theme="dark"] #paginaIA .card .card-num{color:#dfe7f2}
+
+/* ==========================================================================
+   v1.34 — TRILHA DE AUDITORIA (aba do editor)
+   "Quem usou o quê, quando e de onde" — a tela que o Tabelião abre para conferir o
+   uso do Hub. LEGIBILIDADE ANTES DE TUDO (astigmatismo): texto escuro sobre claro,
+   células a 14 px (o .ed-item padrão é 13 px, pequeno demais para ler tabela),
+   cabeçalho 13,5 px em versalete e NADA de cinza-claro — o mais apagado desta folha
+   é rgba(32,42,58,.78) sobre branco. Paleta da casa: vinho #631325, marinho #202a3a
+   e branco. Datas em dd/mm às HHhMM, como no resto do Hub.
+   ATENÇÃO (lição da v1.32): todo @media aqui embaixo está FECHADO — uma at-rule sem
+   fecho aninha o resto da folha e o Chrome do Tabelião ignora tudo daqui para baixo.
+   ========================================================================== */
+
+/* ---- filtros: pessoa · ação · de/até · Filtrar · Exportar CSV ---- */
+.aud-filtros{display:flex;flex-wrap:wrap;align-items:flex-end;gap:10px 12px;margin:4px 0 12px;padding:13px 15px;border:1.5px solid rgba(99,19,37,.28);border-radius:12px;background:#fbf5f6}
+.aud-campo{display:flex;flex-direction:column;gap:4px;min-width:150px;flex:1 1 150px}
+.aud-campo>span{font-family:'Montserrat',sans-serif;font-size:11.5px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#631325}
+.aud-campo select,.aud-campo input{border:1.5px solid rgba(32,42,58,.34);border-radius:7px;padding:8px 10px;font-family:'Lato',sans-serif;font-size:15px;background:#ffffff;color:#202a3a;width:100%}
+.aud-campo select:focus,.aud-campo input:focus{outline:2px solid rgba(99,19,37,.45);outline-offset:1px}
+.aud-filtros .btn-vinho,.aud-filtros .btn-fantasma{flex:0 0 auto;height:40px;font-size:14px;padding:0 16px}
+.aud-filtros .btn-fantasma,.aud-mais .btn-fantasma{background:#ffffff;border-color:rgba(32,42,58,.34);color:#202a3a}
+.aud-filtros .btn-fantasma:hover,.aud-mais .btn-fantasma:hover{border-color:#631325;color:#631325}
+.aud-conta{font-size:14px;line-height:1.5;color:#202a3a;font-weight:700;margin:0 2px 8px}
+
+/* ---- a tabela ---- */
+.aud-rolo{overflow-x:auto;border:1px solid rgba(32,42,58,.28);border-radius:10px;background:#ffffff}
+.aud-tabela{width:100%;min-width:660px;border-collapse:collapse;font-size:14px;line-height:1.45;color:#202a3a}
+.aud-tabela th{font-family:'Montserrat',sans-serif;font-size:13.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;text-align:left;color:#ffffff;background:#631325;padding:9px 10px;white-space:nowrap}
+.aud-tabela td{padding:9px 10px;border-top:1px solid rgba(32,42,58,.18);vertical-align:top;font-size:14px;color:#202a3a}
+.aud-tabela tbody tr:nth-child(even) td{background:#f4f1ec}
+.aud-quando{white-space:nowrap;font-variant-numeric:tabular-nums;font-weight:700}
+.aud-quem{white-space:nowrap;font-weight:700;color:#631325}
+.aud-detalhe{word-break:break-word;min-width:170px}
+.aud-ip{white-space:nowrap;font-variant-numeric:tabular-nums;color:rgba(32,42,58,.82)}
+.aud-acao{display:inline-block;border:1.5px solid #202a3a;border-radius:999px;padding:2px 10px;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:700;letter-spacing:.06em;white-space:nowrap;color:#202a3a;background:#ffffff}
+.aud-acao-login{border-color:#1d5c3a;color:#12482c}
+.aud-acao-logout{border-color:rgba(32,42,58,.58);color:rgba(32,42,58,.86)}
+.aud-acao-ia{border-color:#631325;color:#631325;background:#f7e9ec}
+.aud-acao-admin{border-color:#631325;color:#ffffff;background:#631325}
+.aud-mais{display:flex;justify-content:center;margin:12px 0 4px}
+.aud-mais .btn-fantasma{font-size:14px;padding:9px 20px}
+.aud-fim{font-size:13.5px;color:rgba(32,42,58,.82);text-align:center;margin:10px 0 2px}
+
+/* ---- aba Equipe: a linha aberta para editar nome e cargo (v1.34) ---- */
+.ed-item-edita{flex-wrap:wrap;gap:8px;border-color:rgba(99,19,37,.55);background:#fbf5f6}
+.ed-edita-login{font-family:'Montserrat',sans-serif;font-size:12.5px;font-weight:700;letter-spacing:.06em;color:#631325;flex:none}
+.ed-edita-campo{flex:1 1 150px;min-width:130px;border:1.5px solid rgba(32,42,58,.34);border-radius:7px;padding:7px 10px;font-family:'Lato',sans-serif;font-size:14px;background:#ffffff;color:#202a3a}
+.ed-edita-campo:focus{outline:2px solid rgba(99,19,37,.45);outline-offset:1px}
+
+/* telefone (400 px): filtros empilhados e a tabela rolando dentro da própria caixa */
+@media (max-width:760px){
+  .aud-campo{flex:1 1 100%;min-width:0}
+  .aud-filtros .btn-vinho,.aud-filtros .btn-fantasma{flex:1 1 100%}
+  .aud-tabela{font-size:15px}
+  .ed-edita-campo{flex:1 1 100%}
+}
+
+/* ---- tema escuro ----------------------------------------------------------
+   O editor do Tabelião mora num .subpagina, e o .subpagina é BRANCO nos dois temas
+   (estilo-base.css: background:#ffffff; color:#202a3a) — o Hub escurece o fundo da
+   página, não a folha do modal. Então, aqui dentro, escurecer o texto seria pôr claro
+   sobre claro: a trilha fica DARK-ON-LIGHT também no tema escuro, que é justamente o
+   que o Tabelião pediu ("texto escuro sobre claro, sem cinza-claro"). O bloco existe
+   para FIXAR isso: nenhuma regra global de tema escuro pode clarear estas células.
+   -------------------------------------------------------------------------- */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .aud-filtros{background:#fbf5f6;border-color:rgba(99,19,37,.28)}
+  :root:not([data-theme="light"]) .aud-campo>span{color:#631325}
+  :root:not([data-theme="light"]) .aud-campo select,:root:not([data-theme="light"]) .aud-campo input{background:#ffffff;border-color:rgba(32,42,58,.34);color:#202a3a;color-scheme:light}
+  :root:not([data-theme="light"]) .aud-conta{color:#202a3a}
+  :root:not([data-theme="light"]) .aud-rolo{background:#ffffff;border-color:rgba(32,42,58,.28)}
+  :root:not([data-theme="light"]) .aud-tabela,:root:not([data-theme="light"]) .aud-tabela td{color:#202a3a}
+  :root:not([data-theme="light"]) .aud-tabela th{background:#631325;color:#ffffff}
+  :root:not([data-theme="light"]) .aud-tabela tbody tr:nth-child(even) td{background:#f4f1ec}
+  :root:not([data-theme="light"]) .aud-quem{color:#631325}
+  :root:not([data-theme="light"]) .aud-ip{color:rgba(32,42,58,.82)}
+  :root:not([data-theme="light"]) .aud-acao{background:#ffffff;border-color:#202a3a;color:#202a3a}
+  :root:not([data-theme="light"]) .aud-acao-login{border-color:#1d5c3a;color:#12482c}
+  :root:not([data-theme="light"]) .aud-acao-logout{border-color:rgba(32,42,58,.58);color:rgba(32,42,58,.86)}
+  :root:not([data-theme="light"]) .aud-acao-ia{border-color:#631325;color:#631325;background:#f7e9ec}
+  :root:not([data-theme="light"]) .aud-acao-admin{border-color:#631325;background:#631325;color:#ffffff}
+  :root:not([data-theme="light"]) .aud-fim{color:rgba(32,42,58,.82)}
+  :root:not([data-theme="light"]) .aud-filtros .btn-fantasma,:root:not([data-theme="light"]) .aud-mais .btn-fantasma{background:#ffffff;border-color:rgba(32,42,58,.34);color:#202a3a}
+  :root:not([data-theme="light"]) .ed-item-edita{background:#fbf5f6;border-color:rgba(99,19,37,.55)}
+  :root:not([data-theme="light"]) .ed-edita-login{color:#631325}
+  :root:not([data-theme="light"]) .ed-edita-campo{background:#ffffff;border-color:rgba(32,42,58,.34);color:#202a3a}
+}
+:root[data-theme="dark"] .aud-filtros{background:#fbf5f6;border-color:rgba(99,19,37,.28)}
+:root[data-theme="dark"] .aud-campo>span{color:#631325}
+:root[data-theme="dark"] .aud-campo select,:root[data-theme="dark"] .aud-campo input{background:#ffffff;border-color:rgba(32,42,58,.34);color:#202a3a;color-scheme:light}
+:root[data-theme="dark"] .aud-conta{color:#202a3a}
+:root[data-theme="dark"] .aud-rolo{background:#ffffff;border-color:rgba(32,42,58,.28)}
+:root[data-theme="dark"] .aud-tabela,:root[data-theme="dark"] .aud-tabela td{color:#202a3a}
+:root[data-theme="dark"] .aud-tabela th{background:#631325;color:#ffffff}
+:root[data-theme="dark"] .aud-tabela tbody tr:nth-child(even) td{background:#f4f1ec}
+:root[data-theme="dark"] .aud-quem{color:#631325}
+:root[data-theme="dark"] .aud-ip{color:rgba(32,42,58,.82)}
+:root[data-theme="dark"] .aud-acao{background:#ffffff;border-color:#202a3a;color:#202a3a}
+:root[data-theme="dark"] .aud-acao-login{border-color:#1d5c3a;color:#12482c}
+:root[data-theme="dark"] .aud-acao-logout{border-color:rgba(32,42,58,.58);color:rgba(32,42,58,.86)}
+:root[data-theme="dark"] .aud-acao-ia{border-color:#631325;color:#631325;background:#f7e9ec}
+:root[data-theme="dark"] .aud-acao-admin{border-color:#631325;background:#631325;color:#ffffff}
+:root[data-theme="dark"] .aud-fim{color:rgba(32,42,58,.82)}
+:root[data-theme="dark"] .aud-filtros .btn-fantasma,:root[data-theme="dark"] .aud-mais .btn-fantasma{background:#ffffff;border-color:rgba(32,42,58,.34);color:#202a3a}
+:root[data-theme="dark"] .ed-item-edita{background:#fbf5f6;border-color:rgba(99,19,37,.55)}
+:root[data-theme="dark"] .ed-edita-login{color:#631325}
+:root[data-theme="dark"] .ed-edita-campo{background:#ffffff;border-color:rgba(32,42,58,.34);color:#202a3a}
 
 </style>
 </head>
@@ -4712,6 +4808,43 @@ function api(caminho, opcoes) {
     throw { status: 0, erro: 'sem conexão com o servidor — verifique a internet e tente de novo' };
   });
 }
+/* ============================================================
+   v1.34 — TRILHA DE AUDITORIA (o que só o navegador vê)
+   Entrar, sair e abrir uma ferramenta não passam por rota nenhuma do servidor — o Hub
+   é uma página só. Então é a própria tela que avisa, por POST /hub/registro. Vai com
+   keepalive para o 'logout' sobreviver ao fechar da aba, com semRedirecionar para um
+   401 nunca virar "sua sessão expirou", e engole qualquer erro: a trilha JAMAIS pode
+   atrapalhar quem está trabalhando. Só metadados — nunca o que foi digitado.
+   Lista fechada, igual à do servidor (hub.js: REGISTRO_FERRAMENTAS).
+============================================================ */
+const REGISTRO_FERRAMENTAS = ['protocolo', 'calculadora', 'ia', 'extrator', 'analista', 'minutas',
+  'redator', 'clausulas', 'consulta', 'itbi', 'acervo', 'agenda', 'notas', 'mural', 'links', 'ajuda', 'pdf'];
+function registrar(acao, ferramenta, detalhe) {
+  if (!SESSAO.token) return;
+  const corpo = { acao: acao };
+  if (ferramenta) corpo.ferramenta = ferramenta;
+  if (detalhe) corpo.detalhe = String(detalhe).slice(0, 300);
+  try {
+    api('/hub/registro', { corpo: corpo, keepalive: true, semRedirecionar: true }).catch(function () {});
+  } catch (e) {}
+}
+/* A mesma ferramenta reaberta sem sair dela não vira duas linhas na trilha; voltar ao
+   hub (ou a qualquer coisa que não seja ferramenta) zera, e a próxima abertura conta. */
+let ULTIMA_ABERTA = '';
+function ferramentaDaRota(rota) {
+  const r = String(rota || '');
+  if (r.indexOf('minuta=') === 0) return 'minutas';
+  if (r.indexOf('acervo=') === 0) return 'acervo';
+  return REGISTRO_FERRAMENTAS.indexOf(r) >= 0 ? r : '';
+}
+function registrarAbertura(rota) {
+  const f = ferramentaDaRota(rota);
+  if (!f) { ULTIMA_ABERTA = ''; return; }
+  if (f === ULTIMA_ABERTA) return;
+  ULTIMA_ABERTA = f;
+  registrar('abrir', f);
+}
+
 let retentativa = null;
 function semConexao(liga) {
   el('semConexao').hidden = !liga;
@@ -4840,6 +4973,7 @@ function restaurarSessao() {
 }
 function sair() {
   const token = SESSAO.token;
+  registrar('logout', '', '');   // v1.34: com o token ainda válido e keepalive
   maSair();   // v1.32: despacha o que ainda não foi salvo na agenda (com o token) e zera o estado
   ntSair();   // v1.33: idem para o Bloco de Notas
   if (token) {
@@ -4858,6 +4992,8 @@ function mostrarApp() {
   pintarCardMinutas();   // v1.31 — mini-quadro 3.3 "Em breve" (aberto só ao Tabelião)
   el('telaLogin').hidden = true;
   el('app').hidden = false;
+  ULTIMA_ABERTA = '';
+  registrar('login', '', '');   // v1.34: entrada pelo login ou pela sessão restaurada
   abrirPorEndereco();
   carregarMural();
   maAtualizarSemanaAtual();   // v1.32 — quadro "Minha Agenda" (semana atual, seg–sex)
@@ -4908,6 +5044,7 @@ function mostrarPagina(id, semHistorico, rota) {
     const hash = id === 'paginaHub' ? '' : '#' + (rota || '');
     try { history.pushState({ pagina: id, rota: rota || '' }, '', location.pathname + location.search + hash); } catch (e) {}
   }
+  registrarAbertura(rota);   // v1.34 — trilha de auditoria (também cobre abrirEmbutida)
 }
 /* abre uma ferramenta a partir do quadro 03 · IA Notarial (o Voltar dela volta para lá) */
 function abrirDaIA(pagina, rota, depois) {
@@ -6568,11 +6705,12 @@ function criarEditorRico(inicial, placeholder) {
 /* ============================================================
    MODO DO TABELIÃO — editar e publicar o mural
 ============================================================ */
-let ED = null; // { copia, base, sujo, aba, editando, editor, confirmarSaida }
+let ED = null; // { copia, base, sujo, aba, editando, editor, confirmarSaida, eqEdit, aud }
 function abrirEditorMural() {
   if (!SESSAO.admin) return;
   const partida = MURAL || normalizarLocal({});
-  ED = { copia: clone(partida), base: MURAL_META.atualizado_em || null, sujo: false, aba: 'avisos', editando: null, editor: null, confirmarSaida: false };
+  // eqEdit: quem está com a linha aberta na aba Equipe · aud: filtros da aba Auditoria (v1.34)
+  ED = { copia: clone(partida), base: MURAL_META.atualizado_em || null, sujo: false, aba: 'avisos', editando: null, editor: null, confirmarSaida: false, eqEdit: null, aud: null };
   abrirSub('editar');
 }
 function htmlEditorMural() {
@@ -6580,7 +6718,7 @@ function htmlEditorMural() {
     '<p class="sub-data">Monte os avisos com a formatação que quiser e publique — a mudança aparece para toda a equipe na hora.</p>' +
     '<p class="sub-data">Frases do Dia: <a href="' + FRASES_EDITAR_URL + '" target="_blank" rel="noopener">editar a planilha no Drive</a> · escreva HOJE na coluna \u201cfixar\u201d para todos verem a mesma frase.</p>' +
     '<div class="ed-abas">' +
-      ['avisos:Avisos', 'aniversariantes:Aniversariantes', 'metas:Metas', 'equipe:Equipe', 'numeracao:Numeração', 'historico:Histórico', 'consumo:Consumo de IA'].map(function (x) {
+      ['avisos:Avisos', 'aniversariantes:Aniversariantes', 'metas:Metas', 'equipe:Equipe', 'numeracao:Numeração', 'auditoria:Auditoria', 'historico:Histórico', 'consumo:Consumo de IA'].map(function (x) {
         const p = x.split(':');
         return '<button type="button" class="ed-aba" data-aba="' + p[0] + '">' + p[1] + '</button>';
       }).join('') +
@@ -6612,6 +6750,7 @@ function pintarAba() {
   else if (ED.aba === 'metas') pintarAbaMetas(painel);
   else if (ED.aba === 'equipe') pintarAbaEquipe(painel);
   else if (ED.aba === 'numeracao') pintarAbaNumeracao(painel);
+  else if (ED.aba === 'auditoria') pintarAbaAuditoria(painel);
   else if (ED.aba === 'historico') pintarAbaHistorico(painel);
   else if (ED.aba === 'consumo') pintarAbaConsumo(painel);
 }
@@ -6809,12 +6948,21 @@ function pintarAbaEquipe(painel) {
     painel.innerHTML =
       '<p class="sub-data" style="margin-bottom:10px">Quem entra no Hub CN2O. O que você faz nesta aba vale na hora — não precisa publicar o mural.</p>' +
       '<ul class="ed-lista">' + (lista || []).map(function (u) {
+        // v1.34 — "Editar" abre a própria linha: nome de exibição e cargo (o login não muda).
+        if (ED.eqEdit === u.login) {
+          return '<li class="ed-item ed-item-edita"><span class="ed-edita-login">' + esc(u.login) + '</span>' +
+            '<input type="text" id="edEqEdNome" class="ed-edita-campo" maxlength="80" value="' + esc(u.nome) + '" placeholder="Nome de exibição">' +
+            '<input type="text" id="edEqEdCargo" class="ed-edita-campo" maxlength="60" list="edEqCargos" value="' + esc(u.cargo || '') + '" placeholder="Cargo">' +
+            '<span class="ed-acoes"><button type="button" class="ed-btn on" id="edEqEdSalvar" data-salva="' + esc(u.login) + '">Salvar</button>' +
+            '<button type="button" class="ed-btn" data-cancela="1">Cancelar</button></span></li>';
+        }
         const situacao = u.tem_senha
           ? (u.ultimo_acesso ? 'último acesso ' + quandoCurto(u.ultimo_acesso) : 'senha criada')
           : 'aguardando o primeiro acesso';
         const podeZerar = u.tem_senha && u.login !== SESSAO.login;
         return '<li class="ed-item"><b>' + esc(u.nome) + '</b><small>' + esc(u.login) + ' · ' + esc(u.cargo) + ' · ' + situacao + '</small>' +
-          '<span class="ed-acoes">' + (podeZerar ? '<button type="button" class="ed-btn" data-zera="' + esc(u.login) + '" title="Zerar a senha desta pessoa">Zerar senha</button>' : '') + '</span></li>';
+          '<span class="ed-acoes"><button type="button" class="ed-btn" data-edita="' + esc(u.login) + '" title="Corrigir o nome e o cargo desta pessoa">Editar</button>' +
+          (podeZerar ? '<button type="button" class="ed-btn" data-zera="' + esc(u.login) + '" title="Zerar a senha desta pessoa">Zerar senha</button>' : '') + '</span></li>';
       }).join('') + '</ul>' +
       '<h3 class="ed-titulo versalete">Cadastrar pessoa</h3>' +
       '<div class="ed-form ed-linha">' +
@@ -6824,7 +6972,26 @@ function pintarAbaEquipe(painel) {
         '<datalist id="edEqCargos"><option value="Escrevente"><option value="Substituta do Tabelião"><option value="Cadastro e Protocolo"><option value="Secretária"><option value="Auxiliar"><option value="Estagiário(a)"></datalist>' +
         '<button class="btn-fantasma" id="edEqAdd" type="button">Cadastrar</button>' +
       '</div>' +
-      '<p class="sub-data">A pessoa entra com esse usuário e cria a própria senha no primeiro acesso. Cadastre — ou zere uma senha — só quando ela for entrar em seguida.</p>';
+      '<p class="sub-data">A pessoa entra com esse usuário e cria a própria senha no primeiro acesso. Cadastre — ou zere uma senha — só quando ela for entrar em seguida. <b>Editar</b> corrige o nome de exibição e o cargo (o cargo é o que o Redator CN2O usa para assinar); o usuário, não — ele é a chave de tudo.</p>';
+    // v1.34 — editar nome e cargo de quem já existe
+    painel.querySelectorAll('[data-edita]').forEach(function (b) {
+      b.addEventListener('click', function () { ED.eqEdit = b.dataset.edita; pintarAba(); });
+    });
+    painel.querySelectorAll('[data-cancela]').forEach(function (b) {
+      b.addEventListener('click', function () { ED.eqEdit = null; pintarAba(); });
+    });
+    painel.querySelectorAll('[data-salva]').forEach(function (b) {
+      b.addEventListener('click', function () {
+        const corpo = { login: b.dataset.salva, nome: el('edEqEdNome').value.trim(), cargo: el('edEqEdCargo').value.trim() };
+        if (!corpo.nome) { toast('O nome não pode ficar em branco.', true); el('edEqEdNome').focus(); return; }
+        b.disabled = true;
+        api('/hub/admin/equipe/editar', { corpo: corpo }).then(function (r) {
+          toast('✓ ' + r.nome + ' — ' + r.cargo);
+          ED.eqEdit = null;
+          pintarAba();
+        }).catch(function (e) { b.disabled = false; toast(primeiraMaiuscula(e.erro) + '.', true); });
+      });
+    });
     const nomeEl = el('edEqNome'), loginEl = el('edEqLogin');
     let loginMexido = false;
     loginEl.addEventListener('input', function () { loginMexido = true; });
@@ -6907,6 +7074,172 @@ function pintarAbaNumeracao(painel) {
       }).catch(function (e) { btn.disabled = false; btn.dataset.confirma = ''; btn.textContent = 'Aplicar'; btn.classList.remove('on'); toast(primeiraMaiuscula(e.erro) + '.', true); });
     });
   }).catch(function (e) { if (painel.isConnected) painel.innerHTML = '<p class="ed-vazio">Não consegui ler a numeração (' + esc(e.erro) + ').</p>'; });
+}
+
+/* ============================================================
+   v1.34 — TRILHA DE AUDITORIA (aba do Tabelião)
+   "Implementar trilha de auditoria pelo log no acesso das funcionalidades do hub."
+   Quem usou o quê, quando e de onde. Só metadados: nada do conteúdo dos documentos,
+   das minutas, da agenda ou das notas passa por aqui — nem no servidor, nem na tela.
+   Padrão: últimos 7 dias, 50 linhas por vez, "Mostrar mais 50" e "Exportar CSV"
+   (o servidor devolve a planilha pronta para o Excel em português).
+============================================================ */
+const AUD_ACOES_NOME = {
+  login: 'Entrou', logout: 'Saiu', abrir: 'Abriu', ia: 'IA', consulta: 'T-Consulta',
+  acervo: 'Acervo', minuta: 'Minuta', mural: 'Mural', agenda: 'Agenda', notas: 'Notas',
+  itbi: 'Guia de ITBI', admin: 'Administração'
+};
+const AUD_FERR_NOME = {
+  protocolo: 'e-Protocolo', calculadora: 'Calculadora', ia: 'IA-Not', extrator: 'Extrator',
+  analista: 'e-Analista', minutas: 'Gerador de Minuta', redator: 'Redator CN2O',
+  clausulas: 'Cláusulas', consulta: 'T-Consulta', itbi: 'Guia de ITBI', acervo: 'Acervo',
+  agenda: 'Minha Agenda', notas: 'Bloco de Notas', mural: 'Mural', links: 'Links', ajuda: 'Ajuda',
+  pdf: 'PDF', qualificacao: 'Extrator', matricula: 'e-Analista', minuta: 'Gerador de Minuta',
+  minuta_ue: 'Gerador de Minuta', transpor: 'Transposição', descricao: 'Descrição',
+  equipe: 'Equipe', 'zerar-senha': 'Zerar senha', editar: 'Editar', numeracao: 'Numeração',
+  publicar: 'Publicar', guardar: 'Guardar', gravar: 'Gravar', apagar: 'Apagar',
+  cn2o: 'Acervo 2º Ofício', antigo1: 'Acervo 1º Ofício'
+};
+function diaISO(d) { return d.getFullYear() + '-' + dd(d.getMonth() + 1) + '-' + dd(d.getDate()); }
+function audEstado() {
+  if (!ED.aud) {
+    ED.aud = { login: '', acao: '', de: diaISO(new Date(Date.now() - 6 * 86400000)), ate: diaISO(new Date()),
+               pagina: 1, total: 0, itens: [], logins: [], acoes: [] };
+  }
+  return ED.aud;
+}
+function audConsulta() {
+  const a = audEstado(), p = [];
+  if (a.login) p.push('login=' + encodeURIComponent(a.login));
+  if (a.acao) p.push('acao=' + encodeURIComponent(a.acao));
+  if (a.de) p.push('de=' + encodeURIComponent(a.de));
+  if (a.ate) p.push('ate=' + encodeURIComponent(a.ate));
+  return p.join('&');
+}
+function pintarAbaAuditoria(painel) {
+  const a = audEstado();
+  painel.innerHTML =
+    '<p class="sub-data" style="margin-bottom:10px">Quem usou o quê, quando e de onde. A trilha guarda <b>só o uso</b> — nunca o conteúdo dos documentos, das minutas, da agenda ou das notas. Vale na hora, não precisa publicar o mural.</p>' +
+    '<div class="aud-filtros">' +
+      '<label class="aud-campo"><span>Pessoa</span><select id="edAudLogin"><option value="">Toda a equipe</option></select></label>' +
+      '<label class="aud-campo"><span>Ação</span><select id="edAudAcao"><option value="">Todas as ações</option></select></label>' +
+      '<label class="aud-campo"><span>De</span><input type="date" id="edAudDe" value="' + esc(a.de) + '"></label>' +
+      '<label class="aud-campo"><span>Até</span><input type="date" id="edAudAte" value="' + esc(a.ate) + '"></label>' +
+      '<button type="button" class="btn-vinho" id="edAudFiltrar">Filtrar</button>' +
+      '<button type="button" class="btn-fantasma" id="edAudCsv">⭳ Exportar CSV</button>' +
+    '</div>' +
+    '<p class="aud-conta" id="edAudConta">Lendo a trilha…</p>' +
+    '<div id="edAudCorpo"></div>';
+  el('edAudFiltrar').addEventListener('click', function () {
+    a.login = el('edAudLogin').value;
+    a.acao = el('edAudAcao').value;
+    a.de = el('edAudDe').value;
+    a.ate = el('edAudAte').value;
+    audCarregar(1);
+  });
+  el('edAudCsv').addEventListener('click', audExportar);
+  audCarregar(1);
+}
+function audCarregar(pagina, juntar) {
+  const a = audEstado();
+  const conta = el('edAudConta');
+  if (conta) conta.textContent = 'Lendo a trilha…';
+  api('/hub/admin/auditoria?pagina=' + pagina + (audConsulta() ? '&' + audConsulta() : '')).then(function (r) {
+    if (!ED || ED.aba !== 'auditoria') return;
+    a.pagina = r.pagina || pagina;
+    a.total = r.total || 0;
+    a.itens = juntar ? a.itens.concat(r.itens || []) : (r.itens || []);
+    a.logins = r.logins || a.logins;
+    a.acoes = r.acoes || a.acoes;
+    a.dias = r.dias || a.dias;
+    audPintarFiltros();
+    audPintarCorpo();
+  }).catch(function (e) {
+    if (!ED || ED.aba !== 'auditoria') return;
+    const mais = el('edAudMais');
+    if (juntar && mais) {   // falhou o "mostrar mais": devolve o botão e mantém o que já veio
+      mais.disabled = false;
+      if (conta) conta.textContent = 'Não consegui trazer mais linhas (' + (e.erro || 'erro') + ').';
+      return;
+    }
+    if (conta) conta.textContent = '';
+    const corpo = el('edAudCorpo');
+    if (corpo) corpo.innerHTML = '<p class="ed-vazio">Não consegui ler a trilha (' + esc(e.erro) + ').</p>';
+  });
+}
+function audPintarFiltros() {
+  const a = audEstado();
+  const sel = el('edAudLogin');
+  if (sel) {
+    sel.innerHTML = '<option value="">Toda a equipe</option>' + a.logins.map(function (u) {
+      return '<option value="' + esc(u.login) + '"' + (u.login === a.login ? ' selected' : '') + '>' + esc(u.nome || u.login) + ' (' + esc(u.login) + ')</option>';
+    }).join('');
+    sel.value = a.login;
+  }
+  const sa = el('edAudAcao');
+  if (sa) {
+    sa.innerHTML = '<option value="">Todas as ações</option>' + a.acoes.map(function (x) {
+      return '<option value="' + esc(x) + '"' + (x === a.acao ? ' selected' : '') + '>' + esc(AUD_ACOES_NOME[x] || x) + '</option>';
+    }).join('');
+    sa.value = a.acao;
+  }
+}
+function audPintarCorpo() {
+  const a = audEstado();
+  const conta = el('edAudConta');
+  if (conta) {
+    conta.textContent = a.total === 0
+      ? 'Nenhum registro no período escolhido.'
+      : (a.total === 1 ? '1 registro' : a.total.toLocaleString('pt-BR') + ' registros') +
+        ' · mostrando ' + a.itens.length + (a.dias ? ' · a trilha guarda ' + a.dias + ' dias' : '');
+  }
+  const corpo = el('edAudCorpo');
+  if (!corpo) return;
+  if (!a.itens.length) { corpo.innerHTML = '<p class="ed-vazio">Nenhum registro para esses filtros.</p>'; return; }
+  corpo.innerHTML =
+    '<div class="aud-rolo"><table class="aud-tabela"><thead><tr>' +
+      '<th class="versalete">Quando</th><th class="versalete">Quem</th><th class="versalete">Ação</th>' +
+      '<th class="versalete">Ferramenta</th><th class="versalete">Detalhe</th><th class="versalete">IP</th>' +
+    '</tr></thead><tbody>' + a.itens.map(function (l) {
+      return '<tr><td class="aud-quando">' + esc(quandoCurto(l.em)) + '</td>' +
+        '<td class="aud-quem">' + esc(l.login || '—') + '</td>' +
+        '<td><span class="aud-acao aud-acao-' + esc(l.acao || 'outro') + '">' + esc(AUD_ACOES_NOME[l.acao] || l.acao || '—') + '</span></td>' +
+        '<td>' + esc(l.ferramenta ? (AUD_FERR_NOME[l.ferramenta] || l.ferramenta) : '—') + '</td>' +
+        '<td class="aud-detalhe">' + esc(l.detalhe || '') + '</td>' +
+        '<td class="aud-ip">' + esc(l.ip || '') + '</td></tr>';
+    }).join('') + '</tbody></table></div>' +
+    (a.itens.length < a.total
+      ? '<div class="aud-mais"><button type="button" class="btn-fantasma" id="edAudMais">Mostrar mais 50</button></div>'
+      : '<p class="aud-fim">Fim da lista — ' + a.itens.length + ' de ' + a.total + '.</p>');
+  const mais = el('edAudMais');
+  if (mais) mais.addEventListener('click', function () { mais.disabled = true; audCarregar(audEstado().pagina + 1, true); });
+}
+/* O CSV sai do servidor com BOM UTF-8 e ';' (Excel em português). Como a rota exige o
+   cabeçalho da sessão, o arquivo vem por fetch e desce num <a download>. */
+function audExportar() {
+  const b = el('edAudCsv');
+  b.disabled = true;
+  const antes = b.textContent;
+  b.textContent = 'Preparando…';
+  const c = audConsulta();
+  fetch(CONFIG.endpoint + '/hub/admin/auditoria?csv=1' + (c ? '&' + c : ''), {
+    headers: { 'X-Auth-Token': SESSAO.token }, cache: 'no-store'
+  }).then(function (r) {
+    if (!r.ok) throw new Error('erro ' + r.status);
+    return r.blob();
+  }).then(function (blob) {
+    const a = audEstado();
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = 'auditoria-hub-cn2o-' + (a.de || 'tudo') + '-a-' + (a.ate || 'hoje') + '.csv';
+    document.body.appendChild(link);
+    link.click();
+    setTimeout(function () { try { URL.revokeObjectURL(url); } catch (e) {} link.remove(); }, 8000);
+    toast('✓ Planilha da trilha baixada.');
+  }).catch(function () {
+    toast('Não consegui exportar a trilha.', true);
+  }).then(function () { b.disabled = false; b.textContent = antes; });
 }
 
 function pintarAbaHistorico(painel) {
@@ -7021,7 +7354,11 @@ function renderClausulas() {
     sec.appendChild(cab); sec.appendChild(corpo); box.appendChild(sec);
   });
 }
-function abrirClausulas() { el('veuClausulas').classList.add('aberto'); }
+function abrirClausulas() {
+  const v = el('veuClausulas');
+  if (!v.classList.contains('aberto')) registrar('abrir', 'clausulas');   // v1.34 — trilha
+  v.classList.add('aberto');
+}
 function fecharTelaClausulas() { el('veuClausulas').classList.remove('aberto'); }
 
 /* ============================================================
@@ -10894,6 +11231,9 @@ restaurarSessao();
     elp('itbiEstado').textContent = 'Guia gerada às ' + h.hora + ' · ' + r.paginas + ' página' + (r.paginas > 1 ? 's' : '');
     elp('itbiEstado').classList.add('ok');
     elp('itbiConferencia').hidden = true;
+    /* v1.34 — trilha de auditoria: só o FATO de a guia ter saído e o tamanho dela.
+       Nada das partes (nome, CPF, valor) sai desta tela — nunca saiu e continua assim. */
+    if (typeof registrar === 'function') registrar('itbi', 'pdf', r.paginas + ' página(s)');
     if (typeof toast === 'function') toast('Guia de ITBI gerada — abriu numa aba nova.');
   }
 
