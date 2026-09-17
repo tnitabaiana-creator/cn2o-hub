@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anexo do pedido de certidão — CN2O</title>
+<!--
+  anexo.html — abre o documento que o solicitante entregou no pedido de CERTIDÃO.
+  O cartão do Trello linka para cá, e não para o arquivo: assim o documento da
+  parte não vira URL pública. Esta página usa a MESMA sessão do Hub (a chave já
+  está no navegador de quem entrou); sem sessão, manda para o login.
+-->
+<style>
+  :root{--vinho:#631325;--marinho:#202a3a;--palha:#fbf5dd}
+  *{box-sizing:border-box}
+  body{margin:0;background:#faf7f3;color:#111;
+       font-family:'Atkinson Hyperlegible',system-ui,-apple-system,'Segoe UI',Arial,sans-serif;
+       font-size:17px;line-height:1.5}
+  header{background:#fff;border-bottom:3px solid var(--vinho);padding:14px 18px;
+         display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .mono{font-weight:800;color:var(--marinho);letter-spacing:.04em;font-size:20px;line-height:1}
+  h1{font-size:17px;margin:0;color:var(--marinho);font-weight:700}
+  .sub{font-size:14px;color:#44506b;margin:2px 0 0}
+  main{max-width:1100px;margin:0 auto;padding:18px}
+  .caixa{background:#fff;border:1px solid #d7dbe4;border-radius:12px;padding:16px 18px;margin-bottom:14px}
+  .rot{font-size:13.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--vinho);font-weight:700}
+  .nome{font-size:19px;font-weight:700;color:var(--marinho);margin-top:4px;word-break:break-word}
+  .meta{font-size:14.5px;color:#44506b;margin-top:4px}
+  .visor{background:#fff;border:1px solid #d7dbe4;border-radius:12px;overflow:hidden;min-height:60vh}
+  .visor iframe,.visor img{display:block;width:100%;border:0}
+  .visor iframe{height:78vh}
+  .visor img{height:auto}
+  .acoes{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+  a.botao,button.botao{display:inline-block;background:var(--marinho);color:#fff;border:0;border-radius:10px;
+        padding:12px 18px;font-size:16px;font-weight:600;text-decoration:none;cursor:pointer;
+        font-family:inherit}
+  a.botao.claro{background:#fff;color:var(--marinho);border:2px solid var(--marinho)}
+  .aviso{background:var(--palha);border:1px solid #e3d9b4;border-radius:10px;padding:14px 16px;font-size:16px}
+  .erro{background:#fdeceb;border:1px solid #e9b7b2;border-radius:10px;padding:14px 16px;font-size:16px}
+  .nota{font-size:14px;color:#44506b;margin-top:10px}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="mono">CN<br>2O</div>
+  <div>
+    <h1>Anexo do pedido de certidão</h1>
+    <p class="sub">Cartório de Notas do 2º Ofício de Itabaiana/SE — uso interno</p>
+  </div>
+</header>
+
+<main>
+  <div id="area"><div class="caixa"><div class="rot">Abrindo</div><div class="nome" id="estado">Carregando o documento…</div></div></div>
+</main>
+
+<script>
+const ENDPOINT_RAILWAY='https://cn2o-hub-backend-production.up.railway.app';
+const pega=k=>{try{return sessionStorage.getItem(k)||localStorage.getItem(k)}catch(e){return null}};
+const TOKEN=pega('cn2o_token');
+const area=document.getElementById('area');
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const id=decodeURIComponent((location.hash||'').replace(/^#/,'').trim());
+
+function caixaErro(titulo, detalhe, comLogin){
+  area.innerHTML='<div class="erro"><b>'+esc(titulo)+'</b><br>'+esc(detalhe)+'</div>'+
+    (comLogin?'<div class="acoes"><a class="botao" href="index.html">Entrar no Hub</a></div>':'');
+}
+
+function tamanho(n){
+  if(!n) return '';
+  return n<1024*1024 ? (n/1024).toFixed(0)+' KB' : (n/1024/1024).toFixed(1).replace('.',',')+' MB';
+}
+
+(async function(){
+  if(!id){ caixaErro('Link incompleto','O endereço não traz a identificação do anexo. Volte ao cartão do Trello e clique no link do documento.'); return; }
+  if(!TOKEN){ caixaErro('Você não está identificada neste navegador','Entre no Hub com o seu login e clique no link de novo.',true); return; }
+  try{
+    const r=await fetch(ENDPOINT_RAILWAY+'/hub/cert/anexo/'+encodeURIComponent(id),{headers:{'X-Auth-Token':TOKEN}});
+    if(r.status===401){ caixaErro('Sessão expirada','Entre de novo no Hub e clique no link outra vez.',true); return; }
+    if(r.status===404){ caixaErro('Anexo não encontrado','O documento pode já ter sido expurgado pelo prazo de guarda. Procure o Tabelião.'); return; }
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const tipo=(r.headers.get('Content-Type')||'').split(';')[0];
+    const disp=r.headers.get('Content-Disposition')||'';
+    const m=/filename="?([^"]+)"?/.exec(disp);
+    const nome=m?m[1]:'documento';
+    const blob=await r.blob();
+    const url=URL.createObjectURL(blob);
+    const visor = tipo==='application/pdf'
+      ? '<div class="visor"><iframe src="'+url+'#view=FitH" title="Documento anexado"></iframe></div>'
+      : (tipo.startsWith('image/')
+        ? '<div class="visor"><img src="'+url+'" alt="Documento anexado pelo solicitante"></div>'
+        : '<div class="aviso">Este tipo de arquivo não abre aqui. Use o botão para baixar.</div>');
+    area.innerHTML=
+      '<div class="caixa">'+
+        '<div class="rot">Documento anexado pelo solicitante</div>'+
+        '<div class="nome">'+esc(nome)+'</div>'+
+        '<div class="meta">'+esc(tipo)+(blob.size?' · '+tamanho(blob.size):'')+'</div>'+
+        '<div class="acoes">'+
+          '<a class="botao" href="'+url+'" download="'+esc(nome)+'">Baixar</a>'+
+          '<a class="botao claro" href="index.html">Voltar ao Hub</a>'+
+        '</div>'+
+        '<div class="nota">Documento de terceiro: use-o só para a pesquisa nos livros deste pedido. Não encaminhe por grupo de mensagens nem guarde cópia fora do cartório.</div>'+
+      '</div>'+visor;
+  }catch(e){
+    caixaErro('Não consegui abrir o anexo', e.message+' — tente de novo ou avise o Tabelião.');
+  }
+})();
+</script>
+</body>
+</html>
