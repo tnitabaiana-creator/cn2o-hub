@@ -295,13 +295,15 @@ input.moeda{font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.01
       </div>
       <div class="cel-padrao">
         <label class="rotulo versalete" for="certEspecie">O que o solicitante pede</label>
+        <!-- v1.37.2 — lista fixada pelo Tabelião (só estas cinco) -->
         <select id="certEspecie">
-          <option value="Certidão em breve relatório">Certidão em breve relatório</option>
-          <option value="Certidão de inteiro teor">Certidão de inteiro teor</option>
-          <option value="Traslado (2ª via da escritura)">Traslado (2ª via da escritura)</option>
-          <option value="Certidão de procuração">Certidão de procuração</option>
-          <option value="Certidão negativa de ato">Certidão negativa de ato</option>
+          <option value="Certidão do Ato (inteiro teor)">Certidão do Ato (inteiro teor)</option>
+          <option value="Certidão em breve relato">Certidão em breve relato</option>
+          <option value="Certidão em quesitos">Certidão em quesitos</option>
+          <option value="Certidão negativa">Certidão negativa</option>
+          <option value="Outros">Outros</option>
         </select>
+        <input type="text" id="certEspecieOutro" class="oculto" placeholder="Qual? (ex.: traslado, certidão de procuração)" style="margin-top:8px" aria-label="Outros — qual?">
       </div>
 
       <div class="cel-padrao campo-nc" style="grid-column:1 / -1">
@@ -1631,12 +1633,13 @@ function certLimpar(){
     const bt=document.querySelector('.nc[data-nc="'+id+'"]'); if(bt) bt.classList.remove('sel');
   });
   const arq=el('certArq'); if(arq) arq.value='';
+  el('certEspecie').selectedIndex=0; el('certEspecieOutro').value=''; el('certEspecieOutro').classList.add('oculto');   // v1.37.2
   certAviso('');   // v1.36.1
   renderCertArquivos();
 }
 function certPayload(){
   return {
-    especie: el('certEspecie').value,
+    especie: certEspecie(),
     solicitante:{ nome: el('apresNome').value.trim().toUpperCase(), rg: certValor('certRg'),
                   telefone: el('apresTel').value.trim() },
     parte:{ nome: el('parteNome').value.trim().toUpperCase(),
@@ -1656,7 +1659,20 @@ document.querySelectorAll('.nc[data-nc]').forEach(bt=>{
   bt.addEventListener('click',()=>certMarcarNc(bt.dataset.nc, !S.cert.nc[bt.dataset.nc]));
 });
 CERT_CAMPOS.forEach(id=>{ const inp=el(id); if(inp) inp.addEventListener('input', renderDossie); });
-el('certEspecie').addEventListener('change', renderDossie);
+/* v1.37.2 — "Outros" abre um campo para dizer qual; o cartão leva "Outros — <texto>" */
+function certEspecie(){
+  const v=el('certEspecie').value;
+  if(v!=='Outros') return v;
+  const q=(el('certEspecieOutro').value||'').trim();
+  return q ? 'Outros — '+q : 'Outros';
+}
+el('certEspecie').addEventListener('change', ()=>{
+  const outro = el('certEspecie').value==='Outros';
+  el('certEspecieOutro').classList.toggle('oculto', !outro);
+  if(!outro) el('certEspecieOutro').value='';
+  renderDossie();
+});
+el('certEspecieOutro').addEventListener('input', renderDossie);
 el('certArq').addEventListener('change', async e=>{
   const fs=[...e.target.files]; e.target.value='';
   await certAdicionarArquivos(fs);
