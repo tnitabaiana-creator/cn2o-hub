@@ -20,12 +20,13 @@
          display:flex;align-items:center;gap:14px;flex-wrap:wrap}
   .mono{font-weight:800;color:var(--marinho);letter-spacing:.04em;font-size:20px;line-height:1}
   h1{font-size:17px;margin:0;color:var(--marinho);font-weight:700}
-  .sub{font-size:14px;color:#44506b;margin:2px 0 0}
+  /* v1.36.1: fontes de leitura ≥ 15 px (rótulo ≥ 14 px), cor #33405a (contraste > 9:1) */
+  .sub{font-size:15px;color:#33405a;margin:2px 0 0}
   main{max-width:1100px;margin:0 auto;padding:18px}
   .caixa{background:#fff;border:1px solid #d7dbe4;border-radius:12px;padding:16px 18px;margin-bottom:14px}
-  .rot{font-size:13.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--vinho);font-weight:700}
+  .rot{font-size:14px;letter-spacing:.12em;text-transform:uppercase;color:var(--vinho);font-weight:700}
   .nome{font-size:19px;font-weight:700;color:var(--marinho);margin-top:4px;word-break:break-word}
-  .meta{font-size:14.5px;color:#44506b;margin-top:4px}
+  .meta{font-size:15px;color:#33405a;margin-top:4px}
   .visor{background:#fff;border:1px solid #d7dbe4;border-radius:12px;overflow:hidden;min-height:60vh}
   .visor iframe,.visor img{display:block;width:100%;border:0}
   .visor iframe{height:78vh}
@@ -37,7 +38,7 @@
   a.botao.claro{background:#fff;color:var(--marinho);border:2px solid var(--marinho)}
   .aviso{background:var(--palha);border:1px solid #e3d9b4;border-radius:10px;padding:14px 16px;font-size:16px}
   .erro{background:#fdeceb;border:1px solid #e9b7b2;border-radius:10px;padding:14px 16px;font-size:16px}
-  .nota{font-size:14px;color:#44506b;margin-top:10px}
+  .nota{font-size:15px;color:#33405a;margin-top:10px}
 </style>
 </head>
 <body>
@@ -60,7 +61,21 @@ const pega=k=>{try{return sessionStorage.getItem(k)||localStorage.getItem(k)}cat
 const TOKEN=pega('cn2o_token');
 const area=document.getElementById('area');
 const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-const id=decodeURIComponent((location.hash||'').replace(/^#/,'').trim());
+// v1.36.1: "%" malformado no link faz decodeURIComponent lançar — vira "Link incompleto"
+const id=(()=>{ try{ return decodeURIComponent((location.hash||'').replace(/^#/,'').trim()); }catch(e){ return ''; } })();
+
+/* v1.36.1 — nome do arquivo: filename*=UTF-8''... (RFC 5987) primeiro; senão filename="..."; senão 'documento' */
+function nomeDoArquivo(disp){
+  const m5987=/filename\*\s*=\s*([^']*)'[^']*'([^;]+)/i.exec(disp||'');
+  if(m5987){
+    try{ const n=decodeURIComponent(m5987[2].trim().replace(/^"|"$/g,'')); if(n) return n; }catch(e){ /* cai no filename= */ }
+  }
+  const mq=/(?:^|;)\s*filename\s*=\s*"([^"]*)"/i.exec(disp||'');
+  if(mq && mq[1].trim()) return mq[1].trim();
+  const ms=/(?:^|;)\s*filename\s*=\s*([^;"\s][^;]*)/i.exec(disp||'');
+  if(ms && ms[1].trim()) return ms[1].trim();
+  return 'documento';
+}
 
 function caixaErro(titulo, detalhe, comLogin){
   area.innerHTML='<div class="erro"><b>'+esc(titulo)+'</b><br>'+esc(detalhe)+'</div>'+
@@ -82,8 +97,7 @@ function tamanho(n){
     if(!r.ok) throw new Error('HTTP '+r.status);
     const tipo=(r.headers.get('Content-Type')||'').split(';')[0];
     const disp=r.headers.get('Content-Disposition')||'';
-    const m=/filename="?([^"]+)"?/.exec(disp);
-    const nome=m?m[1]:'documento';
+    const nome=nomeDoArquivo(disp);   // v1.36.1 — também vai no atributo download do Baixar
     const blob=await r.blob();
     const url=URL.createObjectURL(blob);
     const visor = tipo==='application/pdf'

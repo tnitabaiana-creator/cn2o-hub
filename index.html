@@ -9796,6 +9796,7 @@ restaurarSessao();
           fato('Apresentante', p.apresentante && p.apresentante.nome ? esc(p.apresentante.nome) + tel(p.apresentante) : '') +
           fato('Parte / comprador(a)', p.parte && p.parte.nome ? esc(p.parte.nome) + tel(p.parte) : '') +
           fato('Vendedor(a)', p.vendedor && p.vendedor.nome ? esc(p.vendedor.nome) : '') +
+          fato(x.ato === 'DOA' ? 'Valor atribuído ao bem' : 'Preço ajustado', x.preco ? esc(x.preco) : '') +   /* v1.37 */
           fato('Protocolado por', x.escrevente_protocolo ? esc(x.escrevente_protocolo) : '') +
         '</div>' +
         (x.quadro || x.lista || (x.com_quem && x.com_quem.length) ?

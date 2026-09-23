@@ -159,17 +159,28 @@ input[type=text],input[type=tel],input[type=date],select,textarea{font-size:16px
 .linha-nc{display:flex;gap:8px;align-items:stretch}
 .linha-nc input{flex:1;min-width:0}
 .nc{flex:0 0 auto;border:2px solid #c9ced8;background:#fff;color:#44506b;border-radius:10px;
-    padding:0 12px;font:inherit;font-size:14px;line-height:1.1;cursor:pointer;white-space:nowrap}
+    padding:0 12px;font:inherit;font-size:15px;line-height:1.1;cursor:pointer;white-space:nowrap} /* v1.36.1: 15px */
 .nc:hover{border-color:#9aa4b6}
 .nc.sel{background:#631325;border-color:#631325;color:#fff;font-weight:700}
-.campo-nc input:disabled{background:#f1f2f5;color:#7b8494;font-style:italic}
+.campo-nc input:disabled{background:#fff;color:#202a3a;font-style:italic} /* v1.36.1: sem cinza-claro */
+/* v1.36.1 — legibilidade do bloco CERT: placeholder escuro o bastante (≥ 4,5:1) */
+#blCert input::placeholder{color:#5a6272;opacity:1}
+#blCert input:disabled::placeholder{color:#202a3a;opacity:1;font-style:italic}
+/* v1.37 — campo de preço ajustado */
+input.moeda{font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+#perguntas input::placeholder{color:#5a6272;opacity:1}   /* dicas legíveis também na triagem */
+/* v1.36.1 — rótulos e título do bloco CERT em fonte generosa (só neste bloco) */
+#blCert h2{font-size:15.5px}
+#blCert h2 span.n{font-size:14px}
+#blCert label.rotulo{font-size:15px}
+.nota-cert{font-size:15px;line-height:1.55;color:#202a3a;text-align:left}
 .lista-anexos{list-style:none;margin:10px 0 0;padding:0}
 .lista-anexos li{display:flex;align-items:center;gap:10px;background:#fbf5dd;border:1px solid #e3d9b4;
-    border-radius:10px;padding:9px 12px;margin-bottom:7px;font-size:14.5px}
+    border-radius:10px;padding:9px 12px;margin-bottom:7px;font-size:15px} /* v1.36.1: 15px */
 .lista-anexos .arq-nome{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.lista-anexos .arq-tam{color:#44506b;font-size:13.5px;white-space:nowrap}
+.lista-anexos .arq-tam{color:#44506b;font-size:14px;white-space:nowrap} /* v1.36.1: 14px */
 .lista-anexos .arq-x{border:0;background:#631325;color:#fff;border-radius:8px;padding:5px 10px;
-    font:inherit;font-size:13px;cursor:pointer}
+    font:inherit;font-size:14px;cursor:pointer} /* v1.36.1: 14px */
 #certArq{font-size:15px}
 .aviso-fil{margin-top:12px}
 .arq-oculto{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
@@ -252,7 +263,7 @@ input[type=text],input[type=tel],input[type=date],select,textarea{font-size:16px
         <label class="rotulo versalete" for="parteNome" id="rotParte">Parte envolvida</label>
         <input type="text" id="parteNome" placeholder="Nome completo" autocomplete="off">
       </div>
-      <div class="cel-padrao">
+      <div class="cel-padrao" id="celParteTel"><!-- v1.36.1: some no CERT (LGPD) -->
         <label class="rotulo versalete" for="parteTel">Telefone</label>
         <input type="tel" id="parteTel" placeholder="(79) 9____-____">
       </div>
@@ -273,7 +284,7 @@ input[type=text],input[type=tel],input[type=date],select,textarea{font-size:16px
   <!-- 2c · PEDIDO DE CERTIDÃO (v1.36) -->
   <section class="bloco oculto" id="blCert">
     <h2 class="versalete"><span class="n">✦</span>Pedido de certidão — dados informados pelo solicitante</h2>
-    <div class="nota-rail" style="text-align:left;margin:0 0 12px">Marque <b>“não consta”</b> no que o solicitante disser que não sabe. Campo em branco e “não consta” são coisas diferentes: em branco ninguém perguntou; “não consta” é resposta, e a escrevente não vai procurar o que não existe.</div>
+    <div class="nota-cert" style="margin:0 0 12px">Marque <b>“não consta”</b> no que o solicitante disser que não sabe. Campo em branco e “não consta” são coisas diferentes: em branco ninguém perguntou; “não consta” é resposta, e a escrevente não vai procurar o que não existe.</div>
     <div class="grade">
       <div class="cel-padrao campo-nc">
         <label class="rotulo versalete" for="certRg">RG do solicitante</label>
@@ -341,8 +352,10 @@ input[type=text],input[type=tel],input[type=date],select,textarea{font-size:16px
         <label class="rotulo versalete" for="certArq">Documentos que servem de base à pesquisa nos livros</label>
         <input type="file" id="certArq" accept="application/pdf,image/jpeg,image/png,image/webp" multiple class="arq-oculto">
         <label class="btn-arq" for="certArq">📎 Anexar PDF ou foto</label>
+        <!-- v1.36.1: aviso na página no lugar do alert() -->
+        <div class="aviso oculto" id="certAviso" role="alert"></div>
         <ul class="lista-anexos" id="certArqLista"></ul>
-        <div class="nota-rail" style="text-align:left;margin-top:6px">PDF ou foto, até 8 MB cada, no máximo 5. O arquivo fica guardado no cartório; o cartão do Trello recebe só o link, que abre com a senha do Hub.</div>
+        <div class="nota-cert" style="margin-top:6px">PDF ou foto, até 8 MB cada, no máximo 5. O arquivo fica guardado no cartório; o cartão do Trello recebe só o link, que abre com a senha do Hub.</div>
       </div>
     </div>
     <div class="aviso aviso-fil oculto" id="certAvisoFil">⚠ O pedido não traz livro, folhas nem data: a pesquisa vai partir do nome. Nesse caso a <b>filiação é obrigatória</b> — informe o pai ou a mãe da pessoa que participa do ato (homônimo é o erro mais caro do acervo).</div>
@@ -425,8 +438,9 @@ const PAPEIS = {
   'ATA-U':{t:null,a:null,parte:'Requerente (possuidor)',ra:'Requerente',apres:'Advogado(a) — obrigatório (art. 216-A da LRP)'},
   'ATA-W/A':{t:null,a:null,parte:'Solicitante (participante da conversa)',ra:'Solicitante',apres:'Apresentante — o próprio solicitante ou advogado(a)'},
   /* v1.36 — CERT: quem pede é o solicitante (entra no lugar do apresentante) e a
-     "parte" é a pessoa que participou do ato procurado, que pode ser outra. */
-  'CERT':{t:null,a:null,parte:'Pessoa que participa do ato',ra:'Solicitante',apres:'Solicitante',ph:'Nome completo de quem consta do ato'}
+     "parte" é a pessoa que participou do ato procurado, que pode ser outra.
+     v1.36.1: ra = papel de parte_envolvida (a pessoa do ato), não o solicitante. */
+  'CERT':{t:null,a:null,parte:'Pessoa que participa do ato',ra:'Pessoa que participa do ato',apres:'Solicitante',ph:'Nome completo de quem consta do ato'}
 };
 const APRES_PADRAO='Apresentante';
 const ATO_NOME={'CV-Urbano':'Escritura de Compra e Venda (imóvel urbano)','CV-Rural':'Escritura de Compra e Venda (imóvel rural)','CDP':'Escritura de Cessão de Direitos Possessórios','CDH':'Escritura de Cessão de Direitos Hereditários','DOA':'Escritura de Doação','TEST':'Testamento Público','INV':'Escritura de Inventário e Partilha','PER':'Escritura de Permuta','DIV':'Escritura de Divórcio','UE':'Escritura de União Estável','DUE':'Escritura de Dissolução de União Estável','RERRAT':'Escritura de Re-ratificação','ATA-U':'Ata Notarial para Usucapião','ATA-W/A':'Ata Notarial de Mensagens e Áudios','CERT':'Certidão ou Traslado de Ato Notarial'};
@@ -741,7 +755,7 @@ function perguntasPermuta(){
       {v:'Sim', inj:['Guia de ITBI de cada imóvel']},
       {v:'Não — municípios diferentes', inj:['Guia de ITBI em cada município'], aviso:'Cada município cobra o ITBI do imóvel situado nele: duas guias, duas CNDs.'}
     ]},
-    {id:'valores', tipo:'texto', titulo:'Valores atribuídos — bem 1 / bem 2 / torna', placeholder:'Ex.: 200.000 / 150.000 / torna 50.000'},
+    {id:'valores', tipo:'texto', titulo:'Preço ajustado — valores atribuídos: bem 1 / bem 2 / torna', placeholder:'Ex.: R$ 200.000,00 / R$ 150.000,00 / torna R$ 50.000,00', obrigatorio:true},
     {id:'torna_pag', titulo:'Torna / dinheiro — forma de pagamento', dependeDe:['config',['Imóvel por imóvel — com torna em dinheiro','Imóvel por bem móvel + dinheiro']], ops:[
       {v:'Já paga', inj:['Comprovante do pagamento da torna'], aviso:'Se por transferência ou cheque, exigir o comprovante de imediato.'},
       {v:'No ato da lavratura'},
@@ -1040,6 +1054,15 @@ function perguntasDoAto(ato){
     {v:'Não'},
     {v:'Sim', inj:['Procuração com poderes específicos','RG/CPF do procurador']}
   ]});
+
+  // v1.37 — Preço ajustado: o valor declarado pelas partes vem ANTES do momento do
+  // pagamento, em todo negócio patrimonial. Na doação não há preço: é o valor
+  // atribuído ao bem (base do ITCMD), declarado pelas partes.
+  if(ato==='DOA'){
+    Q.push({id:'preco', tipo:'moeda', titulo:'Valor atribuído ao bem doado (declarado pelas partes)', placeholder:'R$ 0,00', obrigatorio:true});
+  }else{
+    Q.push({id:'preco', tipo:'moeda', titulo:'Preço ajustado (valor declarado pelas partes)', placeholder:'R$ 0,00', obrigatorio:true});
+  }
 
   // Pagamento (exceto DOA) — momento primeiro; forma dentro de cada momento
   if(ato!=='DOA'){
@@ -1347,6 +1370,9 @@ document.querySelectorAll('#chipsAto .chip').forEach(c=>{
     el('obs').rows = ehTest ? 7 : 3;
     const ehCert = S.ato==='CERT';
     if(ehCert) certLimpar();
+    /* v1.36.1 — LGPD: no CERT a parte é terceiro; sem telefone, o WhatsApp não o avisa */
+    el('celParteTel').classList.toggle('oculto', ehCert);
+    if(ehCert) el('parteTel').value='';
     el('blCert').classList.toggle('oculto', !ehCert);
     el('blTriagem').classList.toggle('oculto', ehCert);   // a triagem do CERT são os campos acima
     el('obsTitulo').textContent = ehCert ? 'Observações do balcão' : el('obsTitulo').textContent;
@@ -1397,6 +1423,30 @@ function renderExtras(){
   box.appendChild(g);
 }
 function extrasOk(){ return (PAPEIS[S.ato]?.extras||[]).every(([id])=>(S.extras[id]||'').trim()); }
+/* v1.37 — "R$ 1.234,56" a partir do que a escrevente digitar (1234,56 / 1.234,56 / 1234.56 / R$1234).
+   Devolve null quando não há número nenhum (o campo fica como está). */
+function formatarMoeda(v){
+  let t=String(v||'').trim(); if(!t) return null;
+  t=t.replace(/[Rr]\$/,'').replace(/\s+/g,'');
+  if(!/^[\d.,]+$/.test(t)) return null;      // só dígitos, ponto e vírgula — lixo não vira preço
+  const temVirg=t.includes(','), temPonto=t.includes('.');
+  let inteiro=t, cent='';
+  if(temVirg){ const i=t.lastIndexOf(','); inteiro=t.slice(0,i); cent=t.slice(i+1); }
+  else if(temPonto && /\.\d{1,2}$/.test(t)){ const i=t.lastIndexOf('.'); inteiro=t.slice(0,i); cent=t.slice(i+1); }
+  inteiro=inteiro.replace(/\D/g,'')||'0'; cent=(cent.replace(/\D/g,'')+'00').slice(0,2);
+  const n=Number(inteiro+'.'+cent);
+  if(!isFinite(n) || n<=0 || n>=1e12) return null;   // zero não é preço; acima do trilhão é erro de digitação
+  return 'R$ '+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+/* perguntas de texto/moeda marcadas como obrigatórias precisam estar preenchidas */
+function textosObrigatoriosOk(){
+  if(!S.ato) return true;
+  return perguntasDoAto(S.ato).every(q=>{
+    if(!(q.obrigatorio && visivel(q))) return true;
+    const v=(S.respostas[q.id]||'').trim();
+    return q.tipo==='moeda' ? formatarMoeda(v)!==null : !!v;   // moeda: só vale número > 0
+  });
+}
 function papeisEnot(){
   const P=PAPEIS[S.ato]||{}; const ehTest=S.ato==='TEST';
   return { t: (ehTest||S.ato==='INV') ? null : (P.t||null), a: ehTest ? null : (P.a||null) };
@@ -1434,15 +1484,24 @@ function renderPerguntas(){
     if(!visivel(q)) { delete S.respostas[q.id]; return; }
     const div=document.createElement('div'); div.className='pergunta'+(q.dependeDe?' sub':'');
     div.innerHTML=`<div class="titulo-p">${q.titulo}</div>`;
-    if(q.tipo==='data'||q.tipo==='texto'){
+    if(q.tipo==='data'||q.tipo==='texto'||q.tipo==='moeda'){
       const inp=document.createElement('input');
       inp.type = q.tipo==='data' ? 'date' : 'text';
-      inp.style.maxWidth = q.tipo==='data' ? '220px' : '420px';
+      inp.style.maxWidth = q.tipo==='data' ? '220px' : (q.tipo==='moeda' ? '300px' : '420px');
       if(q.placeholder) inp.placeholder=q.placeholder;
+      inp.id='q_'+q.id;
+      if(q.obrigatorio) inp.setAttribute('aria-required','true');
       inp.value=S.respostas[q.id]||'';
       const ev = q.tipo==='data' ? 'change' : 'input';
       inp.addEventListener(ev,()=>{S.respostas[q.id]=inp.value;renderDossie();});
-      div.appendChild(inp); box.appendChild(div); return;
+      if(q.tipo==='moeda'){
+        // v1.37 — máscara de moeda pt-BR ao sair do campo: "150000" → "R$ 150.000,00"
+        inp.inputMode='decimal'; inp.classList.add('moeda');
+        inp.addEventListener('blur',()=>{ const f=formatarMoeda(inp.value); if(f!==null){ inp.value=f; S.respostas[q.id]=f; renderDossie(); } });
+      }
+      div.appendChild(inp);
+      if(q.aviso){ const av=document.createElement('div'); av.className='aviso'; av.textContent='⚠ '+q.aviso; av.style.marginTop='8px'; div.appendChild(av); }
+      box.appendChild(div); return;
     }
     const ops=document.createElement('div'); ops.className='opcoes';
     q.ops.forEach(o=>{
@@ -1499,6 +1558,7 @@ function certFiliacaoOk(){
   return !!(certDado('certPai') || certDado('certMae'));
 }
 function certOk(){
+  if(S.enviando) return false;            // v1.36.1: nada de segundo clique durante o envio
   if(S.ato!=='CERT') return true;
   return !!(el('parteNome').value.trim()) && certFiliacaoOk();
 }
@@ -1527,17 +1587,25 @@ function lerArquivo(f){
     r.readAsDataURL(f);
   });
 }
+/* v1.36.1 — aviso dentro da página (no lugar do alert); vazio = esconde */
+function certAviso(msg){
+  const a = el('certAviso'); if(!a) return;
+  a.textContent = msg || '';
+  a.classList.toggle('oculto', !msg);
+}
 async function certAdicionarArquivos(lista){
+  const erros=[];
   for(const f of lista){
-    if(S.cert.arquivos.length >= CERT_MAX_ARQ){ alert('No máximo '+CERT_MAX_ARQ+' arquivos por pedido.'); break; }
+    if(S.cert.arquivos.length >= CERT_MAX_ARQ){ erros.push('No máximo '+CERT_MAX_ARQ+' arquivos por pedido.'); break; }
     const tipo=(f.type||'').toLowerCase();
-    if(CERT_TIPOS.indexOf(tipo)<0){ alert('"'+f.name+'" não é PDF nem imagem — não anexei.'); continue; }
-    if(f.size > CERT_MAX_BYTES){ alert('"'+f.name+'" passa de 8 MB — reduza ou envie menos páginas.'); continue; }
+    if(CERT_TIPOS.indexOf(tipo)<0){ erros.push('"'+f.name+'" não é PDF nem imagem — não anexei.'); continue; }
+    if(f.size > CERT_MAX_BYTES){ erros.push('"'+f.name+'" passa de 8 MB — reduza ou envie menos páginas.'); continue; }
     try{
       const base64 = await lerArquivo(f);
       S.cert.arquivos.push({nome:f.name, tipo, tamanho:f.size, base64});
-    }catch(e){ alert(e.message); }
+    }catch(e){ erros.push(e.message); }
   }
+  certAviso(erros.length ? '⚠ '+erros.join(' ') : '');   // anexo válido sem erro: o aviso some
   renderCertArquivos(); renderDossie();
 }
 
@@ -1563,6 +1631,7 @@ function certLimpar(){
     const bt=document.querySelector('.nc[data-nc="'+id+'"]'); if(bt) bt.classList.remove('sel');
   });
   const arq=el('certArq'); if(arq) arq.value='';
+  certAviso('');   // v1.36.1
   renderCertArquivos();
 }
 function certPayload(){
@@ -1652,7 +1721,7 @@ function renderDossie(){
   const pronto = S.ato==='TEST'
     ? !!((S.qual['testador_nome']||'').trim() && (S.qual['testador_telefone']||'').trim())
     : !!(el('apresNome').value.trim() && el('apresTel').value.trim() && el('parteNome').value.trim());
-  el('btnProt').disabled=!(pronto && enotRespondido() && extrasOk() && certOk());
+  el('btnProt').disabled=!(pronto && enotRespondido() && extrasOk() && certOk() && textosObrigatoriosOk());
 }
 
 /* ============================================================
@@ -1725,23 +1794,35 @@ el('btnProt').addEventListener('click',async ()=>{
   if(ehCert){
     cert = certPayload();
     if(S.cert.arquivos.length && ENDPOINT_RAILWAY){
-      el('btnProt').disabled=true; el('btnProt').textContent='Enviando anexos…';
+      /* v1.36.1 — UM arquivo por requisição (5 × 8 MB em base64 juntos passam do
+         limite de 24 MB do corpo). Qualquer falha interrompe: nada é protocolado. */
+      el('btnProt').disabled=true; certAviso(''); S.enviando=true;
+      const total=S.cert.arquivos.length;
+      cert.anexos=[];
+      let n=0;
       try{
-        const r=await fetch(ENDPOINT_RAILWAY+'/hub/cert/anexos',{
-          method:'POST',
-          headers:{'Content-Type':'application/json','X-Auth-Token':TOKEN||''},
-          body:JSON.stringify({arquivos:S.cert.arquivos.map(a=>({nome:a.nome,tipo:a.tipo,base64:a.base64}))})
-        });
-        const j=await r.json();
-        if(r.status===401){ limpaSessao(); location.href='index.html'; return; }
-        if(!r.ok) throw new Error(j.erro||('HTTP '+r.status));
-        cert.anexos = j.anexos||[];
+        for(const a of S.cert.arquivos){
+          n++;
+          el('btnProt').textContent='Enviando anexo '+n+' de '+total+'…';
+          const r=await fetch(ENDPOINT_RAILWAY+'/hub/cert/anexos',{
+            method:'POST',
+            headers:{'Content-Type':'application/json','X-Auth-Token':TOKEN||''},
+            body:JSON.stringify({arquivos:[{nome:a.nome,tipo:a.tipo,base64:a.base64}]})
+          });
+          if(r.status===401){ limpaSessao(); location.href='index.html'; return; }
+          let j={}; try{ j=await r.json(); }catch(_){ /* resposta sem JSON (ex.: 413 do proxy) */ }
+          if(!r.ok) throw new Error(j.erro||('HTTP '+r.status));
+          cert.anexos.push(...(j.anexos||[]));
+        }
       }catch(e){
-        alert('Falha ao enviar os anexos: '+e.message+'\nNada foi protocolado. Tente de novo.');
+        certAviso('⚠ Falha ao enviar o anexo '+n+' de '+total+' ("'+(S.cert.arquivos[n-1]||{}).nome+'"): '+
+                  e.message+'. Nada foi protocolado — confira a internet e clique em Protocolizar de novo.');
+        el('certAviso').scrollIntoView({behavior:'smooth', block:'center'});
+        S.enviando=false;
         el('btnProt').disabled=false; el('btnProt').textContent='Protocolizar';
         return;
       }
-      el('btnProt').textContent='Protocolizar';
+      el('btnProt').textContent='Protocolizar'; S.enviando=false;
     }else if(S.cert.arquivos.length){
       cert.anexos = S.cert.arquivos.map((a,i)=>({id:'simulado-'+(i+1), nome:a.nome, tipo:a.tipo, tamanho:a.tamanho}));
     }
@@ -1763,7 +1844,8 @@ el('btnProt').addEventListener('click',async ()=>{
     assinatura_enotariado: ehTest
       ? {testador: S.qtest.enot==='Sim'}
       : (()=>{ const pe=papeisEnot(); return {transmitente: pe.t ? S.enot.t==='Sim' : null, adquirente: pe.a ? S.enot.a==='Sim' : null, papeis:{transmitente:pe.t, adquirente:pe.a}}; })(),
-    parte_envolvida:{papel:P.ra, nome:parte, telefone: ehTest? null : (el('parteTel').value.trim()||null)},
+    // v1.36.1: CERT nunca leva telefone da parte (LGPD — terceiro não é avisado)
+    parte_envolvida:{papel:P.ra, nome:parte, telefone: (ehTest||ehCert)? null : (el('parteTel').value.trim()||null)},
     qualificacao: ehTest ? (()=>{
       const pes=pref=>({nome:S.qual[pref+'_nome']||null,estado_civil:S.qual[pref+'_estado_civil']||null,profissao:S.qual[pref+'_profissao']||null,endereco:S.qual[pref+'_endereco']||null,rg:S.qual[pref+'_rg']||null,cpf:S.qual[pref+'_cpf']||null});
       const nb=parseInt(S.qtest.benefQtd||'1',10);
@@ -1778,6 +1860,7 @@ el('btnProt').addEventListener('click',async ()=>{
     manifestacao_vontade: ehTest ? (el('obs').value.trim()||null) : undefined,
     cert: cert || undefined,
     escrevente: NOME_SESSAO || null, // informativo — o backend usa a sessão
+    preco: (S.respostas.preco || S.respostas.valores || S.respostas.valor || null),   // v1.37 — preço ajustado / valor declarado (ATA-U: 'valor')
     triagem:S.respostas,
     observacoes_nao_documentadas: el('obs').value.trim() || null,
     dossie:{recebidos, pendentes},
@@ -1805,7 +1888,7 @@ ${ehTest?'':'Apresentante: '+apres+'\n'}
 
 Guarde este número: use-o para consultar o andamento do seu ato em cn2oita.com.br ou informe-o à atendente do cartório.`;
 
-  const telParte = ehTest ? '' : el('parteTel').value.trim();
+  const telParte = (ehTest||ehCert) ? '' : el('parteTel').value.trim();   // v1.36.1: CERT só avisa o solicitante
   payload.recibo_destinatarios = telParte ? ['apresentante','parte_envolvida'] : ['apresentante'];
 
   let numeroReal='{NNNN}';
@@ -1821,7 +1904,7 @@ Guarde este número: use-o para consultar o andamento do seu ato em cn2oita.com.
       if(r.status===401){ limpaSessao(); location.href='index.html'; return; }
       if(!r.ok) throw new Error(j.erro||('HTTP '+r.status));
       numeroReal=j.numero;
-      if(j.prazo) S.prazoInfo=' · Prazo p/ lavratura: '+new Date(j.prazo).toLocaleDateString('pt-BR');
+      if(j.prazo) S.prazoInfo=(ehCert?' · Prazo p/ expedição: ':' · Prazo p/ lavratura: ')+new Date(j.prazo).toLocaleDateString('pt-BR');
     }catch(e){
       alert('Falha ao protocolar: '+e.message+'\nNada foi criado. Tente novamente ou avise o tabelião.');
       el('btnProt').disabled=false; el('btnProt').textContent='Protocolizar';
@@ -1832,6 +1915,7 @@ Guarde este número: use-o para consultar o andamento do seu ato em cn2oita.com.
 
   el('reciboDest').textContent = ehTest
     ? `Disparo: ${telApresV} (testador)`
+    : ehCert ? `Disparo: ${el('apresTel').value.trim()} (solicitante)`   // v1.36.1
     : (telParte
       ? `Disparo duplo: ${el('apresTel').value.trim()} (apresentante) e ${telParte} (parte envolvida)`
       : `Disparo: ${el('apresTel').value.trim()} (apresentante) — parte sem telefone cadastrado`);
