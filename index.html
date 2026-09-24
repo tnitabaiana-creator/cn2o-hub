@@ -2745,6 +2745,42 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 }
 .itbi-so-leitor{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
+/* ==========================================================================
+   v1.38 — RELATÓRIOS DAS ESCREVENTES (aba do editor, só o Tabelião)
+   Mesma família da Numeração e da Auditoria: texto escuro sobre claro, ≥ 14 px,
+   nada de cinza-claro; filtros e tabela reaproveitam .aud-*, o destaque dos números
+   reaproveita .num-quadro. Situação em lista: ✓ marinho quando está certo, ⚠ vinho
+   quando falta algo. A prévia é o próprio e-mail (branco, 680 px) num quadro.
+   ATENÇÃO (lição da v1.32): todo @media aqui embaixo está FECHADO.
+   ========================================================================== */
+.rel-situacao{list-style:none;margin:10px 0 4px;padding:0;display:flex;flex-direction:column;gap:6px}
+.rel-situacao li{position:relative;font-size:15px;line-height:1.5;color:#202a3a;padding:8px 12px 8px 36px;border:1px solid rgba(32,42,58,.22);border-radius:9px;background:#ffffff}
+.rel-situacao li::before{content:"•";position:absolute;left:14px;top:8px;font-weight:900;color:#202a3a}
+.rel-situacao li.rel-ok::before{content:"✓"}
+.rel-situacao li.rel-alerta{border-color:rgba(99,19,37,.45);background:#fbf5f6}
+.rel-situacao li.rel-alerta::before{content:"⚠";color:#631325}
+.rel-situacao b{color:#631325}
+.rel-campo-periodo{flex:2 1 260px}
+#edRelEnviar.on,#edRelCarga.on{background:#202a3a;border-color:#202a3a;color:#ffffff}
+.rel-previa{display:block;width:100%;height:72vh;min-height:480px;border:1px solid rgba(32,42,58,.28);border-radius:10px;background:#ffffff}
+.rel-para{min-width:170px}
+.rel-erro{margin-top:4px;font-size:13.5px;line-height:1.4;color:#631325;word-break:break-word}
+@media (max-width:760px){
+  .rel-campo-periodo{flex:1 1 100%}
+  .rel-previa{height:64vh;min-height:380px}
+}
+/* o editor é branco nos dois temas: estas regras só FIXAM as cores (ver a nota da v1.34) */
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .rel-situacao li{background:#ffffff;border-color:rgba(32,42,58,.22);color:#202a3a}
+  :root:not([data-theme="light"]) .rel-situacao li.rel-alerta{background:#fbf5f6;border-color:rgba(99,19,37,.45)}
+  :root:not([data-theme="light"]) .rel-situacao b,:root:not([data-theme="light"]) .rel-erro{color:#631325}
+  :root:not([data-theme="light"]) .rel-previa{background:#ffffff;border-color:rgba(32,42,58,.28)}
+}
+:root[data-theme="dark"] .rel-situacao li{background:#ffffff;border-color:rgba(32,42,58,.22);color:#202a3a}
+:root[data-theme="dark"] .rel-situacao li.rel-alerta{background:#fbf5f6;border-color:rgba(99,19,37,.45)}
+:root[data-theme="dark"] .rel-situacao b,:root[data-theme="dark"] .rel-erro{color:#631325}
+:root[data-theme="dark"] .rel-previa{background:#ffffff;border-color:rgba(32,42,58,.28)}
+
 </style>
 </head>
 <body>
@@ -6814,12 +6850,13 @@ function criarEditorRico(inicial, placeholder) {
 /* ============================================================
    MODO DO TABELIÃO — editar e publicar o mural
 ============================================================ */
-let ED = null; // { copia, base, sujo, aba, editando, editor, confirmarSaida, eqEdit, aud }
+let ED = null; // { copia, base, sujo, aba, editando, editor, confirmarSaida, eqEdit, aud, rel }
 function abrirEditorMural() {
   if (!SESSAO.admin) return;
   const partida = MURAL || normalizarLocal({});
   // eqEdit: quem está com a linha aberta na aba Equipe · aud: filtros da aba Auditoria (v1.34)
-  ED = { copia: clone(partida), base: MURAL_META.atualizado_em || null, sujo: false, aba: 'avisos', editando: null, editor: null, confirmarSaida: false, eqEdit: null, aud: null };
+  // rel: período escolhido e situação da aba Relatórios (v1.38)
+  ED = { copia: clone(partida), base: MURAL_META.atualizado_em || null, sujo: false, aba: 'avisos', editando: null, editor: null, confirmarSaida: false, eqEdit: null, aud: null, rel: null };
   abrirSub('editar');
 }
 function htmlEditorMural() {
@@ -6827,7 +6864,7 @@ function htmlEditorMural() {
     '<p class="sub-data">Monte os avisos com a formatação que quiser e publique — a mudança aparece para toda a equipe na hora.</p>' +
     '<p class="sub-data">Frases do Dia: <a href="' + FRASES_EDITAR_URL + '" target="_blank" rel="noopener">editar a planilha no Drive</a> · escreva HOJE na coluna \u201cfixar\u201d para todos verem a mesma frase.</p>' +
     '<div class="ed-abas">' +
-      ['avisos:Avisos', 'aniversariantes:Aniversariantes', 'metas:Metas', 'equipe:Equipe', 'numeracao:Numeração', 'auditoria:Auditoria', 'historico:Histórico', 'consumo:Consumo de IA'].map(function (x) {
+      ['avisos:Avisos', 'aniversariantes:Aniversariantes', 'metas:Metas', 'equipe:Equipe', 'numeracao:Numeração', 'auditoria:Auditoria', 'relatorios:Relatórios', 'historico:Histórico', 'consumo:Consumo de IA'].map(function (x) {
         const p = x.split(':');
         return '<button type="button" class="ed-aba" data-aba="' + p[0] + '">' + p[1] + '</button>';
       }).join('') +
@@ -6860,6 +6897,7 @@ function pintarAba() {
   else if (ED.aba === 'equipe') pintarAbaEquipe(painel);
   else if (ED.aba === 'numeracao') pintarAbaNumeracao(painel);
   else if (ED.aba === 'auditoria') pintarAbaAuditoria(painel);
+  else if (ED.aba === 'relatorios') pintarAbaRelatorios(painel);
   else if (ED.aba === 'historico') pintarAbaHistorico(painel);
   else if (ED.aba === 'consumo') pintarAbaConsumo(painel);
 }
@@ -7206,6 +7244,7 @@ const AUD_FERR_NOME = {
   pdf: 'PDF', qualificacao: 'Extrator', matricula: 'e-Analista', minuta: 'Gerador de Minuta',
   minuta_ue: 'Gerador de Minuta', transpor: 'Transposição', descricao: 'Descrição',
   equipe: 'Equipe', 'zerar-senha': 'Zerar senha', editar: 'Editar', numeracao: 'Numeração',
+  relatorios: 'Relatórios',
   publicar: 'Publicar', guardar: 'Guardar', gravar: 'Gravar', apagar: 'Apagar',
   cn2o: 'Acervo 2º Ofício', antigo1: 'Acervo 1º Ofício'
 };
@@ -7388,6 +7427,303 @@ function pintarAbaConsumo(painel) {
       '<tr><td><b>Total do mês</b></td><td></td><td class="num"><b>' + usos + '</b></td><td class="num"><b>US$ ' + total.toFixed(2).replace('.', ',') + '</b></td></tr></tbody></table>' +
       '<p class="sub-data" style="margin-top:8px">Custo estimado pela tabela de preços do modelo (Gemini), só das análises concluídas.</p>';
   }).catch(function (e) { if (painel.isConnected) painel.innerHTML = '<p class="ed-vazio">Não consegui ler o consumo (' + esc(e.erro) + ').</p>'; });
+}
+
+/* ============================================================
+   v1.38 — RELATÓRIOS DAS ESCREVENTES (aba do Tabelião)
+   O servidor acompanha os cartões pelo webhook do Trello e manda por e-mail o
+   relatório semanal (segunda, 8h) e o mensal (1º dia útil, 8h) — backend
+   relatorios.js, rotas /hub/relatorios/*. Aqui o Tabelião confere se o rastreio
+   está chegando, vê a prévia de qualquer semana ou mês, baixa o CSV, envia na hora,
+   acompanha os envios e roda a carga do histórico. A prévia é o próprio e-mail, num
+   quadro isolado (sandbox, sem script). Quem entra é o servidor que decide
+   (HUB_ADMINS ou RELATORIOS_ADMINS): um 403 aqui é resposta, não defeito.
+============================================================ */
+const REL_PROVEDOR_NOME = {
+  appsscript: 'Gmail do cartório (Apps Script)', resend: 'Resend',
+  arquivo: 'arquivo no servidor (teste — não sai e-mail)'
+};
+const REL_ROT_ENVIAR = '✉ Enviar agora', REL_ROT_CARGA = 'Rodar carga';
+function relEstado() {
+  if (!ED.rel) ED.rel = { tipo: 'semanal', ref: '', status: null, vigia: null };
+  return ED.rel;
+}
+function relErro(e) {
+  if (e && e.status === 404) return 'o servidor ainda não tem os relatórios — falta publicar o backend v1.38';
+  return (e && e.erro) || 'erro';
+}
+const relNum = function (v) { return Number(v || 0).toLocaleString('pt-BR'); };
+// dd/mm/aaaa a partir de AAAA-MM-DD (as datas de período chegam do servidor sem hora)
+function relDia(s) {
+  s = String(s || '').slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s.slice(8, 10) + '/' + s.slice(5, 7) + '/' + s.slice(0, 4) : '—';
+}
+function relSomaDias(d, n) { return new Date(d.getFullYear(), d.getMonth(), d.getDate() + n); }
+function relIntervalo(ini, fim) {
+  const a = dd(ini.getDate()) + '/' + dd(ini.getMonth() + 1);
+  return (ini.getFullYear() === fim.getFullYear() ? a : a + '/' + ini.getFullYear()) +
+    ' a ' + dd(fim.getDate()) + '/' + dd(fim.getMonth() + 1) + '/' + fim.getFullYear();
+}
+// Os períodos que dá para escolher. "ref" é o dia em que o relatório sairia, na regra do
+// servidor: semanal → a segunda-feira seguinte à semana; mensal → o dia 1º do mês seguinte.
+// O primeiro da lista é o período em curso (parcial); o padrão é o último fechado.
+function relPeriodos(tipo) {
+  const hoje = new Date(), out = [];
+  if (tipo === 'semanal') {
+    const segunda = relSomaDias(hoje, -((hoje.getDay() + 6) % 7));
+    for (let i = 0; i < 16; i++) {
+      const ini = relSomaDias(segunda, -7 * i);
+      out.push({ ref: diaISO(relSomaDias(ini, 7)), rotulo: relIntervalo(ini, relSomaDias(ini, 6)) + (i === 0 ? ' (semana atual, até agora)' : '') });
+    }
+  } else {
+    for (let i = 0; i < 12; i++) {
+      const ini = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+      out.push({ ref: diaISO(new Date(ini.getFullYear(), ini.getMonth() + 1, 1)),
+        rotulo: primeiraMaiuscula(MESES[ini.getMonth()]) + ' de ' + ini.getFullYear() + (i === 0 ? ' (mês atual, até agora)' : '') });
+    }
+  }
+  return out;
+}
+// Confirmação em dois toques, como no ajuste da numeração.
+function relArmar(b, chave, rotuloConfirma, rotulo) {
+  b.dataset.confirma = chave; b.textContent = rotuloConfirma; b.classList.add('on');
+  setTimeout(function () { if (b.isConnected && b.dataset.confirma === chave) relDesarmar(b, rotulo); }, 6000);
+}
+function relDesarmar(b, rotulo) { if (!b) return; b.dataset.confirma = ''; b.textContent = rotulo; b.classList.remove('on'); }
+// A prévia (HTML) e o CSV não são JSON: vêm por fetch com o cabeçalho da sessão,
+// como o CSV da auditoria.
+function relBaixar(caminho) {
+  return fetch(CONFIG.endpoint + '/hub/relatorios' + caminho, { headers: { 'X-Auth-Token': SESSAO.token }, cache: 'no-store' })
+    .then(function (r) {
+      if (r.ok) return r;
+      return r.text().then(function (t) {
+        let d = null;
+        try { d = JSON.parse(t); } catch (e) {}
+        if (r.status === 401) sessaoExpirada();
+        throw { status: r.status, erro: (d && d.erro) || ('erro ' + r.status) };
+      });
+    }, function () { throw { status: 0, erro: 'sem conexão com o servidor — verifique a internet e tente de novo' }; });
+}
+
+function pintarAbaRelatorios(painel) {
+  const r = relEstado();
+  painel.innerHTML =
+    '<p class="sub-data" style="margin-bottom:10px">O relatório <b>semanal</b> sai sozinho toda segunda-feira às 8h e o <b>mensal</b> no 1º dia útil do mês, às 8h, por e-mail. Aqui você confere se o acompanhamento dos cartões está chegando, vê qualquer semana ou mês antes, envia na hora e acompanha os envios. Vale na hora, não precisa publicar o mural.</p>' +
+    '<div id="edRelSituacao"><p class="ed-vazio">Lendo a situação dos relatórios…</p></div>' +
+    '<h3 class="ed-titulo versalete">Ver ou enviar um relatório</h3>' +
+    '<div class="aud-filtros">' +
+      '<label class="aud-campo"><span>Relatório</span><select id="edRelTipo"><option value="semanal">Semanal</option><option value="mensal">Mensal</option></select></label>' +
+      '<label class="aud-campo rel-campo-periodo"><span>Período</span><select id="edRelPeriodo"></select></label>' +
+      '<button type="button" class="btn-vinho" id="edRelVer">Ver prévia</button>' +
+      '<button type="button" class="btn-fantasma" id="edRelCsv">⭳ Baixar CSV</button>' +
+      '<button type="button" class="btn-fantasma" id="edRelEnviar">' + REL_ROT_ENVIAR + '</button>' +
+    '</div>' +
+    '<div id="edRelPrevia"></div>' +
+    '<h3 class="ed-titulo versalete">Envios</h3>' +
+    '<div id="edRelEnvios"><p class="ed-vazio">Lendo os envios…</p></div>' +
+    '<h3 class="ed-titulo versalete">Carga do histórico</h3>' +
+    '<p class="sub-data">Busca no Trello os movimentos dos quadros desde a data escolhida. Rode uma vez depois de instalar; repetir não duplica nada. Leva alguns minutos e roda no servidor — pode fechar esta tela.</p>' +
+    '<div class="aud-filtros">' +
+      '<label class="aud-campo"><span>Desde</span><input type="date" id="edRelDesde" value="2026-06-01"></label>' +
+      '<button type="button" class="btn-vinho" id="edRelCarga">' + REL_ROT_CARGA + '</button>' +
+    '</div>' +
+    '<p class="aud-conta" id="edRelCargaSit"></p>';
+  const tipo = el('edRelTipo'), per = el('edRelPeriodo');
+  tipo.value = r.tipo;
+  function pintarPeriodos() {
+    const lista = relPeriodos(tipo.value);
+    per.innerHTML = lista.map(function (p) { return '<option value="' + esc(p.ref) + '">' + esc(p.rotulo) + '</option>'; }).join('');
+    per.value = lista.some(function (p) { return p.ref === r.ref; }) ? r.ref : lista[1].ref;
+    r.tipo = tipo.value; r.ref = per.value;
+    relDesarmar(el('edRelEnviar'), REL_ROT_ENVIAR);
+  }
+  tipo.addEventListener('change', function () { r.ref = ''; pintarPeriodos(); });
+  per.addEventListener('change', function () { r.ref = per.value; relDesarmar(el('edRelEnviar'), REL_ROT_ENVIAR); });
+  pintarPeriodos();
+  el('edRelVer').addEventListener('click', relVerPrevia);
+  el('edRelCsv').addEventListener('click', relBaixarCsv);
+  el('edRelEnviar').addEventListener('click', relEnviar);
+  el('edRelCarga').addEventListener('click', relCarga);
+  el('edRelDesde').addEventListener('input', function () { relDesarmar(el('edRelCarga'), REL_ROT_CARGA); });
+  relCarregarSituacao();
+  relCarregarEnvios();
+}
+const relAbaAberta = function () { return !!(ED && ED.aba === 'relatorios'); };
+
+function relCarregarSituacao() {
+  api('/hub/relatorios/status').then(function (s) {
+    if (!relAbaAberta()) return;
+    relEstado().status = s;
+    relPintarSituacao();
+    relPintarCarga();
+  }).catch(function (e) {
+    if (!relAbaAberta()) return;
+    const box = el('edRelSituacao');
+    if (box) box.innerHTML = '<p class="ed-vazio">Não consegui ler a situação dos relatórios (' + esc(relErro(e)) + ').</p>';
+  });
+}
+function relPintarSituacao() {
+  const s = relEstado().status, box = el('edRelSituacao');
+  if (!s || !box) return;
+  const ra = s.rastreio || {}, w = s.webhooks, em = s.email || {}, inv = ra.assinaturas_invalidas || {};
+  const itens = [];
+  const ok = function (t) { itens.push('<li class="rel-ok">' + t + '</li>'); };
+  const alerta = function (t) { itens.push('<li class="rel-alerta">' + t + '</li>'); };
+  const info = function (t) { itens.push('<li>' + t + '</li>'); };
+  if (ra.webhook_assinado) ok('Acompanhamento ligado: o webhook do Trello chega assinado.');
+  else alerta('Falta o <b>TRELLO_SECRET</b> no servidor: nenhum movimento de cartão entra nos relatórios.');
+  if (inv.total) {
+    alerta(relNum(inv.total) + ' entrega(s) do Trello com assinatura inválida desde o último reinício do servidor' +
+      (inv.ultima ? ' (a última ' + esc(quandoCurto(inv.ultima)) + ')' : '') + ' — confira o <b>TRELLO_SECRET</b>.');
+  }
+  if (w && w.erro) alerta('Não consegui conferir os webhooks no Trello.');
+  else if (w) {
+    if (w.quadros_sem_webhook && w.quadros_sem_webhook.length) {
+      alerta(w.quadros_sem_webhook.length + ' quadro(s) sem webhook para este servidor — rode <b>npm run setup</b> no Railway.');
+    } else ok('Webhooks ativos em todos os quadros acompanhados (' + relNum(w.ativos) + ').');
+    if (w.outras_urls && w.outras_urls.length) alerta('Há webhooks apontando para outro endereço: ' + w.outras_urls.map(esc).join(', ') + '.');
+  }
+  info(ra.ultimo ? 'Último movimento de cartão: <b>' + esc(quandoCurto(ra.ultimo)) + '</b>.'
+    : 'Nenhum movimento de cartão recebido ainda — rode a carga do histórico, no fim desta tela.');
+  if (ra.pendentes) info(relNum(ra.pendentes) + ' movimento(s) aguardando processamento.');
+  if (ra.sem_tipo) alerta(relNum(ra.sem_tipo) + ' ato(s) concluído(s) sem tipo reconhecido pelo título (entram como OUTROS).');
+  if (em.configurado) ok('E-mail: ' + esc(REL_PROVEDOR_NOME[em.provedor] || em.provedor) + '.');
+  else alerta('E-mail <b>não configurado</b>: os relatórios não saem. Falta publicar o Apps Script de envio.');
+  const para = esc((em.para || []).join(', '));
+  if (em.homologacao) alerta('Em homologação: os relatórios vão só para <b>' + para + '</b>. Para valer, preencha RELATORIO_EMAIL_PARA no Railway.');
+  else info('Destinatários: <b>' + para + '</b>.');
+  const u = s.ultimo_envio;
+  const ultimo = u
+    ? 'Último relatório: <b>' + esc(u.tipo === 'mensal' ? 'mensal' : 'semanal') + ' de ' + esc(relDia(u.periodo_inicio)) + '</b> · ' +
+      esc(u.status === 'enviado' ? 'enviado ' + quandoCurto(u.enviado_em) : u.status === 'erro' ? 'com erro (veja os envios)' : 'enviando…')
+    : 'Nenhum relatório enviado ainda.';
+  box.innerHTML =
+    '<div class="num-quadro">' +
+      '<div class="num-atual"><span>Atos concluídos</span><b>' + relNum(ra.conclusoes) + '</b></div>' +
+      '<div class="num-atual"><span>Movimentos recebidos</span><b>' + relNum(ra.eventos) + '</b></div>' +
+      '<div class="num-info">' + ultimo + '</div>' +
+    '</div>' +
+    '<ul class="rel-situacao">' + itens.join('') + '</ul>';
+}
+
+function relVerPrevia() {
+  const r = relEstado(), b = el('edRelVer'), box = el('edRelPrevia');
+  b.disabled = true; b.textContent = 'Montando…';
+  box.innerHTML = '<p class="aud-conta">Montando o relatório — leva alguns segundos (o servidor consulta o Trello).</p>';
+  relBaixar('/previa?tipo=' + encodeURIComponent(r.tipo) + '&ref=' + encodeURIComponent(r.ref))
+    .then(function (resp) { return resp.text(); })
+    .then(function (html) {
+      if (!relAbaAberta() || !box.isConnected) return;
+      box.innerHTML = '<p class="aud-conta">Prévia — é exatamente o e-mail que seria enviado.</p>' +
+        '<iframe class="rel-previa" title="Prévia do relatório" sandbox="allow-popups allow-popups-to-escape-sandbox"></iframe>';
+      box.querySelector('iframe').srcdoc = html;
+    })
+    .catch(function (e) { if (box.isConnected) box.innerHTML = '<p class="ed-vazio">Não consegui montar a prévia (' + esc(relErro(e)) + ').</p>'; })
+    .then(function () { if (b.isConnected) { b.disabled = false; b.textContent = 'Ver prévia'; } });
+}
+function relBaixarCsv() {
+  const r = relEstado(), b = el('edRelCsv'), antes = b.textContent;
+  b.disabled = true; b.textContent = 'Preparando…';
+  relBaixar('/previa?formato=csv&wip=0&tipo=' + encodeURIComponent(r.tipo) + '&ref=' + encodeURIComponent(r.ref))
+    .then(function (resp) {
+      const m = /filename="([^"]+)"/.exec(resp.headers.get('Content-Disposition') || '');
+      return resp.blob().then(function (blob) { return { blob: blob, nome: m ? m[1] : 'relatorio-' + r.tipo + '.csv' }; });
+    })
+    .then(function (x) {
+      const url = URL.createObjectURL(x.blob);
+      const link = document.createElement('a');
+      link.href = url; link.download = x.nome;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(function () { try { URL.revokeObjectURL(url); } catch (e) {} link.remove(); }, 8000);
+      toast('✓ Planilha do relatório baixada.');
+    })
+    .catch(function (e) { toast('Não consegui baixar o CSV (' + relErro(e) + ').', true); })
+    .then(function () { if (b.isConnected) { b.disabled = false; b.textContent = antes; } });
+}
+function relEnviar() {
+  const r = relEstado(), b = el('edRelEnviar');
+  const em = (r.status && r.status.email) || null;
+  if (em && !em.configurado) { toast('O e-mail ainda não está configurado no servidor — nada seria enviado.', true); return; }
+  const chave = r.tipo + '|' + r.ref;
+  if (b.dataset.confirma !== chave) {
+    relArmar(b, chave, em && em.homologacao ? 'Confirmar envio de teste?' : 'Confirmar envio?', REL_ROT_ENVIAR);
+    return;
+  }
+  b.disabled = true; b.textContent = 'Enviando…';
+  api('/hub/relatorios/enviar', { corpo: { tipo: r.tipo, ref: r.ref } }).then(function (x) {
+    toast('✓ Relatório enviado para ' + (x.para || []).join(', ') + (x.homologacao ? ' (homologação)' : ''));
+    relCarregarEnvios();
+    relCarregarSituacao();
+  }).catch(function (e) {
+    toast(primeiraMaiuscula(relErro(e)) + '.', true);
+    relCarregarEnvios();
+  }).then(function () { if (b.isConnected) { b.disabled = false; relDesarmar(b, REL_ROT_ENVIAR); } });
+}
+
+function relCarregarEnvios() {
+  api('/hub/relatorios/envios').then(function (x) {
+    if (!relAbaAberta()) return;
+    const box = el('edRelEnvios');
+    if (!box) return;
+    const lista = (x && x.envios) || [];
+    if (!lista.length) { box.innerHTML = '<p class="ed-vazio">Nenhum relatório enviado ainda.</p>'; return; }
+    box.innerHTML =
+      '<div class="aud-rolo"><table class="aud-tabela"><thead><tr>' +
+        '<th class="versalete">Quando</th><th class="versalete">Relatório</th><th class="versalete">Período</th>' +
+        '<th class="versalete">Como</th><th class="versalete">Situação</th><th class="versalete">Para</th>' +
+      '</tr></thead><tbody>' + lista.map(function (v) {
+        const sit = v.status === 'enviado' ? 'Enviado'
+          : v.status === 'erro' ? 'Erro' + (v.tentativas > 1 ? ' (' + v.tentativas + ' tentativas)' : '') : 'Enviando…';
+        const marca = v.status === 'enviado' ? ' aud-acao-login' : (v.status === 'erro' ? ' aud-acao-ia' : '');
+        return '<tr><td class="aud-quando">' + esc(quandoCurto(v.enviado_em || v.criado_em)) + '</td>' +
+          '<td>' + (v.tipo === 'mensal' ? 'Mensal' : 'Semanal') + '</td>' +
+          '<td class="aud-quando">' + esc(relDia(v.periodo_inicio)) + ' a ' + esc(relDia(v.periodo_fim)) + '</td>' +
+          '<td>' + esc(v.manual ? 'Manual · ' + (v.por || '—') : 'Automático') + '</td>' +
+          '<td><span class="aud-acao' + marca + '">' + esc(sit) + '</span>' + (v.erro ? '<div class="rel-erro">' + esc(v.erro) + '</div>' : '') + '</td>' +
+          // o endereço quebra depois do @ e da vírgula, nunca no meio do domínio
+          '<td class="rel-para">' + esc(v.destinatarios || '—').replace(/@/g, '@<wbr>').replace(/, /g, ',<wbr> ') + '</td></tr>';
+      }).join('') + '</tbody></table></div>';
+  }).catch(function (e) {
+    if (!relAbaAberta()) return;
+    const box = el('edRelEnvios');
+    if (box) box.innerHTML = '<p class="ed-vazio">Não consegui ler os envios (' + esc(relErro(e)) + ').</p>';
+  });
+}
+
+function relCarga() {
+  const b = el('edRelCarga'), desde = el('edRelDesde').value;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(desde)) { toast('Escolha a data de início da carga.'); return; }
+  if (b.dataset.confirma !== desde) { relArmar(b, desde, 'Confirmar carga desde ' + relDia(desde) + '?', REL_ROT_CARGA); return; }
+  b.disabled = true;
+  api('/hub/relatorios/carga', { corpo: { desde: desde } }).then(function () {
+    toast('✓ Carga iniciada no servidor — o andamento aparece aqui.');
+    relDesarmar(b, REL_ROT_CARGA);
+    relCarregarSituacao();
+  }).catch(function (e) {
+    b.disabled = false; relDesarmar(b, REL_ROT_CARGA);
+    toast(primeiraMaiuscula(relErro(e)) + '.', true);
+  });
+}
+function relPintarCarga() {
+  const s = relEstado().status, p = el('edRelCargaSit'), b = el('edRelCarga');
+  if (!s || !p) return;
+  const c = s.carga;
+  if (b) b.disabled = !!(c && c.situacao === 'rodando');
+  if (!c) { p.textContent = 'Nenhuma carga rodada desde o último reinício do servidor.'; return; }
+  if (c.situacao === 'rodando') {
+    p.textContent = 'Carga desde ' + relDia(c.desde) + ' rodando' + (c.ultima_mensagem ? ' — ' + c.ultima_mensagem : '…');
+    const r = relEstado();
+    clearTimeout(r.vigia);   // acompanha até terminar, enquanto a aba estiver aberta
+    r.vigia = setTimeout(function () { if (relAbaAberta() && el('edRelCargaSit')) relCarregarSituacao(); }, 5000);
+    return;
+  }
+  if (c.situacao === 'erro') { p.textContent = 'A carga desde ' + relDia(c.desde) + ' parou com erro: ' + c.erro; return; }
+  const x = c.resultado || {};
+  const semTipo = (x.rotulos_nao_reconhecidos || []).map(function (t) { return (t.rotulo || 'sem rótulo') + ' (' + t.n + ')'; });
+  p.textContent = 'Carga desde ' + relDia(c.desde) + ' concluída: ' + relNum(x.lidas) + ' ação(ões) lidas em ' + relNum(x.quadros) +
+    ' quadro(s), ' + relNum(x.novas) + ' nova(s), ' + relNum(x.cartoes) + ' cartão(ões) revistos.' +
+    (semTipo.length ? ' Títulos sem tipo reconhecido: ' + semTipo.join(', ') + '.' : '');
 }
 
 function publicarMural() {
@@ -11572,4 +11908,4 @@ restaurarSessao();
 </body>
 </html>
 
-<!-- Hub CN2O v1.37.4 · 24/09/2026 -->
+<!-- Hub CN2O v1.38 · 24/09/2026 -->
