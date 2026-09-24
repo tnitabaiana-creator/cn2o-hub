@@ -1974,7 +1974,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 
 /* "Quantas pessoas?" */
 .itbi-contagem{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
-.itbi-rot{font-family:'Montserrat',sans-serif;font-weight:700;font-size:13.5px;letter-spacing:.1em;text-transform:uppercase;color:rgba(32,42,58,.85)}
+.itbi-rot{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:rgba(32,42,58,.85)}
 #paginaItbi .ed-chip{font-size:14px;padding:9px 16px;line-height:1.2;font-weight:700;color:rgba(32,42,58,.82);border-color:rgba(32,42,58,.28);background:var(--fase-caixa)}
 #paginaItbi .ed-chip:hover{border-color:var(--vinho);color:var(--vinho)}
 #paginaItbi .ed-chip:focus-visible{outline:3px solid rgba(99,19,37,.5);outline-offset:2px}
@@ -2706,6 +2706,44 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 .lista-cnj .link-nota{color:#3d4556;font-size:14px}
 .lista-cnj .link-seta{color:var(--vinho)}
 .cnj-sub{font-size:14px;color:#3d4556}
+
+/* ============================================================
+   v1.37.4 — GUIA DE ITBI: até 15 adquirentes e 15 transmitentes
+   (pedido do Tabelião, 24/09/2026). "Um" ou "Múltiplos" e, nos múltiplos,
+   quantos (2 a 15) — no desenho do e-Protocolo (botões grandes, nota com
+   filete vinho, subpergunta recuada). Cada pessoa ganha o seu bloco.
+============================================================ */
+#paginaItbi .itbi-modo{gap:10px}
+#paginaItbi .itbi-modo .ed-chip{font-size:16px;font-weight:700;padding:12px 20px;border-radius:12px;letter-spacing:0}
+.itbi-multi{display:flex;flex-direction:column;gap:10px;border-left:3px solid rgba(32,42,58,.22);padding:2px 0 4px 16px}
+.itbi-multi[hidden]{display:none}
+.itbi-multi-nota{margin:0;background:rgba(99,19,37,.06);border-left:4px solid var(--vinho);border-radius:0 10px 10px 0;padding:12px 16px;font-size:16px;line-height:1.5;color:var(--tinta)}
+.itbi-multi-rot{margin:4px 0 0;border-left:4px solid var(--vinho);padding-left:10px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:16px;color:var(--tinta)}
+#paginaItbi .itbi-qtd{gap:8px}
+#paginaItbi .itbi-qtd .ed-chip{min-width:52px;min-height:48px;font-size:17px;border-radius:10px;padding:10px 12px;text-align:center}
+.itbi-pessoa-cab{display:flex;align-items:center;justify-content:space-between;gap:10px 14px;flex-wrap:wrap;margin:0 0 10px}
+.itbi-pessoa-cab .itbi-pessoa-tit{margin:0}
+.itbi-repetir{border:1.5px solid rgba(32,42,58,.32);border-radius:999px;background:#ffffff;color:#202a3a;font-family:'Lato',sans-serif;font-weight:700;font-size:14px;line-height:1.2;padding:8px 14px}
+.itbi-repetir:hover{border-color:var(--vinho);color:var(--vinho);background:rgba(99,19,37,.06)}
+.itbi-repetir:focus-visible{outline:3px solid rgba(99,19,37,.55);outline-offset:2px}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]) .itbi-multi{border-left-color:rgba(255,255,255,.3)}
+  :root:not([data-theme="light"]) .itbi-multi-nota{background:rgba(255,255,255,.07);border-left-color:#f2d7dc;color:#f2f0ec}
+  :root:not([data-theme="light"]) .itbi-multi-rot{border-left-color:#f2d7dc;color:#f2f0ec}
+  :root:not([data-theme="light"]) .itbi-repetir{background:transparent;color:#f2f0ec;border-color:rgba(255,255,255,.35)}
+  :root:not([data-theme="light"]) .itbi-repetir:hover{color:#f2d7dc;border-color:#f2d7dc;background:rgba(255,255,255,.08)} }
+:root[data-theme="dark"] .itbi-multi{border-left-color:rgba(255,255,255,.3)}
+:root[data-theme="dark"] .itbi-multi-nota{background:rgba(255,255,255,.07);border-left-color:#f2d7dc;color:#f2f0ec}
+:root[data-theme="dark"] .itbi-multi-rot{border-left-color:#f2d7dc;color:#f2f0ec}
+:root[data-theme="dark"] .itbi-repetir{background:transparent;color:#f2f0ec;border-color:rgba(255,255,255,.35)}
+:root[data-theme="dark"] .itbi-repetir:hover{color:#f2d7dc;border-color:#f2d7dc;background:rgba(255,255,255,.08)}
+@media (max-width:560px){
+  #paginaItbi .itbi-modo .ed-chip{flex:1 1 100%;text-align:center}
+  .itbi-multi{padding-left:10px}
+  #paginaItbi .itbi-qtd .ed-chip{min-width:46px;min-height:46px}
+  .itbi-repetir{flex:1 1 100%}
+}
+.itbi-so-leitor{position:absolute;width:1px;height:1px;margin:-1px;padding:0;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
 
 </style>
 </head>
@@ -4284,33 +4322,42 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
       <!-- 1 · ADQUIRENTE(S) -->
       <section class="itbi-quadro">
         <div class="itbi-quadro-cab"><span class="itbi-num">1</span>
-          <div class="itbi-quadro-tit"><h3>Adquirente(s)</h3><p>Quem compra ou adquire. O <b>nome</b> é o único campo obrigatório.</p></div>
+          <div class="itbi-quadro-tit"><h3>Adquirente(s)</h3><p>Quem compra ou adquire — <b>até 15 pessoas</b>. O <b>nome</b> é o único campo obrigatório.</p></div>
         </div>
+        <!-- v1.37.4 — um ou vários (adquirentes): até 15; o formulário abre um bloco por pessoa -->
         <div class="itbi-contagem">
-          <span class="itbi-rot">Quantas pessoas?</span>
-          <div class="ed-chips" id="itbiQtdAdq" role="group" aria-label="Número de adquirentes">
-            <button type="button" class="ed-chip ativo" data-qtd="1">1</button>
-            <button type="button" class="ed-chip" data-qtd="2">2</button>
-            <button type="button" class="ed-chip" data-qtd="3">3</button>
-            <button type="button" class="ed-chip" data-qtd="4">4</button>
+          <span class="itbi-rot">Adquirente(s) — um ou vários?</span>
+          <div class="ed-chips itbi-modo" id="itbiModoAdq" role="group" aria-label="Um ou vários adquirentes">
+            <button type="button" class="ed-chip ativo" data-modo="um" aria-pressed="true">Um adquirente</button>
+            <button type="button" class="ed-chip" data-modo="varios" aria-pressed="false" aria-expanded="false" aria-controls="itbiMultiAdq itbiBlocosAdq">Múltiplos adquirentes</button>
           </div>
         </div>
+        <div class="itbi-multi" id="itbiMultiAdq" hidden>
+          <p class="itbi-multi-nota">⚠ O formulário abre um bloco de campos para cada adquirente — até 15. Qualificação individual de cada um, extraída da documentação.</p>
+          <p class="itbi-multi-rot">Adquirentes — quantos?</p>
+          <div class="ed-chips itbi-qtd" id="itbiQtdAdq" role="group" aria-label="Número de adquirentes"></div>
+        </div>
         <div class="itbi-pessoas" id="itbiBlocosAdq"></div>
+        <p id="itbiQtdAviso" class="itbi-so-leitor" aria-live="polite"></p>
       </section>
 
       <!-- 2 · TRANSMITENTE(ES) -->
       <section class="itbi-quadro">
         <div class="itbi-quadro-cab"><span class="itbi-num">2</span>
-          <div class="itbi-quadro-tit"><h3>Transmitente(es)</h3><p>Quem vende ou transmite. O <b>nome</b> é o único campo obrigatório.</p></div>
+          <div class="itbi-quadro-tit"><h3>Transmitente(es)</h3><p>Quem vende ou transmite — <b>até 15 pessoas</b>. O <b>nome</b> é o único campo obrigatório.</p></div>
         </div>
+        <!-- v1.37.4 — um ou vários (transmitentes): até 15; o formulário abre um bloco por pessoa -->
         <div class="itbi-contagem">
-          <span class="itbi-rot">Quantas pessoas?</span>
-          <div class="ed-chips" id="itbiQtdTra" role="group" aria-label="Número de transmitentes">
-            <button type="button" class="ed-chip ativo" data-qtd="1">1</button>
-            <button type="button" class="ed-chip" data-qtd="2">2</button>
-            <button type="button" class="ed-chip" data-qtd="3">3</button>
-            <button type="button" class="ed-chip" data-qtd="4">4</button>
+          <span class="itbi-rot">Transmitente(s) — um ou vários?</span>
+          <div class="ed-chips itbi-modo" id="itbiModoTra" role="group" aria-label="Um ou vários transmitentes">
+            <button type="button" class="ed-chip ativo" data-modo="um" aria-pressed="true">Um transmitente</button>
+            <button type="button" class="ed-chip" data-modo="varios" aria-pressed="false" aria-expanded="false" aria-controls="itbiMultiTra itbiBlocosTra">Múltiplos transmitentes</button>
           </div>
+        </div>
+        <div class="itbi-multi" id="itbiMultiTra" hidden>
+          <p class="itbi-multi-nota">⚠ O formulário abre um bloco de campos para cada transmitente — até 15. Qualificação individual de cada um, extraída da documentação.</p>
+          <p class="itbi-multi-rot">Transmitentes — quantos?</p>
+          <div class="ed-chips itbi-qtd" id="itbiQtdTra" role="group" aria-label="Número de transmitentes"></div>
         </div>
         <div class="itbi-pessoas" id="itbiBlocosTra"></div>
       </section>
@@ -10717,8 +10764,11 @@ restaurarSessao();
   var X0 = 11, LARG = 188, TOPO = 11, BAIXO = 11;
   var UTIL = 297 - TOPO - BAIXO;
 
-  var POLOS = { adq: { pre: 'itbiAdq', rot: 'adquirente', ROT: 'ADQUIRENTE', caixa: 'itbiBlocosAdq', chips: 'itbiQtdAdq' },
-                tra: { pre: 'itbiTra', rot: 'transmitente', ROT: 'TRANSMITENTE', caixa: 'itbiBlocosTra', chips: 'itbiQtdTra' } };
+  /* v1.37.4 — até 15 pessoas por polo (pedido do Tabelião, 24/09/2026): "Um" ou
+     "Múltiplos" e, nos múltiplos, quantos (2 a 15); abre um bloco por pessoa. */
+  var MAX_PESSOAS = 15;
+  var POLOS = { adq: { pre: 'itbiAdq', rot: 'adquirente', ROT: 'ADQUIRENTE', caixa: 'itbiBlocosAdq', chips: 'itbiQtdAdq', modo: 'itbiModoAdq', multi: 'itbiMultiAdq' },
+                tra: { pre: 'itbiTra', rot: 'transmitente', ROT: 'TRANSMITENTE', caixa: 'itbiBlocosTra', chips: 'itbiQtdTra', modo: 'itbiModoTra', multi: 'itbiMultiTra' } };
   var CAMPOS_PESSOA = [
     { k: 'Nome', rot: 'Nome completo', dica: 'como está no documento', nc: false },
     { k: 'Cpf', rot: 'CPF / CNPJ', dica: '000.000.000-00', nc: true },
@@ -10740,8 +10790,11 @@ restaurarSessao();
   /* ---------------- montagem dos blocos por pessoa ---------------- */
   function blocoPessoa(polo, i) {
     var P = POLOS[polo], pre = P.pre + i, html = '';
-    html += '<div class="itbi-pessoa" data-pessoa="' + polo + i + '"' + (i > 1 ? ' hidden' : '') + '>';
-    html += '<p class="itbi-pessoa-tit">' + escapa(P.ROT.charAt(0) + P.ROT.slice(1).toLowerCase()) + ' ' + i + '</p>';
+    html += '<div class="itbi-pessoa" role="group" aria-label="' + escapa(P.ROT.charAt(0) + P.ROT.slice(1).toLowerCase()) + ' ' + i + '" data-pessoa="' + polo + i + '"' + (i > 1 ? ' hidden' : '') + '>';
+    var nomePolo = P.ROT.charAt(0) + P.ROT.slice(1).toLowerCase();
+    html += '<div class="itbi-pessoa-cab"><p class="itbi-pessoa-tit">' + escapa(nomePolo) + ' ' + i + '</p>';
+    if (i > 1) html += '<button type="button" class="itbi-repetir" data-repetir="' + polo + i + '">Repetir o endereço do ' + escapa(P.rot) + ' ' + (i - 1) + '</button>';
+    html += '</div>';
     html += '<div class="itbi-grade">';
     CAMPOS_PESSOA.forEach(function (c) {
       var id = pre + c.k, largo = (c.k === 'Endereco' || c.k === 'Nome') ? ' itbi-largo' : '';
@@ -10759,34 +10812,77 @@ restaurarSessao();
 
   Object.keys(POLOS).forEach(function (polo) {
     var caixa = elp(POLOS[polo].caixa), h = '';
-    for (var i = 1; i <= 4; i++) h += blocoPessoa(polo, i);
+    for (var i = 1; i <= MAX_PESSOAS; i++) h += blocoPessoa(polo, i);
     caixa.innerHTML = h;
+    var q = '';
+    for (var n = 2; n <= MAX_PESSOAS; n++) q += '<button type="button" class="ed-chip" data-qtd="' + n + '" aria-pressed="false">' + n + '</button>';
+    elp(POLOS[polo].chips).innerHTML = q;
   });
 
   /* ---------------- quantidade de pessoas ---------------- */
   var QTD = { adq: 1, tra: 1 };
   function aplicarQtd(polo) {
-    var n = QTD[polo];
-    for (var i = 1; i <= 4; i++) {
+    var P = POLOS[polo], n = QTD[polo], varios = n > 1;
+    for (var i = 1; i <= MAX_PESSOAS; i++) {
       var b = pag.querySelector('[data-pessoa="' + polo + i + '"]');
       if (b) b.hidden = (i > n);
     }
-    var g = elp(POLOS[polo].chips);
-    g.querySelectorAll('.ed-chip').forEach(function (c) {
+    elp(P.modo).querySelectorAll('.ed-chip').forEach(function (c) {
+      var at = (c.dataset.modo === 'varios') === varios;
+      c.classList.toggle('ativo', at);
+      c.setAttribute('aria-pressed', at ? 'true' : 'false');
+    });
+    elp(P.multi).hidden = !varios;
+    var bv = elp(P.modo).querySelector('[data-modo="varios"]');
+    if (bv) bv.setAttribute('aria-expanded', varios ? 'true' : 'false');
+    elp(P.chips).querySelectorAll('.ed-chip').forEach(function (c) {
       var at = Number(c.dataset.qtd) === n;
       c.classList.toggle('ativo', at);
       c.setAttribute('aria-pressed', at ? 'true' : 'false');
     });
   }
+  /* v1.37.4 — escolher "Múltiplos" ou o número NÃO move a tela: a pessoa continua
+     vendo a pergunta; o leitor de tela ouve quantos blocos estão abertos. */
+  function anunciar(polo) {
+    var av = elp('itbiQtdAviso'), n = QTD[polo], P = POLOS[polo];
+    if (av) av.textContent = n + (n === 1 ? ' bloco de ' + P.rot + ' aberto.' : ' blocos de ' + P.rot + 's abertos.');
+  }
   Object.keys(POLOS).forEach(function (polo) {
-    elp(POLOS[polo].chips).addEventListener('click', function (ev) {
+    var P = POLOS[polo];
+    /* "Um adquirente" / "Múltiplos adquirentes": múltiplos começa em 2 */
+    elp(P.modo).addEventListener('click', function (ev) {
       var b = ev.target.closest('.ed-chip'); if (!b) return;
-      QTD[polo] = Number(b.dataset.qtd) || 1;
+      var antes = QTD[polo];
+      QTD[polo] = b.dataset.modo === 'varios' ? Math.max(2, antes) : 1;
       aplicarQtd(polo);
-      var novo = pag.querySelector('[data-pessoa="' + polo + QTD[polo] + '"] input');
-      if (novo && QTD[polo] > 1) try { novo.focus(); } catch (e) {}
+      if (QTD[polo] !== antes) anunciar(polo);
+    });
+    /* quantos (2 a 15) */
+    elp(P.chips).addEventListener('click', function (ev) {
+      var b = ev.target.closest('.ed-chip'); if (!b) return;
+      var antes = QTD[polo];
+      QTD[polo] = Math.min(MAX_PESSOAS, Math.max(2, Number(b.dataset.qtd) || 2));
+      aplicarQtd(polo);
+      if (QTD[polo] !== antes) anunciar(polo);
     });
     aplicarQtd(polo);
+  });
+
+  /* "Repetir o endereço do anterior": copia endereço, município e CEP (inclusive o
+     "não consta") da pessoa de cima — comum em casais e em herdeiros da mesma casa. */
+  var CAMPOS_ENDERECO = ['Endereco', 'Municipio', 'Cep'];
+  pag.addEventListener('click', function (ev) {
+    var b = ev.target.closest('.itbi-repetir'); if (!b) return;
+    var m = /^(adq|tra)(\d+)$/.exec(b.dataset.repetir || ''); if (!m) return;
+    var P = POLOS[m[1]], i = Number(m[2]);
+    CAMPOS_ENDERECO.forEach(function (k) {
+      var deId = P.pre + (i - 1) + k, paraId = P.pre + i + k;
+      var btnPara = pag.querySelector('.itbi-nc[data-nc="' + paraId + '"]');
+      var ncDe = ncLigado(deId);
+      if (btnPara && ncLigado(paraId) !== ncDe) pintarNc(btnPara, ncDe);
+      if (!ncDe) elp(paraId).value = elp(deId).value;
+    });
+    if (typeof toast === 'function') toast('Endereço repetido do ' + P.rot + ' ' + (i - 1) + '.');
   });
 
   /* ---------------- chips de escolha única (situação, tipo, natureza) ---------------- */
@@ -10925,15 +11021,19 @@ restaurarSessao();
   }
 
   /* ---------------- conferência dos campos em branco ---------------- */
+  /* v1.37.4 — com até 30 pessoas, a conferência mostra os campos do imóvel primeiro e
+     uma linha por pessoa ("Adquirente 3: CPF / CNPJ, CEP"), não uma linha por campo. */
   function emBranco() {
-    var faltas = [];
+    var faltas = [], pessoasFalta = [];
     Object.keys(POLOS).forEach(function (polo) {
       var P = POLOS[polo];
       for (var i = 1; i <= QTD[polo]; i++) {
+        var nomes = [], primeiro = null;
         CAMPOS_PESSOA.forEach(function (c) {
           var id = P.pre + i + c.k;
-          if (vazio(id)) faltas.push({ id: id, txt: c.rot + ' — ' + P.rot + ' ' + i });
+          if (vazio(id)) { nomes.push(c.rot); if (!primeiro) primeiro = id; }
         });
+        if (nomes.length) pessoasFalta.push({ id: primeiro, txt: P.ROT.charAt(0) + P.ROT.slice(1).toLowerCase() + ' ' + i + ': ' + nomes.join(', '), n: nomes.length });
       }
     });
     [['itbiInscricao', 'Inscrição cadastral do imóvel'], ['itbiLogradouro', 'Logradouro do imóvel'],
@@ -10950,12 +11050,23 @@ restaurarSessao();
       faltas.push({ id: 'itbiValor', txt: 'Valor atribuído pelo contribuinte' });
     }
     if (!(elp('itbiGuiaNum').value || '').trim()) faltas.push({ id: 'itbiGuiaNum', txt: 'Nº da guia (sai a linha para preencher à mão)' });
-    return faltas;
+    return faltas.concat(pessoasFalta);
   }
-  function semNome(polo) {
-    var P = POLOS[polo];
-    for (var i = 1; i <= QTD[polo]; i++) if ((elp(P.pre + i + 'Nome').value || '').trim()) return false;
-    return true;
+  function contarFaltas(faltas) {
+    var t = 0;
+    faltas.forEach(function (f) { t += f.n || 1; });
+    return t;
+  }
+  /* o nome é obrigatório em TODO bloco aberto: bloco sem nome não vai à guia em branco */
+  function nomesFaltando() {
+    var out = [];
+    Object.keys(POLOS).forEach(function (polo) {
+      var P = POLOS[polo];
+      for (var i = 1; i <= QTD[polo]; i++) {
+        if (!(elp(P.pre + i + 'Nome').value || '').trim()) out.push({ id: P.pre + i + 'Nome', txt: 'Nome completo — ' + P.rot + ' ' + i });
+      }
+    });
+    return out;
   }
 
   /* ============================================================
@@ -11009,6 +11120,11 @@ restaurarSessao();
       var t = atual ? atual + ' ' + p : p;
       if (largS(pdf, t, neg, base) <= limite) { atual = t; return; }
       if (atual) { linhas.push(atual); atual = ''; limite = largN; }
+      else if (!linhas.length && limite < largN && largS(pdf, p, neg, base) <= largN) {
+        /* v1.37.4 — a 1ª palavra não cabe ao lado do rótulo mas cabe na linha de baixo:
+           desce inteira (antes partia CNPJ e "120,00" no meio) */
+        linhas.push(''); limite = largN;
+      }
       if (largS(pdf, p, neg, base) <= limite) { atual = p; return; }
       var pedaco = '';
       for (var i = 0; i < p.length; i++) {
@@ -11186,23 +11302,56 @@ restaurarSessao();
     } };
   }
 
+  /* v1.37.4 — várias linhas que nunca se separam entre páginas (uma pessoa inteira) */
+  function grupo(lista) {
+    var h = 0;
+    lista.forEach(function (x) { h += x.h; });
+    return { h: h, desenhar: function (pdf, y) {
+      lista.forEach(function (x) { x.desenhar(pdf, y); y += x.h; });
+    } };
+  }
+  /* uma pessoa: 4 linhas no leiaute do modelo; 2 linhas no leiaute compacto
+     (muitas partes — até 15 por polo). */
+  function linhasPessoa(pdf, base, polo, p, varios, compacto) {
+    var rot = varios ? POLOS[polo].ROT + ' ' + p.n + ':' : '', nome = (p.nome || '').toUpperCase();
+    if (compacto) {
+      return grupo([
+        linhaTabela(pdf, base, [
+          { fr: 0.52, rotulo: rot, valor: nome, neg: true },
+          { fr: 0.25, rotulo: 'CPF/CNPJ nº:', valor: p.cpf },
+          { fr: 0.23, rotulo: 'RG/CNH:', valor: p.rg }]),
+        linhaTabela(pdf, base, [
+          { fr: 0.24, rotulo: 'PROFISSÃO:', valor: p.profissao },
+          { fr: 0.36, rotulo: 'ENDEREÇO:', valor: p.endereco },
+          { fr: 0.24, rotulo: 'MUNICÍPIO:', valor: p.municipio },
+          { fr: 0.16, rotulo: 'CEP:', valor: p.cep }])]);
+    }
+    return grupo([
+      linhaTabela(pdf, base, [{ fr: 1, rotulo: rot, valor: nome, neg: true }]),
+      linhaTabela(pdf, base, [
+        { fr: 0.36, rotulo: 'CPF/CNPJ nº:', valor: p.cpf },
+        { fr: 0.30, rotulo: 'RG/CNH:', valor: p.rg },
+        { fr: 0.34, rotulo: 'PROFISSÃO:', valor: p.profissao }]),
+      linhaTabela(pdf, base, [{ fr: 1, rotulo: 'ENDEREÇO:', valor: p.endereco }]),
+      linhaTabela(pdf, base, [
+        { fr: 0.62, rotulo: 'MUNICÍPIO:', valor: p.municipio },
+        { fr: 0.38, rotulo: 'CEP:', valor: p.cep }])]);
+  }
+
   /* monta a lista de blocos para um tamanho de corpo */
-  function planta(pdf, d, passo) {
+  function planta(pdf, d, passo, compacto) {
     var base = passo.base, f = passo.fixo, b = [];
     b.push(cabecalho(pdf, base, 17 + 5 * f, d.doc.guia));
-    [['adq', '1 – ADQUIRENTE'], ['tra', '2 – TRANSMITENTE(ES)']].forEach(function (par) {
-      var polo = par[0], lista = d[polo];
-      b.push(banda(pdf, base, par[1]));
+    [['adq', '1 – ADQUIRENTE', '1 – ADQUIRENTE(S)'], ['tra', '2 – TRANSMITENTE(ES)', '2 – TRANSMITENTE(ES)']].forEach(function (par) {
+      var polo = par[0], lista = d[polo], varios = lista.length > 1;
+      var titulo = varios ? par[2] + ' (' + lista.length + ')' : par[1];
+      b.push(banda(pdf, base, titulo));
+      /* se a página virar no meio da lista, a seção reabre com "(continuação)" */
+      var cont = banda(pdf, base, (varios ? par[2] : par[1]) + ' (continuação)');
       lista.forEach(function (p) {
-        b.push(linhaTabela(pdf, base, [{ fr: 1, rotulo: lista.length > 1 ? POLOS[polo].ROT + ' ' + p.n + ':' : '', valor: (p.nome || '').toUpperCase(), neg: true }]));
-        b.push(linhaTabela(pdf, base, [
-          { fr: 0.36, rotulo: 'CPF/CNPJ nº:', valor: p.cpf },
-          { fr: 0.30, rotulo: 'RG/CNH:', valor: p.rg },
-          { fr: 0.34, rotulo: 'PROFISSÃO:', valor: p.profissao }]));
-        b.push(linhaTabela(pdf, base, [{ fr: 1, rotulo: 'ENDEREÇO:', valor: p.endereco }]));
-        b.push(linhaTabela(pdf, base, [
-          { fr: 0.62, rotulo: 'MUNICÍPIO:', valor: p.municipio },
-          { fr: 0.38, rotulo: 'CEP:', valor: p.cep }]));
+        var pessoa = linhasPessoa(pdf, base, polo, p, varios, compacto);
+        pessoa.continuacao = cont;
+        b.push(pessoa);
       });
     });
     var im = d.imovel;
@@ -11231,11 +11380,11 @@ restaurarSessao();
       { fr: 0.28, rotulo: 'ENTIDADE FINANCIADORA:', valor: op.financiadora },
       { fr: 0.30, rotulo: 'VALOR ATRIBUÍDO PELO CONTRIBUINTE:', valor: op.valor }]));
     b.push(linhaTabela(pdf, base, [{ fr: 1, rotulo: 'OUTRAS INFORMAÇÕES:', valor: op.outras }]));
-    b.push(banda(pdf, base, '5 – DOCUMENTAÇÃO DO IMÓVEL:'));
-    b.push(blocoDocumentacao(pdf, base, 26 + 8 * f, d));
-    b.push(banda(pdf, base, '6 - AVALIAÇÃO'));
-    b.push(blocoAvaliacao(pdf, base, 19 + 5 * f));
-    b.push(blocoObservacoes(pdf, base, 11 + 7 * f, d.obs));
+    /* v1.37.4 — documentação (com a assinatura), avaliação e observações andam juntas:
+       nunca sobra uma página só com as Observações */
+    b.push(grupo([banda(pdf, base, '5 – DOCUMENTAÇÃO DO IMÓVEL:'), blocoDocumentacao(pdf, base, 26 + 8 * f, d),
+                  banda(pdf, base, '6 - AVALIAÇÃO'), blocoAvaliacao(pdf, base, 19 + 5 * f),
+                  blocoObservacoes(pdf, base, 11 + 7 * f, d.obs)]));
     var total = 0;
     b.forEach(function (x) { total += x.h; });
     return { blocos: b, altura: total };
@@ -11244,23 +11393,50 @@ restaurarSessao();
   var PASSOS = [{ base: 10, fixo: 1 }, { base: 9.5, fixo: 0.8 }, { base: 9, fixo: 0.6 },
                 { base: 8.5, fixo: 0.4 }, { base: 8, fixo: 0.2 }, { base: 7.5, fixo: 0 }];
 
+  /* v1.37.4 — ordem de escolha: (1) o leiaute do modelo da Prefeitura numa página,
+     descendo o corpo por degraus até 8,5 pt; (2) o leiaute compacto (2 linhas por
+     pessoa) numa página, também até 8,5 pt; (3) muitas partes ou dados longos: compacto
+     em 9 pt em quantas páginas precisar, cada pessoa inteira numa página, a seção
+     reaberta em "(continuação)" e "Página N de M" no pé. */
+  var PASSO_VARIAS_PAGINAS = { base: 9, fixo: 0.6 };
+  var CORPO_MINIMO_UMA_PAGINA = 8.5;
   function desenharGuia(d) {
-    var escolhido = null, pdf = null, plano = null;
-    for (var i = 0; i < PASSOS.length; i++) {
+    var escolhido = null, pdf = null, plano = null, compacto = false, i;
+    [false, true].forEach(function (comp) {
+      for (var k = 0; k < PASSOS.length && !escolhido; k++) {
+        if (PASSOS[k].base < CORPO_MINIMO_UMA_PAGINA) break;
+        pdf = new PDFMini({ pagina: 'A4' });
+        plano = planta(pdf, d, PASSOS[k], comp);
+        if (plano.altura <= UTIL) { escolhido = PASSOS[k]; compacto = comp; }
+      }
+    });
+    if (!escolhido) {
+      escolhido = PASSO_VARIAS_PAGINAS; compacto = true;
       pdf = new PDFMini({ pagina: 'A4' });
-      plano = planta(pdf, d, PASSOS[i]);
-      escolhido = PASSOS[i];
-      if (plano.altura <= UTIL) break;
+      plano = planta(pdf, d, escolhido, true);
     }
     var y = TOPO, limite = 297 - BAIXO + 0.05;
     plano.blocos.forEach(function (bl, i) {
       /* cabeçalho de seção nunca fica órfão no pé da página */
       var junto = bl.cola && plano.blocos[i + 1] ? plano.blocos[i + 1].h : 0;
-      if (y + bl.h + junto > limite) { pdf.novaPagina(); y = TOPO; }
+      if (y + bl.h + junto > limite) {
+        pdf.novaPagina(); y = TOPO;
+        if (bl.continuacao) { bl.continuacao.desenhar(pdf, y); y += bl.continuacao.h; }
+      }
       bl.desenhar(pdf, y);
       y += bl.h;
     });
-    return { pdf: pdf, base: escolhido.base, altura: plano.altura, paginas: pdf.totalPaginas() };
+    var total = pdf.totalPaginas();
+    if (total > 1) {
+      var tam = 7.5;
+      for (var k = 0; k < total; k++) {
+        pdf.atual = k;
+        var rodape = 'Guia de ITBI' + (d.doc.guia ? ' nº ' + d.doc.guia : '') + ' · Página ' + (k + 1) + ' de ' + total;
+        escS(pdf, X0, 289.5, rodape, false, tam, { alinhar: 'dir', larguraMm: LARG });
+      }
+      pdf.atual = total - 1;
+    }
+    return { pdf: pdf, base: escolhido.base, altura: plano.altura, paginas: total, compacto: compacto };
   }
 
   /* ---------------- gerar / baixar / limpar ---------------- */
@@ -11310,8 +11486,8 @@ restaurarSessao();
     }).join('');
     cx.innerHTML =
       '<p class="itbi-conf-cab"><b>' + (bloqueio ? 'Falta o essencial' : 'Antes de gerar, confira') + '</b>' +
-        '<span class="itbi-conf-selo">' + faltas.length + ' campo' + (faltas.length === 1 ? '' : 's') + ' em branco</span></p>' +
-      (bloqueio ? '<p class="itbi-conf-nota">A guia precisa de <b>ao menos um nome de adquirente e um de transmitente</b>. Os demais campos podem sair em branco.</p>'
+        '<span class="itbi-conf-selo">' + contarFaltas(faltas) + ' campo' + (contarFaltas(faltas) === 1 ? '' : 's') + ' em branco</span></p>' +
+      (bloqueio ? '<p class="itbi-conf-nota">O <b>nome</b> é obrigatório em cada adquirente e em cada transmitente aberto. Os demais campos podem sair em branco. Se sobrou bloco, diminua o número de pessoas.</p>'
                 : '<p class="itbi-conf-nota">Campo em branco sai em branco na guia (como no modelo da Prefeitura). Se a informação não existe nos documentos, prefira marcar <b>“não consta”</b>.</p>') +
       '<ul class="itbi-conf-lista">' + itens + '</ul>' +
       (faltas.length > 40 ? '<p class="itbi-conf-nota">… e mais ' + (faltas.length - 40) + '.</p>' : '') +
@@ -11340,13 +11516,8 @@ restaurarSessao();
 
   elp('btnItbiGerar').addEventListener('click', function () {
     elp('itbiEstado').textContent = ''; elp('itbiEstado').classList.remove('ok');
-    if (semNome('adq') || semNome('tra')) {
-      var falt = [];
-      if (semNome('adq')) falt.push({ id: 'itbiAdq1Nome', txt: 'Nome completo — adquirente 1' });
-      if (semNome('tra')) falt.push({ id: 'itbiTra1Nome', txt: 'Nome completo — transmitente 1' });
-      pedirConferencia(falt, true);
-      return;
-    }
+    var falt = nomesFaltando();
+    if (falt.length) { pedirConferencia(falt, true); return; }
     var faltas = emBranco();
     if (faltas.length) { pedirConferencia(faltas, false); return; }
     gerar();
