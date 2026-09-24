@@ -157,6 +157,17 @@ input[type=text],input[type=tel],input[type=date],select,textarea{font-size:16px
 .selo{font-size:10.5px}
 /* v1.36 — CERTIDÃO: campo com o botão "não consta" ao lado, e a lista de anexos */
 .linha-nc{display:flex;gap:8px;align-items:stretch}
+/* v1.37.5 — pessoa física / jurídica / múltiplos na identificação */
+.ident-partes .pergunta{margin:12px 0 0}
+.ident-partes .pergunta.sub{margin-left:0;padding-left:14px;border-left:3px solid rgba(32,42,58,.22)}
+.ident-partes .titulo-p{font-size:15px}
+.ident-partes .op{font-size:15px}
+.ident-partes .aviso{font-size:14.5px}
+.ident-partes-cel{border-top:1px dashed rgba(32,42,58,.18);padding-top:4px}
+#identTSlotCV .ident-partes{margin-top:4px}
+.ident-partes button.op{font-family:inherit;line-height:1.25}
+.ident-partes button.op:not(.sel){color:var(--marinho)}
+.ident-partes button.op:focus-visible{outline:3px solid rgba(99,19,37,.55);outline-offset:2px}
 .linha-nc input{flex:1;min-width:0}
 .nc{flex:0 0 auto;border:2px solid #c9ced8;background:#fff;color:#44506b;border-radius:10px;
     padding:0 12px;font:inherit;font-size:15px;line-height:1.1;cursor:pointer;white-space:nowrap} /* v1.36.1: 15px */
@@ -247,7 +258,11 @@ input.moeda{font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.01
           <div class="op op-cat" data-cat="Construtor">Construtor</div>
         </div>
         <div id="badgeBandeira" class="oculto badge-parceiro" style="margin-top:7px"></div>
+        <div id="identTSlotCV"></div>
       </div>
+      <!-- v1.37.5 — pessoa física, jurídica ou múltiplos (botões; sem campos por pessoa) -->
+      <div id="identTSolto" class="cel-padrao oculto ident-partes-cel" style="grid-column:1 / -1"></div>
+      <div id="identT" class="ident-partes" hidden></div>
       <div id="enotT" class="cel-padrao oculto" style="grid-column:1 / -1"></div>
       <div class="cel-padrao">
         <label class="rotulo versalete" for="apresNome" id="rotApres">Apresentante</label>
@@ -267,9 +282,11 @@ input.moeda{font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.01
         <label class="rotulo versalete" for="parteTel">Telefone</label>
         <input type="tel" id="parteTel" placeholder="(79) 9____-____">
       </div>
+      <div id="identA" class="cel-padrao oculto ident-partes ident-partes-cel" style="grid-column:1 / -1"></div>
       <div id="extrasBox" class="cel-padrao oculto" style="grid-column:1 / -1"></div>
       <div id="enotA" class="cel-padrao oculto" style="grid-column:1 / -1"></div>
     </div>
+    <div class="aviso oculto" id="identAviso" role="status"></div>
     <div class="pergunta" style="margin-top:14px">
       <div class="opcoes"><div class="op tog" id="urgente">⚑ Urgente</div></div>
     </div>
@@ -367,7 +384,7 @@ input.moeda{font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.01
   <section class="bloco oculto" id="blTriagem">
     <h2 class="versalete"><span class="n">3</span><span id="rotTriagem">Triagem — </span><span id="tituloTriagem"></span></h2>
     <div class="aviso oculto" id="avisoSigilo">⚠ Testamento segue trilho restrito: o conteúdo do ato não é anexado ao cartão; o cartão registra apenas o protocolo e a referência do livro.</div>
-    <div class="aviso oculto" id="avisoCDH">ℹ Cedentes e cessionário NÃO são referenciados aqui — serão extraídos no Momento 3: cedentes = herdeiros do espólio indicado no campo TRANSMITENTE da guia de ITBI ("Espólio de Fulano"), identificados pela certidão de óbito e qualificados pelas certidões de nascimento/casamento; cessionário = campo ADQUIRENTE da guia. O nome digitado acima serve ao recibo e será conferido contra a guia.</div>
+    <div class="aviso oculto" id="avisoCDH">ℹ Os nomes de cedentes e cessionário não são digitados aqui — serão extraídos no Momento 3: cedentes = herdeiros do espólio indicado no campo TRANSMITENTE da guia de ITBI ("Espólio de Fulano"), identificados pela certidão de óbito e qualificados pelas certidões de nascimento/casamento; cessionário = campo ADQUIRENTE da guia. O nome digitado acima serve ao recibo e será conferido contra a guia.</div>
     <div id="perguntas"></div>
   </section>
 
@@ -427,7 +444,7 @@ const PAPEIS = {
   'CV-Urbano':{t:'Vendedor(es)',a:'Comprador(es)',parte:'Comprador(a)',ra:'Comprador(a)'},
   'CV-Rural' :{t:'Vendedor(es)',a:'Comprador(es)',parte:'Comprador(a)',ra:'Comprador(a)'},
   'CDP':{t:'Cedente(s)',a:'Cessionário(s)',parte:'Cessionário(a)',ra:'Cessionário(a)'},
-  'CDH':{t:'Cedente(s)',a:'Cessionário',parte:'Cessionário(a)',ph:'Se mais de um, o primeiro',ra:'Cessionário(a)'},
+  'CDH':{t:'Cedente(s)',a:'Cessionário(s)',parte:'Cessionário(a)',ph:'Se mais de um, o primeiro',ra:'Cessionário(a)'},
   'DOA':{t:'Doador(a)',a:'Donatário(a)',parte:'Donatário(a)',ra:'Donatário(a)'},
   'TEST':{t:'Testador(a)',a:'Beneficiário(s)',parte:'Testador(a)',ra:'Testador(a)'},
   'INV':{t:'Espólio',a:'Herdeiros',parte:'Inventariante',ra:'Inventariante',apres:'Advogado apresentante'},
@@ -445,6 +462,16 @@ const PAPEIS = {
   'CERT':{t:null,a:null,parte:'Pessoa que participa do ato',ra:'Pessoa que participa do ato',apres:'Solicitante',ph:'Nome completo de quem consta do ato'}
 };
 const APRES_PADRAO='Apresentante';
+/* v1.37.5 — atos em que "pessoa física / jurídica / múltiplos" fica na identificação */
+const IDENT_T=['CV-Urbano','CV-Rural','CDP','CDH'];      // vendedor(es) / cedente(s)
+const IDENT_A=['CV-Urbano','CV-Rural','CDP','CDH'];      // comprador(es) / cessionário(s)
+const IDENT_ROT={
+  'CV-Urbano':{t:'vendedores',a:'compradores',T:'Vendedor(es)',A:'Comprador(es)'},
+  'CV-Rural' :{t:'vendedores',a:'compradores',T:'Vendedor(es)',A:'Comprador(es)'},
+  'CDP':{t:'cedentes',a:'cessionários',T:'Cedente(s)',A:'Cessionário(s)'},
+  'CDH':{t:'cedentes',a:'cessionários',T:'Cedente(s)',A:'Cessionário(s)'}
+};
+const cap = s => s ? s.charAt(0).toUpperCase()+s.slice(1) : s;
 const ATO_NOME={'CV-Urbano':'Escritura de Compra e Venda (imóvel urbano)','CV-Rural':'Escritura de Compra e Venda (imóvel rural)','CDP':'Escritura de Cessão de Direitos Possessórios','CDH':'Escritura de Cessão de Direitos Hereditários','DOA':'Escritura de Doação','TEST':'Testamento Público','INV':'Escritura de Inventário e Partilha','PER':'Escritura de Permuta','DIV':'Escritura de Divórcio','UE':'Escritura de União Estável','DUE':'Escritura de Dissolução de União Estável','RERRAT':'Escritura de Re-ratificação','ATA-U':'Ata Notarial para Usucapião','ATA-W/A':'Ata Notarial de Mensagens e Áudios','CERT':'Certidão ou Traslado de Ato Notarial'};
 
 /* ============================================================
@@ -612,7 +639,7 @@ function perguntasInventario(){
   ];
 }
 
-const QTDS=['2','3','4','5','6'];
+const QTDS=['2','3','4','5','6','7','8','9','10','11','12','13','14','15'];   // v1.37.5: até 15, como a guia de ITBI
 
 
 /* ===== NOVOS ATOS (03/09/2026) =====
@@ -984,14 +1011,42 @@ function perguntasDoAto(ato){
   if(ato==='ATA-U') return perguntasAtaUsucapiao();
   if(ato==='ATA-W/A') return perguntasAtaMensagens();
   const P = PAPEIS[ato]; const Q=[];
+  /* v1.37.5 — pedido do Tabelião (24/09/2026): nos atos com comprador ou cessionário
+     (CV-Urbano, CV-Rural, CDP, CDH), "pessoa física / pessoa jurídica / múltiplos"
+     sai da triagem e vai para a IDENTIFICAÇÃO, em botões ao lado de vendedor e de
+     comprador. Nos múltiplos: composição (só PF, só PJ ou MISTO) e quantos (2–15).
+     NÃO há campos por pessoa: na geração da minuta, vendedores e compradores saem da
+     guia de ITBI. ident:'t'|'a' = a pergunta é desenhada na identificação. */
+  const identT = IDENT_T.includes(ato) ? 't' : undefined;
+  const identA = IDENT_A.includes(ato) ? 'a' : undefined;
+  const nomeT = (IDENT_ROT[ato]||{}).t, nomeA = (IDENT_ROT[ato]||{}).a;
 
-  // Transmitente (não se aplica ao CDH: cedentes extraídos da documentação no Momento 3)
-  if(ato!=='CDH'){
-  Q.push({id:'t_tipo', titulo:`${P.t} — pessoa`, ops:[
+  // Transmitente. v1.37.5: nos atos da identificação (CV, CDP, CDH) a pergunta mora lá;
+  // no CDH só ela (estado civil, regime e origem não se aplicam: cedentes são os herdeiros).
+  const ehCVato = ato==='CV-Urbano'||ato==='CV-Rural';
+  const fonteT = ato==='CDP' ? 'da guia de ITBI (se houver) ou da documentação'
+               : ato==='CDH' ? 'da guia de ITBI (espólio) e das certidões de óbito, nascimento e casamento' : 'da guia de ITBI';
+  const avisoT = identT ? `Nomes e qualificação de cada um dos ${nomeT} saem ${fonteT} na geração da minuta` +
+    (ehCVato ? ' — acima, digite só um deles (vai no cartão).' : ' — aqui não se digita nome.') : '';
+  if(ato!=='CDH' || identT){
+  Q.push({id:'t_tipo', ident:identT, titulo: identT ? `${(IDENT_ROT[ato]||{}).T} — pessoa física, jurídica ou múltiplos?` : `${P.t} — pessoa`, ops:[
     {v:'Pessoa física'},
     {v:'Pessoa jurídica', inj:['Contrato social','RG/CPF do representante','Certidão simplificada da Junta']},
-    {v:'Múltiplos transmitentes', inj:['RG/CPF e certidões de estado civil de TODOS os transmitentes (e cônjuges)'], aviso:'Qualificação individual extraída da documentação no Momento 3 — mesmo princípio do CDH.'}
+    identT ? {v:'Múltiplos transmitentes', rot:'Múltiplos '+nomeT, aviso: avisoT}
+           : {v:'Múltiplos transmitentes', inj:['RG/CPF e certidões de estado civil de TODOS os transmitentes (e cônjuges)'], aviso:'Qualificação individual extraída da documentação no Momento 3 — mesmo princípio do CDH.'}
   ]});
+  if(identT){
+    // os documentos acompanham a composição (PF, PJ ou misto), não o botão "Múltiplos"
+    const docPF='RG/CPF e certidões de estado civil de TODOS os transmitentes (e cônjuges)';
+    const docPJ='Contrato social, representação e certidão simplificada da Junta de CADA pessoa jurídica transmitente';
+    Q.push({id:'t_comp', ident:'t', titulo:`${cap(nomeT)} — composição`, dependeDe:['t_tipo','Múltiplos transmitentes'], ops:[
+      {v:'Só pessoas físicas', inj:[docPF]},
+      {v:'Só pessoas jurídicas', inj:[docPJ]},
+      {v:'Misto — pessoas físicas e jurídicas', inj:[docPF, docPJ]}
+    ]});
+  }
+  }
+  if(ato!=='CDH'){
   Q.push({id:'t_civil', titulo:`${P.t} — estado civil`, dependeDe:['t_tipo','Pessoa física'], ops:[
     {v:'Solteiro(a)'},
     {v:'Casado(a)', inj:['Certidão de casamento (transmitente)']},
@@ -1015,19 +1070,37 @@ function perguntasDoAto(ato){
   }
 
   // Múltiplos transmitentes — só a quantidade; nomes e qualificação saem da guia de ITBI/ITCMD no Momento 3
-  if(ato!=='CDH'){
-    Q.push({id:'t_qtd', titulo:`${P.t} — quantos?`, dependeDe:['t_tipo','Múltiplos transmitentes'], ops:QTDS.map(n=>({v:n}))});
+  if(ato!=='CDH' || identT){
+    Q.push({id:'t_qtd', ident:identT, titulo: identT ? `${cap(nomeT)} — quantos?` : `${P.t} — quantos?`, dependeDe:['t_tipo','Múltiplos transmitentes'], ops:QTDS.map(n=>({v:n}))});
+  }
+
+  // v1.37.5 — adquirente: pessoa física, jurídica ou múltiplos (na identificação)
+  if(identA){
+    const fonteA = ato==='CDP' ? 'da guia de ITBI (se houver) ou da documentação' : 'da guia de ITBI';
+    const docPFa='RG/CPF e certidões de estado civil de TODOS os adquirentes';
+    const docPJa='Contrato social, representação e certidão simplificada da Junta de CADA pessoa jurídica adquirente';
+    Q.push({id:'a_tipo', ident:'a', titulo:`${(IDENT_ROT[ato]||{}).A} — pessoa física, jurídica ou múltiplos?`, ops:[
+      {v:'Pessoa física'},
+      {v:'Pessoa jurídica', inj:['Contrato social (adquirente)','RG/CPF do representante (adquirente)','Certidão simplificada da Junta (adquirente)']},
+      {v:'Múltiplos adquirentes', rot:'Múltiplos '+nomeA, aviso:`Mais de um adquirente: o gerador insere a cláusula de instituição de condomínio voluntário. Nomes e qualificação de cada um dos ${nomeA} saem ${fonteA} na geração da minuta — acima, digite só um deles (vai no título do cartão e no recibo).`}
+    ]});
+    Q.push({id:'a_comp', ident:'a', titulo:`${cap(nomeA)} — composição`, dependeDe:['a_tipo','Múltiplos adquirentes'], ops:[
+      {v:'Só pessoas físicas', inj:[docPFa]},
+      {v:'Só pessoas jurídicas', inj:[docPJa]},
+      {v:'Misto — pessoas físicas e jurídicas', inj:[docPFa, docPJa]}
+    ]});
+    Q.push({id:'a_qtd', ident:'a', titulo:`${cap(nomeA)} — quantos?`, dependeDe:['a_tipo','Múltiplos adquirentes'], ops:QTDS.map(n=>({v:n}))});
   }
 
   // Adquirente (CDH: cessionário extraído do campo ADQUIRENTE da guia de ITBI)
   if(ato!=='CDH'){
-  Q.push({id:'a_civil', titulo:`${P.a} — estado civil`, ops:[
+  Q.push({id:'a_civil', titulo:`${P.a} — estado civil`, dependeDe: identA ? ['a_tipo','Pessoa física'] : undefined, ops:[
     {v:'Solteiro(a)'},
     {v:'Casado(a)', inj:['Certidão de casamento (adquirente)']},
     {v:'Divorciado(a)'},
     {v:'Viúvo(a)'},
     {v:'União estável'},
-    {v:'Múltiplos adquirentes', inj:['RG/CPF e certidões de estado civil de TODOS os adquirentes'], aviso:'Mais de um adquirente: o gerador insere a cláusula de instituição de condomínio voluntário (titularidade condominial); qualificação individual no Momento 3.'}
+    ...(identA ? [] : [{v:'Múltiplos adquirentes', inj:['RG/CPF e certidões de estado civil de TODOS os adquirentes'], aviso:'Mais de um adquirente: o gerador insere a cláusula de instituição de condomínio voluntário (titularidade condominial); qualificação individual no Momento 3.'}])
   ]});
   Q.push({id:'a_ue', titulo:`${P.a} — como constará a união estável?`, dependeDe:['a_civil','União estável'], ops:[
     {v:'Prova documental existente', inj:['Escritura/declaração de união estável','RG/CPF do convivente'], aviso:'A união estável consta por prova documental; convivente qualificado no ato.'},
@@ -1042,7 +1115,7 @@ function perguntasDoAto(ato){
     {v:'Comunhão (antes da Lei 6.515/77)'}
   ]});
   // Múltiplos adquirentes — só a quantidade; nomes e qualificação saem da guia no Momento 3
-  Q.push({id:'a_qtd', titulo:`${P.a} — quantos?`, dependeDe:['a_civil','Múltiplos adquirentes'], ops:QTDS.map(n=>({v:n}))});
+  if(!identA) Q.push({id:'a_qtd', titulo:`${P.a} — quantos?`, dependeDe:['a_civil','Múltiplos adquirentes'], ops:QTDS.map(n=>({v:n}))});
   }
 
   // Parentesco + representação
@@ -1138,13 +1211,8 @@ function perguntasDoAto(ato){
   }
   if(ato==='CDH'){
     // Múltiplos cedentes/cessionários — só a quantidade; nomes e qualificação saem da guia e das certidões no Momento 3
-    Q.push({id:'t_multi', titulo:'Cedentes — mais de um?', ops:[{v:'Não'},{v:'Sim'}]});
-    Q.push({id:'t_qtd', titulo:'Cedentes — quantos?', dependeDe:['t_multi','Sim'], ops:QTDS.map(n=>({v:n}))});
-    Q.push({id:'a_multi', titulo:'Cessionários — mais de um?', ops:[
-      {v:'Não'},
-      {v:'Sim', inj:['RG/CPF e certidões de estado civil de TODOS os cessionários'], aviso:'Mais de um cessionário: o gerador insere a cláusula de instituição de condomínio voluntário; qualificação individual no Momento 3.'}
-    ]});
-    Q.push({id:'a_qtd', titulo:'Cessionários — quantos?', dependeDe:['a_multi','Sim'], ops:QTDS.map(n=>({v:n}))});
+    // v1.37.5 — cedentes: pessoa física, jurídica ou múltiplos passou para a identificação (t_tipo)
+    // v1.37.5 — cessionário(s): pessoa física, jurídica ou múltiplos passou para a identificação (a_tipo)
     Q.push({id:'config', titulo:'Configuração do negócio — atenção', ops:[
       {v:'Cessão pura — APENAS os herdeiros cedem direitos hereditários', aviso:'Só a fração hereditária é objeto do ato; o cônjuge sobrevivente, se existir, não transmite nada aqui.'},
       {v:'Negócio misto — sobrevivente VENDE a meação + herdeiros CEDEM a herança', aviso:'Muda a nomenclatura do ato e exige cláusula especial: a meação NÃO é herança — conforme o regime, o sobrevivente já é proprietário de 50% e VENDE essa fração ideal; apenas a metade dos herdeiros é inventariada/partilhada e objeto de cessão. Seguir o padrão próprio do negócio misto (Módulo 3-B).'}
@@ -1308,8 +1376,10 @@ el('checkTitulo').textContent='Conferência documental — '+S.ato;
 const vistos=new Set(); const conds=[];
 perguntasDoAto(S.ato).forEach(q=>(q.ops||[]).forEach(o=>{
 (o.inj||[]).forEach(i=>{
-const chave=i+'|'+o.v;
-if(!vistos.has(chave)){vistos.add(chave);conds.push({i,v:o.v});}
+const rotulo=o.rot||o.v;   // v1.37.5: o rótulo do botão ("Múltiplos vendedores"), não o valor interno
+const ja=conds.find(c=>c.i===i);
+if(ja){ if(!ja.v.split(' ou ').includes(rotulo)) ja.v+=' ou '+rotulo; }
+else if(!vistos.has(i)){vistos.add(i);conds.push({i,v:rotulo});}
 });
 }));
 const itens=itensDossie();
@@ -1484,6 +1554,7 @@ function renderPerguntas(){
   const box=el('perguntas'); box.innerHTML='';
   perguntasDoAto(S.ato).forEach(q=>{
     if(!visivel(q)) { delete S.respostas[q.id]; return; }
+    if(q.ident) return;   // v1.37.5 — desenhada na identificação (renderIdentPartes)
     const div=document.createElement('div'); div.className='pergunta'+(q.dependeDe?' sub':'');
     div.innerHTML=`<div class="titulo-p">${q.titulo}</div>`;
     if(q.tipo==='data'||q.tipo==='texto'||q.tipo==='moeda'){
@@ -1526,6 +1597,64 @@ function renderPerguntas(){
     if(sel && sel.aviso){const a=document.createElement('div');a.className='aviso';a.textContent='⚠ '+sel.aviso;div.appendChild(a);}
     box.appendChild(div);
   });
+  renderIdentPartes();
+}
+
+/* v1.37.5 — "pessoa física / pessoa jurídica / múltiplos" ao lado de vendedor e de
+   comprador (CV), de cedente e de cessionário (CDP) e de cessionário (CDH). As respostas
+   são as MESMAS da triagem (S.respostas.t_tipo, a_tipo…): o dossiê, a triagem que
+   depende delas (estado civil, regime…) e o payload continuam no mesmo lugar. */
+/* v1.37.5 — as perguntas da identificação são obrigatórias: sem elas o estado civil,
+   o regime e os documentos correspondentes nunca aparecem (auditoria). Nos múltiplos,
+   composição e quantidade também. Devolve os títulos do que falta. */
+function identPartesFaltando(){
+  if(!S.ato || (!IDENT_T.includes(S.ato) && !IDENT_A.includes(S.ato))) return [];
+  return perguntasDoAto(S.ato).filter(q=>q.ident && visivel(q) && !S.respostas[q.id]).map(q=>q.titulo.replace(/\?$/,''));
+}
+function renderIdentPartes(){
+  const ato=S.ato, rot=IDENT_ROT[ato]||{};
+  const temT=IDENT_T.includes(ato), temA=IDENT_A.includes(ato);
+  const ehCV = ato==='CV-Urbano'||ato==='CV-Rural';
+  const bT=el('identT'), bA=el('identA'), solto=el('identTSolto');
+  // o bloco do transmitente mora dentro do box do vendedor (CV) ou numa célula própria (CDP)
+  const destino = ehCV ? el('identTSlotCV') : solto;
+  if(bT.parentNode!==destino) destino.appendChild(bT);
+  bT.hidden=!temT; solto.classList.toggle('oculto', !(temT && !ehCV));
+  bA.classList.toggle('oculto', !temA);
+  const qs = ato ? perguntasDoAto(ato).filter(q=>q.ident) : [];
+  const desenha=(caixa, lado)=>{
+    caixa.innerHTML='';
+    qs.filter(q=>q.ident===lado && visivel(q)).forEach(q=>{
+      const div=document.createElement('div'); div.className='pergunta'+(q.dependeDe?' sub':'');
+      div.dataset.ident=q.id;
+      div.innerHTML=`<div class="titulo-p">${q.titulo}</div>`;
+      const ops=document.createElement('div'); ops.className='opcoes'; ops.setAttribute('role','group'); ops.setAttribute('aria-label', q.titulo);
+      q.ops.forEach(o=>{
+        const b=document.createElement('button'); b.type='button'; b.className='op'; b.textContent=o.rot||o.v; b.dataset.v=o.v;
+        const marcado=S.respostas[q.id]===o.v;
+        b.classList.toggle('sel', marcado); b.setAttribute('aria-pressed', marcado?'true':'false');
+        b.addEventListener('click',()=>{
+          // clicar de novo na opção marcada desmarca (útil para corrigir; a resposta é exigida para protocolizar)
+          if(S.respostas[q.id]===o.v) delete S.respostas[q.id]; else S.respostas[q.id]=o.v;
+          renderPerguntas(); renderDossie();
+          const foco=document.querySelector('[data-ident="'+q.id+'"] .op[data-v="'+CSS.escape(o.v)+'"]');
+          if(foco) try{ foco.focus({preventScroll:true}); }catch(e){}
+        });
+        ops.appendChild(b);
+      });
+      div.appendChild(ops);
+      const sel=q.ops.find(o=>o.v===S.respostas[q.id]);
+      if(sel && sel.aviso){const a=document.createElement('div');a.className='aviso';a.textContent='⚠ '+sel.aviso;div.appendChild(a);}
+      caixa.appendChild(div);
+    });
+  };
+  if(temT) desenha(bT,'t'); else bT.innerHTML='';
+  if(temA) desenha(bA,'a'); else bA.innerHTML='';
+  // nos múltiplos, o nome digitado é o de um deles
+  const pn=el('parteNome');
+  if(temA) pn.placeholder = S.respostas.a_tipo==='Múltiplos adquirentes' ? (ato==='CDP' ? 'Um deles' : 'Um deles — o primeiro da guia de ITBI') : ((PAPEIS[ato]||{}).ph||'Nome completo');
+  const vn=el('vendNome');
+  if(ehCV) vn.placeholder = S.respostas.t_tipo==='Múltiplos transmitentes' ? 'Um deles — o primeiro da guia de ITBI' : 'Nome do vendedor';
 }
 
 /* ============================================================
@@ -1737,7 +1866,9 @@ function renderDossie(){
   const pronto = S.ato==='TEST'
     ? !!((S.qual['testador_nome']||'').trim() && (S.qual['testador_telefone']||'').trim())
     : !!(el('apresNome').value.trim() && el('apresTel').value.trim() && el('parteNome').value.trim());
-  el('btnProt').disabled=!(pronto && enotRespondido() && extrasOk() && certOk() && textosObrigatoriosOk());
+  const faltaPartes = identPartesFaltando();
+  const avP=el('identAviso'); if(avP){ avP.classList.toggle('oculto', !faltaPartes.length); avP.textContent = faltaPartes.length ? '⚠ Para protocolizar, responda: '+faltaPartes.join(' · ') : ''; }
+  el('btnProt').disabled=!(pronto && enotRespondido() && extrasOk() && certOk() && textosObrigatoriosOk() && !faltaPartes.length);
 }
 
 /* ============================================================
@@ -1855,6 +1986,12 @@ el('btnProt').addEventListener('click',async ()=>{
     partes: ehTest ? undefined : {
       qtd_transmitentes: S.respostas.t_qtd ? parseInt(S.respostas.t_qtd,10) : (S.respostas.qtd1 ? parseInt(S.respostas.qtd1,10) : 1),
       qtd_adquirentes: S.respostas.a_qtd ? parseInt(S.respostas.a_qtd,10) : (S.respostas.qtd2 ? parseInt(S.respostas.qtd2,10) : 1),
+      // v1.37.5 — pessoa física/jurídica/múltiplos e composição (PF, PJ ou misto) por polo;
+      // nos múltiplos, nomes e qualificação saem da guia de ITBI na geração da minuta
+      transmitentes: IDENT_T.includes(S.ato) ? { tipo: S.respostas.t_tipo||null, composicao: S.respostas.t_comp||null,
+        fonte_nomes: S.respostas.t_tipo==='Múltiplos transmitentes' ? (S.ato==='CDP' ? 'guia de ITBI ou documentação' : S.ato==='CDH' ? 'guia de ITBI (espólio) e certidões' : 'guia de ITBI') : null } : undefined,
+      adquirentes: IDENT_A.includes(S.ato) ? { tipo: S.respostas.a_tipo||null, composicao: S.respostas.a_comp||null,
+        fonte_nomes: S.respostas.a_tipo==='Múltiplos adquirentes' ? (S.ato==='CDP' ? 'guia de ITBI ou documentação' : 'guia de ITBI') : null } : undefined,
       nomeadas: P.extras ? [{papel:P.parte, nome:parte}, ...P.extras.map(([id,rot])=>({papel:rot, nome:(S.extras[id]||'').trim().toUpperCase()}))] : undefined
     },
     assinatura_enotariado: ehTest
