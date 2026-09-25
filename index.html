@@ -554,6 +554,14 @@ footer{border-top:1px solid var(--linha);padding:22px 20px 30px;text-align:cente
 .btn-entrar:hover{filter:brightness(1.16)}
 .btn-entrar:disabled{opacity:.6;cursor:wait}
 #formPrimeiro .btn-mini{align-self:flex-start}
+/* v1.39.1 — primeiro acesso com o código do Tabelião */
+.login-codigo{align-self:flex-start;margin-top:4px;text-transform:none;letter-spacing:.02em;font-size:13px}
+.campo-codigo{font-family:ui-monospace,Consolas,monospace;letter-spacing:.14em;text-transform:uppercase}
+.eq-codigo{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:0 0 12px;padding:14px 16px;border:2px solid #631325;border-radius:12px;background:#fbf5f6;color:#202a3a}
+.eq-codigo span{font-size:14.5px}
+.eq-codigo strong{font:800 26px/1.1 ui-monospace,Consolas,monospace;letter-spacing:.12em;color:#631325}
+.eq-codigo small{flex-basis:100%;font-size:14px;line-height:1.45;color:#202a3a}
+.eq-sem{color:#631325}
 .login-instrucao{border-top:1px solid var(--home-cartao-borda);padding-top:18px;font-size:12px;color:var(--home-rotulo)}
 .login-nota{font-size:14px;line-height:1.8;color:var(--home-nota);letter-spacing:.02em}
 .login-nota-pe{margin-top:6px}
@@ -2861,11 +2869,17 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
         </div>
         <button id="btnEntrar" class="btn-entrar" type="submit">Entrar no Hub</button>
         <p id="msgLogin" class="aviso" hidden></p>
+        <!-- v1.39.1: primeiro acesso só com o código de uso único que o Tabelião entrega -->
+        <button class="btn-mini login-codigo" type="button" id="btnPrimeiroAcesso">Primeiro acesso ou senha zerada? Tenho um código</button>
       </form>
 
       <form id="formPrimeiro" class="form-hub" hidden novalidate>
         <p class="login-instrucao versalete">Primeiro acesso — crie a sua senha</p>
-        <p class="login-nota">Olá, <b id="nomePrimeiro"></b>! Escolha uma senha com pelo menos 8 caracteres. Ela é só sua — nem o Tabelião a conhece — e vale também para o e-Protocolo.</p>
+        <p class="login-nota">Digite o seu usuário e o <b>código de acesso</b> que o Tabelião entregou a você (vale uma vez, por 48 horas). Depois escolha uma senha com pelo menos 8 caracteres, sem o seu nome. Ela é só sua — nem o Tabelião a conhece — e vale também para o e-Protocolo.</p>
+        <label class="rotulo-hub" for="loginPrimeiro">Usuário</label>
+        <input class="campo campo-alto" id="loginPrimeiro" autocomplete="username" placeholder="seu usuário (nome.sobrenome)" autocapitalize="none" autocorrect="off" spellcheck="false">
+        <label class="rotulo-hub" for="codigoPrimeiro">Código de acesso</label>
+        <input class="campo campo-alto campo-codigo" id="codigoPrimeiro" autocomplete="one-time-code" placeholder="XXXXX-XXXXX" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="20">
         <label class="rotulo-hub" for="senhaNova">Nova senha</label>
         <div class="campo-olho">
           <input class="campo campo-alto" type="password" id="senhaNova" autocomplete="new-password" placeholder="mínimo 8 caracteres">
@@ -2881,7 +2895,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
         <p id="msgPrimeiro" class="aviso" hidden></p>
       </form>
 
-      <p class="login-nota login-nota-pe">Use seu usuário e senha do e-Protocolo.<br>Esqueceu a senha? Solicite a redefinição ao Tabelião.</p>
+      <p class="login-nota login-nota-pe">Use seu usuário e senha do e-Protocolo.<br>Esqueceu a senha? Peça ao Tabelião um código de acesso.</p>
     </div>
   </div>
   </div>
@@ -5055,7 +5069,6 @@ function semConexao(liga) {
 /* ============================================================
    LOGIN INDIVIDUAL (o mesmo do Protocolo)
 ============================================================ */
-let PRIMEIRO_LOGIN = null;
 function msg(id, texto, ok) {
   const p = el(id);
   p.textContent = texto || '';
@@ -5105,32 +5118,37 @@ function entrar(ev) {
   const b = el('btnEntrar');
   ocupado(b, true, 'Entrando…');
   msg('msgLogin', '');
+  // v1.39.1: o servidor não diz mais quem está "sem senha" — o primeiro acesso é pelo
+  // botão "Tenho um código", com o código que o Tabelião entrega
   api('/login', { corpo: { login: login, senha: senha }, semRedirecionar: true }).then(function (r) {
-    if (r && r.primeiro_acesso) { mostrarPrimeiroAcesso(login); return; }
     return iniciarSessao(r.token, r.nome, login, r.cargo);
   }).catch(function (e) {
-    msg('msgLogin', e.status === 401 ? 'Usuário ou senha não conferem.' : primeiraMaiuscula(e.erro) + '.');
+    msg('msgLogin', e.status === 401 ? 'Usuário ou senha não conferem. É o seu primeiro acesso? Use o botão "Tenho um código".' : primeiraMaiuscula(e.erro) + '.');
     el('campoSenha').select();
   }).then(function () { ocupado(b, false, 'Entrar no Hub'); });
 }
 function mostrarPrimeiroAcesso(login) {
-  PRIMEIRO_LOGIN = login;
-  el('nomePrimeiro').textContent = login;
+  el('loginPrimeiro').value = login || '';
+  el('codigoPrimeiro').value = '';
   el('formLogin').hidden = true;
   el('formPrimeiro').hidden = false;
   msg('msgPrimeiro', '');
   el('senhaNova').value = ''; el('senhaConf').value = '';
-  setTimeout(function () { el('senhaNova').focus(); }, 30);
+  setTimeout(function () { el(login ? 'codigoPrimeiro' : 'loginPrimeiro').focus(); }, 30);
 }
 function criarSenha(ev) {
   ev.preventDefault();
+  const login = el('loginPrimeiro').value.trim().toLowerCase();
+  const codigo = el('codigoPrimeiro').value.trim();
   const s1 = el('senhaNova').value, s2 = el('senhaConf').value;
+  if (!login) { msg('msgPrimeiro', 'Digite o seu usuário (nome.sobrenome).'); el('loginPrimeiro').focus(); return; }
+  if (!codigo) { msg('msgPrimeiro', 'Digite o código de acesso que o Tabelião entregou.'); el('codigoPrimeiro').focus(); return; }
   if (s1.length < 8) { msg('msgPrimeiro', 'A senha precisa ter pelo menos 8 caracteres.'); return; }
   if (s1 !== s2) { msg('msgPrimeiro', 'As duas senhas não são iguais.'); return; }
   const b = el('btnCriarSenha');
   ocupado(b, true, 'Criando…');
-  api('/definir-senha', { corpo: { login: PRIMEIRO_LOGIN, senha: s1 }, semRedirecionar: true }).then(function (r) {
-    return iniciarSessao(r.token, r.nome, PRIMEIRO_LOGIN, r.cargo);
+  api('/definir-senha', { corpo: { login: login, codigo: codigo, senha: s1 }, semRedirecionar: true }).then(function (r) {
+    return iniciarSessao(r.token, r.nome, login, r.cargo);
   }).catch(function (e) {
     msg('msgPrimeiro', primeiraMaiuscula(e.erro) + '.');
   }).then(function () { ocupado(b, false, 'Criar senha e entrar'); });
@@ -6916,7 +6934,7 @@ function abrirEditorMural(abaInicial) {
   const partida = MURAL || normalizarLocal({});
   // eqEdit: quem está com a linha aberta na aba Equipe · aud: filtros da aba Auditoria (v1.34)
   // rel: período escolhido e situação da aba Relatórios (v1.38)
-  ED = { copia: clone(partida), base: MURAL_META.atualizado_em || null, sujo: false, aba: abaInicial || 'avisos', editando: null, editor: null, confirmarSaida: false, eqEdit: null, aud: null, rel: null };
+  ED = { copia: clone(partida), base: MURAL_META.atualizado_em || null, sujo: false, aba: abaInicial || 'avisos', editando: null, editor: null, confirmarSaida: false, eqEdit: null, eqCodigo: null, aud: null, rel: null };
   abrirSub('editar');
 }
 function htmlEditorMural() {
@@ -7152,8 +7170,14 @@ function pintarAbaEquipe(painel) {
   painel.innerHTML = '<p class="ed-vazio">Carregando a equipe…</p>';
   api('/hub/admin/equipe').then(function (lista) {
     if (!ED || ED.aba !== 'equipe') return;
+    // v1.39.1 — o código de acesso aparece UMA vez, aqui, logo depois de gerado
+    const cod = ED.eqCodigo;
     painel.innerHTML =
       '<p class="sub-data" style="margin-bottom:10px">Quem entra no Hub CN2O. O que você faz nesta aba vale na hora — não precisa publicar o mural.</p>' +
+      (cod ? '<div class="eq-codigo" role="status"><span>Código de acesso de <b>' + esc(cod.login) + '</b></span>' +
+        '<strong id="edEqCodigo">' + esc(cod.codigo) + '</strong>' +
+        '<small>Entregue em mãos (não mande por WhatsApp nem e-mail). Vale uma vez, por ' + esc(String(cod.horas)) + ' horas. A pessoa clica em "Tenho um código" na tela de entrada. Ele não aparece de novo.</small>' +
+        '<span class="ed-acoes"><button type="button" class="ed-btn" id="edEqCopiar">Copiar</button><button type="button" class="ed-btn" id="edEqFechar">Já entreguei</button></span></div>' : '') +
       '<ul class="ed-lista">' + (lista || []).map(function (u) {
         // v1.34 — "Editar" abre a própria linha: nome de exibição e cargo (o login não muda).
         if (ED.eqEdit === u.login) {
@@ -7163,13 +7187,16 @@ function pintarAbaEquipe(painel) {
             '<span class="ed-acoes"><button type="button" class="ed-btn on" id="edEqEdSalvar" data-salva="' + esc(u.login) + '">Salvar</button>' +
             '<button type="button" class="ed-btn" data-cancela="1">Cancelar</button></span></li>';
         }
+        // v1.39.1: sem senha, só entra com um código de acesso gerado aqui
         const situacao = u.tem_senha
-          ? (u.ultimo_acesso ? 'último acesso ' + quandoCurto(u.ultimo_acesso) : 'senha criada')
-          : 'aguardando o primeiro acesso';
-        const podeZerar = u.tem_senha && u.login !== SESSAO.login;
+          ? (u.ultimo_acesso ? 'último acesso ' + esc(quandoCurto(u.ultimo_acesso)) : 'senha criada')
+          : (u.codigo_pendente ? 'código entregue — vale até ' + esc(quandoCurto(u.codigo_expira)) : '<b class="eq-sem">sem senha — gere um código de acesso</b>');
+        const rotulo = u.tem_senha ? 'Zerar senha' : (u.codigo_pendente ? 'Novo código' : 'Gerar código');
+        const podeCodigo = u.login !== SESSAO.login;
         return '<li class="ed-item"><b>' + esc(u.nome) + '</b><small>' + esc(u.login) + ' · ' + esc(u.cargo) + ' · ' + situacao + '</small>' +
           '<span class="ed-acoes"><button type="button" class="ed-btn" data-edita="' + esc(u.login) + '" title="Corrigir o nome e o cargo desta pessoa">Editar</button>' +
-          (podeZerar ? '<button type="button" class="ed-btn" data-zera="' + esc(u.login) + '" title="Zerar a senha desta pessoa">Zerar senha</button>' : '') + '</span></li>';
+          (podeCodigo ? '<button type="button" class="ed-btn" data-zera="' + esc(u.login) + '" data-rotulo="' + rotulo + '" title="' +
+            (u.tem_senha ? 'Apaga a senha, encerra as sessões e gera um código de acesso' : 'Gera um código de acesso de uso único (48 h)') + '">' + rotulo + '</button>' : '') + '</span></li>';
       }).join('') + '</ul>' +
       '<h3 class="ed-titulo versalete">Cadastrar pessoa</h3>' +
       '<div class="ed-form ed-linha">' +
@@ -7179,7 +7206,7 @@ function pintarAbaEquipe(painel) {
         '<datalist id="edEqCargos"><option value="Escrevente"><option value="Substituta do Tabelião"><option value="Cadastro e Protocolo"><option value="Secretária"><option value="Auxiliar"><option value="Estagiário(a)"></datalist>' +
         '<button class="btn-fantasma" id="edEqAdd" type="button">Cadastrar</button>' +
       '</div>' +
-      '<p class="sub-data">A pessoa entra com esse usuário e cria a própria senha no primeiro acesso. Cadastre — ou zere uma senha — só quando ela for entrar em seguida. <b>Editar</b> corrige o nome de exibição e o cargo (o cargo é o que o Redator CN2O usa para assinar); o usuário, não — ele é a chave de tudo.</p>';
+      '<p class="sub-data">Ao cadastrar (ou zerar uma senha), o Hub gera um <b>código de acesso</b> de uso único, válido por 48 horas: entregue-o em mãos. Com ele a pessoa cria a própria senha em "Tenho um código", na tela de entrada. Sem o código, ninguém cria senha. <b>Editar</b> corrige o nome de exibição e o cargo (o cargo é o que o Redator CN2O usa para assinar); o usuário, não — ele é a chave de tudo.</p>';
     // v1.34 — editar nome e cargo de quem já existe
     painel.querySelectorAll('[data-edita]').forEach(function (b) {
       b.addEventListener('click', function () { ED.eqEdit = b.dataset.edita; pintarAba(); });
@@ -7206,8 +7233,9 @@ function pintarAbaEquipe(painel) {
     el('edEqAdd').addEventListener('click', function () {
       const corpo = { nome: nomeEl.value.trim(), login: loginEl.value.trim().toLowerCase(), cargo: el('edEqCargo').value.trim() };
       if (!corpo.nome || !corpo.login) { toast('Preencha o nome e o usuário.'); return; }
-      api('/hub/admin/equipe', { corpo: corpo }).then(function () {
+      api('/hub/admin/equipe', { corpo: corpo }).then(function (r) {
         toast('✓ ' + corpo.nome + ' cadastrado(a) — usuário ' + corpo.login);
+        if (r && r.codigo) ED.eqCodigo = { login: r.login, codigo: r.codigo, horas: r.validade_horas || 48 };
         pintarAba();
       }).catch(function (e) { toast(primeiraMaiuscula(e.erro) + '.', true); });
     });
@@ -7215,15 +7243,24 @@ function pintarAbaEquipe(painel) {
       b.addEventListener('click', function () {
         if (b.dataset.confirma !== '1') {
           b.dataset.confirma = '1'; b.textContent = 'Confirmar?'; b.classList.add('on');
-          setTimeout(function () { if (b.isConnected) { b.dataset.confirma = ''; b.textContent = 'Zerar senha'; b.classList.remove('on'); } }, 3500);
+          setTimeout(function () { if (b.isConnected) { b.dataset.confirma = ''; b.textContent = b.dataset.rotulo; b.classList.remove('on'); } }, 3500);
           return;
         }
-        api('/hub/admin/zerar-senha', { corpo: { login: b.dataset.zera } }).then(function () {
-          toast('✓ Senha zerada — ' + b.dataset.zera + ' cria uma nova no próximo acesso');
+        b.disabled = true;
+        api('/hub/admin/codigo-acesso', { corpo: { login: b.dataset.zera } }).then(function (r) {
+          ED.eqCodigo = { login: r.login, codigo: r.codigo, horas: r.validade_horas || 48 };
           pintarAba();
-        }).catch(function (e) { toast(primeiraMaiuscula(e.erro) + '.', true); });
+        }).catch(function (e) { b.disabled = false; toast(primeiraMaiuscula(e.erro) + '.', true); });
       });
     });
+    if (el('edEqCopiar')) {
+      el('edEqCopiar').addEventListener('click', function () {
+        const t = el('edEqCodigo').textContent;
+        (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(t) : Promise.reject())
+          .then(function () { toast('✓ Código copiado.'); }, function () { toast('Selecione o código e copie com Ctrl+C.', true); });
+      });
+      el('edEqFechar').addEventListener('click', function () { ED.eqCodigo = null; pintarAba(); });
+    }
   }).catch(function (e) { if (painel.isConnected) painel.innerHTML = '<p class="ed-vazio">Não consegui ler a equipe (' + esc(e.erro) + ').</p>'; });
 }
 
@@ -7294,7 +7331,7 @@ function pintarAbaNumeracao(painel) {
 const AUD_ACOES_NOME = {
   login: 'Entrou', logout: 'Saiu', abrir: 'Abriu', ia: 'IA', consulta: 'T-Consulta',
   acervo: 'Acervo', minuta: 'Minuta', mural: 'Mural', agenda: 'Agenda', notas: 'Notas',
-  itbi: 'Guia de ITBI', admin: 'Administração'
+  itbi: 'Guia de ITBI', admin: 'Administração', acesso: 'Acesso'   // v1.39.1: falhas, bloqueios, primeiro acesso
 };
 const AUD_FERR_NOME = {
   protocolo: 'e-Protocolo', calculadora: 'Calculadora', ia: 'IA-Not', extrator: 'Extrator',
@@ -7303,7 +7340,9 @@ const AUD_FERR_NOME = {
   agenda: 'Minha Agenda', notas: 'Bloco de Notas', mural: 'Mural', links: 'Links', ajuda: 'Ajuda',
   pdf: 'PDF', qualificacao: 'Extrator', matricula: 'e-Analista', minuta: 'Gerador de Minuta',
   minuta_ue: 'Gerador de Minuta', transpor: 'Transposição', descricao: 'Descrição',
-  equipe: 'Equipe', 'zerar-senha': 'Zerar senha', editar: 'Editar', numeracao: 'Numeração',
+  equipe: 'Equipe', 'zerar-senha': 'Código de acesso', editar: 'Editar', numeracao: 'Numeração',
+  'login-falha': 'Senha errada', 'codigo-falha': 'Código errado', 'primeiro-acesso': 'Primeiro acesso',
+  'senha-emergencia': 'Senha de emergência',
   relatorios: 'Relatórios',
   publicar: 'Publicar', guardar: 'Guardar', gravar: 'Gravar', apagar: 'Apagar',
   cn2o: 'Acervo 2º Ofício', antigo1: 'Acervo 1º Ofício'
@@ -8821,6 +8860,7 @@ document.querySelectorAll('[data-olho]').forEach(function (b) {
   });
 });
 el('formPrimeiro').addEventListener('submit', criarSenha);
+el('btnPrimeiroAcesso').addEventListener('click', function () { mostrarPrimeiroAcesso(el('campoLogin').value.trim().toLowerCase()); });   // v1.39.1
 el('btnVoltarLogin').addEventListener('click', function () { mostrarLogin(); });
 el('btnSair').addEventListener('click', sair);
 el('btnTema').addEventListener('click', alternarTema);
@@ -12526,4 +12566,4 @@ restaurarSessao();
 </body>
 </html>
 
-<!-- Hub CN2O v1.39 · 25/09/2026 -->
+<!-- Hub CN2O v1.39.1 · 25/09/2026 -->
