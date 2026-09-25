@@ -4222,7 +4222,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
         <p class="assinatura" id="metaMin"></p>
       </div>
       <div class="aviso" id="minutaLinkBox" hidden>
-        ✓ Resultado guardado na plataforma — link permanente:
+        ✓ Resultado guardado na plataforma por 90 dias — link (abre para você e para o Tabelião):
         <a href="#" id="minutaLinkA"></a>
         <button class="btn-mini" id="btnCopiarLinkMin" type="button" style="margin-left:8px">Copiar link</button>
       </div>
@@ -4916,9 +4916,9 @@ const CONFIG = {
       titulo: 'Agenda do Tabelião'
     }
   },
-  // Chaves de sessão compartilhadas com o protocolo.html (mesmo site, mesmo login):
-  // gravadas na aba (sessionStorage, que o protocolo sempre leu) e lembradas no
-  // navegador (localStorage) até a sessão expirar no servidor (12 h) ou "Sair".
+  // Chaves de sessão compartilhadas com o protocolo.html e o anexo.html (mesmo site,
+  // mesmo login): desde a v1.39.4, só na aba (sessionStorage) — fechar a aba encerra
+  // a sessão neste computador; no servidor, ela expira em 12 h ou no "Sair".
   sessao: { token: 'cn2o_token', nome: 'cn2o_nome', cargo: 'cn2o_cargo', login: 'cn2o_login' },
   muralMinutos: 5
 };
@@ -5099,22 +5099,30 @@ function mostrarLogin(mensagem) {
   msg('msgLogin', mensagem || '');
   setTimeout(function () { (el('campoLogin').value ? el('campoSenha') : el('campoLogin')).focus(); }, 30);
 }
+// v1.39.4 (segurança, pacote D): a sessão vive só na aba (sessionStorage). Fechou a aba,
+// saiu — no computador compartilhado, quem senta depois não herda o login de ninguém.
 function salvarSessao() {
   const k = CONFIG.sessao;
-  [store, aba].forEach(function (lugar) {
-    lugar.set(k.token, SESSAO.token);
-    lugar.set(k.nome, SESSAO.nome || '');
-    lugar.set(k.cargo, SESSAO.cargo || '');
-    lugar.set(k.login, SESSAO.login || '');
-  });
+  aba.set(k.token, SESSAO.token);
+  aba.set(k.nome, SESSAO.nome || '');
+  aba.set(k.cargo, SESSAO.cargo || '');
+  aba.set(k.login, SESSAO.login || '');
+}
+// a sessão lembrada no navegador (até a v1.39.3) passa para a aba uma vez e sai do localStorage
+function migrarSessaoAntiga() {
+  const k = CONFIG.sessao;
+  const chaves = [k.token, k.nome, k.cargo, k.login];
+  if (!aba.get(k.token) && store.get(k.token)) chaves.forEach(function (c) { aba.set(c, store.get(c) || ''); });
+  chaves.concat(['cn2o_hub_key']).forEach(function (c) { store.del(c); });
 }
 function limparSessao() {
   SESSAO.token = SESSAO.nome = SESSAO.login = SESSAO.cargo = null; SESSAO.admin = false;
   el('navRelatorios').hidden = true;   // v1.38.2: o atalho some junto com a sessão
   const k = CONFIG.sessao;
   [store, aba].forEach(function (lugar) { [k.token, k.nome, k.cargo, k.login].forEach(function (c) { lugar.del(c); }); });
+  store.del('cn2o_hub_key');   // v1.39.4: chave antiga do e-Protocolo, sem uso desde a v1.39.2
 }
-function lerSessao(chave) { return store.get(chave) || aba.get(chave); }
+function lerSessao(chave) { return aba.get(chave); }
 function sessaoExpirada() {
   if (!SESSAO.token) return;
   limparSessao();
@@ -5179,10 +5187,14 @@ function iniciarSessao(token, nome, login, cargo) {
     // /hub ainda não publicado ou servidor instável: entra mesmo assim.
   }).then(function () {
     el('campoSenha').value = '';
+    // v1.39.4: se a sessão expirou e OUTRA pessoa entrou nesta aba, a página recarrega —
+    // o que a anterior deixou aberto não aparece para quem chegou
+    if (LOGIN_DA_TELA && LOGIN_DA_TELA !== SESSAO.login) { location.replace(location.pathname); return; }
     mostrarApp();
   });
 }
 function restaurarSessao() {
+  migrarSessaoAntiga();   // v1.39.4
   const token = lerSessao(CONFIG.sessao.token);
   if (!token) { mostrarLogin(); return; }
   SESSAO.token = token;
@@ -5207,14 +5219,18 @@ function sair() {
   maSair();   // v1.32: despacha o que ainda não foi salvo na agenda (com o token) e zera o estado
   ntSair();   // v1.33: idem para o Bloco de Notas
   if (token) {
-    fetch(CONFIG.endpoint + '/logout', { method: 'POST', headers: { 'X-Auth-Token': token } }).catch(function () {});
+    fetch(CONFIG.endpoint + '/logout', { method: 'POST', headers: { 'X-Auth-Token': token }, keepalive: true }).catch(function () {});
   }
   limparSessao();
-  MURAL = null;
-  fecharSubMural(true);
-  mostrarLogin();
+  try { sessionStorage.clear(); } catch (e) {}
+  // v1.39.4 (segurança, pacote D): recarrega a página. Antes a tela de login cobria o
+  // Hub, mas qualificações, ITBI e acervo continuavam na página para o próximo que entrasse.
+  // O que a agenda e as notas ainda salvavam já foi com keepalive (maSair/ntSair).
+  location.replace(location.pathname);
 }
+let LOGIN_DA_TELA = '';   // v1.39.4: de quem é o que está montado na página
 function mostrarApp() {
+  LOGIN_DA_TELA = SESSAO.login || '';
   el('saudacao').innerHTML = 'Olá, <b>' + esc(primeiroNome(SESSAO.nome)) + '</b>!';
   fraseDoDia();
   el('avatarIni').textContent = (SESSAO.nome || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(function (n) { return n.charAt(0).toUpperCase(); }).join('') || '?';
@@ -5310,6 +5326,14 @@ function avisarGeradorEmBreve() {
   toast('Gerador de Minuta: em breve — o Tabelião está concluindo a curadoria das minutas.');
 }
 function abrirRota(rota, semHistorico) {
+  // v1.39.4: o anexo do CERT abre numa aba nova (link do cartão), que não tem sessão; o
+  // anexo.html manda para cá com #anexo=ID e, depois do login, a mesma aba volta para ele
+  if (rota && rota.indexOf('anexo=') === 0) {
+    let id = '';
+    try { id = decodeURIComponent(rota.slice(6)); } catch (e) { id = ''; }
+    if (/^[A-Za-z0-9._~-]{1,120}$/.test(id)) { location.replace('anexo.html#' + encodeURIComponent(id)); return; }
+    rota = '';
+  }
   VOLTAR_PARA = '';   // v1.34 — atalho pelo endereço (#extrator, #minutas…) volta ao hub
   if ((rota === 'minutas' || (rota && rota.indexOf('minuta=') === 0)) && !geradorDisponivel()) {
     avisarGeradorEmBreve();
@@ -5332,7 +5356,7 @@ function abrirRota(rota, semHistorico) {
     }).catch(function (e) {
       const s = el('saidaMinuta');
       s.classList.add('vazia');
-      s.textContent = e.status === 404 ? 'Minuta não encontrada — o link pode estar errado.' : 'Não consegui carregar a minuta (' + (e.erro || 'erro') + ').';
+      s.textContent = e.status === 404 ? 'Minuta não encontrada. O link pode estar errado, a minuta pode ter passado de 90 dias, ou ela foi guardada por outra pessoa: só quem guardou e o Tabelião abrem.' : 'Não consegui carregar a minuta (' + (e.erro || 'erro') + ').';
     });
     return;
   }
@@ -5994,7 +6018,7 @@ function maRenderCard() {
       '<span class="ma-dia-cab"><span class="ma-dia-nome">' + MA_DIAS_CURTO[d.getDay()] + '</span><span class="ma-dia-num">' + dd(d.getDate()) + '</span></span>' +
       (itens.length
         ? '<span class="ma-itens">' + itens.slice(0, 4).map(function (i) {
-            return '<span class="ma-item' + (i.faixa === 0 ? ' ma-item-dia' : '') + '"><span class="ma-hora">' + (i.faixa === 0 ? '⚑' : dd(i.faixa) + 'h') + '</span><span class="ma-txt">' + esc(i.texto) + '</span></span>';
+            return '<span class="ma-item' + (i.faixa === 0 ? ' ma-item-dia' : '') + '"><span class="ma-hora">' + (i.faixa === 0 ? '⚑' : dd(Number(i.faixa) || 0) + 'h') + '</span><span class="ma-txt">' + esc(i.texto) + '</span></span>';
           }).join('') + (itens.length > 4 ? '<span class="ma-mais">+ ' + (itens.length - 4) + ' mais</span>' : '') + '</span>'
         : '<span class="ma-livre">' + (ehHoje ? 'nada anotado para hoje' : 'livre') + '</span>') +
       '</button>';
@@ -6025,10 +6049,10 @@ function maRenderDepois(sexta) {
   caixa.hidden = false;
   caixa.innerHTML = '<p class="ma-depois-rot">Depois desta semana:' + (total > 3 ? ' <span class="ma-depois-mais">+ ' + (total - 3) + ' na agenda</span>' : '') + '</p><ul class="ma-depois-lista">' +
     itens.map(function (i) {
-      return '<li><button type="button" class="ma-depois-item" data-ma-ir="' + i.dia + '" aria-label="' +
+      return '<li><button type="button" class="ma-depois-item" data-ma-ir="' + esc(i.dia) + '" aria-label="' +
         esc(maTituloDia(i.dia) + ', ' + maRotuloFaixa(i.faixa) + ' — ' + i.texto + '. Abrir a agenda neste dia.') + '">' +
         '<span class="ma-depois-data">' + maDataCurta(i.dia) + '</span>' +
-        '<span class="ma-depois-hora">' + (i.faixa === 0 ? '⚑' : dd(i.faixa) + 'h') + '</span>' +
+        '<span class="ma-depois-hora">' + (i.faixa === 0 ? '⚑' : dd(Number(i.faixa) || 0) + 'h') + '</span>' +
         '<span class="ma-depois-txt">' + esc(maCortar(i.texto, 42)) + '</span></button></li>';
     }).join('') + '</ul>';
   caixa.querySelectorAll('[data-ma-ir]').forEach(function (b) { b.addEventListener('click', function () { abrirSub('agenda', b.dataset.maIr); }); });
@@ -6065,9 +6089,9 @@ function maHtmlProximos() {
   return grupos.map(function (g) {
     return '<div class="ma-prox-grupo"><p class="ma-prox-data">' + esc(maDataCurta(g.dia)) + '</p>' +
       g.itens.map(function (i) {
-        return '<button type="button" class="ma-prox-item" data-ma-ir="' + g.dia + '" aria-label="' +
+        return '<button type="button" class="ma-prox-item" data-ma-ir="' + esc(g.dia) + '" aria-label="' +
           esc(maTituloDia(g.dia) + ', ' + maRotuloFaixa(i.faixa) + ' — ' + i.texto + '. Abrir a agenda neste dia.') + '">' +
-          '<span class="ma-prox-hora">' + (i.faixa === 0 ? '⚑' : dd(i.faixa) + 'h') + '</span>' +
+          '<span class="ma-prox-hora">' + (i.faixa === 0 ? '⚑' : dd(Number(i.faixa) || 0) + 'h') + '</span>' +
           '<span class="ma-prox-txt">' + esc(maCortar(i.texto, 160)) + '</span></button>';
       }).join('') + '</div>';
   }).join('');
@@ -7533,7 +7557,7 @@ function pintarAbaConsumo(painel) {
     let total = 0, usos = 0;
     const corpo = linhas.map(function (l) {
       total += Number(l.custo_usd) || 0; usos += Number(l.usos) || 0;
-      return '<tr><td>' + esc(l.login) + '</td><td>' + esc(nomes[l.ferramenta] || l.ferramenta) + '</td><td class="num">' + l.usos + '</td><td class="num">US$ ' + (Number(l.custo_usd) || 0).toFixed(3).replace('.', ',') + '</td></tr>';
+      return '<tr><td>' + esc(l.login) + '</td><td>' + esc(nomes[l.ferramenta] || l.ferramenta) + '</td><td class="num">' + (Number(l.usos) || 0) + '</td><td class="num">US$ ' + (Number(l.custo_usd) || 0).toFixed(3).replace('.', ',') + '</td></tr>';
     }).join('');
     painel.innerHTML = '<table class="ed-tabela"><thead><tr><th>Quem</th><th>Ferramenta</th><th style="text-align:right">Usos</th><th style="text-align:right">Custo</th></tr></thead><tbody>' + corpo +
       '<tr><td><b>Total do mês</b></td><td></td><td class="num"><b>' + usos + '</b></td><td class="num"><b>US$ ' + total.toFixed(2).replace('.', ',') + '</b></td></tr></tbody></table>' +
@@ -7775,7 +7799,7 @@ function relCarregarEnvios() {
         '<th class="versalete">Como</th><th class="versalete">Situação</th><th class="versalete">Para</th>' +
       '</tr></thead><tbody>' + lista.map(function (v) {
         const sit = v.status === 'enviado' ? 'Enviado'
-          : v.status === 'erro' ? 'Erro' + (v.tentativas > 1 ? ' (' + v.tentativas + ' tentativas)' : '') : 'Enviando…';
+          : v.status === 'erro' ? 'Erro' + (Number(v.tentativas) > 1 ? ' (' + Number(v.tentativas) + ' tentativas)' : '') : 'Enviando…';
         const marca = v.status === 'enviado' ? ' aud-acao-login' : (v.status === 'erro' ? ' aud-acao-ia' : '');
         return '<tr><td class="aud-quando">' + esc(quandoCurto(v.enviado_em || v.criado_em)) + '</td>' +
           '<td>' + (v.tipo === 'mensal' ? 'Mensal' : 'Semanal') + '</td>' +
@@ -10930,7 +10954,8 @@ restaurarSessao();
           '</div>' : '') +
         (x.fases && x.fases.length ? '<p class="painel-cab versalete" style="margin:18px 0 2px"><span>Fases percorridas</span></p><ol class="con-fases">' + fases + '</ol>' : '') +
         (pend ? '<div class="con-pend"><b>Documentos ainda pendentes no dossiê</b><ul>' + pend + '</ul></div>' : '') +
-        (x.link ? '<a class="con-link" href="' + esc(x.link) + '" target="_blank" rel="noopener">Abrir o cartão no Trello ↗</a>' : '') +
+        // v1.39.4: só link do Trello abre daqui (nada de "javascript:" vindo do cartão)
+        (/^https:\/\/trello\.com\/[^\s"'<>\\]+$/.test(String(x.link || '')) ? '<a class="con-link" href="' + esc(x.link) + '" target="_blank" rel="noopener">Abrir o cartão no Trello ↗</a>' : '') +
         (x.ultima_atividade ? '<p class="con-meta">Última atividade no cartão: ' + conData(x.ultima_atividade, true) + '</p>' : '') +
       '</div>';
     caixa.hidden = false;
@@ -12617,4 +12642,4 @@ restaurarSessao();
 </body>
 </html>
 
-<!-- Hub CN2O v1.39.3 · 25/09/2026 -->
+<!-- Hub CN2O v1.39.4 · 25/09/2026 -->
