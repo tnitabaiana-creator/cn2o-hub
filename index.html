@@ -2848,6 +2848,8 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
       <button class="nav-item" data-nav="avisos" type="button"><span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6"/><path d="M10 19a2.2 2.2 0 0 0 4 0"/></svg></span>Avisos</button>
       <button class="nav-item" data-nav="minha-agenda" type="button"><span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M8 3v4M16 3v4M4 10h16"/><path d="m8.5 15 2 2 4-4"/></svg></span>Minha Agenda</button>
       <button class="nav-item" data-nav="calendario" type="button"><span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="14" rx="2"/><path d="M8 3v5M16 3v5M4 11h16"/></svg></span>Agenda do Tabelião</button>
+      <!-- v1.38.2: atalho para os Relatórios das Escreventes — só o Tabelião (mostrarApp tira o hidden) -->
+      <button class="nav-item" id="navRelatorios" data-nav="relatorios" type="button" hidden><span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 20v-6M12 20V4M18 20V10"/></svg></span>Relatórios</button>
       <button class="nav-item" data-nav="documentos" type="button"><span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v5h4M10 12h5M10 16h5"/></svg></span>Documentos</button>
       <button class="nav-item" data-nav="ajuda" type="button"><span class="nav-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.4a2.5 2.5 0 0 1 4.9.6c0 1.6-2.4 2-2.4 3.4"/><path d="M12 17.2v.1"/></svg></span>Ajuda</button>
     </nav>
@@ -5031,6 +5033,7 @@ function salvarSessao() {
 }
 function limparSessao() {
   SESSAO.token = SESSAO.nome = SESSAO.login = SESSAO.cargo = null; SESSAO.admin = false;
+  el('navRelatorios').hidden = true;   // v1.38.2: o atalho some junto com a sessão
   const k = CONFIG.sessao;
   [store, aba].forEach(function (lugar) { [k.token, k.nome, k.cargo, k.login].forEach(function (c) { lugar.del(c); }); });
 }
@@ -5134,6 +5137,7 @@ function mostrarApp() {
   fraseDoDia();
   el('avatarIni').textContent = (SESSAO.nome || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(function (n) { return n.charAt(0).toUpperCase(); }).join('') || '?';
   el('btnEditarMural').hidden = !SESSAO.admin;
+  el('navRelatorios').hidden = !SESSAO.admin;   // v1.38.2 — atalho da barra lateral, só o Tabelião
   pintarCardMinutas();   // v1.31 — mini-quadro 3.3 "Em breve" (aberto só ao Tabelião)
   el('telaLogin').hidden = true;
   el('app').hidden = false;
@@ -5753,6 +5757,9 @@ function fecharSubMural(forcar) {
   if (NT.subAberta) ntDescarregarSub();   // v1.33: o Bloco de Notas também
   el('veuMural').classList.remove('aberto');
   ED = null;
+  // v1.38.2: só volta a barra para Início se o editor veio do atalho Relatórios
+  // (o Esc também passa por aqui, com qualquer item da barra ativo)
+  if (el('navRelatorios').classList.contains('ativo')) marcarNav('inicio');
 }
 
 /* ============================================================
@@ -6851,12 +6858,13 @@ function criarEditorRico(inicial, placeholder) {
    MODO DO TABELIÃO — editar e publicar o mural
 ============================================================ */
 let ED = null; // { copia, base, sujo, aba, editando, editor, confirmarSaida, eqEdit, aud, rel }
-function abrirEditorMural() {
+// v1.38.2: abaInicial abre direto numa aba (o atalho Relatórios da barra lateral)
+function abrirEditorMural(abaInicial) {
   if (!SESSAO.admin) return;
   const partida = MURAL || normalizarLocal({});
   // eqEdit: quem está com a linha aberta na aba Equipe · aud: filtros da aba Auditoria (v1.34)
   // rel: período escolhido e situação da aba Relatórios (v1.38)
-  ED = { copia: clone(partida), base: MURAL_META.atualizado_em || null, sujo: false, aba: 'avisos', editando: null, editor: null, confirmarSaida: false, eqEdit: null, aud: null, rel: null };
+  ED = { copia: clone(partida), base: MURAL_META.atualizado_em || null, sujo: false, aba: abaInicial || 'avisos', editando: null, editor: null, confirmarSaida: false, eqEdit: null, aud: null, rel: null };
   abrirSub('editar');
 }
 function htmlEditorMural() {
@@ -8219,7 +8227,7 @@ el('veuMural').addEventListener('click', function (ev) { if (ev.target === el('v
 document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape') { fecharTelaClausulas(); fecharSubMural(); } });
 document.querySelectorAll('[data-sub]').forEach(function (b) { b.addEventListener('click', function () { abrirSub(b.dataset.sub); }); });
 if (el('ntNova')) el('ntNova').addEventListener('click', function () { ntNovaNota(); });   // v1.33 — Bloco de Notas, do quadro do mural
-el('btnEditarMural').addEventListener('click', abrirEditorMural);
+el('btnEditarMural').addEventListener('click', function () { abrirEditorMural(); });   // v1.38.2: sem o evento virar a aba inicial
 el('btnCopiarDesc').addEventListener('click', function () {
   if (DESC_ATUAL) copiar(DESC_ATUAL).then(function () { toast('✓ Descrição copiada — cole na escritura'); });
 });
@@ -10132,6 +10140,7 @@ document.querySelectorAll('.lat-nav .nav-item').forEach(function (b) {
     else if (n === 'calendario') { marcarNav('calendario'); abrirEmbutida('agenda', false); }
     else if (n === 'documentos') { window.open('https://drive.google.com/drive/folders/17jiEqA5ufl4L_7fKKvHzvWF23wvDnlWT', '_blank', 'noopener'); }
     else if (n === 'ajuda') { const v = el('veuAjuda'); v.hidden = false; v.classList.add('aberto'); }
+    else if (n === 'relatorios' && SESSAO.admin) { irParaInicio(); marcarNav('relatorios'); abrirEditorMural('relatorios'); }   // v1.38.2
   });
 });
 el('fecharAjuda').addEventListener('click', function () { el('veuAjuda').classList.remove('aberto'); el('veuAjuda').hidden = true; });
@@ -11908,4 +11917,4 @@ restaurarSessao();
 </body>
 </html>
 
-<!-- Hub CN2O v1.38 · 24/09/2026 -->
+<!-- Hub CN2O v1.38.2 · 25/09/2026 -->
