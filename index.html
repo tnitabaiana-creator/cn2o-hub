@@ -2765,6 +2765,10 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 .rel-previa{display:block;width:100%;height:72vh;min-height:480px;border:1px solid rgba(32,42,58,.28);border-radius:10px;background:#ffffff}
 .rel-para{min-width:170px}
 .rel-erro{margin-top:4px;font-size:13.5px;line-height:1.4;color:#631325;word-break:break-word}
+/* v1.38.3 — a carga do histórico (instalação) fica recolhida no fim da aba */
+.rel-suporte{margin-top:22px;padding-top:12px;border-top:1px solid rgba(32,42,58,.18)}
+.rel-suporte summary{cursor:pointer;font-size:14px;font-weight:700;color:#202a3a;padding:4px 0}
+.rel-suporte[open] summary{margin-bottom:8px}
 @media (max-width:760px){
   .rel-campo-periodo{flex:1 1 100%}
   .rel-previa{height:64vh;min-height:380px}
@@ -2775,11 +2779,13 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
   :root:not([data-theme="light"]) .rel-situacao li.rel-alerta{background:#fbf5f6;border-color:rgba(99,19,37,.45)}
   :root:not([data-theme="light"]) .rel-situacao b,:root:not([data-theme="light"]) .rel-erro{color:#631325}
   :root:not([data-theme="light"]) .rel-previa{background:#ffffff;border-color:rgba(32,42,58,.28)}
+  :root:not([data-theme="light"]) .rel-suporte summary{color:#202a3a}
 }
 :root[data-theme="dark"] .rel-situacao li{background:#ffffff;border-color:rgba(32,42,58,.22);color:#202a3a}
 :root[data-theme="dark"] .rel-situacao li.rel-alerta{background:#fbf5f6;border-color:rgba(99,19,37,.45)}
 :root[data-theme="dark"] .rel-situacao b,:root[data-theme="dark"] .rel-erro{color:#631325}
 :root[data-theme="dark"] .rel-previa{background:#ffffff;border-color:rgba(32,42,58,.28)}
+:root[data-theme="dark"] .rel-suporte summary{color:#202a3a}
 
 </style>
 </head>
@@ -7441,16 +7447,15 @@ function pintarAbaConsumo(painel) {
    v1.38 — RELATÓRIOS DAS ESCREVENTES (aba do Tabelião)
    O servidor acompanha os cartões pelo webhook do Trello e manda por e-mail o
    relatório semanal (segunda, 8h) e o mensal (1º dia útil, 8h) — backend
-   relatorios.js, rotas /hub/relatorios/*. Aqui o Tabelião confere se o rastreio
-   está chegando, vê a prévia de qualquer semana ou mês, baixa o CSV, envia na hora,
-   acompanha os envios e roda a carga do histórico. A prévia é o próprio e-mail, num
-   quadro isolado (sandbox, sem script). Quem entra é o servidor que decide
+   relatorios.js, rotas /hub/relatorios/*. Aqui o Tabelião vê a prévia de qualquer
+   semana ou mês, baixa o CSV, envia na hora e acompanha os envios. A prévia é o próprio
+   e-mail, num quadro isolado (sandbox, sem script). Quem entra é o servidor que decide
    (HUB_ADMINS ou RELATORIOS_ADMINS): um 403 aqui é resposta, não defeito.
+   v1.38.3: a situação fala a língua do Tabelião — uma linha "tudo em ordem" ou avisos
+   simples com "avise o suporte"; o detalhe técnico (webhooks, assinatura, provedor,
+   variáveis) fica no JSON de GET /hub/relatorios/status. A carga do histórico, que é
+   de instalação, fica recolhida no fim da tela.
 ============================================================ */
-const REL_PROVEDOR_NOME = {
-  appsscript: 'Gmail do cartório (Apps Script)', resend: 'Resend',
-  arquivo: 'arquivo no servidor (teste — não sai e-mail)'
-};
 const REL_ROT_ENVIAR = '✉ Enviar agora', REL_ROT_CARGA = 'Rodar carga';
 function relEstado() {
   if (!ED.rel) ED.rel = { tipo: 'semanal', ref: '', status: null, vigia: null };
@@ -7516,7 +7521,7 @@ function relBaixar(caminho) {
 function pintarAbaRelatorios(painel) {
   const r = relEstado();
   painel.innerHTML =
-    '<p class="sub-data" style="margin-bottom:10px">O relatório <b>semanal</b> sai sozinho toda segunda-feira às 8h e o <b>mensal</b> no 1º dia útil do mês, às 8h, por e-mail. Aqui você confere se o acompanhamento dos cartões está chegando, vê qualquer semana ou mês antes, envia na hora e acompanha os envios. Vale na hora, não precisa publicar o mural.</p>' +
+    '<p class="sub-data" style="margin-bottom:10px">O relatório <b>semanal</b> sai sozinho toda segunda-feira às 8h e o <b>mensal</b> no 1º dia útil do mês, às 8h, por e-mail. Aqui você vê qualquer semana ou mês antes, envia na hora e acompanha os envios. Não precisa publicar o mural.</p>' +
     '<div id="edRelSituacao"><p class="ed-vazio">Lendo a situação dos relatórios…</p></div>' +
     '<h3 class="ed-titulo versalete">Ver ou enviar um relatório</h3>' +
     '<div class="aud-filtros">' +
@@ -7529,13 +7534,15 @@ function pintarAbaRelatorios(painel) {
     '<div id="edRelPrevia"></div>' +
     '<h3 class="ed-titulo versalete">Envios</h3>' +
     '<div id="edRelEnvios"><p class="ed-vazio">Lendo os envios…</p></div>' +
-    '<h3 class="ed-titulo versalete">Carga do histórico</h3>' +
-    '<p class="sub-data">Busca no Trello os movimentos dos quadros desde a data escolhida. Rode uma vez depois de instalar; repetir não duplica nada. Leva alguns minutos e roda no servidor — pode fechar esta tela.</p>' +
-    '<div class="aud-filtros">' +
-      '<label class="aud-campo"><span>Desde</span><input type="date" id="edRelDesde" value="2026-06-01"></label>' +
-      '<button type="button" class="btn-vinho" id="edRelCarga">' + REL_ROT_CARGA + '</button>' +
-    '</div>' +
-    '<p class="aud-conta" id="edRelCargaSit"></p>';
+    // v1.38.3: ferramenta de instalação — recolhida, para o suporte
+    '<details class="rel-suporte"><summary>Carga do histórico (uso do suporte)</summary>' +
+      '<p class="sub-data">Busca no Trello os movimentos dos quadros desde a data escolhida. Rode uma vez depois de instalar; repetir não duplica nada. Leva alguns minutos e roda no servidor — pode fechar esta tela.</p>' +
+      '<div class="aud-filtros">' +
+        '<label class="aud-campo"><span>Desde</span><input type="date" id="edRelDesde" value="2026-06-01"></label>' +
+        '<button type="button" class="btn-vinho" id="edRelCarga">' + REL_ROT_CARGA + '</button>' +
+      '</div>' +
+      '<p class="aud-conta" id="edRelCargaSit"></p>' +
+    '</details>';
   const tipo = el('edRelTipo'), per = el('edRelPeriodo');
   tipo.value = r.tipo;
   function pintarPeriodos() {
@@ -7574,32 +7581,18 @@ function relPintarSituacao() {
   const s = relEstado().status, box = el('edRelSituacao');
   if (!s || !box) return;
   const ra = s.rastreio || {}, w = s.webhooks, em = s.email || {}, inv = ra.assinaturas_invalidas || {};
-  const itens = [];
-  const ok = function (t) { itens.push('<li class="rel-ok">' + t + '</li>'); };
-  const alerta = function (t) { itens.push('<li class="rel-alerta">' + t + '</li>'); };
-  const info = function (t) { itens.push('<li>' + t + '</li>'); };
-  if (ra.webhook_assinado) ok('Acompanhamento ligado: o webhook do Trello chega assinado.');
-  else alerta('Falta o <b>TRELLO_SECRET</b> no servidor: nenhum movimento de cartão entra nos relatórios.');
-  if (inv.total) {
-    alerta(relNum(inv.total) + ' entrega(s) do Trello com assinatura inválida desde o último reinício do servidor' +
-      (inv.ultima ? ' (a última ' + esc(quandoCurto(inv.ultima)) + ')' : '') + ' — confira o <b>TRELLO_SECRET</b>.');
-  }
-  if (w && w.erro) alerta('Não consegui conferir os webhooks no Trello.');
-  else if (w) {
-    if (w.quadros_sem_webhook && w.quadros_sem_webhook.length) {
-      alerta(w.quadros_sem_webhook.length + ' quadro(s) sem webhook para este servidor — rode <b>npm run setup</b> no Railway.');
-    } else ok('Webhooks ativos em todos os quadros acompanhados (' + relNum(w.ativos) + ').');
-    if (w.outras_urls && w.outras_urls.length) alerta('Há webhooks apontando para outro endereço: ' + w.outras_urls.map(esc).join(', ') + '.');
-  }
-  info(ra.ultimo ? 'Último movimento de cartão: <b>' + esc(quandoCurto(ra.ultimo)) + '</b>.'
-    : 'Nenhum movimento de cartão recebido ainda — rode a carga do histórico, no fim desta tela.');
-  if (ra.pendentes) info(relNum(ra.pendentes) + ' movimento(s) aguardando processamento.');
-  if (ra.sem_tipo) alerta(relNum(ra.sem_tipo) + ' ato(s) concluído(s) sem tipo reconhecido pelo título (entram como OUTROS).');
-  if (em.configurado) ok('E-mail: ' + esc(REL_PROVEDOR_NOME[em.provedor] || em.provedor) + '.');
-  else alerta('E-mail <b>não configurado</b>: os relatórios não saem. Falta publicar o Apps Script de envio.');
-  const para = esc((em.para || []).join(', '));
-  if (em.homologacao) alerta('Em homologação: os relatórios vão só para <b>' + para + '</b>. Para valer, preencha RELATORIO_EMAIL_PARA no Railway.');
-  else info('Destinatários: <b>' + para + '</b>.');
+  // v1.38.3: nada de webhook, assinatura, provedor ou nome de variável na tela do Tabelião —
+  // só "tudo em ordem" ou o que ele precisa saber; o detalhe continua no JSON do /status.
+  const avisos = [];
+  const acompanhamentoComDefeito = !ra.webhook_assinado || inv.total || (w && (w.erro ||
+    (w.quadros_sem_webhook && w.quadros_sem_webhook.length) || (w.outras_urls && w.outras_urls.length)));
+  if (acompanhamentoComDefeito) avisos.push('O acompanhamento dos cartões do Trello precisa de um ajuste técnico. Avise o suporte.');
+  if (!em.configurado || em.provedor === 'arquivo') avisos.push('Os relatórios <b>não estão saindo por e-mail</b>. Avise o suporte.');
+  else if (em.homologacao) avisos.push('Os relatórios estão em teste e vão só para <b>' + esc((em.para || []).join(', ')) + '</b>. Avise o suporte para liberar o envio definitivo.');
+  if (ra.sem_tipo) avisos.push(relNum(ra.sem_tipo) + ' ato(s) concluído(s) sem o tipo reconhecido no título do cartão — entram nos relatórios como OUTROS.');
+  const itens = avisos.length
+    ? avisos.map(function (t) { return '<li class="rel-alerta">' + t + '</li>'; })
+    : ['<li class="rel-ok">Tudo em ordem: os relatórios saem sozinhos por e-mail.</li>'];
   const u = s.ultimo_envio;
   const ultimo = u
     ? 'Último relatório: <b>' + esc(u.tipo === 'mensal' ? 'mensal' : 'semanal') + ' de ' + esc(relDia(u.periodo_inicio)) + '</b> · ' +
@@ -7608,7 +7601,6 @@ function relPintarSituacao() {
   box.innerHTML =
     '<div class="num-quadro">' +
       '<div class="num-atual"><span>Atos concluídos</span><b>' + relNum(ra.conclusoes) + '</b></div>' +
-      '<div class="num-atual"><span>Movimentos recebidos</span><b>' + relNum(ra.eventos) + '</b></div>' +
       '<div class="num-info">' + ultimo + '</div>' +
     '</div>' +
     '<ul class="rel-situacao">' + itens.join('') + '</ul>';
@@ -11917,4 +11909,4 @@ restaurarSessao();
 </body>
 </html>
 
-<!-- Hub CN2O v1.38.2 · 25/09/2026 -->
+<!-- Hub CN2O v1.38.3 · 25/09/2026 -->
