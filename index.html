@@ -2769,6 +2769,52 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 .rel-suporte{margin-top:22px;padding-top:12px;border-top:1px solid rgba(32,42,58,.18)}
 .rel-suporte summary{cursor:pointer;font-size:14px;font-weight:700;color:#202a3a;padding:4px 0}
 .rel-suporte[open] summary{margin-bottom:8px}
+/* v1.39 — chave Escreventes | Atendimentos do balcão, e o painel dos atendimentos (NextQS).
+   O editor é branco nos dois temas: as cores daqui são fixas (texto escuro sobre claro). */
+.rel-chave{display:inline-flex;flex-wrap:wrap;gap:4px;padding:4px;margin:0 0 14px;border:1.5px solid rgba(32,42,58,.22);border-radius:12px;background:#ffffff}
+.rel-chave-bt{border:0;background:transparent;border-radius:9px;padding:9px 16px;font:700 14px/1.2 'Montserrat',sans-serif;color:#202a3a;cursor:pointer}
+.rel-chave-bt:hover:not(.ativa){background:rgba(99,19,37,.07)}
+.rel-chave-bt.ativa{background:#202a3a;color:#ffffff}
+.atd-situacao-linha{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.atd-situacao-linha .rel-situacao{flex:1 1 360px;margin:6px 0}
+.atd-filtros{margin-top:10px}
+.atd-junta{display:flex;align-items:center;gap:8px;font-size:14.5px;font-weight:700;color:#202a3a;align-self:flex-end;padding-bottom:10px;cursor:pointer}
+.atd-junta input{width:18px;height:18px;accent-color:#631325}
+.atd-titulo{margin:18px 0 2px;font:800 22px/1.2 'Montserrat',sans-serif;color:#202a3a}
+.atd-livro{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:12px 0 4px}
+.atd-livro div{border-radius:10px;padding:12px 14px;background:#e4eaf4}
+.atd-livro div:nth-child(2),.atd-livro div:nth-child(6){background:#edf3ec}
+.atd-livro div:nth-child(3){background:#f3e6e9}
+.atd-livro div:nth-child(4){background:#fbf5dd}
+.atd-livro span{display:block;font:700 12.5px/1.3 'Montserrat',sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#202a3a}
+.atd-livro strong{display:block;font:800 26px/1.15 'Montserrat',sans-serif;color:#202a3a;margin-top:4px}
+.atd-livro strong.v{color:#631325}
+.atd-livro small{display:block;font-size:14px;line-height:1.35;color:#202a3a;margin-top:2px}
+.atd-q{margin-top:14px;padding:14px 16px;border:1.5px solid rgba(32,42,58,.16);border-radius:12px;background:#ffffff;min-width:0}
+.atd-q h4{margin:0;font:700 17px/1.25 'Montserrat',sans-serif;color:#202a3a}
+.atd-q .atd-sub{margin:3px 0 10px;font-size:14px;line-height:1.45;color:#3a4454}
+.atd-q a{color:#631325;font-weight:700}
+.atd-area{position:relative;height:260px}
+.atd-area.atd-baixa{height:230px}
+.atd-grade{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px}
+.atd-vazio{border:2px dashed rgba(32,42,58,.3);border-radius:8px;padding:14px;font-size:14.5px;line-height:1.45;color:#202a3a;background:#ffffff}
+.atd-dica{position:absolute;z-index:5;pointer-events:none;background:#ffffff;color:#202a3a;border:2px solid #202a3a;border-radius:6px;padding:7px 9px;font-size:14px;line-height:1.35;box-shadow:0 6px 18px rgba(32,42,58,.18);white-space:nowrap}
+.atd-dica[hidden]{display:none}
+.atd-faixas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px}
+.atd-faixas div{border-radius:10px;padding:10px 14px;background:#e4eaf4}
+.atd-faixas div:nth-child(2){background:#edf3ec}
+.atd-faixas div:nth-child(3){background:#fbf5dd}
+.atd-faixas span{display:block;font:700 12.5px 'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.06em;color:#202a3a}
+.atd-faixas strong{display:block;font:800 22px 'Montserrat',sans-serif;color:#202a3a}
+.atd-faixas small{font-size:14px;color:#202a3a}
+.atd-tabela th.n,.atd-tabela td.n{text-align:right}
+.atd-rolo{max-height:460px;overflow:auto}
+.atd-rolo .atd-tabela thead th{position:sticky;top:0;z-index:1;background:#ffffff}
+@media (max-width:760px){
+  .atd-grade{grid-template-columns:1fr}
+  .atd-livro{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .atd-faixas{grid-template-columns:1fr}
+}
 @media (max-width:760px){
   .rel-campo-periodo{flex:1 1 100%}
   .rel-previa{height:64vh;min-height:380px}
@@ -7458,7 +7504,8 @@ function pintarAbaConsumo(painel) {
 ============================================================ */
 const REL_ROT_ENVIAR = '✉ Enviar agora', REL_ROT_CARGA = 'Rodar carga';
 function relEstado() {
-  if (!ED.rel) ED.rel = { tipo: 'semanal', ref: '', status: null, vigia: null };
+  // visao (v1.39): 'escreventes' ou 'atendimentos' — a última escolhida fica guardada
+  if (!ED.rel) ED.rel = { tipo: 'semanal', ref: '', status: null, vigia: null, visao: store.get('cn2o_rel_visao') === 'atendimentos' ? 'atendimentos' : 'escreventes' };
   return ED.rel;
 }
 function relErro(e) {
@@ -7520,7 +7567,8 @@ function relBaixar(caminho) {
 
 function pintarAbaRelatorios(painel) {
   const r = relEstado();
-  painel.innerHTML =
+  if (r.visao === 'atendimentos') { atdPintar(painel); return; }   // v1.39
+  painel.innerHTML = relChave('escreventes') +
     '<p class="sub-data" style="margin-bottom:10px">O relatório <b>semanal</b> sai sozinho toda segunda-feira às 8h e o <b>mensal</b> no 1º dia útil do mês, às 8h, por e-mail. Aqui você vê qualquer semana ou mês antes, envia na hora e acompanha os envios. Não precisa publicar o mural.</p>' +
     '<div id="edRelSituacao"><p class="ed-vazio">Lendo a situação dos relatórios…</p></div>' +
     '<h3 class="ed-titulo versalete">Ver ou enviar um relatório</h3>' +
@@ -7560,6 +7608,7 @@ function pintarAbaRelatorios(painel) {
   el('edRelEnviar').addEventListener('click', relEnviar);
   el('edRelCarga').addEventListener('click', relCarga);
   el('edRelDesde').addEventListener('input', function () { relDesarmar(el('edRelCarga'), REL_ROT_CARGA); });
+  relLigarChave(painel);   // v1.39
   relCarregarSituacao();
   relCarregarEnvios();
 }
@@ -7725,6 +7774,574 @@ function relPintarCarga() {
     ' quadro(s), ' + relNum(x.novas) + ' nova(s), ' + relNum(x.cartoes) + ' cartão(ões) revistos.' +
     (semTipo.length ? ' Títulos sem tipo reconhecido: ' + semTipo.join(', ') + '.' : '');
 }
+
+/* ============================================================
+   v1.39 — ATENDIMENTOS DO BALCÃO (NextQS) na aba Relatórios
+   A mesma leitura do painel "Atendimentos · CN2O" (claude.ai), agora com os dados do
+   próprio servidor do Hub (atendimentos.js), sem n8n: o servidor coleta o NextQS de
+   seg–sex às 17h e guarda um registro por dia. Aqui só se agrega e desenha: período,
+   fila e atendente são filtros locais. Gráficos em SVG desenhados à mão, sem biblioteca.
+   Linha r do servidor: [fila, atendente, guichê, unidade, emitidas, atendidas,
+   não atendidas, Σespera (s), nº esperas, Σatendimento (s), nº atendimentos, Σcsat, nº csat].
+============================================================ */
+const ATD = { dados: null, lidoEm: 0, carregando: false, erro: '', p: 'mes', ini: '', fim: '', fila: '', at: '', juntar: store.get('cn2o_atd_juntar') !== '0', busca: '', agrupar: '', vigia: null, cache: null };
+const ATD_PASTA_PDF = 'https://drive.google.com/drive/folders/1DtDPfQmlyz3HB93F-Xe_XEU-1nJ70QX-';
+const ATD_DSEM = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+const ATD_MES_CURTO = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+const ATD_COR = { v: '#631325', m: '#202a3a', m18: 'rgba(32,42,58,.22)', grade: 'rgba(32,42,58,.14)', tx: '#202a3a', tx2: '#3a4454' };
+const ATD_ROT_ENVIAR = '✉ Enviar por e-mail', ATD_ROT_CARGA = 'Rodar carga';
+
+// Chave "Escreventes | Atendimentos do balcão" no topo da aba (a escolha fica guardada)
+function relChave(atual) {
+  return '<div class="rel-chave" role="tablist" aria-label="Qual relatório">' +
+    [['escreventes', 'Escreventes'], ['atendimentos', 'Atendimentos do balcão']].map(function (x) {
+      return '<button type="button" role="tab" class="rel-chave-bt' + (x[0] === atual ? ' ativa' : '') + '" aria-selected="' + (x[0] === atual) + '" data-rel-visao="' + x[0] + '">' + x[1] + '</button>';
+    }).join('') + '</div>';
+}
+function relLigarChave(painel) {
+  painel.querySelectorAll('[data-rel-visao]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      const r = relEstado();
+      if (r.visao === b.dataset.relVisao) return;
+      r.visao = b.dataset.relVisao;
+      store.set('cn2o_rel_visao', r.visao);
+      pintarAba();
+    });
+  });
+}
+const atdAberta = function () { return !!(ED && ED.aba === 'relatorios' && ED.rel && ED.rel.visao === 'atendimentos' && el('atdCorpo')); };
+
+// ---------- números e datas
+function atdDeIso(s) { const p = String(s).split('-'); return new Date(+p[0], +p[1] - 1, +(p[2] || 1)); }
+function atdMesBr(ym) { return primeiraMaiuscula(MESES[+ym.slice(5, 7) - 1]) + ' de ' + ym.slice(0, 4); }
+function atdN(n) { return n == null || isNaN(n) ? '—' : Math.round(n).toLocaleString('pt-BR'); }
+function atdP(n) { return n == null || isNaN(n) ? '—' : (n * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + '%'; }
+function atdT(s) {
+  if (s == null || isNaN(s)) return '—';
+  s = Math.round(s);
+  const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60;
+  return h ? h + 'h' + dd(m) : m + 'min' + (m < 10 ? ' ' + dd(x) + 's' : '');
+}
+function atdLimpa(v) { return v == null ? null : (String(v).replace(/\s+/g, ' ').trim() || null); }
+function atdNomeFila(v) { const t = atdLimpa(v); return ATD.juntar && t ? (t.replace(/[\s.·,;:\-–—]+$/, '').trim() || t) : t; }
+
+// ---------- dados: os dias do servidor → linhas planas (refeitas só quando mudam)
+function atdLinhas() {
+  if (ATD.cache && ATD.cache.fonte === ATD.dados && ATD.cache.juntar === ATD.juntar) return ATD.cache;
+  const rows = [], horas = [];
+  ((ATD.dados && ATD.dados.dias) || []).forEach(function (x) {
+    let d = x.dados;
+    if (typeof d === 'string') { try { d = JSON.parse(d); } catch (e) { d = null; } }
+    if (!d || !/^\d{4}-\d{2}-\d{2}$/.test(x.dia || '')) return;
+    (d.r || []).forEach(function (r) {
+      if (!r[4] && !r[5]) return;
+      rows.push({ d: x.dia, m: x.dia.slice(0, 7), f: atdNomeFila(r[0]), a: atdLimpa(r[1]), g: atdLimpa(r[2]), em: r[4] || 0, at: r[5] || 0, na: r[6] == null ? null : r[6], te: r[7] || 0, tw: r[8] || 0, ta: r[9] || 0, aw: r[10] || 0 });
+    });
+    (d.h || []).forEach(function (h) { horas.push({ d: x.dia, h: h[0], em: h[1] }); });
+  });
+  ATD.cache = { fonte: ATD.dados, juntar: ATD.juntar, rows: rows, horas: horas };
+  return ATD.cache;
+}
+function atdIntervalo() {
+  const h = new Date(), y = h.getFullYear(), m = h.getMonth();
+  switch (ATD.p) {
+    case 'mes': return [diaISO(new Date(y, m, 1)), diaISO(new Date(y, m + 1, 0))];
+    case 'mes_ant': return [diaISO(new Date(y, m - 1, 1)), diaISO(new Date(y, m, 0))];
+    case '30': return [diaISO(relSomaDias(h, -29)), diaISO(h)];
+    case 'ano': return [y + '-01-01', y + '-12-31'];
+    case 'tudo': return ['0000-01-01', '9999-12-31'];
+    default: return [ATD.ini || '0000-01-01', ATD.fim || '9999-12-31'];
+  }
+}
+function atdTituloPeriodo(r) {
+  if (ATD.p === 'mes' || ATD.p === 'mes_ant') return atdMesBr(r[0].slice(0, 7));
+  if (ATD.p === '30') return 'Últimos 30 dias';
+  if (ATD.p === 'ano') return 'Ano de ' + new Date().getFullYear();
+  if (ATD.p === 'tudo') return 'Todo o histórico';
+  return (ATD.ini ? relDia(ATD.ini) : 'Início') + ' a ' + (ATD.fim ? relDia(ATD.fim) : 'hoje');
+}
+function atdPassa(r) { return (!ATD.fila || r.f === ATD.fila) && (!ATD.at || r.a === ATD.at); }
+function atdSomar(rows) {
+  const s = { em: 0, at: 0, na: 0, temNa: false, te: 0, tw: 0, ta: 0, aw: 0 };
+  rows.forEach(function (r) { s.em += r.em || 0; s.at += r.at || 0; if (r.na != null) { s.na += r.na; s.temNa = true; } s.te += r.te || 0; s.tw += r.tw || 0; s.ta += r.ta || 0; s.aw += r.aw || 0; });
+  s.tme = s.tw ? s.te / s.tw : null; s.tma = s.aw ? s.ta / s.aw : null;
+  if (!s.temNa) s.na = null;
+  return s;
+}
+function atdAgrupar(rows, chave) {
+  const g = {}, o = [];
+  rows.forEach(function (r) { let k = r[chave]; if (k == null || k === '') k = '(sem informação)'; if (!g[k]) { g[k] = []; o.push(k); } g[k].push(r); });
+  return o.map(function (k) { const s = atdSomar(g[k]); s.k = k; return s; });
+}
+function atdBase() {
+  const L = atdLinhas(), r = atdIntervalo();
+  const noPer = L.rows.filter(function (x) { return x.d >= r[0] && x.d <= r[1]; });
+  return { r: r, L: L, noPer: noPer, rows: noPer.filter(atdPassa) };
+}
+
+// ---------- situação da coleta, em linguagem simples (o detalhe fica no servidor)
+function atdColetaEsperada() {
+  // última coleta das 17h (seg–sex, horário de Sergipe) que já deveria ter acontecido, com 30 min de folga
+  const agora = Date.now(), OFF = -3 * 3600e3;
+  for (let k = 0; k < 8; k++) {
+    const d = new Date(agora + OFF - k * 864e5), w = d.getUTCDay();
+    if (w === 0 || w === 6) continue;
+    const alvo = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 17, 0, 0) - OFF;
+    if (alvo + 30 * 60e3 <= agora) return alvo;
+  }
+  return 0;
+}
+function atdSituacao() {
+  const j = ATD.dados || {}, st = j.status || {}, u = st.ultima;
+  const itens = [];
+  if (!j.configurado) itens.push(['rel-alerta', 'A coleta do NextQS ainda não foi ligada no servidor. Avise o suporte.']);
+  else if (u && !u.ok) itens.push(['rel-alerta', 'A última coleta não deu certo (' + esc(quandoCurto(u.quando)) + '). Os números abaixo são da última que funcionou. Se continuar, avise o suporte.']);
+  else if (u && atdColetaEsperada() && Date.parse(u.quando) < atdColetaEsperada() - 10 * 60e3) itens.push(['rel-alerta', 'A coleta das 17h não aconteceu: a última foi em ' + esc(quandoCurto(u.quando)) + '. Avise o suporte.']);
+  else if (u) itens.push(['rel-ok', 'Em dia: última coleta ' + esc(quandoCurto(u.quando)) + '.']);
+  else itens.push(['', 'Nenhuma coleta ainda. Rode a carga do histórico, no fim desta tela.']);
+  return '<ul class="rel-situacao">' + itens.map(function (x) { return '<li class="' + x[0] + '">' + x[1] + '</li>'; }).join('') + '</ul>';
+}
+
+// ---------- gráficos (SVG a partir dos números)
+const ATD_SVG = 'http://www.w3.org/2000/svg';
+function atdSvg(tag, at, pai) { const e = document.createElementNS(ATD_SVG, tag); for (const k in at) e.setAttribute(k, at[k]); if (pai) pai.appendChild(e); return e; }
+function atdTxt(pai, x, y, t, at) { const e = atdSvg('text', Object.assign({ x: x, y: y, fill: ATD_COR.tx2, 'font-size': 13, 'font-family': '"Atkinson Hyperlegible",Lato,Arial,sans-serif' }, at || {}), pai); e.textContent = t; return e; }
+function atdLargura(box) { return Math.max(260, Math.floor(box.getBoundingClientRect().width || 600)); }
+function atdEscala(max, n) {
+  n = n || 5; if (!(max > 0)) max = 1;
+  const bruto = max / n, e = Math.pow(10, Math.floor(Math.log10(bruto))), m = bruto / e;
+  const p = m <= 1 ? 1 : m <= 2 ? 2 : m <= 2.5 ? 2.5 : m <= 5 ? 5 : 10, passo = p * e, topo = Math.ceil(max / passo - 1e-9) * passo, t = [];
+  for (let v = 0; v <= topo + 1e-9; v += passo) t.push(Math.round(v * 100) / 100);
+  return { topo: topo, t: t };
+}
+function atdEixo(v) { return v >= 10000 ? (v / 1000).toLocaleString('pt-BR', { maximumFractionDigits: 1 }) + ' mil' : Math.round(v).toLocaleString('pt-BR'); }
+function atdCaixa(id) { const b = el(id); b.innerHTML = ''; b.style.position = 'relative'; return b; }
+function atdDica(box, x, y, html) {
+  let d = box.querySelector('.atd-dica');
+  if (!d) { d = document.createElement('div'); d.className = 'atd-dica'; box.appendChild(d); }
+  d.innerHTML = html; d.hidden = false;
+  const W = box.clientWidth, w = d.offsetWidth, h = d.offsetHeight;
+  let l = Math.min(Math.max(4, x + 14), W - w - 4);
+  if (x + 14 + w > W) l = Math.max(4, x - w - 14);
+  d.style.left = l + 'px'; d.style.top = Math.max(0, y - h - 10) + 'px';
+}
+function atdSemDica(box) { const d = box.querySelector('.atd-dica'); if (d) d.hidden = true; }
+function atdVazio(id, msg) { const b = el(id); b.style.height = 'auto'; b.innerHTML = '<div class="atd-vazio">' + esc(msg) + '</div>'; }
+
+function atdLinha(id, rot, series, dicas) {
+  const box = atdCaixa(id); box.style.height = '';
+  const W = atdLargura(box), H = box.clientHeight || 260, M = { t: series.length > 1 ? 30 : 14, r: 14, b: 30, l: 52 };
+  const pw = W - M.l - M.r, ph = H - M.t - M.b, n = rot.length;
+  let max = 0; series.forEach(function (s) { s.v.forEach(function (v) { if (v > max) max = v; }); });
+  const E = atdEscala(max), X = function (i) { return M.l + (n < 2 ? pw / 2 : i * pw / (n - 1)); }, Y = function (v) { return M.t + ph - (v / E.topo) * ph; };
+  const svg = atdSvg('svg', { width: W, height: H, viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'Atendidas por dia' }, box);
+  const lg = atdSvg('linearGradient', { id: 'atdGrad', x1: 0, y1: 0, x2: 0, y2: 1 }, atdSvg('defs', {}, svg));
+  atdSvg('stop', { offset: '0%', 'stop-color': '#202a3a', 'stop-opacity': 0.28 }, lg); atdSvg('stop', { offset: '100%', 'stop-color': '#202a3a', 'stop-opacity': 0.02 }, lg);
+  E.t.forEach(function (v) { const y = Y(v); atdSvg('line', { x1: M.l, x2: W - M.r, y1: y, y2: y, stroke: ATD_COR.grade }, svg); atdTxt(svg, M.l - 8, y + 4, atdEixo(v), { 'text-anchor': 'end' }); });
+  atdSvg('line', { x1: M.l, x2: W - M.r, y1: M.t + ph, y2: M.t + ph, stroke: ATD_COR.m, 'stroke-width': 1.5 }, svg);
+  const passo = Math.max(1, Math.ceil(n / Math.max(1, Math.floor(pw / 74))));
+  rot.forEach(function (r, i) { if (i % passo === 0) atdTxt(svg, X(i), H - 8, r, { 'text-anchor': i === 0 ? 'start' : (i === n - 1 ? 'end' : 'middle') }); });
+  const caminho = function (v) { return v.map(function (y, i) { return (i ? 'L' : 'M') + X(i).toFixed(1) + ' ' + Y(y).toFixed(1); }).join(' '); };
+  series.slice().reverse().forEach(function (s) {
+    if (s.area && n > 1) atdSvg('path', { d: caminho(s.v) + ' L' + X(n - 1) + ' ' + (M.t + ph) + ' L' + X(0) + ' ' + (M.t + ph) + ' Z', fill: 'url(#atdGrad)' }, svg);
+    atdSvg('path', { d: caminho(s.v), fill: 'none', stroke: s.cor, 'stroke-width': s.tracejada ? 2 : 3, 'stroke-dasharray': s.tracejada ? '6 5' : 'none', 'stroke-linejoin': 'round', 'stroke-linecap': 'round' }, svg);
+    if (!s.tracejada && n <= 45) s.v.forEach(function (v, i) { atdSvg('circle', { cx: X(i), cy: Y(v), r: 3.5, fill: s.cor }, svg); });
+  });
+  if (series.length > 1) {
+    let lx = W - M.r;
+    series.slice().reverse().forEach(function (s) {
+      atdTxt(svg, lx, 16, s.nome, { 'text-anchor': 'end', fill: ATD_COR.tx, 'font-weight': 700 });
+      const w = s.nome.length * 7.4;
+      atdSvg('line', { x1: lx - w - 26, x2: lx - w - 8, y1: 12, y2: 12, stroke: s.cor, 'stroke-width': 3, 'stroke-dasharray': s.tracejada ? '5 4' : 'none' }, svg);
+      lx -= w + 42;
+    });
+  }
+  const guia = atdSvg('line', { x1: 0, x2: 0, y1: M.t, y2: M.t + ph, stroke: ATD_COR.m, 'stroke-width': 1, 'stroke-dasharray': '3 3', visibility: 'hidden' }, svg);
+  const marca = atdSvg('circle', { r: 6, fill: '#fff', stroke: ATD_COR.v, 'stroke-width': 3, visibility: 'hidden' }, svg);
+  const alvo = atdSvg('rect', { x: M.l, y: M.t, width: pw, height: ph, fill: 'transparent' }, svg);
+  function mover(ev) {
+    const b = svg.getBoundingClientRect();
+    let i = n < 2 ? 0 : Math.round((ev.clientX - b.left - M.l) / pw * (n - 1));
+    i = Math.max(0, Math.min(n - 1, i));
+    guia.setAttribute('x1', X(i)); guia.setAttribute('x2', X(i)); guia.setAttribute('visibility', 'visible');
+    marca.setAttribute('cx', X(i)); marca.setAttribute('cy', Y(series[0].v[i])); marca.setAttribute('visibility', 'visible');
+    atdDica(box, X(i), Y(series[0].v[i]), dicas(i));
+  }
+  alvo.addEventListener('mousemove', mover);
+  alvo.addEventListener('touchstart', function (e) { mover(e.touches[0]); }, { passive: true });
+  alvo.addEventListener('mouseleave', function () { guia.setAttribute('visibility', 'hidden'); marca.setAttribute('visibility', 'hidden'); atdSemDica(box); });
+}
+function atdBarrasH(id, itens, dicas) {
+  itens = itens.slice().sort(function (a, b) { return b.v - a.v; }).slice(0, 15);
+  const linha = 34, H = itens.length * linha + 34;
+  const box = atdCaixa(id); box.style.height = H + 'px';
+  const W = atdLargura(box);
+  const maxRot = Math.max.apply(null, itens.map(function (x) { return String(x.k).length; }));
+  const L = Math.min(Math.round(W * 0.42), Math.max(90, maxRot * 8.2 + 12)), pw = W - L - 64;
+  const E = atdEscala(Math.max.apply(null, itens.map(function (x) { return x.v; }).concat([1])), 4);
+  const svg = atdSvg('svg', { width: W, height: H, viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'Gráfico de barras' }, box);
+  E.t.forEach(function (v) { const x = L + v / E.topo * pw; atdSvg('line', { x1: x, x2: x, y1: 4, y2: H - 24, stroke: ATD_COR.grade }, svg); atdTxt(svg, x, H - 6, atdEixo(v), { 'text-anchor': 'middle', 'font-size': 12 }); });
+  itens.forEach(function (it, i) {
+    const y = 6 + i * linha, w = Math.max(2, it.v / E.topo * pw);
+    let nome = String(it.k);
+    if (nome.length * 8.2 > L - 12) nome = nome.slice(0, Math.floor((L - 12) / 8.2) - 1) + '…';
+    atdTxt(svg, L - 10, y + linha / 2 + 1, nome, { 'text-anchor': 'end', fill: ATD_COR.tx, 'font-weight': 700, 'font-size': 14 });
+    const bar = atdSvg('rect', { x: L, y: y + 5, width: w, height: linha - 12, rx: 3, fill: i === 0 ? ATD_COR.v : ATD_COR.m }, svg);
+    atdTxt(svg, L + w + 6, y + linha / 2 + 1, atdN(it.v), { fill: ATD_COR.tx, 'font-weight': 700, 'font-size': 13 });
+    const alvo = atdSvg('rect', { x: 0, y: y, width: W, height: linha, fill: 'transparent' }, svg);
+    alvo.addEventListener('mousemove', function (ev) { const b = box.getBoundingClientRect(); bar.setAttribute('opacity', 0.8); atdDica(box, ev.clientX - b.left, y + 6, '<b>' + esc(it.k) + '</b><br>' + dicas(it).join('<br>')); });
+    alvo.addEventListener('mouseleave', function () { bar.setAttribute('opacity', 1); atdSemDica(box); });
+  });
+}
+function atdColunas(id, rot, vals, cores, dicas) {
+  const box = atdCaixa(id); box.style.height = '';
+  const W = atdLargura(box), H = box.clientHeight || 240, M = { t: 24, r: 10, b: 30, l: 52 }, pw = W - M.l - M.r, ph = H - M.t - M.b, n = rot.length;
+  const E = atdEscala(Math.max.apply(null, vals.concat([1])));
+  const svg = atdSvg('svg', { width: W, height: H, viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'Gráfico de colunas' }, box);
+  E.t.forEach(function (v) { const y = M.t + ph - v / E.topo * ph; atdSvg('line', { x1: M.l, x2: W - M.r, y1: y, y2: y, stroke: ATD_COR.grade }, svg); atdTxt(svg, M.l - 8, y + 4, atdEixo(v), { 'text-anchor': 'end' }); });
+  atdSvg('line', { x1: M.l, x2: W - M.r, y1: M.t + ph, y2: M.t + ph, stroke: ATD_COR.m, 'stroke-width': 1.5 }, svg);
+  const slot = pw / n, bw = Math.min(64, slot * 0.68), passo = Math.max(1, Math.ceil(n / Math.max(1, Math.floor(pw / 46))));
+  vals.forEach(function (v, i) {
+    const h = v / E.topo * ph, x = M.l + i * slot + (slot - bw) / 2, y = M.t + ph - h;
+    const bar = atdSvg('rect', { x: x, y: y, width: bw, height: Math.max(0, h), rx: 3, fill: cores[i] || ATD_COR.m }, svg);
+    if (bw >= 26) atdTxt(svg, x + bw / 2, y - 6, atdEixo(v), { 'text-anchor': 'middle', fill: ATD_COR.tx, 'font-weight': 700, 'font-size': 12 });
+    if (i % passo === 0) atdTxt(svg, x + bw / 2, H - 8, rot[i], { 'text-anchor': 'middle' });
+    const alvo = atdSvg('rect', { x: M.l + i * slot, y: M.t, width: slot, height: ph, fill: 'transparent' }, svg);
+    alvo.addEventListener('mousemove', function () { bar.setAttribute('opacity', 0.8); atdDica(box, x + bw / 2, y, dicas(i)); });
+    alvo.addEventListener('mouseleave', function () { bar.setAttribute('opacity', 1); atdSemDica(box); });
+  });
+}
+
+// ---------- a tela
+function atdPintar(painel) {
+  painel.innerHTML = relChave('atendimentos') + '<div id="atdCorpo"><p class="ed-vazio">Lendo os atendimentos…</p></div>';
+  relLigarChave(painel);
+  if (!ATD.dados || Date.now() - ATD.lidoEm > 10 * 60e3) atdCarregar(); else atdDesenhar();
+}
+function atdCarregar() {
+  if (ATD.carregando) return;
+  ATD.carregando = true; ATD.erro = '';
+  const desde = diaISO(relSomaDias(new Date(), -400));
+  api('/hub/relatorios/atendimentos?desde=' + desde).then(function (j) {
+    ATD.dados = j; ATD.lidoEm = Date.now(); ATD.cache = null;
+  }).catch(function (e) {
+    ATD.erro = e && e.status === 404 ? 'o servidor ainda não tem os atendimentos — falta publicar o servidor v1.39' : relErro(e);
+  }).then(function () {
+    ATD.carregando = false;
+    if (atdAberta()) atdDesenhar();
+  });
+}
+function atdDesenhar() {
+  const corpo = el('atdCorpo');
+  if (!corpo) return;
+  if (ATD.erro && !ATD.dados) { corpo.innerHTML = '<p class="ed-vazio">Não consegui ler os atendimentos (' + esc(ATD.erro) + ').</p>'; return; }
+  const j = ATD.dados || {};
+  corpo.innerHTML =
+    '<p class="sub-data" style="margin-bottom:8px">Senhas e filas do balcão, lidas do NextQS pelo servidor do Hub. A coleta é automática, de segunda a sexta às 17h.</p>' +
+    '<div class="atd-situacao-linha">' + atdSituacao() + (j.configurado ? '<button type="button" class="btn-fantasma" id="atdAtualizar">↻ Atualizar agora</button>' : '') + '</div>' +
+    '<div class="aud-filtros atd-filtros">' +
+      '<label class="aud-campo"><span>Período</span><select id="atdPer">' +
+        [['mes', 'Mês atual'], ['mes_ant', 'Mês anterior'], ['30', 'Últimos 30 dias'], ['ano', 'Este ano'], ['tudo', 'Tudo'], ['livre', 'Escolher datas']].map(function (o) {
+          return '<option value="' + o[0] + '"' + (ATD.p === o[0] ? ' selected' : '') + '>' + o[1] + '</option>';
+        }).join('') + '</select></label>' +
+      '<label class="aud-campo atd-data"' + (ATD.p === 'livre' ? '' : ' hidden') + '><span>De</span><input type="date" id="atdIni" value="' + esc(ATD.ini) + '"></label>' +
+      '<label class="aud-campo atd-data"' + (ATD.p === 'livre' ? '' : ' hidden') + '><span>Até</span><input type="date" id="atdFim" value="' + esc(ATD.fim) + '"></label>' +
+      '<label class="aud-campo"><span>Fila / serviço</span><select id="atdFila"></select></label>' +
+      '<label class="aud-campo"><span>Atendente</span><select id="atdAt"></select></label>' +
+      '<label class="atd-junta"><input type="checkbox" id="atdJuntar"' + (ATD.juntar ? ' checked' : '') + '> Juntar filas de mesmo nome</label>' +
+    '</div>' +
+    '<h3 class="atd-titulo" id="atdTitulo"></h3><p class="sub-data" id="atdNota"></p>' +
+    '<div id="atdConteudo"></div>' +
+    '<section class="atd-q"><h4>Relatório mensal em PDF</h4><p class="atd-sub">Duas folhas com a identidade CN2O: o mês comparado ao anterior, dias, filas e equipe. Sai sozinho por e-mail às 7h do 1º dia útil de cada mês.</p>' +
+      '<div class="aud-filtros"><label class="aud-campo"><span>Mês</span><select id="atdMes"></select></label>' +
+      '<button type="button" class="btn-vinho" id="atdPdf">⭳ Baixar PDF</button>' +
+      '<button type="button" class="btn-fantasma" id="atdEnviar">' + ATD_ROT_ENVIAR + '</button></div>' +
+      '<p class="aud-conta" id="atdPdfSit"></p>' +
+      '<p class="sub-data">Os PDFs feitos antes, pelo n8n, continuam <a href="' + ATD_PASTA_PDF + '" target="_blank" rel="noopener">na pasta do Drive</a>.</p></section>' +
+    '<details class="rel-suporte"><summary>Carga do histórico (uso do suporte)</summary>' +
+      '<p class="sub-data">Busca no NextQS as senhas desde a data escolhida, em blocos de 90 dias. Rode uma vez depois de instalar; repetir não duplica nada. Roda no servidor: pode fechar esta tela.</p>' +
+      '<div class="aud-filtros"><label class="aud-campo"><span>Desde</span><input type="date" id="atdDesde" value="' + diaISO(relSomaDias(new Date(), -365)) + '"></label>' +
+      '<button type="button" class="btn-vinho" id="atdCarga">' + ATD_ROT_CARGA + '</button></div>' +
+      '<p class="aud-conta" id="atdCargaSit"></p></details>';
+  // filtros
+  el('atdPer').addEventListener('change', function () {
+    ATD.p = this.value;
+    if (ATD.p === 'livre' && !ATD.ini) { const h = new Date(); ATD.ini = diaISO(new Date(h.getFullYear(), h.getMonth(), 1)); ATD.fim = diaISO(h); }
+    corpo.querySelectorAll('.atd-data').forEach(function (x) { x.hidden = ATD.p !== 'livre'; });
+    el('atdIni').value = ATD.ini; el('atdFim').value = ATD.fim;
+    atdRender();
+  });
+  ['atdIni', 'atdFim'].forEach(function (id) { el(id).addEventListener('change', function () { ATD.ini = el('atdIni').value; ATD.fim = el('atdFim').value; atdRender(); }); });
+  el('atdFila').addEventListener('change', function () { ATD.fila = this.value; atdRender(); });
+  el('atdAt').addEventListener('change', function () { ATD.at = this.value; atdRender(); });
+  el('atdJuntar').addEventListener('change', function () { ATD.juntar = this.checked; store.set('cn2o_atd_juntar', ATD.juntar ? '1' : '0'); ATD.fila = ''; atdRender(); });
+  if (el('atdAtualizar')) el('atdAtualizar').addEventListener('click', atdAtualizarAgora);
+  el('atdPdf').addEventListener('click', atdBaixarPdf);
+  el('atdEnviar').addEventListener('click', atdEnviarPdf);
+  el('atdMes').addEventListener('change', function () { relDesarmar(el('atdEnviar'), ATD_ROT_ENVIAR); });
+  el('atdCarga').addEventListener('click', atdCarga);
+  el('atdDesde').addEventListener('input', function () { relDesarmar(el('atdCarga'), ATD_ROT_CARGA); });
+  el('atdCarga').hidden = !j.configurado;
+  atdRender();
+  atdPintarCarga();
+}
+
+function atdOpcoes(sel, vals, atual, rotulo) {
+  sel.innerHTML = '<option value="">' + rotulo + '</option>' + vals.map(function (v) { return '<option value="' + esc(v) + '"' + (v === atual ? ' selected' : '') + '>' + esc(v) + '</option>'; }).join('');
+}
+function atdRender() {
+  if (!el('atdConteudo')) return;
+  const B = atdBase();
+  const filas = [], ats = [];
+  B.noPer.forEach(function (r) { if (r.f && filas.indexOf(r.f) < 0) filas.push(r.f); if (r.a && ats.indexOf(r.a) < 0) ats.push(r.a); });
+  filas.sort(); ats.sort();
+  if (ATD.fila && filas.indexOf(ATD.fila) < 0) filas.push(ATD.fila);
+  if (ATD.at && ats.indexOf(ATD.at) < 0) ats.push(ATD.at);
+  atdOpcoes(el('atdFila'), filas, ATD.fila, 'Todas');
+  atdOpcoes(el('atdAt'), ats, ATD.at, 'Todos');
+  el('atdTitulo').textContent = atdTituloPeriodo(B.r);
+  const nDias = atdAgrupar(B.noPer, 'd').length;
+  el('atdNota').textContent = nDias ? nDias + ' dia(s) com atendimento neste período.' + (ATD.fila || ATD.at ? ' Filtro: ' + [ATD.fila, ATD.at].filter(Boolean).join(' · ') + '.' : '') : '';
+  atdMeses();
+  const box = el('atdConteudo');
+  if (!B.rows.length) {
+    box.innerHTML = '<div class="atd-vazio" style="margin-top:10px">Nenhum atendimento neste período' + (ATD.fila || ATD.at ? ' com esse filtro' : '') + '.' +
+      (ATD.dados && !(ATD.dados.dias || []).length ? ' Os dados chegam pela coleta das 17h; para trazer o histórico, rode a carga no fim desta tela.' : '') + '</div>';
+    return;
+  }
+  box.innerHTML =
+    '<div class="atd-livro" id="atdLivro"></div>' +
+    '<section class="atd-q"><h4>Atendidas por dia</h4><p class="atd-sub">Passe o mouse sobre a linha para ver o dia.</p><div class="atd-area" id="atdSerra"></div></section>' +
+    '<div class="atd-grade">' +
+      '<section class="atd-q"><h4>Filas e serviços</h4><p class="atd-sub">Senhas atendidas por fila, com a espera média de cada uma.</p><div id="atdFilas"></div></section>' +
+      '<section class="atd-q"><h4>Equipe</h4><p class="atd-sub">Atendimentos por atendente e tempo médio no guichê.</p><div id="atdEquipe"></div></section>' +
+      '<section class="atd-q"><h4>Dia da semana</h4><p class="atd-sub">Média de senhas atendidas em cada dia útil do período.</p><div class="atd-area atd-baixa" id="atdSemana"></div></section>' +
+      '<section class="atd-q"><h4>Mês a mês</h4><p class="atd-sub">Todos os meses com dados, com os filtros de fila e atendente.</p><div class="atd-area atd-baixa" id="atdMesAMes"></div></section>' +
+    '</div>' +
+    '<section class="atd-q"><h4>Dia do mês</h4><p class="atd-sub">Média de atendidas em cada dia do mês, somando todos os meses com dados. Os 3 dias de maior movimento aparecem em vinho.</p><div class="atd-area atd-baixa" id="atdDiaMes"></div><div class="atd-faixas" id="atdFaixas"></div></section>' +
+    '<section class="atd-q" id="atdQHoras"><h4>Horário de pico</h4><p class="atd-sub" id="atdHorasSub"></p><div class="atd-area atd-baixa" id="atdHoras"></div></section>' +
+    '<section class="atd-q"><h4>Detalhamento</h4>' +
+      '<div class="aud-filtros"><label class="aud-campo"><span>Procurar</span><input type="search" id="atdBusca" placeholder="Fila, atendente, data…" value="' + esc(ATD.busca) + '"></label>' +
+      '<label class="aud-campo"><span>Agrupar por</span><select id="atdAgrupar">' +
+        [['', 'Dia, fila e atendente'], ['d', 'Dia'], ['f', 'Fila'], ['a', 'Atendente'], ['m', 'Mês']].map(function (o) { return '<option value="' + o[0] + '"' + (ATD.agrupar === o[0] ? ' selected' : '') + '>' + o[1] + '</option>'; }).join('') +
+      '</select></label><button type="button" class="btn-fantasma" id="atdCsv">⭳ Baixar CSV</button></div>' +
+      '<div class="aud-rolo atd-rolo"><table class="aud-tabela atd-tabela" id="atdTabela"></table></div></section>';
+  el('atdBusca').addEventListener('input', function () { ATD.busca = this.value; clearTimeout(ATD.tBusca); ATD.tBusca = setTimeout(function () { atdTabela(atdBase()); }, 200); });
+  el('atdAgrupar').addEventListener('change', function () { ATD.agrupar = this.value; atdTabela(atdBase()); });
+  el('atdCsv').addEventListener('click', atdCsv);
+  atdLivro(B); atdGraficos(B); atdTabela(B);
+}
+function atdLivro(B) {
+  const s = atdSomar(B.rows);
+  const dias = atdAgrupar(B.rows, 'd').filter(function (x) { return x.at > 0 || x.em > 0; }).length;
+  const taxa = s.na != null && s.em ? s.na / s.em : null;
+  const it = [
+    ['Senhas emitidas', atdN(s.em), ''],
+    ['Atendidas', atdN(s.at), s.em ? atdP(s.at / s.em) + ' das emitidas' : ''],
+    ['Não atendidas', s.na == null ? '—' : atdN(s.na), taxa == null ? '' : atdP(taxa) + ' desistiram ou não compareceram', taxa != null && taxa > 0.1],
+    ['Espera média', atdT(s.tme), 'da emissão à chamada'],
+    ['Atendimento médio', atdT(s.tma), 'tempo no guichê'],
+    ['Média por dia', dias ? atdN(s.at / dias) : '—', dias ? dias + ' dia(s) com atendimento' : '']
+  ];
+  el('atdLivro').innerHTML = it.map(function (x) { return '<div><span>' + esc(x[0]) + '</span><strong' + (x[3] ? ' class="v"' : '') + '>' + esc(x[1]) + '</strong><small>' + esc(x[2]) + '</small></div>'; }).join('');
+}
+function atdGraficos(B) {
+  // atendidas por dia
+  const g = atdAgrupar(B.rows, 'd').sort(function (a, b) { return a.k.localeCompare(b.k); });
+  const series = [{ nome: 'Atendidas', v: g.map(function (x) { return x.at; }), cor: ATD_COR.v, area: true }];
+  if (g.some(function (x) { return x.em > x.at; })) series.push({ nome: 'Senhas emitidas', v: g.map(function (x) { return x.em; }), cor: 'rgba(32,42,58,.6)', tracejada: true });
+  atdLinha('atdSerra', g.map(function (x) { return x.k.slice(8, 10) + '/' + x.k.slice(5, 7); }), series, function (i) {
+    const x = g[i], d = atdDeIso(x.k), l = ['<b>' + ATD_DSEM[d.getDay()] + ', ' + relDia(x.k) + '</b>', 'Atendidas: ' + atdN(x.at), 'Emitidas: ' + atdN(x.em)];
+    if (x.na != null) l.push('Não atendidas: ' + atdN(x.na));
+    if (x.tme != null) l.push('Espera média: ' + atdT(x.tme));
+    if (x.tma != null) l.push('Atendimento médio: ' + atdT(x.tma));
+    return l.join('<br>');
+  });
+  // filas
+  const gf = atdAgrupar(B.rows, 'f').filter(function (x) { return x.at > 0 || x.em > 0; });
+  if (gf.length === 1 && gf[0].k === '(sem informação)') atdVazio('atdFilas', 'O NextQS não separou as filas neste período.');
+  else atdBarrasH('atdFilas', gf.map(function (x) { return Object.assign({ v: x.at }, x); }), function (x) {
+    const l = ['Atendidas: ' + atdN(x.at), 'Emitidas: ' + atdN(x.em)];
+    if (x.tme != null) l.push('Espera média: ' + atdT(x.tme));
+    if (x.tma != null) l.push('Atendimento médio: ' + atdT(x.tma));
+    return l;
+  });
+  // equipe
+  const ga = atdAgrupar(B.rows, 'a').filter(function (x) { return x.k !== '(sem informação)' && x.at > 0; });
+  if (!ga.length) atdVazio('atdEquipe', 'Os dados não trazem o nome de quem atendeu.');
+  else atdBarrasH('atdEquipe', ga.map(function (x) { return Object.assign({ v: x.at }, x); }), function (x) {
+    const l = ['Atendimentos: ' + atdN(x.at)];
+    if (x.tma != null) l.push('Tempo médio no guichê: ' + atdT(x.tma));
+    if (x.tme != null) l.push('Espera média das senhas: ' + atdT(x.tme));
+    return l;
+  });
+  // dia da semana
+  const soma = [0, 0, 0, 0, 0, 0, 0], qt = [0, 0, 0, 0, 0, 0, 0];
+  atdAgrupar(B.rows, 'd').forEach(function (x) { if (!(x.at > 0 || x.em > 0)) return; const w = atdDeIso(x.k).getDay(); soma[w] += x.at; qt[w]++; });
+  const ids = [1, 2, 3, 4, 5]; if (qt[6]) ids.push(6); if (qt[0]) ids.push(0);
+  const med = ids.map(function (i) { return qt[i] ? soma[i] / qt[i] : 0; }), mx = Math.max.apply(null, med);
+  atdColunas('atdSemana', ids.map(function (i) { return ATD_DSEM[i]; }), med, med.map(function (v) { return v === mx && v > 0 ? ATD_COR.v : ATD_COR.m; }), function (k) {
+    const i = ids[k]; return '<b>' + ATD_DSEM[i] + '</b><br>Média: ' + atdN(med[k]) + ' atendidas por dia<br>' + qt[i] + ' dia(s) no período';
+  });
+  // mês a mês (todos os meses, com os filtros de fila e atendente)
+  const todos = B.L.rows.filter(atdPassa), porMes = {};
+  todos.forEach(function (x) { (porMes[x.m] = porMes[x.m] || []).push(x); });
+  const ms = Object.keys(porMes).sort(), vm = ms.map(function (k) { return atdSomar(porMes[k]); });
+  if (!ms.length) atdVazio('atdMesAMes', 'Ainda não há meses com dados.');
+  else atdColunas('atdMesAMes', ms.map(function (k) { return ATD_MES_CURTO[+k.slice(5, 7) - 1] + '/' + k.slice(2, 4); }), vm.map(function (s) { return s.at; }),
+    ms.map(function (k) { return k >= B.r[0].slice(0, 7) && k <= B.r[1].slice(0, 7) ? ATD_COR.v : ATD_COR.m18; }), function (i) {
+      const s = vm[i], l = ['<b>' + atdMesBr(ms[i]) + '</b>', 'Atendidas: ' + atdN(s.at), 'Emitidas: ' + atdN(s.em)];
+      if (s.tme != null) l.push('Espera média: ' + atdT(s.tme));
+      return l.join('<br>');
+    });
+  // dia do mês (todos os meses)
+  const pd = {};
+  todos.forEach(function (x) { (pd[x.d] = pd[x.d] || { at: 0, em: 0 }); pd[x.d].at += x.at || 0; pd[x.d].em += x.em || 0; });
+  const sd = [], qd = [];
+  for (let i = 0; i <= 31; i++) { sd[i] = 0; qd[i] = 0; }
+  Object.keys(pd).forEach(function (d) { if (pd[d].em > 0) { const n = +d.slice(8, 10); sd[n] += pd[d].at; qd[n]++; } });
+  const rot = [], vd = [];
+  for (let i = 1; i <= 31; i++) { rot.push(String(i)); vd.push(qd[i] ? sd[i] / qd[i] : 0); }
+  const top = vd.slice().sort(function (a, b) { return b - a; })[2] || Infinity;
+  atdColunas('atdDiaMes', rot, vd, vd.map(function (v) { return v > 0 && v >= top ? ATD_COR.v : ATD_COR.m; }), function (k) {
+    return '<b>Dia ' + (k + 1) + '</b><br>Média: ' + atdN(vd[k]) + ' atendidas<br>' + qd[k + 1] + ' dia(s) útil(eis) com dados';
+  });
+  const faixa = function (a, b) { let s = 0, n = 0; for (let j = a; j <= b; j++) { s += sd[j]; n += qd[j]; } return n ? s / n : null; };
+  el('atdFaixas').innerHTML = [['Início do mês', 'dias 1 a 10', faixa(1, 10)], ['Meio do mês', 'dias 11 a 20', faixa(11, 20)], ['Fim do mês', 'dias 21 a 31', faixa(21, 31)]].map(function (f) {
+    return '<div><span>' + f[0] + '</span><strong>' + atdN(f[2]) + '</strong><small>atendidas por dia · ' + f[1] + '</small></div>';
+  }).join('');
+  // horário de pico (senhas emitidas por hora de chegada; sem filtro de fila/atendente)
+  const comH = B.L.horas.filter(function (x) { return x.d >= B.r[0] && x.d <= B.r[1]; });
+  el('atdQHoras').hidden = !comH.length;
+  if (comH.length) {
+    const nDiasH = atdAgrupar(comH, 'd').length;
+    el('atdHorasSub').textContent = 'Senhas emitidas por hora de chegada, somando ' + nDiasH + ' dia(s) do período' + (ATD.fila || ATD.at ? ' (todas as filas e atendentes)' : '') + '.';
+    const gh = atdAgrupar(comH, 'h').sort(function (a, b) { return String(a.k).localeCompare(String(b.k), 'pt-BR', { numeric: true }); });
+    const mh = Math.max.apply(null, gh.map(function (x) { return x.em; }));
+    atdColunas('atdHoras', gh.map(function (x) { return x.k; }), gh.map(function (x) { return x.em; }), gh.map(function (x) { return x.em === mh ? ATD_COR.v : ATD_COR.m; }), function (i) {
+      const x = gh[i]; return '<b>' + esc(x.k) + '</b><br>' + atdN(x.em) + ' senhas emitidas<br>Média: ' + atdN(x.em / nDiasH) + ' por dia';
+    });
+  }
+}
+function atdLinhasTabela(B) {
+  const gp = ATD.agrupar, q = String(ATD.busca || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
+  let rows = B.rows, cols;
+  if (gp) {
+    rows = atdAgrupar(rows, gp).sort(function (a, b) { return gp === 'd' || gp === 'm' ? String(b.k).localeCompare(String(a.k)) : b.at - a.at; });
+    cols = [{ t: { d: 'Dia', f: 'Fila / serviço', a: 'Atendente', m: 'Mês' }[gp], v: function (x) { return gp === 'd' ? relDia(x.k) : (gp === 'm' ? atdMesBr(x.k) : x.k); } }];
+  } else {
+    rows = rows.slice().sort(function (a, b) { return b.d.localeCompare(a.d) || String(a.f || '').localeCompare(String(b.f || '')); })
+      .map(function (r) { const o = Object.assign({}, r); o.tme = r.tw ? r.te / r.tw : null; o.tma = r.aw ? r.ta / r.aw : null; return o; });
+    cols = [{ t: 'Dia', v: function (r) { return relDia(r.d); } }, { t: 'Fila / serviço', v: function (r) { return r.f || ''; } },
+      { t: 'Atendente', v: function (r) { return r.a || ''; } }, { t: 'Guichê', v: function (r) { return r.g || ''; } }];
+  }
+  cols = cols.concat([
+    { t: 'Emitidas', n: 1, v: function (r) { return atdN(r.em); }, c: function (r) { return r.em; } },
+    { t: 'Atendidas', n: 1, v: function (r) { return atdN(r.at); }, c: function (r) { return r.at; } },
+    { t: 'Não atendidas', n: 1, v: function (r) { return r.na == null ? '—' : atdN(r.na); }, c: function (r) { return r.na; } },
+    { t: 'Espera média', n: 1, v: function (r) { return atdT(r.tme); }, c: function (r) { return r.tme == null ? '' : Math.round(r.tme); }, csv: 'Espera média (s)' },
+    { t: 'Atendimento médio', n: 1, v: function (r) { return atdT(r.tma); }, c: function (r) { return r.tma == null ? '' : Math.round(r.tma); }, csv: 'Atendimento médio (s)' }
+  ]);
+  if (q) rows = rows.filter(function (r) { return cols.map(function (c) { return c.v(r); }).join(' ').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().indexOf(q) >= 0; });
+  return { cols: cols, rows: rows };
+}
+function atdTabela(B) {
+  const T = atdLinhasTabela(B), t = el('atdTabela');
+  if (!t) return;
+  const lim = T.rows.slice(0, 300);
+  t.innerHTML = '<thead><tr>' + T.cols.map(function (c) { return '<th class="versalete' + (c.n ? ' n' : '') + '">' + esc(c.t) + '</th>'; }).join('') + '</tr></thead><tbody>' +
+    (lim.length ? lim.map(function (r) { return '<tr>' + T.cols.map(function (c) { return '<td' + (c.n ? ' class="n"' : '') + '>' + esc(c.v(r)) + '</td>'; }).join('') + '</tr>'; }).join('')
+      : '<tr><td colspan="' + T.cols.length + '">Nenhuma linha.</td></tr>') +
+    (T.rows.length > 300 ? '<tr><td colspan="' + T.cols.length + '">Mostrando 300 de ' + atdN(T.rows.length) + ' linhas. O CSV leva todas.</td></tr>' : '') + '</tbody>';
+}
+function atdCsv() {
+  const T = atdLinhasTabela(atdBase());
+  if (!T.rows.length) { toast('Não há linhas para baixar.'); return; }
+  const linhas = [T.cols.map(function (c) { return c.csv || c.t; })].concat(T.rows.map(function (r) { return T.cols.map(function (c) { const v = c.c ? c.c(r) : c.v(r); return v == null ? '' : v; }); }));
+  const csv = '﻿' + linhas.map(function (l) { return l.map(function (v) { v = String(v); if (/^[=+\-@]/.test(v)) v = "'" + v; return /[;"\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }).join(';'); }).join('\r\n');
+  const r = atdIntervalo(), nome = 'atendimentos-cn2o_' + (r[0].indexOf('0000') === 0 ? 'inicio' : r[0]) + '_a_' + (r[1].indexOf('9999') === 0 ? 'hoje' : r[1]) + '.csv';
+  atdSalvar(new Blob([csv], { type: 'text/csv' }), nome);
+  toast('✓ Planilha dos atendimentos baixada.');
+}
+function atdSalvar(blob, nome) {
+  const url = URL.createObjectURL(blob), a = document.createElement('a');
+  a.href = url; a.download = nome; document.body.appendChild(a); a.click();
+  setTimeout(function () { try { URL.revokeObjectURL(url); } catch (e) {} a.remove(); }, 8000);
+}
+
+// ---------- ações
+function atdMeses() {
+  const sel = el('atdMes');
+  if (!sel) return;
+  const ms = {};
+  atdLinhas().rows.forEach(function (x) { if (x.em > 0) ms[x.m] = 1; });
+  const hoje = diaISO(new Date()).slice(0, 7), lista = Object.keys(ms).filter(function (m) { return m <= hoje; }).sort().reverse(), atual = sel.value;
+  sel.innerHTML = lista.length ? lista.map(function (m) { return '<option value="' + m + '">' + atdMesBr(m) + (m === hoje ? ' (até agora)' : '') + '</option>'; }).join('') : '<option value="">sem meses com dados</option>';
+  if (atual && lista.indexOf(atual) >= 0) sel.value = atual;
+  else if (lista.length > 1 && lista[0] === hoje) sel.value = lista[1];
+  el('atdPdf').disabled = el('atdEnviar').disabled = !lista.length;
+  const st = (ATD.dados && ATD.dados.status) || {}, env = st['relatorio_' + sel.value];
+  el('atdPdfSit').textContent = env && env.ok ? 'O PDF de ' + atdMesBr(sel.value).toLowerCase() + ' já foi ' + env.mensagem + ' (' + quandoCurto(env.quando) + ').' : '';
+}
+function atdAtualizarAgora() {
+  const b = el('atdAtualizar');
+  b.disabled = true; b.textContent = 'Buscando no NextQS…';
+  api('/hub/relatorios/atendimentos/atualizar', { corpo: {} }).then(function (r) {
+    toast('✓ ' + r.mensagem);
+    ATD.lidoEm = 0; atdCarregar();
+  }).catch(function (e) {
+    toast(primeiraMaiuscula(relErro(e)) + '.', true);
+    if (b.isConnected) { b.disabled = false; b.textContent = '↻ Atualizar agora'; }
+  });
+}
+function atdBaixarPdf() {
+  const mes = el('atdMes').value, b = el('atdPdf');
+  if (!mes) return;
+  b.disabled = true; b.textContent = 'Montando…';
+  relBaixar('/atendimentos/pdf?mes=' + encodeURIComponent(mes)).then(function (r) { return r.blob(); })
+    .then(function (blob) { atdSalvar(blob, 'Atendimentos CN2O — ' + mes + '.pdf'); toast('✓ PDF de ' + atdMesBr(mes).toLowerCase() + ' baixado.'); })
+    .catch(function (e) { toast('Não consegui montar o PDF (' + relErro(e) + ').', true); })
+    .then(function () { if (b.isConnected) { b.disabled = false; b.textContent = '⭳ Baixar PDF'; } });
+}
+function atdEnviarPdf() {
+  const mes = el('atdMes').value, b = el('atdEnviar');
+  if (!mes) return;
+  if (b.dataset.confirma !== mes) { relArmar(b, mes, 'Confirmar envio?', ATD_ROT_ENVIAR); return; }
+  b.disabled = true; b.textContent = 'Enviando…';
+  api('/hub/relatorios/atendimentos/enviar', { corpo: { mes: mes } }).then(function (r) {
+    toast('✓ PDF de ' + atdMesBr(mes).toLowerCase() + ' enviado para ' + (r.para || []).join(', ') + (r.homologacao ? ' (teste)' : ''));
+    ATD.lidoEm = 0; atdCarregar();
+  }).catch(function (e) { toast(primeiraMaiuscula(relErro(e)) + '.', true); })
+    .then(function () { if (b.isConnected) { b.disabled = false; relDesarmar(b, ATD_ROT_ENVIAR); } });
+}
+function atdCarga() {
+  const b = el('atdCarga'), desde = el('atdDesde').value;
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(desde)) { toast('Escolha a data de início da carga.'); return; }
+  if (b.dataset.confirma !== desde) { relArmar(b, desde, 'Confirmar carga desde ' + relDia(desde) + '?', ATD_ROT_CARGA); return; }
+  b.disabled = true;
+  api('/hub/relatorios/atendimentos/carga', { corpo: { desde: desde } }).then(function () {
+    toast('✓ Carga iniciada no servidor — o andamento aparece aqui.');
+    relDesarmar(b, ATD_ROT_CARGA);
+    ATD.lidoEm = 0; atdCarregar();
+  }).catch(function (e) { b.disabled = false; relDesarmar(b, ATD_ROT_CARGA); toast(primeiraMaiuscula(relErro(e)) + '.', true); });
+}
+function atdPintarCarga() {
+  const p = el('atdCargaSit'), b = el('atdCarga'), c = ATD.dados && ATD.dados.carga;
+  if (!p) return;
+  if (b) b.disabled = !!(c && c.situacao === 'rodando');
+  if (!c) { p.textContent = 'Nenhuma carga rodada desde o último reinício do servidor.'; return; }
+  if (c.situacao === 'rodando') {
+    p.textContent = 'Carga desde ' + relDia(c.desde) + ' rodando…';
+    clearTimeout(ATD.vigia);   // acompanha até terminar, enquanto a aba estiver aberta
+    ATD.vigia = setTimeout(function () { if (atdAberta()) { ATD.lidoEm = 0; atdCarregar(); } }, 5000);
+    return;
+  }
+  if (c.situacao === 'erro') { p.textContent = 'A carga desde ' + relDia(c.desde) + ' parou com erro: ' + c.erro; return; }
+  const x = c.resultado || {};
+  p.textContent = 'Carga desde ' + relDia(c.desde) + ' concluída: ' + relNum(x.senhas) + ' senha(s) em ' + relNum(x.dias) + ' dia(s).';
+}
+let atdRedim;
+window.addEventListener('resize', function () { clearTimeout(atdRedim); atdRedim = setTimeout(function () { if (atdAberta() && ATD.dados) atdRender(); }, 250); });
 
 function publicarMural() {
   if (!ED) return;
@@ -11909,4 +12526,4 @@ restaurarSessao();
 </body>
 </html>
 
-<!-- Hub CN2O v1.38.3 · 25/09/2026 -->
+<!-- Hub CN2O v1.39 · 25/09/2026 -->
