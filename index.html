@@ -554,6 +554,14 @@ footer{border-top:1px solid var(--linha);padding:22px 20px 30px;text-align:cente
 .btn-entrar:hover{filter:brightness(1.16)}
 .btn-entrar:disabled{opacity:.6;cursor:wait}
 #formPrimeiro .btn-mini{align-self:flex-start}
+/* v1.39.1 — primeiro acesso com o código do Tabelião */
+.login-codigo{align-self:flex-start;margin-top:4px;text-transform:none;letter-spacing:.02em;font-size:13px}
+.campo-codigo{font-family:ui-monospace,Consolas,monospace;letter-spacing:.14em;text-transform:uppercase}
+.eq-codigo{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin:0 0 12px;padding:14px 16px;border:2px solid #631325;border-radius:12px;background:#fbf5f6;color:#202a3a}
+.eq-codigo span{font-size:14.5px}
+.eq-codigo strong{font:800 26px/1.1 ui-monospace,Consolas,monospace;letter-spacing:.12em;color:#631325}
+.eq-codigo small{flex-basis:100%;font-size:14px;line-height:1.45;color:#202a3a}
+.eq-sem{color:#631325}
 .login-instrucao{border-top:1px solid var(--home-cartao-borda);padding-top:18px;font-size:12px;color:var(--home-rotulo)}
 .login-nota{font-size:14px;line-height:1.8;color:var(--home-nota);letter-spacing:.02em}
 .login-nota-pe{margin-top:6px}
@@ -2833,6 +2841,16 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 :root[data-theme="dark"] .rel-previa{background:#ffffff;border-color:rgba(32,42,58,.28)}
 :root[data-theme="dark"] .rel-suporte summary{color:#202a3a}
 
+/* --- v1.39.3 (segurança, pacote C): alertas de conferência da IA — ônus omitido ou texto
+       que parece instrução no documento. Caixa clara, texto escuro, sempre legível --- */
+.ia-alertas{margin:0 0 12px;padding:12px 16px;border:2px solid #631325;border-left-width:6px;border-radius:10px;background:#fbf5f6;color:#202a3a}
+.ia-alertas[hidden]{display:none}
+.ia-alertas p{margin:0;font-size:14.5px;line-height:1.5;font-weight:600}
+.ia-alertas p + p{margin-top:8px}
+.min-doccriar{margin:6px 0 12px;font-size:14px;align-self:flex-start;width:auto;max-width:100%}
+.min-doccriar[hidden]{display:none}
+.min-doccriar:disabled{cursor:progress;opacity:.75;transform:none}
+
 </style>
 </head>
 <body>
@@ -2861,11 +2879,17 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
         </div>
         <button id="btnEntrar" class="btn-entrar" type="submit">Entrar no Hub</button>
         <p id="msgLogin" class="aviso" hidden></p>
+        <!-- v1.39.1: primeiro acesso só com o código de uso único que o Tabelião entrega -->
+        <button class="btn-mini login-codigo" type="button" id="btnPrimeiroAcesso">Primeiro acesso ou senha zerada? Tenho um código</button>
       </form>
 
       <form id="formPrimeiro" class="form-hub" hidden novalidate>
         <p class="login-instrucao versalete">Primeiro acesso — crie a sua senha</p>
-        <p class="login-nota">Olá, <b id="nomePrimeiro"></b>! Escolha uma senha com pelo menos 8 caracteres. Ela é só sua — nem o Tabelião a conhece — e vale também para o e-Protocolo.</p>
+        <p class="login-nota">Digite o seu usuário e o <b>código de acesso</b> que o Tabelião entregou a você (vale uma vez, por 48 horas). Depois escolha uma senha com pelo menos 8 caracteres, sem o seu nome. Ela é só sua — nem o Tabelião a conhece — e vale também para o e-Protocolo.</p>
+        <label class="rotulo-hub" for="loginPrimeiro">Usuário</label>
+        <input class="campo campo-alto" id="loginPrimeiro" autocomplete="username" placeholder="seu usuário (nome.sobrenome)" autocapitalize="none" autocorrect="off" spellcheck="false">
+        <label class="rotulo-hub" for="codigoPrimeiro">Código de acesso</label>
+        <input class="campo campo-alto campo-codigo" id="codigoPrimeiro" autocomplete="one-time-code" placeholder="XXXXX-XXXXX" autocapitalize="characters" autocorrect="off" spellcheck="false" maxlength="20">
         <label class="rotulo-hub" for="senhaNova">Nova senha</label>
         <div class="campo-olho">
           <input class="campo campo-alto" type="password" id="senhaNova" autocomplete="new-password" placeholder="mínimo 8 caracteres">
@@ -2881,7 +2905,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
         <p id="msgPrimeiro" class="aviso" hidden></p>
       </form>
 
-      <p class="login-nota login-nota-pe">Use seu usuário e senha do e-Protocolo.<br>Esqueceu a senha? Solicite a redefinição ao Tabelião.</p>
+      <p class="login-nota login-nota-pe">Use seu usuário e senha do e-Protocolo.<br>Esqueceu a senha? Peça ao Tabelião um código de acesso.</p>
     </div>
   </div>
   </div>
@@ -4170,6 +4194,8 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
              decisão; só URL https entra no href (mostrarDocMinuta, app.js).
              v1.30 — o botão leva as cores do Google Drive (azul, verde e amarelo) para
              chamar a atenção da escrevente; texto escuro sobre branco (conforto de leitura). -->
+        <!-- v1.39.3 (segurança): o Doc não nasce mais sozinho — confira a minuta e clique -->
+        <button type="button" class="min-docbtn min-doccriar" id="minDocCriar" hidden><span class="min-doccores" aria-hidden="true"><i></i><i></i><i></i></span><span>Criar o Google Doc</span></button>
         <div class="min-docbox" id="minDocBox" hidden>
           <a class="min-docbtn" id="minDocLink" href="#" target="_blank" rel="noopener"><span class="min-doccores" aria-hidden="true"><i></i><i></i><i></i></span><span>Abrir no Google Docs</span></a>
           <span class="min-doctitulo" id="minDocTitulo"></span>
@@ -4196,7 +4222,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
         <p class="assinatura" id="metaMin"></p>
       </div>
       <div class="aviso" id="minutaLinkBox" hidden>
-        ✓ Resultado guardado na plataforma — link permanente:
+        ✓ Resultado guardado na plataforma por 90 dias — link (abre para você e para o Tabelião):
         <a href="#" id="minutaLinkA"></a>
         <button class="btn-mini" id="btnCopiarLinkMin" type="button" style="margin-left:8px">Copiar link</button>
       </div>
@@ -4890,9 +4916,9 @@ const CONFIG = {
       titulo: 'Agenda do Tabelião'
     }
   },
-  // Chaves de sessão compartilhadas com o protocolo.html (mesmo site, mesmo login):
-  // gravadas na aba (sessionStorage, que o protocolo sempre leu) e lembradas no
-  // navegador (localStorage) até a sessão expirar no servidor (12 h) ou "Sair".
+  // Chaves de sessão compartilhadas com o protocolo.html e o anexo.html (mesmo site,
+  // mesmo login): desde a v1.39.4, só na aba (sessionStorage) — fechar a aba encerra
+  // a sessão neste computador; no servidor, ela expira em 12 h ou no "Sair".
   sessao: { token: 'cn2o_token', nome: 'cn2o_nome', cargo: 'cn2o_cargo', login: 'cn2o_login' },
   muralMinutos: 5
 };
@@ -5055,7 +5081,6 @@ function semConexao(liga) {
 /* ============================================================
    LOGIN INDIVIDUAL (o mesmo do Protocolo)
 ============================================================ */
-let PRIMEIRO_LOGIN = null;
 function msg(id, texto, ok) {
   const p = el(id);
   p.textContent = texto || '';
@@ -5074,22 +5099,30 @@ function mostrarLogin(mensagem) {
   msg('msgLogin', mensagem || '');
   setTimeout(function () { (el('campoLogin').value ? el('campoSenha') : el('campoLogin')).focus(); }, 30);
 }
+// v1.39.4 (segurança, pacote D): a sessão vive só na aba (sessionStorage). Fechou a aba,
+// saiu — no computador compartilhado, quem senta depois não herda o login de ninguém.
 function salvarSessao() {
   const k = CONFIG.sessao;
-  [store, aba].forEach(function (lugar) {
-    lugar.set(k.token, SESSAO.token);
-    lugar.set(k.nome, SESSAO.nome || '');
-    lugar.set(k.cargo, SESSAO.cargo || '');
-    lugar.set(k.login, SESSAO.login || '');
-  });
+  aba.set(k.token, SESSAO.token);
+  aba.set(k.nome, SESSAO.nome || '');
+  aba.set(k.cargo, SESSAO.cargo || '');
+  aba.set(k.login, SESSAO.login || '');
+}
+// a sessão lembrada no navegador (até a v1.39.3) passa para a aba uma vez e sai do localStorage
+function migrarSessaoAntiga() {
+  const k = CONFIG.sessao;
+  const chaves = [k.token, k.nome, k.cargo, k.login];
+  if (!aba.get(k.token) && store.get(k.token)) chaves.forEach(function (c) { aba.set(c, store.get(c) || ''); });
+  chaves.concat(['cn2o_hub_key']).forEach(function (c) { store.del(c); });
 }
 function limparSessao() {
   SESSAO.token = SESSAO.nome = SESSAO.login = SESSAO.cargo = null; SESSAO.admin = false;
   el('navRelatorios').hidden = true;   // v1.38.2: o atalho some junto com a sessão
   const k = CONFIG.sessao;
   [store, aba].forEach(function (lugar) { [k.token, k.nome, k.cargo, k.login].forEach(function (c) { lugar.del(c); }); });
+  store.del('cn2o_hub_key');   // v1.39.4: chave antiga do e-Protocolo, sem uso desde a v1.39.2
 }
-function lerSessao(chave) { return store.get(chave) || aba.get(chave); }
+function lerSessao(chave) { return aba.get(chave); }
 function sessaoExpirada() {
   if (!SESSAO.token) return;
   limparSessao();
@@ -5105,32 +5138,37 @@ function entrar(ev) {
   const b = el('btnEntrar');
   ocupado(b, true, 'Entrando…');
   msg('msgLogin', '');
+  // v1.39.1: o servidor não diz mais quem está "sem senha" — o primeiro acesso é pelo
+  // botão "Tenho um código", com o código que o Tabelião entrega
   api('/login', { corpo: { login: login, senha: senha }, semRedirecionar: true }).then(function (r) {
-    if (r && r.primeiro_acesso) { mostrarPrimeiroAcesso(login); return; }
     return iniciarSessao(r.token, r.nome, login, r.cargo);
   }).catch(function (e) {
-    msg('msgLogin', e.status === 401 ? 'Usuário ou senha não conferem.' : primeiraMaiuscula(e.erro) + '.');
+    msg('msgLogin', e.status === 401 ? 'Usuário ou senha não conferem. É o seu primeiro acesso? Use o botão "Tenho um código".' : primeiraMaiuscula(e.erro) + '.');
     el('campoSenha').select();
   }).then(function () { ocupado(b, false, 'Entrar no Hub'); });
 }
 function mostrarPrimeiroAcesso(login) {
-  PRIMEIRO_LOGIN = login;
-  el('nomePrimeiro').textContent = login;
+  el('loginPrimeiro').value = login || '';
+  el('codigoPrimeiro').value = '';
   el('formLogin').hidden = true;
   el('formPrimeiro').hidden = false;
   msg('msgPrimeiro', '');
   el('senhaNova').value = ''; el('senhaConf').value = '';
-  setTimeout(function () { el('senhaNova').focus(); }, 30);
+  setTimeout(function () { el(login ? 'codigoPrimeiro' : 'loginPrimeiro').focus(); }, 30);
 }
 function criarSenha(ev) {
   ev.preventDefault();
+  const login = el('loginPrimeiro').value.trim().toLowerCase();
+  const codigo = el('codigoPrimeiro').value.trim();
   const s1 = el('senhaNova').value, s2 = el('senhaConf').value;
+  if (!login) { msg('msgPrimeiro', 'Digite o seu usuário (nome.sobrenome).'); el('loginPrimeiro').focus(); return; }
+  if (!codigo) { msg('msgPrimeiro', 'Digite o código de acesso que o Tabelião entregou.'); el('codigoPrimeiro').focus(); return; }
   if (s1.length < 8) { msg('msgPrimeiro', 'A senha precisa ter pelo menos 8 caracteres.'); return; }
   if (s1 !== s2) { msg('msgPrimeiro', 'As duas senhas não são iguais.'); return; }
   const b = el('btnCriarSenha');
   ocupado(b, true, 'Criando…');
-  api('/definir-senha', { corpo: { login: PRIMEIRO_LOGIN, senha: s1 }, semRedirecionar: true }).then(function (r) {
-    return iniciarSessao(r.token, r.nome, PRIMEIRO_LOGIN, r.cargo);
+  api('/definir-senha', { corpo: { login: login, codigo: codigo, senha: s1 }, semRedirecionar: true }).then(function (r) {
+    return iniciarSessao(r.token, r.nome, login, r.cargo);
   }).catch(function (e) {
     msg('msgPrimeiro', primeiraMaiuscula(e.erro) + '.');
   }).then(function () { ocupado(b, false, 'Criar senha e entrar'); });
@@ -5149,10 +5187,14 @@ function iniciarSessao(token, nome, login, cargo) {
     // /hub ainda não publicado ou servidor instável: entra mesmo assim.
   }).then(function () {
     el('campoSenha').value = '';
+    // v1.39.4: se a sessão expirou e OUTRA pessoa entrou nesta aba, a página recarrega —
+    // o que a anterior deixou aberto não aparece para quem chegou
+    if (LOGIN_DA_TELA && LOGIN_DA_TELA !== SESSAO.login) { location.replace(location.pathname); return; }
     mostrarApp();
   });
 }
 function restaurarSessao() {
+  migrarSessaoAntiga();   // v1.39.4
   const token = lerSessao(CONFIG.sessao.token);
   if (!token) { mostrarLogin(); return; }
   SESSAO.token = token;
@@ -5177,14 +5219,18 @@ function sair() {
   maSair();   // v1.32: despacha o que ainda não foi salvo na agenda (com o token) e zera o estado
   ntSair();   // v1.33: idem para o Bloco de Notas
   if (token) {
-    fetch(CONFIG.endpoint + '/logout', { method: 'POST', headers: { 'X-Auth-Token': token } }).catch(function () {});
+    fetch(CONFIG.endpoint + '/logout', { method: 'POST', headers: { 'X-Auth-Token': token }, keepalive: true }).catch(function () {});
   }
   limparSessao();
-  MURAL = null;
-  fecharSubMural(true);
-  mostrarLogin();
+  try { sessionStorage.clear(); } catch (e) {}
+  // v1.39.4 (segurança, pacote D): recarrega a página. Antes a tela de login cobria o
+  // Hub, mas qualificações, ITBI e acervo continuavam na página para o próximo que entrasse.
+  // O que a agenda e as notas ainda salvavam já foi com keepalive (maSair/ntSair).
+  location.replace(location.pathname);
 }
+let LOGIN_DA_TELA = '';   // v1.39.4: de quem é o que está montado na página
 function mostrarApp() {
+  LOGIN_DA_TELA = SESSAO.login || '';
   el('saudacao').innerHTML = 'Olá, <b>' + esc(primeiroNome(SESSAO.nome)) + '</b>!';
   fraseDoDia();
   el('avatarIni').textContent = (SESSAO.nome || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(function (n) { return n.charAt(0).toUpperCase(); }).join('') || '?';
@@ -5280,6 +5326,14 @@ function avisarGeradorEmBreve() {
   toast('Gerador de Minuta: em breve — o Tabelião está concluindo a curadoria das minutas.');
 }
 function abrirRota(rota, semHistorico) {
+  // v1.39.4: o anexo do CERT abre numa aba nova (link do cartão), que não tem sessão; o
+  // anexo.html manda para cá com #anexo=ID e, depois do login, a mesma aba volta para ele
+  if (rota && rota.indexOf('anexo=') === 0) {
+    let id = '';
+    try { id = decodeURIComponent(rota.slice(6)); } catch (e) { id = ''; }
+    if (/^[A-Za-z0-9._~-]{1,120}$/.test(id)) { location.replace('anexo.html#' + encodeURIComponent(id)); return; }
+    rota = '';
+  }
   VOLTAR_PARA = '';   // v1.34 — atalho pelo endereço (#extrator, #minutas…) volta ao hub
   if ((rota === 'minutas' || (rota && rota.indexOf('minuta=') === 0)) && !geradorDisponivel()) {
     avisarGeradorEmBreve();
@@ -5302,7 +5356,7 @@ function abrirRota(rota, semHistorico) {
     }).catch(function (e) {
       const s = el('saidaMinuta');
       s.classList.add('vazia');
-      s.textContent = e.status === 404 ? 'Minuta não encontrada — o link pode estar errado.' : 'Não consegui carregar a minuta (' + (e.erro || 'erro') + ').';
+      s.textContent = e.status === 404 ? 'Minuta não encontrada. O link pode estar errado, a minuta pode ter passado de 90 dias, ou ela foi guardada por outra pessoa: só quem guardou e o Tabelião abrem.' : 'Não consegui carregar a minuta (' + (e.erro || 'erro') + ').';
     });
     return;
   }
@@ -5964,7 +6018,7 @@ function maRenderCard() {
       '<span class="ma-dia-cab"><span class="ma-dia-nome">' + MA_DIAS_CURTO[d.getDay()] + '</span><span class="ma-dia-num">' + dd(d.getDate()) + '</span></span>' +
       (itens.length
         ? '<span class="ma-itens">' + itens.slice(0, 4).map(function (i) {
-            return '<span class="ma-item' + (i.faixa === 0 ? ' ma-item-dia' : '') + '"><span class="ma-hora">' + (i.faixa === 0 ? '⚑' : dd(i.faixa) + 'h') + '</span><span class="ma-txt">' + esc(i.texto) + '</span></span>';
+            return '<span class="ma-item' + (i.faixa === 0 ? ' ma-item-dia' : '') + '"><span class="ma-hora">' + (i.faixa === 0 ? '⚑' : dd(Number(i.faixa) || 0) + 'h') + '</span><span class="ma-txt">' + esc(i.texto) + '</span></span>';
           }).join('') + (itens.length > 4 ? '<span class="ma-mais">+ ' + (itens.length - 4) + ' mais</span>' : '') + '</span>'
         : '<span class="ma-livre">' + (ehHoje ? 'nada anotado para hoje' : 'livre') + '</span>') +
       '</button>';
@@ -5995,10 +6049,10 @@ function maRenderDepois(sexta) {
   caixa.hidden = false;
   caixa.innerHTML = '<p class="ma-depois-rot">Depois desta semana:' + (total > 3 ? ' <span class="ma-depois-mais">+ ' + (total - 3) + ' na agenda</span>' : '') + '</p><ul class="ma-depois-lista">' +
     itens.map(function (i) {
-      return '<li><button type="button" class="ma-depois-item" data-ma-ir="' + i.dia + '" aria-label="' +
+      return '<li><button type="button" class="ma-depois-item" data-ma-ir="' + esc(i.dia) + '" aria-label="' +
         esc(maTituloDia(i.dia) + ', ' + maRotuloFaixa(i.faixa) + ' — ' + i.texto + '. Abrir a agenda neste dia.') + '">' +
         '<span class="ma-depois-data">' + maDataCurta(i.dia) + '</span>' +
-        '<span class="ma-depois-hora">' + (i.faixa === 0 ? '⚑' : dd(i.faixa) + 'h') + '</span>' +
+        '<span class="ma-depois-hora">' + (i.faixa === 0 ? '⚑' : dd(Number(i.faixa) || 0) + 'h') + '</span>' +
         '<span class="ma-depois-txt">' + esc(maCortar(i.texto, 42)) + '</span></button></li>';
     }).join('') + '</ul>';
   caixa.querySelectorAll('[data-ma-ir]').forEach(function (b) { b.addEventListener('click', function () { abrirSub('agenda', b.dataset.maIr); }); });
@@ -6035,9 +6089,9 @@ function maHtmlProximos() {
   return grupos.map(function (g) {
     return '<div class="ma-prox-grupo"><p class="ma-prox-data">' + esc(maDataCurta(g.dia)) + '</p>' +
       g.itens.map(function (i) {
-        return '<button type="button" class="ma-prox-item" data-ma-ir="' + g.dia + '" aria-label="' +
+        return '<button type="button" class="ma-prox-item" data-ma-ir="' + esc(g.dia) + '" aria-label="' +
           esc(maTituloDia(g.dia) + ', ' + maRotuloFaixa(i.faixa) + ' — ' + i.texto + '. Abrir a agenda neste dia.') + '">' +
-          '<span class="ma-prox-hora">' + (i.faixa === 0 ? '⚑' : dd(i.faixa) + 'h') + '</span>' +
+          '<span class="ma-prox-hora">' + (i.faixa === 0 ? '⚑' : dd(Number(i.faixa) || 0) + 'h') + '</span>' +
           '<span class="ma-prox-txt">' + esc(maCortar(i.texto, 160)) + '</span></button>';
       }).join('') + '</div>';
   }).join('');
@@ -6916,7 +6970,7 @@ function abrirEditorMural(abaInicial) {
   const partida = MURAL || normalizarLocal({});
   // eqEdit: quem está com a linha aberta na aba Equipe · aud: filtros da aba Auditoria (v1.34)
   // rel: período escolhido e situação da aba Relatórios (v1.38)
-  ED = { copia: clone(partida), base: MURAL_META.atualizado_em || null, sujo: false, aba: abaInicial || 'avisos', editando: null, editor: null, confirmarSaida: false, eqEdit: null, aud: null, rel: null };
+  ED = { copia: clone(partida), base: MURAL_META.atualizado_em || null, sujo: false, aba: abaInicial || 'avisos', editando: null, editor: null, confirmarSaida: false, eqEdit: null, eqCodigo: null, aud: null, rel: null };
   abrirSub('editar');
 }
 function htmlEditorMural() {
@@ -7152,8 +7206,14 @@ function pintarAbaEquipe(painel) {
   painel.innerHTML = '<p class="ed-vazio">Carregando a equipe…</p>';
   api('/hub/admin/equipe').then(function (lista) {
     if (!ED || ED.aba !== 'equipe') return;
+    // v1.39.1 — o código de acesso aparece UMA vez, aqui, logo depois de gerado
+    const cod = ED.eqCodigo;
     painel.innerHTML =
       '<p class="sub-data" style="margin-bottom:10px">Quem entra no Hub CN2O. O que você faz nesta aba vale na hora — não precisa publicar o mural.</p>' +
+      (cod ? '<div class="eq-codigo" role="status"><span>Código de acesso de <b>' + esc(cod.login) + '</b></span>' +
+        '<strong id="edEqCodigo">' + esc(cod.codigo) + '</strong>' +
+        '<small>Entregue em mãos (não mande por WhatsApp nem e-mail). Vale uma vez, por ' + esc(String(cod.horas)) + ' horas. A pessoa clica em "Tenho um código" na tela de entrada. Ele não aparece de novo.</small>' +
+        '<span class="ed-acoes"><button type="button" class="ed-btn" id="edEqCopiar">Copiar</button><button type="button" class="ed-btn" id="edEqFechar">Já entreguei</button></span></div>' : '') +
       '<ul class="ed-lista">' + (lista || []).map(function (u) {
         // v1.34 — "Editar" abre a própria linha: nome de exibição e cargo (o login não muda).
         if (ED.eqEdit === u.login) {
@@ -7163,13 +7223,16 @@ function pintarAbaEquipe(painel) {
             '<span class="ed-acoes"><button type="button" class="ed-btn on" id="edEqEdSalvar" data-salva="' + esc(u.login) + '">Salvar</button>' +
             '<button type="button" class="ed-btn" data-cancela="1">Cancelar</button></span></li>';
         }
+        // v1.39.1: sem senha, só entra com um código de acesso gerado aqui
         const situacao = u.tem_senha
-          ? (u.ultimo_acesso ? 'último acesso ' + quandoCurto(u.ultimo_acesso) : 'senha criada')
-          : 'aguardando o primeiro acesso';
-        const podeZerar = u.tem_senha && u.login !== SESSAO.login;
+          ? (u.ultimo_acesso ? 'último acesso ' + esc(quandoCurto(u.ultimo_acesso)) : 'senha criada')
+          : (u.codigo_pendente ? 'código entregue — vale até ' + esc(quandoCurto(u.codigo_expira)) : '<b class="eq-sem">sem senha — gere um código de acesso</b>');
+        const rotulo = u.tem_senha ? 'Zerar senha' : (u.codigo_pendente ? 'Novo código' : 'Gerar código');
+        const podeCodigo = u.login !== SESSAO.login;
         return '<li class="ed-item"><b>' + esc(u.nome) + '</b><small>' + esc(u.login) + ' · ' + esc(u.cargo) + ' · ' + situacao + '</small>' +
           '<span class="ed-acoes"><button type="button" class="ed-btn" data-edita="' + esc(u.login) + '" title="Corrigir o nome e o cargo desta pessoa">Editar</button>' +
-          (podeZerar ? '<button type="button" class="ed-btn" data-zera="' + esc(u.login) + '" title="Zerar a senha desta pessoa">Zerar senha</button>' : '') + '</span></li>';
+          (podeCodigo ? '<button type="button" class="ed-btn" data-zera="' + esc(u.login) + '" data-rotulo="' + rotulo + '" title="' +
+            (u.tem_senha ? 'Apaga a senha, encerra as sessões e gera um código de acesso' : 'Gera um código de acesso de uso único (48 h)') + '">' + rotulo + '</button>' : '') + '</span></li>';
       }).join('') + '</ul>' +
       '<h3 class="ed-titulo versalete">Cadastrar pessoa</h3>' +
       '<div class="ed-form ed-linha">' +
@@ -7179,7 +7242,7 @@ function pintarAbaEquipe(painel) {
         '<datalist id="edEqCargos"><option value="Escrevente"><option value="Substituta do Tabelião"><option value="Cadastro e Protocolo"><option value="Secretária"><option value="Auxiliar"><option value="Estagiário(a)"></datalist>' +
         '<button class="btn-fantasma" id="edEqAdd" type="button">Cadastrar</button>' +
       '</div>' +
-      '<p class="sub-data">A pessoa entra com esse usuário e cria a própria senha no primeiro acesso. Cadastre — ou zere uma senha — só quando ela for entrar em seguida. <b>Editar</b> corrige o nome de exibição e o cargo (o cargo é o que o Redator CN2O usa para assinar); o usuário, não — ele é a chave de tudo.</p>';
+      '<p class="sub-data">Ao cadastrar (ou zerar uma senha), o Hub gera um <b>código de acesso</b> de uso único, válido por 48 horas: entregue-o em mãos. Com ele a pessoa cria a própria senha em "Tenho um código", na tela de entrada. Sem o código, ninguém cria senha. <b>Editar</b> corrige o nome de exibição e o cargo (o cargo é o que o Redator CN2O usa para assinar); o usuário, não — ele é a chave de tudo.</p>';
     // v1.34 — editar nome e cargo de quem já existe
     painel.querySelectorAll('[data-edita]').forEach(function (b) {
       b.addEventListener('click', function () { ED.eqEdit = b.dataset.edita; pintarAba(); });
@@ -7206,8 +7269,9 @@ function pintarAbaEquipe(painel) {
     el('edEqAdd').addEventListener('click', function () {
       const corpo = { nome: nomeEl.value.trim(), login: loginEl.value.trim().toLowerCase(), cargo: el('edEqCargo').value.trim() };
       if (!corpo.nome || !corpo.login) { toast('Preencha o nome e o usuário.'); return; }
-      api('/hub/admin/equipe', { corpo: corpo }).then(function () {
+      api('/hub/admin/equipe', { corpo: corpo }).then(function (r) {
         toast('✓ ' + corpo.nome + ' cadastrado(a) — usuário ' + corpo.login);
+        if (r && r.codigo) ED.eqCodigo = { login: r.login, codigo: r.codigo, horas: r.validade_horas || 48 };
         pintarAba();
       }).catch(function (e) { toast(primeiraMaiuscula(e.erro) + '.', true); });
     });
@@ -7215,15 +7279,24 @@ function pintarAbaEquipe(painel) {
       b.addEventListener('click', function () {
         if (b.dataset.confirma !== '1') {
           b.dataset.confirma = '1'; b.textContent = 'Confirmar?'; b.classList.add('on');
-          setTimeout(function () { if (b.isConnected) { b.dataset.confirma = ''; b.textContent = 'Zerar senha'; b.classList.remove('on'); } }, 3500);
+          setTimeout(function () { if (b.isConnected) { b.dataset.confirma = ''; b.textContent = b.dataset.rotulo; b.classList.remove('on'); } }, 3500);
           return;
         }
-        api('/hub/admin/zerar-senha', { corpo: { login: b.dataset.zera } }).then(function () {
-          toast('✓ Senha zerada — ' + b.dataset.zera + ' cria uma nova no próximo acesso');
+        b.disabled = true;
+        api('/hub/admin/codigo-acesso', { corpo: { login: b.dataset.zera } }).then(function (r) {
+          ED.eqCodigo = { login: r.login, codigo: r.codigo, horas: r.validade_horas || 48 };
           pintarAba();
-        }).catch(function (e) { toast(primeiraMaiuscula(e.erro) + '.', true); });
+        }).catch(function (e) { b.disabled = false; toast(primeiraMaiuscula(e.erro) + '.', true); });
       });
     });
+    if (el('edEqCopiar')) {
+      el('edEqCopiar').addEventListener('click', function () {
+        const t = el('edEqCodigo').textContent;
+        (navigator.clipboard && navigator.clipboard.writeText ? navigator.clipboard.writeText(t) : Promise.reject())
+          .then(function () { toast('✓ Código copiado.'); }, function () { toast('Selecione o código e copie com Ctrl+C.', true); });
+      });
+      el('edEqFechar').addEventListener('click', function () { ED.eqCodigo = null; pintarAba(); });
+    }
   }).catch(function (e) { if (painel.isConnected) painel.innerHTML = '<p class="ed-vazio">Não consegui ler a equipe (' + esc(e.erro) + ').</p>'; });
 }
 
@@ -7294,7 +7367,7 @@ function pintarAbaNumeracao(painel) {
 const AUD_ACOES_NOME = {
   login: 'Entrou', logout: 'Saiu', abrir: 'Abriu', ia: 'IA', consulta: 'T-Consulta',
   acervo: 'Acervo', minuta: 'Minuta', mural: 'Mural', agenda: 'Agenda', notas: 'Notas',
-  itbi: 'Guia de ITBI', admin: 'Administração'
+  itbi: 'Guia de ITBI', admin: 'Administração', acesso: 'Acesso'   // v1.39.1: falhas, bloqueios, primeiro acesso
 };
 const AUD_FERR_NOME = {
   protocolo: 'e-Protocolo', calculadora: 'Calculadora', ia: 'IA-Not', extrator: 'Extrator',
@@ -7303,7 +7376,10 @@ const AUD_FERR_NOME = {
   agenda: 'Minha Agenda', notas: 'Bloco de Notas', mural: 'Mural', links: 'Links', ajuda: 'Ajuda',
   pdf: 'PDF', qualificacao: 'Extrator', matricula: 'e-Analista', minuta: 'Gerador de Minuta',
   minuta_ue: 'Gerador de Minuta', transpor: 'Transposição', descricao: 'Descrição',
-  equipe: 'Equipe', 'zerar-senha': 'Zerar senha', editar: 'Editar', numeracao: 'Numeração',
+  equipe: 'Equipe', 'zerar-senha': 'Código de acesso', editar: 'Editar', numeracao: 'Numeração',
+  'login-falha': 'Senha errada', 'codigo-falha': 'Código errado', 'primeiro-acesso': 'Primeiro acesso',
+  'senha-emergencia': 'Senha de emergência',
+  'google-doc': 'Google Doc', agentes: 'Plataforma de Agentes',   // v1.39.3
   relatorios: 'Relatórios',
   publicar: 'Publicar', guardar: 'Guardar', gravar: 'Gravar', apagar: 'Apagar',
   cn2o: 'Acervo 2º Ofício', antigo1: 'Acervo 1º Ofício'
@@ -7481,7 +7557,7 @@ function pintarAbaConsumo(painel) {
     let total = 0, usos = 0;
     const corpo = linhas.map(function (l) {
       total += Number(l.custo_usd) || 0; usos += Number(l.usos) || 0;
-      return '<tr><td>' + esc(l.login) + '</td><td>' + esc(nomes[l.ferramenta] || l.ferramenta) + '</td><td class="num">' + l.usos + '</td><td class="num">US$ ' + (Number(l.custo_usd) || 0).toFixed(3).replace('.', ',') + '</td></tr>';
+      return '<tr><td>' + esc(l.login) + '</td><td>' + esc(nomes[l.ferramenta] || l.ferramenta) + '</td><td class="num">' + (Number(l.usos) || 0) + '</td><td class="num">US$ ' + (Number(l.custo_usd) || 0).toFixed(3).replace('.', ',') + '</td></tr>';
     }).join('');
     painel.innerHTML = '<table class="ed-tabela"><thead><tr><th>Quem</th><th>Ferramenta</th><th style="text-align:right">Usos</th><th style="text-align:right">Custo</th></tr></thead><tbody>' + corpo +
       '<tr><td><b>Total do mês</b></td><td></td><td class="num"><b>' + usos + '</b></td><td class="num"><b>US$ ' + total.toFixed(2).replace('.', ',') + '</b></td></tr></tbody></table>' +
@@ -7723,7 +7799,7 @@ function relCarregarEnvios() {
         '<th class="versalete">Como</th><th class="versalete">Situação</th><th class="versalete">Para</th>' +
       '</tr></thead><tbody>' + lista.map(function (v) {
         const sit = v.status === 'enviado' ? 'Enviado'
-          : v.status === 'erro' ? 'Erro' + (v.tentativas > 1 ? ' (' + v.tentativas + ' tentativas)' : '') : 'Enviando…';
+          : v.status === 'erro' ? 'Erro' + (Number(v.tentativas) > 1 ? ' (' + Number(v.tentativas) + ' tentativas)' : '') : 'Enviando…';
         const marca = v.status === 'enviado' ? ' aud-acao-login' : (v.status === 'erro' ? ' aud-acao-ia' : '');
         return '<tr><td class="aud-quando">' + esc(quandoCurto(v.enviado_em || v.criado_em)) + '</td>' +
           '<td>' + (v.tipo === 'mensal' ? 'Mensal' : 'Semanal') + '</td>' +
@@ -8643,6 +8719,25 @@ function assinaturaIA(rotulo, r, t0) {
   return rotulo + ' ' + (SESSAO.nome || '—') + ' · ' + agoraCurto() +
     (r.modelo ? ' · ' + nomeModelo(r.modelo) : '') + ' · ' + Math.max(1, Math.round((r.ms || (Date.now() - t0)) / 1000)) + ' s' + custo + duplaLeitura;
 }
+// v1.39.3 (segurança, pacote C) — alertas da conferência do servidor, feita sem IA: ônus
+// que o documento cita e a resposta omitiu, e trechos com cara de instrução para a IA.
+// Caixa logo acima do resultado; texto sempre por textContent.
+function mostrarAlertasIA(saida, alertas) {
+  let box = saida.previousElementSibling;
+  if (!box || !box.classList || !box.classList.contains('ia-alertas')) {
+    box = document.createElement('div');
+    box.className = 'ia-alertas';
+    box.setAttribute('role', 'alert');
+    saida.parentNode.insertBefore(box, saida);
+  }
+  box.textContent = '';
+  (Array.isArray(alertas) ? alertas : []).forEach(function (a) {
+    const p = document.createElement('p');
+    p.textContent = '⚠ ' + String((a && a.texto) || '');
+    box.appendChild(p);
+  });
+  box.hidden = !box.childNodes.length;
+}
 // v1.29 — a mensagem de balcão para cada falha de uma chamada de IA (compartilhada):
 // o escrevente precisa saber o que fazer, não o código de erro de quem hospeda o modelo.
 function mensagemErroIA(e) {
@@ -8650,6 +8745,8 @@ function mensagemErroIA(e) {
   if (e.cancelado) return 'Interrompido.';
   if (e.status === 401) return 'Sua sessão expirou — entre de novo e repita a análise.';
   if (e.status === 429 && e.dados && e.dados.motivo === 'cota') return 'A cota de IA da serventia se esgotou por ora.\n\nTente de novo em alguns minutos; se persistir, avise o Tabelião. Seus anexos continuam aqui.';
+  if (e.status === 429 && e.dados && e.dados.motivo === 'teto') return 'O limite diário de uso da IA desta conta foi atingido.\n\nVolta a funcionar amanhã; se for preciso mais hoje, fale com o Tabelião.';   // v1.39.3
+  if (e.status === 403) return primeiraMaiuscula(e.erro || 'acesso não permitido') + '.';   // v1.39.3 (Gerador ainda "em breve")
   if (e.status === 429) return 'Muitas análises seguidas. Aguarde ' + Math.ceil(((e.dados && e.dados.tente_em_s) || 60) / 60) + ' min e tente de novo.';
   if (e.status === 503 && e.dados && e.dados.motivo === 'congestionado') return 'O provedor da IA está congestionado neste momento (pico de uso) — não é problema do seu documento.\n\nAguarde uns 20 segundos e clique de novo: seus anexos continuam aqui.';
   if (e.status === 503) return 'A IA ainda não foi ligada no servidor — avise o Tabelião.';
@@ -8722,6 +8819,7 @@ function montarFerramenta(cfg) {
       saida.innerHTML = htmlProgresso(modo.msgProgresso(arqs.length), s);   // v1.30 — relógio + barra
     }
     pintar(); relogio = setInterval(pintar, 1000);
+    mostrarAlertasIA(saida, []);   // v1.39.3
     ctrl = new AbortController();
     Promise.all(arqs.map(function (a) {
       return blobParaBase64(a.blob).then(function (b64) { return { nome: a.nome, mime: a.mime, base64: b64 }; });
@@ -8732,6 +8830,7 @@ function montarFerramenta(cfg) {
     }).then(function (r) {
       clearInterval(relogio);
       saida.textContent = modo.processar ? modo.processar(r.texto) : r.texto;
+      mostrarAlertasIA(saida, r.alertas);   // v1.39.3
       btnCop.hidden = false;
       if (cfg.aoConcluir) cfg.aoConcluir(r, saida.textContent);
       meta.textContent = assinaturaIA(modo.assinatura, r, t0);
@@ -8821,6 +8920,7 @@ document.querySelectorAll('[data-olho]').forEach(function (b) {
   });
 });
 el('formPrimeiro').addEventListener('submit', criarSenha);
+el('btnPrimeiroAcesso').addEventListener('click', function () { mostrarPrimeiroAcesso(el('campoLogin').value.trim().toLowerCase()); });   // v1.39.1
 el('btnVoltarLogin').addEventListener('click', function () { mostrarLogin(); });
 el('btnSair').addEventListener('click', sair);
 el('btnTema').addEventListener('click', alternarTema);
@@ -9251,6 +9351,18 @@ function htmlProgresso(msg, s) {
 // (documento criado na pasta do Gerador) ou doc_erro. A caixa com o botão-link fica no
 // topo do resultado; a falha vira uma nota discreta ("use o Copiar"). Só URL https entra
 // no href; sem doc nem doc_erro, as duas somem.
+// v1.39.3 (segurança, pacote C): o Google Doc nasce só no clique, depois da conferência,
+// e o servidor usa a ÚLTIMA minuta que ele mesmo gerou para esta pessoa (nada vai daqui).
+el('minDocCriar').addEventListener('click', function () {
+  const b = this, rot = b.lastElementChild;
+  b.disabled = true; rot.textContent = 'Criando o Google Doc…';
+  api('/hub/minuta-doc', { corpo: {} }).then(function (r) {
+    b.hidden = true;
+    mostrarDocMinuta(r && r.doc, '');
+  }).catch(function (e) {
+    mostrarDocMinuta(null, (e && e.erro) || 'falha ao criar o documento');
+  }).then(function () { b.disabled = false; rot.textContent = 'Criar o Google Doc'; });
+});
 function mostrarDocMinuta(doc, erro) {
   const url = doc && typeof doc.url === 'string' && /^https:\/\/[^\s"'<>\\]+$/.test(doc.url) ? doc.url : '';
   el('minDocBox').hidden = !url;
@@ -9962,7 +10074,7 @@ function linhasPendencias(alvo, txt) {
     // v1.29 — com a ponte do Google Docs ligada no servidor, a nota avisa que a minuta
     // nasce também como documento na pasta do Gerador
     nota.textContent = IA_STATUS.docs_ativo
-      ? 'A minuta nasce também como Google Doc na pasta do Gerador (Drive) — o resultado aparece logo abaixo das fases.'
+      ? 'O resultado aparece logo abaixo das fases. Depois de conferir, "Criar o Google Doc" leva a minuta para a pasta do Gerador (Drive).'
       : 'O resultado aparece logo abaixo das fases.';
   }
   document.addEventListener('cn2o-ia-status', reverCiencia);
@@ -9977,6 +10089,7 @@ function linhasPendencias(alvo, txt) {
     el('minDevolvida').hidden = true;
     el('minutaLinkBox').hidden = true;
     mostrarDocMinuta(null, '');   // v1.29 — some a caixa do Google Docs (e a nota de falha)
+    el('minDocCriar').hidden = true;   // v1.39.3 — o botão volta só com uma minuta nova
   }
 
   /* ============================================================
@@ -10348,7 +10461,8 @@ function linhasPendencias(alvo, txt) {
   function concluirTransp(r, t0) {
     const dados = r && r.dados && typeof r.dados === 'object' ? r.dados : {};
     const pessoas = (Array.isArray(dados.pessoas) ? dados.pessoas : []).filter(function (p) { return p && typeof p === 'object'; });
-    const alertas = Array.isArray(dados.alertas) ? dados.alertas.map(String) : [];
+    const alertas = (Array.isArray(dados.alertas) ? dados.alertas.map(String) : [])
+      .concat((Array.isArray(r && r.alertas) ? r.alertas : []).map(function (a) { return '⚠ ' + String((a && a.texto) || ''); }));   // v1.39.3
     if (!pessoas.length) {
       erroTransp('Nenhuma pessoa foi identificada nos documentos anexados — confira as fotos (nitidez, página certa) e tente de novo. Os campos não foram alterados.', alertas);
       return;
@@ -10660,6 +10774,7 @@ function linhasPendencias(alvo, txt) {
       // v1.29 — Minuta no Google Docs: botão-link em destaque (doc) ou nota de falha (doc_erro)
       const doc = r.doc && typeof r.doc.url === 'string' ? r.doc : null;
       mostrarDocMinuta(doc, r.doc_erro || '');
+      el('minDocCriar').hidden = !r.doc_disponivel;   // v1.39.3: o Doc só nasce no clique
       // o link guarda a resposta inteira — a decisão do roteador faz parte do resultado
       // (e a URL do Google Doc, quando houver, para reabrir com o botão)
       const guardar = { titulo: tituloDaMinuta(), texto: r.texto };
@@ -10839,7 +10954,8 @@ restaurarSessao();
           '</div>' : '') +
         (x.fases && x.fases.length ? '<p class="painel-cab versalete" style="margin:18px 0 2px"><span>Fases percorridas</span></p><ol class="con-fases">' + fases + '</ol>' : '') +
         (pend ? '<div class="con-pend"><b>Documentos ainda pendentes no dossiê</b><ul>' + pend + '</ul></div>' : '') +
-        (x.link ? '<a class="con-link" href="' + esc(x.link) + '" target="_blank" rel="noopener">Abrir o cartão no Trello ↗</a>' : '') +
+        // v1.39.4: só link do Trello abre daqui (nada de "javascript:" vindo do cartão)
+        (/^https:\/\/trello\.com\/[^\s"'<>\\]+$/.test(String(x.link || '')) ? '<a class="con-link" href="' + esc(x.link) + '" target="_blank" rel="noopener">Abrir o cartão no Trello ↗</a>' : '') +
         (x.ultima_atividade ? '<p class="con-meta">Última atividade no cartão: ' + conData(x.ultima_atividade, true) + '</p>' : '') +
       '</div>';
     caixa.hidden = false;
@@ -12526,4 +12642,4 @@ restaurarSessao();
 </body>
 </html>
 
-<!-- Hub CN2O v1.39 · 25/09/2026 -->
+<!-- Hub CN2O v1.39.4 · 25/09/2026 -->

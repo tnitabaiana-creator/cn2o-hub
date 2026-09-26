@@ -1337,13 +1337,15 @@ const BAND_INFO={
 };
 // marcação uniforme das bandeiras: bolinha que muda de cor conforme a bandeira
 const bola=b=>BAND_INFO[b]?`<span class="bola" style="background:${BAND_INFO[b].cor}" title="${BAND_INFO[b].rot}"></span>`:'';
-const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+// v1.39.4 (segurança, pacote D): aspas também — os nomes vêm dos cartões do Trello e
+// entram em atributos (value="…"); sem isso, um cartão renomeado rodava código aqui
+const esc=s=>String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 function preencherListas(){
-  el('vendedores').innerHTML=VENDEDORES_CORP.map(v=>`<option value="${v.nome}">`).join('');
+  el('vendedores').innerHTML=VENDEDORES_CORP.map(v=>`<option value="${esc(v.nome)}">`).join('');
   let aps=CORRETORES;
   if(['INV','DIV','DUE','ATA-U','ATA-W/A'].includes(S.ato)) aps=ADVOGADOS;
   else if(['CDH','UE','RERRAT'].includes(S.ato)) aps=[...ADVOGADOS,...CORRETORES];
-  el('parceiros').innerHTML=aps.map(c=>`<option value="${c}">`).join('');
+  el('parceiros').innerHTML=aps.map(c=>`<option value="${esc(c)}">`).join('');
 }
 function advogadoCadastrado(){
   const c=(el('apresNome').value||'').trim().toUpperCase();
@@ -1882,41 +1884,32 @@ const ENDPOINT_RAILWAY='https://cn2o-hub-backend-production.up.railway.app';
 
 if(ENDPOINT_RAILWAY){ document.querySelector('.selo').textContent='Produção'; }
 // Sessão compartilhada com o Hub CN2O (index.html): aba atual ou login lembrado.
-const pega=k=>{try{return sessionStorage.getItem(k)||localStorage.getItem(k)}catch(e){return null}};
-const limpaSessao=()=>{try{sessionStorage.clear()}catch(_){}try{['cn2o_token','cn2o_nome','cn2o_cargo','cn2o_login'].forEach(k=>localStorage.removeItem(k))}catch(_){}};
+// v1.39.4: a sessão do Hub vive só na aba (sessionStorage); o localStorage perde as chaves antigas
+const pega=k=>{try{return sessionStorage.getItem(k)}catch(e){return null}};
+const limpaSessao=()=>{try{sessionStorage.clear()}catch(_){}try{['cn2o_token','cn2o_nome','cn2o_cargo','cn2o_login','cn2o_hub_key'].forEach(k=>localStorage.removeItem(k))}catch(_){}};
 const EMBUTIDO=(()=>{try{return window.top!==window.self}catch(e){return true}})();
 const TOKEN=pega('cn2o_token'), NOME_SESSAO=pega('cn2o_nome')||'', CARGO_SESSAO=pega('cn2o_cargo')||'';
-if(ENDPOINT_RAILWAY && !TOKEN) location.href='index.html';
+if(ENDPOINT_RAILWAY && !TOKEN) location.href='index.html#protocolo';
 if(NOME_SESSAO){
   const si=document.getElementById('sessaoInfo');
-  si.innerHTML=`Sessão: <b>${NOME_SESSAO}</b>${CARGO_SESSAO?' · '+CARGO_SESSAO:''}${EMBUTIDO?'':' &nbsp;·&nbsp; <a href="index.html" style="color:#631325">Hub CN2O</a>'} &nbsp;·&nbsp; <a href="#" id="sair" style="color:#631325">Sair</a>`;
+  si.innerHTML=`Sessão: <b>${esc(NOME_SESSAO)}</b>${CARGO_SESSAO?' · '+esc(CARGO_SESSAO):''}${EMBUTIDO?'':' &nbsp;·&nbsp; <a href="index.html" style="color:#631325">Hub CN2O</a>'} &nbsp;·&nbsp; <a href="#" id="sair" style="color:#631325">Sair</a>`;
   document.getElementById('sair').addEventListener('click',e=>{e.preventDefault();
-    if(ENDPOINT_RAILWAY) fetch(ENDPOINT_RAILWAY+'/logout',{method:'POST',headers:{'X-Auth-Token':TOKEN}}).catch(()=>{});
+    if(ENDPOINT_RAILWAY) fetch(ENDPOINT_RAILWAY+'/logout',{method:'POST',headers:{'X-Auth-Token':TOKEN},keepalive:true}).catch(()=>{});
     limpaSessao();
-    location.href='index.html';});
-}
-let HUB_KEY=null;
-function chaveAcesso(){
-  if(HUB_KEY) return HUB_KEY;
-  try{ HUB_KEY=localStorage.getItem('cn2o_hub_key'); }catch(e){}
-  if(!HUB_KEY){
-    HUB_KEY=prompt('Código de acesso do cartório:');
-    try{ if(HUB_KEY) localStorage.setItem('cn2o_hub_key', HUB_KEY); }catch(e){}
-  }
-  return HUB_KEY;
+    (EMBUTIDO?window.top:window).location.replace('index.html');});
 }
 // listas dinâmicas (⚙ Vendedores Corporativos e ⚙ Corretores via backend)
 if(ENDPOINT_RAILWAY){
   fetch(ENDPOINT_RAILWAY+'/vendedores').then(r=>r.json()).then(vs=>{
     if(Array.isArray(vs)&&vs.length){
       VENDEDORES_CORP.length=0;
-      vs.forEach(v=>VENDEDORES_CORP.push({nome:v.nome.toUpperCase(),bandeira:v.bandeira||'verde'}));
+      vs.forEach(v=>{ if(v&&typeof v.nome==='string') VENDEDORES_CORP.push({nome:v.nome.toUpperCase(),bandeira:BAND_INFO[v.bandeira]?v.bandeira:'verde'}); });
       preencherListas();
     }
   }).catch(()=>{});
   fetch(ENDPOINT_RAILWAY+'/corretores').then(r=>r.json()).then(cs=>{
     if(Array.isArray(cs)&&cs.length){
-      CORRETORES=cs.map(c=>c.nome.toUpperCase());
+      CORRETORES=cs.filter(c=>c&&typeof c.nome==='string').map(c=>c.nome.toUpperCase());
       preencherListas();
     }
   }).catch(()=>{});
