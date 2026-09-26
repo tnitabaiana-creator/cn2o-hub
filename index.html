@@ -2851,6 +2851,48 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 .min-doccriar[hidden]{display:none}
 .min-doccriar:disabled{cursor:progress;opacity:.75;transform:none}
 
+/* --- v1.40: Relatórios · Produtividade em reais (mesmas caixas claras da aba Atendimentos) --- */
+.prod-barra{align-items:flex-end}
+.prod-arraste{margin:4px 0 0;font-size:13.5px;color:#3a4454}
+.prod-imp{border-color:#631325;border-width:2px}
+.prod-ajustes{margin-top:10px}
+.prod-perigo{color:#8a2033;border-color:rgba(138,32,51,.45)}
+.prod-vs{font:600 15px/1.3 'Montserrat',sans-serif;color:#3a4454;margin-left:6px}
+.prod-perfis{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.prod-perfil{border:1.5px solid rgba(32,42,58,.16);border-left:6px solid var(--prod-cor);border-radius:10px;padding:12px 14px;background:#fbf9f4;color:#202a3a}
+.prod-perfil .prod-tag{display:inline-block;font:700 11.5px/1 'Montserrat',sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#ffffff;background:var(--prod-cor);padding:5px 8px;border-radius:4px}
+.prod-perfil strong{display:block;font:800 23px/1.2 'Montserrat',sans-serif;margin-top:8px}
+.prod-perfil small{display:block;font-size:14px;color:#3a4454}
+.prod-perfil p{margin:6px 0 0;font-size:14px;line-height:1.45}
+.prod-perfil .prod-quem{color:#3a4454}
+.prod-tabela td,.prod-tabela th{text-align:right;white-space:nowrap}
+.prod-tabela td:first-child,.prod-tabela th:first-child,.prod-tabela td:nth-child(2),.prod-tabela th:nth-child(2){text-align:left}
+.prod-tabela th.prod-ord{cursor:pointer;user-select:none}
+.prod-tabela th.prod-ord:hover{background:#7d2438}
+.prod-tabela th span{color:#E3CFA6;font-size:11px}
+.prod-tabela tfoot td{font-weight:700;border-top:2px solid #C9A15A;background:#fbf8f1}
+.prod-tabela tr.prod-atual td{background:#f6efe0;font-weight:700}
+.prod-bola{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:8px;vertical-align:0}
+.prod-sobe{color:#1f5a4f;font-weight:700}
+.prod-desce{color:#8a2033;font-weight:700}
+.prod-casc{display:grid;grid-template-columns:minmax(150px,220px) 1fr minmax(120px,170px);gap:14px;align-items:center;padding:9px 0;color:#202a3a}
+.prod-casc+.prod-casc{border-top:1px solid rgba(32,42,58,.14)}
+.prod-casc b{font-size:14.5px}
+.prod-casc small{display:block;font-size:13px;color:#3a4454}
+.prod-casc.neg b,.prod-casc.neg .prod-casc-v{color:#8a2033}
+.prod-casc-barra{height:16px;background:#f1ece2;border-radius:3px;position:relative;overflow:hidden}
+.prod-casc-barra i{position:absolute;left:0;top:0;bottom:0}
+.prod-casc-v{text-align:right;font-weight:800;font-size:15px}
+.prod-ia-resumo{margin:0 0 10px;font-size:15px;line-height:1.6;color:#202a3a}
+.prod-alertas{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:6px}
+.prod-alertas li{padding:9px 12px;border-radius:8px;background:#e4eaf4;color:#202a3a;font-size:14px;line-height:1.5}
+.prod-alertas li.atencao{background:#f3e6e9;border-left:5px solid #631325}
+.prod-obs{margin:0 0 10px 20px;padding:0;display:grid;gap:5px;font-size:14px;line-height:1.55;color:#202a3a}
+.prod-ia-pessoas summary{cursor:pointer;font:700 14.5px/1.4 'Montserrat',sans-serif;color:#202a3a;margin:4px 0}
+.prod-ia-p{padding:8px 0;border-top:1px solid rgba(32,42,58,.12);color:#202a3a}
+.prod-ia-p p{margin:3px 0 0;font-size:14px;line-height:1.55}
+@media (max-width:720px){ .prod-casc{grid-template-columns:1fr}.prod-casc-v{text-align:left} }
+
 </style>
 </head>
 <body>
@@ -7580,8 +7622,9 @@ function pintarAbaConsumo(painel) {
 ============================================================ */
 const REL_ROT_ENVIAR = '✉ Enviar agora', REL_ROT_CARGA = 'Rodar carga';
 function relEstado() {
-  // visao (v1.39): 'escreventes' ou 'atendimentos' — a última escolhida fica guardada
-  if (!ED.rel) ED.rel = { tipo: 'semanal', ref: '', status: null, vigia: null, visao: store.get('cn2o_rel_visao') === 'atendimentos' ? 'atendimentos' : 'escreventes' };
+  // visao (v1.39): 'escreventes', 'atendimentos' ou (v1.40) 'produtividade' — a última escolhida fica guardada
+  const v = store.get('cn2o_rel_visao');
+  if (!ED.rel) ED.rel = { tipo: 'semanal', ref: '', status: null, vigia: null, visao: v === 'atendimentos' || v === 'produtividade' ? v : 'escreventes' };
   return ED.rel;
 }
 function relErro(e) {
@@ -7644,6 +7687,7 @@ function relBaixar(caminho) {
 function pintarAbaRelatorios(painel) {
   const r = relEstado();
   if (r.visao === 'atendimentos') { atdPintar(painel); return; }   // v1.39
+  if (r.visao === 'produtividade') { prodPintar(painel); return; }   // v1.40 (produtividade.js)
   painel.innerHTML = relChave('escreventes') +
     '<p class="sub-data" style="margin-bottom:10px">O relatório <b>semanal</b> sai sozinho toda segunda-feira às 8h e o <b>mensal</b> no 1º dia útil do mês, às 8h, por e-mail. Aqui você vê qualquer semana ou mês antes, envia na hora e acompanha os envios. Não precisa publicar o mural.</p>' +
     '<div id="edRelSituacao"><p class="ed-vazio">Lendo a situação dos relatórios…</p></div>' +
@@ -7867,10 +7911,10 @@ const ATD_MES_CURTO = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', '
 const ATD_COR = { v: '#631325', m: '#202a3a', m18: 'rgba(32,42,58,.22)', grade: 'rgba(32,42,58,.14)', tx: '#202a3a', tx2: '#3a4454' };
 const ATD_ROT_ENVIAR = '✉ Enviar por e-mail', ATD_ROT_CARGA = 'Rodar carga';
 
-// Chave "Escreventes | Atendimentos do balcão" no topo da aba (a escolha fica guardada)
+// Chave "Escreventes | Atendimentos do balcão | Produtividade (R$)" no topo da aba (a escolha fica guardada)
 function relChave(atual) {
   return '<div class="rel-chave" role="tablist" aria-label="Qual relatório">' +
-    [['escreventes', 'Escreventes'], ['atendimentos', 'Atendimentos do balcão']].map(function (x) {
+    [['escreventes', 'Escreventes'], ['atendimentos', 'Atendimentos do balcão'], ['produtividade', 'Produtividade (R$)']].map(function (x) {
       return '<button type="button" role="tab" class="rel-chave-bt' + (x[0] === atual ? ' ativa' : '') + '" aria-selected="' + (x[0] === atual) + '" data-rel-visao="' + x[0] + '">' + x[1] + '</button>';
     }).join('') + '</div>';
 }
@@ -12638,8 +12682,960 @@ restaurarSessao();
   window.ITBI_ULTIMO_INFO = '';
 })();
 
+/* ============================================================
+   RELATÓRIOS · PRODUTIVIDADE EM REAIS  ·  v1.40
+   ------------------------------------------------------------
+   Terceira visão da aba Relatórios (só o Tabelião). Lê a "Pesquisa de
+   Produtividade" do sistema do cartório — .xls do Excel 97-2003 ou .csv —
+   AQUI no navegador e manda ao servidor só os totais: por pessoa, por
+   forma de pagamento, por faixa de valor e, quando o arquivo tem data,
+   por dia. A IA (botão) lê esses totais e escreve a análise do mês.
+
+   Formatos aceitos (as colunas são achadas pelo nome do cabeçalho):
+     Setor;Valor;Forma de Pagamento                 (login, sem data)
+     Criação;Valor;Usuário;Forma Pgto.              (com data e nome)
+   A última linha do sistema (só o total, sem pessoa) é descartada.
+
+   Leitor de .xls sem dependência: contêiner OLE2 (CFB) + registros BIFF8
+   (SST/CONTINUE, LABELSST, LABEL, NUMBER, RK, MULRK, FORMULA/STRING).
+============================================================ */
+
+/* ---------- leitor de planilhas ---------- */
+const PLANILHA = (function () {
+  'use strict';
+  const FIM_CADEIA = 0xFFFFFFFE;
+
+  function lerCfb(u8) {
+    const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+    const assinatura = [0xD0, 0xCF, 0x11, 0xE0, 0xA1, 0xB1, 0x1A, 0xE1];
+    for (let i = 0; i < 8; i++) if (u8[i] !== assinatura[i]) throw new Error('não é uma planilha do Excel 97-2003');
+    const shift = dv.getUint16(0x1E, true), ssz = 1 << shift;
+    const nFat = dv.getUint32(0x2C, true), dirIni = dv.getUint32(0x30, true), corte = dv.getUint32(0x38, true);
+    const miniFatIni = dv.getUint32(0x3C, true), difIni = dv.getUint32(0x44, true), nDif = dv.getUint32(0x48, true);
+    const setor = function (n) { return (n + 1) * ssz; };
+    const difat = [];
+    for (let i = 0; i < 109; i++) difat.push(dv.getUint32(0x4C + i * 4, true));
+    let d = difIni;
+    for (let k = 0; k < nDif && d < FIM_CADEIA; k++) {
+      const o = setor(d);
+      for (let i = 0; i < ssz / 4 - 1; i++) difat.push(dv.getUint32(o + i * 4, true));
+      d = dv.getUint32(o + ssz - 4, true);
+    }
+    const fat = [];
+    for (let i = 0; i < nFat; i++) {
+      const o = setor(difat[i]);
+      for (let j = 0; j < ssz / 4; j++) fat.push(dv.getUint32(o + j * 4, true));
+    }
+    function cadeia(ini, tabela) {
+      const out = [];
+      for (let s = ini; s < FIM_CADEIA && out.length <= tabela.length; s = tabela[s]) out.push(s);
+      return out;
+    }
+    function juntar(ini) {
+      const c = cadeia(ini, fat), buf = new Uint8Array(c.length * ssz);
+      c.forEach(function (s, i) { buf.set(u8.subarray(setor(s), setor(s) + ssz), i * ssz); });
+      return buf;
+    }
+    const dir = juntar(dirIni), dvd = new DataView(dir.buffer), entradas = [];
+    for (let o = 0; o + 128 <= dir.length; o += 128) {
+      const tam = dvd.getUint16(o + 64, true);
+      let nome = '';
+      for (let i = 0; i + 1 < tam - 1 && i < 64; i += 2) nome += String.fromCharCode(dvd.getUint16(o + i, true));
+      entradas.push({ nome: nome, tipo: dir[o + 66], ini: dvd.getUint32(o + 116, true), tam: dvd.getUint32(o + 120, true) });
+    }
+    const raiz = entradas[0];
+    let mini = null, miniFat = null;
+    function fluxo(e) {
+      if (e.tam < corte && e !== raiz) {
+        if (!mini) {
+          mini = juntar(raiz.ini);
+          const mf = juntar(miniFatIni), dm = new DataView(mf.buffer);
+          miniFat = [];
+          for (let i = 0; i + 4 <= mf.length; i += 4) miniFat.push(dm.getUint32(i, true));
+        }
+        const c = cadeia(e.ini, miniFat), buf = new Uint8Array(c.length * 64);
+        c.forEach(function (s, i) { buf.set(mini.subarray(s * 64, s * 64 + 64), i * 64); });
+        return buf.subarray(0, e.tam);
+      }
+      return juntar(e.ini).subarray(0, e.tam);
+    }
+    const livro = entradas.filter(function (e) { return e.tipo === 2 && /^(workbook|book)$/i.test(e.nome); })[0];
+    if (!livro) throw new Error('a planilha não tem a pasta de trabalho do Excel');
+    return fluxo(livro);
+  }
+
+  function rk(v) {
+    let n;
+    if (v & 2) n = v >> 2;
+    else { const b = new DataView(new ArrayBuffer(8)); b.setInt32(4, v & ~3, true); n = b.getFloat64(0, true); }
+    return (v & 1) ? n / 100 : n;
+  }
+
+  // Lê os bytes do SST atravessando os CONTINUE: os caracteres de uma string que muda de
+  // registro recomeçam com um byte de opções (1 = UTF-16, 0 = 8 bits).
+  function lerSst(segs) {
+    let si = 0, p = 0;
+    const u8 = function () { while (p >= segs[si].length) { si++; p = 0; if (si >= segs.length) throw new Error('SST truncado'); } return segs[si][p++]; };
+    const u16 = function () { const a = u8(); return a | (u8() << 8); };
+    const u32 = function () { const a = u16(); return (a | (u16() << 16)) >>> 0; };
+    const pular = function (n) { for (let i = 0; i < n; i++) u8(); };
+    u32();
+    const unicos = u32(), out = [];
+    for (let k = 0; k < unicos; k++) {
+      let cch = u16();
+      const op = u8();
+      let alto = op & 1;
+      const nRich = (op & 8) ? u16() : 0, nExt = (op & 4) ? u32() : 0;
+      let s = '';
+      while (cch > 0) {
+        if (p >= segs[si].length) { si++; p = 0; alto = segs[si][p++] & 1; }
+        const disp = segs[si].length - p, n = Math.min(cch, alto ? Math.floor(disp / 2) : disp);
+        for (let i = 0; i < n; i++) {
+          s += String.fromCharCode(alto ? segs[si][p] | (segs[si][p + 1] << 8) : segs[si][p]);
+          p += alto ? 2 : 1;
+        }
+        cch -= n;
+      }
+      pular(nRich * 4 + nExt);
+      out.push(s);
+    }
+    return out;
+  }
+
+  function lerBiff(u8) {
+    const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+    const grade = [];
+    let sst = [], biff8 = true, naPlanilha = false, feitas = 0, formulaAberta = null;
+    const por = function (l, c, v) { (grade[l] = grade[l] || [])[c] = v; };
+    const texto8 = function (o, cch) { let s = ''; for (let i = 0; i < cch; i++) s += String.fromCharCode(u8[o + i]); return s; };
+    const textoUni = function (o) {   // cch u16 + opções + caracteres (dentro de um registro só)
+      const cch = dv.getUint16(o, true);
+      if (!biff8) return texto8(o + 2, cch);
+      const alto = u8[o + 2] & 1;
+      let s = '';
+      for (let i = 0; i < cch; i++) s += String.fromCharCode(alto ? dv.getUint16(o + 3 + i * 2, true) : u8[o + 3 + i]);
+      return s;
+    };
+    let o = 0;
+    while (o + 4 <= u8.length) {
+      const tipo = dv.getUint16(o, true), tam = dv.getUint16(o + 2, true), d = o + 4;
+      o = d + tam;
+      if (tipo === 0x0809) {
+        biff8 = dv.getUint16(d, true) === 0x0600;
+        if (dv.getUint16(d + 2, true) === 0x0010 && feitas === 0) naPlanilha = true;
+        continue;
+      }
+      if (tipo === 0x000A) { if (naPlanilha) break; continue; }
+      if (tipo === 0x00FC) {
+        const segs = [u8.subarray(d, d + tam)];
+        while (o + 4 <= u8.length && dv.getUint16(o, true) === 0x003C) {
+          const t2 = dv.getUint16(o + 2, true);
+          segs.push(u8.subarray(o + 4, o + 4 + t2));
+          o += 4 + t2;
+        }
+        sst = lerSst(segs);
+        continue;
+      }
+      if (!naPlanilha) continue;
+      const lin = dv.getUint16(d, true), col = dv.getUint16(d + 2, true);
+      if (tipo === 0x00FD) por(lin, col, sst[dv.getUint32(d + 6, true)] || '');
+      else if (tipo === 0x0203) por(lin, col, dv.getFloat64(d + 6, true));
+      else if (tipo === 0x027E) por(lin, col, rk(dv.getInt32(d + 6, true)));
+      else if (tipo === 0x00BD) {
+        const ultima = dv.getUint16(d + tam - 2, true);
+        for (let c = col, p = d + 4; c <= ultima; c++, p += 6) por(lin, c, rk(dv.getInt32(p + 2, true)));
+      } else if (tipo === 0x0204 || tipo === 0x00D6) por(lin, col, textoUni(d + 6));
+      else if (tipo === 0x0006) {
+        if (dv.getUint16(d + 12, true) === 0xFFFF) {
+          const t = u8[d + 6];
+          if (t === 0) formulaAberta = [lin, col];
+          else if (t === 1) por(lin, col, u8[d + 8] ? 'VERDADEIRO' : 'FALSO');
+        } else por(lin, col, dv.getFloat64(d + 6, true));
+      } else if (tipo === 0x0207 && formulaAberta) { por(formulaAberta[0], formulaAberta[1], textoUni(d)); formulaAberta = null; }
+    }
+    feitas++;
+    const linhas = [];
+    for (let l = 0; l < grade.length; l++) {
+      const r = grade[l] || [];
+      const out = [];
+      for (let c = 0; c < r.length; c++) out.push(r[c] == null ? '' : r[c]);
+      linhas.push(out);
+    }
+    return linhas;
+  }
+
+  function lerCsv(txt) {
+    const primeira = txt.split(/\r?\n/)[0] || '';
+    const cont = function (ch) { return primeira.split(ch).length - 1; };
+    const sep = cont(';') >= cont(',') && cont(';') >= cont('\t') ? ';' : (cont('\t') > cont(',') ? '\t' : ',');
+    const linhas = [];
+    let lin = [], cel = '', aspas = false;
+    for (let i = 0; i < txt.length; i++) {
+      const c = txt[i];
+      if (aspas) {
+        if (c === '"') { if (txt[i + 1] === '"') { cel += '"'; i++; } else aspas = false; }
+        else cel += c;
+      } else if (c === '"') aspas = true;
+      else if (c === sep) { lin.push(cel); cel = ''; }
+      else if (c === '\n' || c === '\r') {
+        if (c === '\r' && txt[i + 1] === '\n') i++;
+        lin.push(cel); linhas.push(lin); lin = []; cel = '';
+      } else cel += c;
+    }
+    if (cel !== '' || lin.length) { lin.push(cel); linhas.push(lin); }
+    return linhas;
+  }
+
+  function lerHtml(txt) {
+    const doc = new DOMParser().parseFromString(txt, 'text/html');
+    const t = doc.querySelector('table');
+    if (!t) throw new Error('o arquivo não tem tabela');
+    return Array.prototype.map.call(t.rows, function (r) {
+      return Array.prototype.map.call(r.cells, function (c) { return (c.textContent || '').trim(); });
+    });
+  }
+
+  function decodificar(u8) {
+    try { return new TextDecoder('utf-8', { fatal: true }).decode(u8).replace(/^﻿/, ''); }
+    catch (e) { return new TextDecoder('windows-1252').decode(u8); }
+  }
+
+  // → { linhas: [[...]], formato: 'xls' | 'csv' | 'html' }
+  function ler(buffer) {
+    const u8 = new Uint8Array(buffer);
+    if (u8[0] === 0xD0 && u8[1] === 0xCF) return { linhas: lerBiff(lerCfb(u8)), formato: 'xls' };
+    if (u8[0] === 0x50 && u8[1] === 0x4B) throw new Error('arquivo .xlsx: no Excel, use "Salvar como" → "Pasta de Trabalho do Excel 97-2003 (.xls)" ou CSV');
+    const txt = decodificar(u8);
+    if (/^\s*</.test(txt)) return { linhas: lerHtml(txt), formato: 'html' };
+    return { linhas: lerCsv(txt), formato: 'csv' };
+  }
+
+  return { ler: ler, lerCsv: lerCsv, lerBiff: lerBiff, lerCfb: lerCfb };
+})();
+
+/* ---------- interpretação: linhas → totais do mês ---------- */
+const PROD_FAIXAS = [[5, 'até R$ 5'], [12, 'R$ 5–12'], [50, 'R$ 12–50'], [200, 'R$ 50–200'], [1000, 'R$ 200–1 mil'], [5000, 'R$ 1–5 mil'], [Infinity, '+ de R$ 5 mil']];
+const PROD_SEM_FORMA = 'Sem forma informada';
+
+function prodValor(v) {
+  if (typeof v === 'number') return isFinite(v) ? v : NaN;
+  let s = String(v == null ? '' : v).replace(/R\$|\s| /g, '');
+  if (!s) return NaN;
+  let neg = false;
+  if (/^\(.*\)$/.test(s)) { neg = true; s = s.slice(1, -1); }
+  if (s.charAt(0) === '-') { neg = !neg; s = s.slice(1); }
+  if (s.indexOf(',') >= 0 && s.indexOf('.') >= 0) s = s.lastIndexOf(',') > s.lastIndexOf('.') ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
+  else if (s.indexOf(',') >= 0) s = s.replace(',', '.');
+  else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, '');
+  const n = parseFloat(s);
+  return isNaN(n) ? NaN : (neg ? -n : n);
+}
+// "dd/mm/aaaa [hh:mm]", "aaaa-mm-dd" ou número de série do Excel → AAAA-MM-DD
+function prodData(v) {
+  if (typeof v === 'number' && v > 20000 && v < 80000) {
+    const d = new Date(Math.round((v - 25569) * 864e5));
+    return d.getUTCFullYear() + '-' + dd(d.getUTCMonth() + 1) + '-' + dd(d.getUTCDate());
+  }
+  const s = String(v == null ? '' : v).trim();
+  let m = /^(\d{1,2})[\/.-](\d{1,2})[\/.-](\d{2,4})/.exec(s);
+  if (m) { const a = m[3].length === 2 ? '20' + m[3] : m[3]; return a + '-' + dd(+m[2]) + '-' + dd(+m[1]); }
+  m = /^(\d{4})-(\d{1,2})-(\d{1,2})/.exec(s);
+  return m ? m[1] + '-' + dd(+m[2]) + '-' + dd(+m[3]) : null;
+}
+function prodForma(v) {
+  const partes = String(v == null ? '' : v).split(/[,;+\/]/).map(function (x) { return x.replace(/\s+/g, ' ').trim(); }).filter(Boolean);
+  if (!partes.length || /^n[ãa]o informad/i.test(partes[0]) && partes.length === 1) return PROD_SEM_FORMA;
+  const unicas = partes.filter(function (x, i) { return partes.indexOf(x) === i; }).sort(function (a, b) { return a.localeCompare(b, 'pt-BR'); });
+  return unicas.length === 1 ? unicas[0] : 'Misto: ' + unicas.join(' + ');
+}
+function prodMediana(vals) {
+  if (!vals.length) return null;
+  const v = vals.slice().sort(function (a, b) { return a - b; }), n = v.length;
+  return Math.round((v[Math.floor(n / 2)] + v[Math.floor((n - 1) / 2)]) / 2 * 100) / 100;
+}
+const PROD_MESES_RE = ['janeiro', 'fevereiro', 'mar[çc]o', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+
+// linhas → { dados, mes, ano, avisos[], resumo }
+function prodInterpretar(linhas, arquivo, formato, nomeParaId) {
+  const norm = function (s) { return String(s == null ? '' : s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim(); };
+  let h = -1, cab = null;
+  for (let i = 0; i < Math.min(linhas.length, 15); i++) {
+    const r = linhas[i].map(norm);
+    if (r.some(function (c) { return /^valor|emolumento/.test(c); }) && r.some(function (c) { return /usuario|setor|escrevente|operador|atendente/.test(c); })) { h = i; cab = r; break; }
+  }
+  if (h < 0) throw new Error('não achei o cabeçalho com as colunas "Valor" e "Setor" (ou "Usuário")');
+  const acha = function (re) { for (let i = 0; i < cab.length; i++) if (re.test(cab[i])) return i; return -1; };
+  const iVal = acha(/^valor|emolumento/), iPes = acha(/usuario|setor|escrevente|operador|atendente/);
+  const iPg = acha(/forma|pgto|pagamento|meio/), iData = acha(/criacao|^data|emissao|lancamento/);
+  const P = {}, PG = {}, F = PROD_FAIXAS.map(function (x) { return { faixa: x[1], qtd: 0, total: 0 }; }), D = {}, todos = [];
+  const avisos = [];
+  let soma = 0, semValor = 0, descartadas = 0;
+  const corpo = linhas.slice(h + 1).filter(function (r) { return r.some(function (c) { return String(c).trim() !== ''; }); });
+  corpo.forEach(function (r, k) {
+    const bruto = String(r[iPes] == null ? '' : r[iPes]).replace(/\s+/g, ' ').trim();
+    const v = prodValor(r[iVal]);
+    if (isNaN(v)) { semValor++; return; }
+    // a linha final do sistema: sem pessoa e com o total geral
+    if (!bruto && k === corpo.length - 1 && Math.abs(v - soma) < 0.05) { descartadas++; return; }
+    let id, nome = null;
+    if (!bruto) id = 'SEM SETOR';
+    else if (/^[a-z0-9]+(\.[a-z0-9]+)+$/i.test(bruto)) id = bruto.toUpperCase();
+    else { nome = bruto; id = nomeParaId[norm(bruto)] || bruto.toUpperCase(); }
+    const p = P[id] || (P[id] = { id: id, nome: nome, atos: 0, total: 0, vals: [], dias: {} });
+    p.atos++; p.total += v; p.vals.push(v); todos.push(v); soma += v;
+    const f = prodForma(iPg >= 0 ? r[iPg] : '');
+    const g = PG[f] || (PG[f] = { forma: f, qtd: 0, total: 0 });
+    g.qtd++; g.total += v;
+    for (let i = 0; i < PROD_FAIXAS.length; i++) if (v <= PROD_FAIXAS[i][0]) { F[i].qtd++; F[i].total += v; break; }
+    const dia = iData >= 0 ? prodData(r[iData]) : null;
+    if (dia) {
+      p.dias[dia] = 1;
+      const x = D[dia] || (D[dia] = { total: 0, por: {} });
+      x.total += v; x.por[id] = (x.por[id] || 0) + v;
+    }
+  });
+  const pessoas = Object.keys(P).map(function (k) { return P[k]; });
+  if (!pessoas.length) throw new Error('nenhum lançamento com valor na planilha');
+  if (semValor) avisos.push(semValor + ' linha(s) sem valor numérico foram ignoradas.');
+  if (P['SEM SETOR']) avisos.push(P['SEM SETOR'].atos + ' lançamento(s) sem setor/usuário (' + prodR$(P['SEM SETOR'].total) + ') entram como "Sem setor". Se for a linha de total do sistema, confira se ela bate com a soma.');
+  // mês: o mais frequente nas datas; sem data, o nome do mês no arquivo
+  const dias = Object.keys(D).sort();
+  let ano = null, mes = null;
+  if (dias.length) {
+    const cont = {};
+    dias.forEach(function (d) { cont[d.slice(0, 7)] = (cont[d.slice(0, 7)] || 0) + 1; });
+    const ym = Object.keys(cont).sort(function (a, b) { return cont[b] - cont[a]; })[0];
+    ano = +ym.slice(0, 4); mes = +ym.slice(5, 7);
+    const fora = dias.filter(function (d) { return d.slice(0, 7) !== ym; });
+    if (fora.length) avisos.push(fora.length + ' dia(s) com lançamento fora de ' + ym.slice(5, 7) + '/' + ym.slice(0, 4) + ' (' + fora.slice(0, 3).map(relDia).join(', ') + (fora.length > 3 ? '…' : '') + '). Eles entram no total.');
+  } else {
+    const a = norm(arquivo);
+    PROD_MESES_RE.forEach(function (re, i) { if (mes == null && new RegExp(re).test(a)) mes = i + 1; });
+    const y = /(20\d{2})/.exec(a);
+    if (y) ano = +y[1];
+    avisos.push('A planilha não tem a data dos lançamentos: sem gráfico por dia e por dia da semana.');
+  }
+  if (dias.length > 31) throw new Error('a planilha tem mais de 31 dias com lançamento — exporte um mês por vez');
+  const r2 = function (v) { return Math.round(v * 100) / 100; };
+  const dados = {
+    formato: formato + (iData >= 0 ? '-com-data' : ''),
+    arquivo: String(arquivo || '').slice(0, 120),
+    total: r2(soma), atos: todos.length, mediana: prodMediana(todos), diasUteis: null,
+    pessoas: pessoas.sort(function (a, b) { return b.total - a.total; }).map(function (p) {
+      return { id: p.id, nome: p.nome, atos: p.atos, total: r2(p.total), mediana: prodMediana(p.vals), max: r2(Math.max.apply(null, p.vals)), dias: dias.length ? Object.keys(p.dias).length : null };
+    }),
+    pgto: Object.keys(PG).map(function (k) { return { forma: k, qtd: PG[k].qtd, total: r2(PG[k].total) }; }).sort(function (a, b) { return b.qtd - a.qtd; }),
+    faixas: F.map(function (x) { return { faixa: x.faixa, qtd: x.qtd, total: r2(x.total) }; }),
+    serie: dias.length ? {
+      dias: dias,
+      total: dias.map(function (d) { return r2(D[d].total); }),
+      porPessoa: pessoas.reduce(function (o, p) { o[p.id] = dias.map(function (d) { return r2(D[d].por[p.id] || 0); }); return o; }, {})
+    } : null
+  };
+  return { dados: dados, ano: ano, mes: mes, avisos: avisos, descartadas: descartadas, colunas: { data: iData >= 0, forma: iPg >= 0 } };
+}
+
+/* ---------- estado e números ---------- */
+const PROD = { dados: null, lidoEm: 0, carregando: false, erro: '', cur: '', comp: 'none', ord: 'total', dir: -1, imp: null, ocupado: false };
+const prodAberta = function () { return !!(ED && ED.aba === 'relatorios' && ED.rel && ED.rel.visao === 'produtividade' && el('prodCorpo')); };
+const prodR$ = function (v) { return v == null || isNaN(v) ? '—' : Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); };
+const prodR$0 = function (v) { return v == null || isNaN(v) ? '—' : 'R$ ' + Math.round(v).toLocaleString('pt-BR'); };
+const prodPct = function (v, sinal) { return v == null || !isFinite(v) ? '—' : (sinal && v > 0 ? '+' : '') + v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%'; };
+const prodX = function (v) { return v == null || !isFinite(v) ? '—' : v.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + '×'; };
+const prodMesBr = function (ch) { return primeiraMaiuscula(MESES[+ch.slice(5, 7) - 1]) + ' de ' + ch.slice(0, 4); };
+const prodMesCurto = function (ch) { return ATD_MES_CURTO[+ch.slice(5, 7) - 1] + '/' + ch.slice(2, 4); };
+const PROD_COR = { mesa: '#631325', balcao: '#2F6E63', tabeliao: '#A66A2E', sistema: '#8D8779' };
+const PROD_PERFIL = { mesa: 'Mesa de escrituras', balcao: 'Balcão', tabeliao: 'Tabelião', sistema: 'Sistema' };
+
+function prodCfg() { return (PROD.dados && PROD.dados.config) || { corte: 200, ferd: 16.6667, ir: 27.5 }; }
+function prodMeses() { return (PROD.dados && PROD.dados.meses) || []; }
+function prodMes(ch) { return prodMeses().filter(function (m) { return m.chave === ch; })[0] || null; }
+function prodPerfil(p) {
+  if (/n[ãa]o utilizar|sistema|extradigital|^sem setor$/i.test(p.id + ' ' + (p.nome || ''))) return 'sistema';
+  if (((PROD.dados && PROD.dados.tabeliaes) || []).indexOf(String(p.id).toLowerCase()) >= 0) return 'tabeliao';
+  return p.atos && p.total / p.atos >= prodCfg().corte ? 'mesa' : 'balcao';
+}
+function prodNome(p) {
+  const nomes = (PROD.dados && PROD.dados.nomes) || {};
+  const eq = nomes[String(p.id).toLowerCase()];
+  if (eq) return eq;
+  if (/^sem setor$/i.test(p.id)) return 'Sem setor';
+  if (/n[ãa]o utilizar|extradigital/i.test(p.id + ' ' + (p.nome || ''))) return 'Sistema (não utilizar)';
+  if (!p.nome) {   // planilha só com login: usa o nome completo que veio de outro mês, se houver
+    const ms = prodMeses();
+    for (let i = ms.length - 1; i >= 0 && !p.nome; i--) {
+      const o = ms[i].dados.pessoas.filter(function (x) { return x.id === p.id && x.nome; })[0];
+      if (o) p = { id: p.id, nome: o.nome };
+    }
+  }
+  if (p.nome) { const w = p.nome.split(/\s+/), prep = ['de', 'da', 'do', 'dos', 'das', 'e']; return [w[0], w.slice(1).filter(function (x) { return prep.indexOf(x.toLowerCase()) < 0; })[0] || ''].join(' ').trim(); }
+  return String(p.id).toLowerCase().split('.').map(primeiraMaiuscula).join(' ');
+}
+// o mês de comparação: nenhum, o anterior da lista ou um escolhido
+function prodComparado(m) {
+  if (!m || PROD.comp === 'none') return null;
+  const ms = prodMeses();
+  if (PROD.comp === 'auto') { const i = ms.indexOf(m); return i > 0 ? ms[i - 1] : null; }
+  const c = prodMes(PROD.comp);
+  return c && c !== m ? c : null;
+}
+// indicadores derivados de cada pessoa
+function prodPessoas(m) {
+  const d = m.dados;
+  return d.pessoas.map(function (p) {
+    const shareR = d.total ? p.total / d.total * 100 : 0, shareA = d.atos ? p.atos / d.atos * 100 : 0;
+    return Object.assign({}, p, {
+      nomeTela: prodNome(p), perfil: prodPerfil(p), ticket: p.atos ? p.total / p.atos : 0,
+      shareR: shareR, shareA: shareA, indice: shareA ? shareR / shareA : 0,
+      porDia: d.diasUteis ? p.total / d.diasUteis : 0, atosDia: d.diasUteis ? p.atos / d.diasUteis : 0
+    });
+  });
+}
+
+/* ---------- a tela ---------- */
+function prodPintar(painel) {
+  painel.innerHTML = relChave('produtividade') + '<div id="prodCorpo"><p class="ed-vazio">Lendo a produtividade…</p></div>';
+  relLigarChave(painel);
+  if (!PROD.dados || Date.now() - PROD.lidoEm > 10 * 60e3) prodCarregar(); else prodDesenhar();
+}
+function prodCarregar(depois) {
+  if (PROD.carregando) return;
+  PROD.carregando = true; PROD.erro = '';
+  api('/hub/relatorios/produtividade').then(function (j) {
+    PROD.dados = j; PROD.lidoEm = Date.now();
+    const ms = prodMeses();
+    if (depois) PROD.cur = depois;
+    if (!prodMes(PROD.cur)) PROD.cur = ms.length ? ms[ms.length - 1].chave : '';
+  }).catch(function (e) {
+    PROD.erro = e && e.status === 404 ? 'o servidor ainda não tem este relatório — falta publicar o servidor v1.40' : relErro(e);
+  }).then(function () {
+    PROD.carregando = false;
+    if (prodAberta()) prodDesenhar();
+  });
+}
+function prodDesenhar() {
+  const corpo = el('prodCorpo');
+  if (!corpo) return;
+  if (PROD.erro && !PROD.dados) { corpo.innerHTML = '<p class="ed-vazio">Não consegui ler a produtividade (' + esc(PROD.erro) + ').</p>'; return; }
+  const ms = prodMeses(), cfg = prodCfg();
+  corpo.innerHTML =
+    '<p class="sub-data" style="margin-bottom:8px">Faturamento por escrevente a partir da <b>Pesquisa de Produtividade</b> do sistema do cartório. A planilha é lida neste computador e o servidor guarda só os totais do mês.</p>' +
+    '<div class="aud-filtros prod-barra">' +
+      '<label class="aud-campo"><span>Mês</span><select id="prodMes">' + ms.slice().reverse().map(function (m) {
+        return '<option value="' + m.chave + '"' + (m.chave === PROD.cur ? ' selected' : '') + '>' + prodMesBr(m.chave) + '</option>';
+      }).join('') + '</select></label>' +
+      '<label class="aud-campo"><span>Comparar com</span><select id="prodComp"><option value="none">Sem comparação</option><option value="auto">Mês anterior</option>' +
+        ms.slice().reverse().map(function (m) { return '<option value="' + m.chave + '">' + prodMesBr(m.chave) + '</option>'; }).join('') + '</select></label>' +
+      '<button type="button" class="btn-vinho" id="prodImportar">⭱ Importar planilha</button>' +
+      '<button type="button" class="btn-fantasma" id="prodPdf">⭳ Baixar PDF</button>' +
+      '<button type="button" class="btn-fantasma" id="prodCsv">⭳ Planilha (CSV)</button>' +
+    '</div>' +
+    '<input type="file" id="prodArquivo" accept=".xls,.csv,.txt,application/vnd.ms-excel,text/csv" hidden>' +
+    '<div id="prodImp"></div>' +
+    '<details class="rel-suporte prod-ajustes"><summary>Ajustes do relatório</summary>' +
+      '<p class="sub-data">A mesa de escrituras é quem tem ticket médio a partir do corte; o Tabelião e os lançamentos de sistema ficam à parte. A cascata é uma <b>estimativa</b>: o IR real é progressivo e tem as deduções do livro-caixa.</p>' +
+      '<div class="aud-filtros">' +
+        '<label class="aud-campo"><span>Mesa a partir de (R$)</span><input type="number" id="prodCorte" min="1" step="10" value="' + cfg.corte + '"></label>' +
+        '<label class="aud-campo"><span>FERD (%)</span><input type="number" id="prodFerd" min="0" max="100" step="0.0001" value="' + cfg.ferd + '"></label>' +
+        '<label class="aud-campo"><span>IR estimado (%)</span><input type="number" id="prodIr" min="0" max="100" step="0.1" value="' + cfg.ir + '"></label>' +
+        '<button type="button" class="btn-vinho" id="prodSalvarCfg">Salvar ajustes</button>' +
+        '<button type="button" class="btn-fantasma prod-perigo" id="prodApagar">Apagar este mês</button>' +
+      '</div><p class="aud-conta" id="prodCfgSit"></p></details>' +
+    '<div id="prodConteudo"></div>';
+  el('prodMes').addEventListener('change', function () { PROD.cur = this.value; relDesarmar(el('prodApagar'), 'Apagar este mês'); prodRender(); });
+  el('prodComp').value = PROD.comp;
+  el('prodComp').addEventListener('change', function () { PROD.comp = this.value; prodRender(); });
+  el('prodImportar').addEventListener('click', function () { el('prodArquivo').value = ''; el('prodArquivo').click(); });
+  el('prodArquivo').addEventListener('change', function () { if (this.files && this.files[0]) prodLerArquivo(this.files[0]); });
+  if (!corpo.dataset.arraste) {   // o #prodCorpo sobrevive às recargas: liga o arrastar uma vez só
+    corpo.dataset.arraste = '1';
+    corpo.addEventListener('dragover', function (e) { e.preventDefault(); });
+    corpo.addEventListener('drop', function (e) { e.preventDefault(); if (e.dataTransfer && e.dataTransfer.files[0]) prodLerArquivo(e.dataTransfer.files[0]); });
+  }
+  el('prodPdf').addEventListener('click', prodPdf);
+  el('prodCsv').addEventListener('click', prodCsv);
+  el('prodSalvarCfg').addEventListener('click', prodSalvarCfg);
+  el('prodApagar').addEventListener('click', prodApagar);
+  prodPintarImp();
+  prodRender();
+}
+
+function prodRender() {
+  const box = el('prodConteudo');
+  if (!box) return;
+  const m = prodMes(PROD.cur);
+  el('prodPdf').disabled = el('prodCsv').disabled = el('prodApagar').disabled = !m;
+  if (!m) { box.innerHTML = '<div class="atd-vazio" style="margin-top:10px">Nenhum mês ainda. Use <b>Importar planilha</b> com a Pesquisa de Produtividade do sistema (.xls ou .csv).</div>'; return; }
+  const d = m.dados, c = prodComparado(m), P = prodPessoas(m), cfg = prodCfg();
+  box.innerHTML =
+    '<h3 class="atd-titulo">' + prodMesBr(m.chave) + (c ? ' <small class="prod-vs">comparado com ' + prodMesBr(c.chave) + '</small>' : '') + '</h3>' +
+    '<p class="sub-data">' + esc((m.fonte || '') + ' · importado ' + (m.importado_por ? 'por ' + m.importado_por + ' ' : '') + (m.importado_em ? 'em ' + quandoCurto(m.importado_em) : '')) + '</p>' +
+    '<div class="atd-livro" id="prodLivro"></div>' +
+    '<section class="atd-q" id="prodQIa"></section>' +
+    '<section class="atd-q"><h4>Mesa de escrituras × balcão</h4><p class="atd-sub">Separação pelo ticket médio: a partir de ' + prodR$0(cfg.corte) + ' por ato, a pessoa conta como mesa. Comparar mesa com balcão distorce a análise individual.</p><div class="prod-perfis" id="prodPerfis"></div></section>' +
+    '<section class="atd-q"><h4>Por escrevente</h4><p class="atd-sub">Clique no título de uma coluna para ordenar. O <b>índice de valor</b> é a parte da receita dividida pela parte dos atos: acima de 1,00, a pessoa gera mais receita do que o volume sugere.</p>' +
+      '<div class="aud-rolo"><table class="aud-tabela prod-tabela" id="prodTabela"></table></div></section>' +
+    '<div class="atd-grade">' +
+      '<section class="atd-q"><h4>Faturamento por pessoa</h4><p class="atd-sub">Vinho: mesa · verde: balcão · ocre: Tabelião.</p><div id="prodGFat"></div></section>' +
+      '<section class="atd-q"><h4>Atos por pessoa</h4><p class="atd-sub">Quantidade de lançamentos no mês.</p><div id="prodGAtos"></div></section>' +
+      '<section class="atd-q"><h4>Formas de pagamento</h4><p class="atd-sub" id="prodPgSub"></p><div id="prodGPg"></div></section>' +
+      '<section class="atd-q"><h4>Faixas de valor por ato</h4><p class="atd-sub">Receita em cada faixa de valor unitário; a quantidade de atos aparece ao passar o mouse.</p><div class="atd-area atd-baixa" id="prodGFaixa"></div></section>' +
+    '</div>' +
+    (d.serie ? '<section class="atd-q"><h4>Faturamento por dia</h4><p class="atd-sub">Passe o mouse sobre a linha para ver quem faturou em cada dia.</p><div class="atd-area" id="prodGDia"></div></section>' +
+      '<section class="atd-q"><h4>Dia da semana</h4><p class="atd-sub">Média de faturamento em cada dia útil do mês.</p><div class="atd-area atd-baixa" id="prodGSem"></div></section>' : '') +
+    (c ? '<section class="atd-q"><h4>Variação por pessoa</h4><p class="atd-sub">Diferença em reais frente a ' + prodMesBr(c.chave) + '.</p><div id="prodGVar"></div></section>' : '') +
+    '<section class="atd-q"><h4>Mês a mês</h4><p class="atd-sub">Faturamento de todos os meses importados; o mês em foco aparece em vinho.</p><div class="atd-area atd-baixa" id="prodGMeses"></div>' +
+      '<div class="aud-rolo"><table class="aud-tabela prod-tabela" id="prodTabMeses"></table></div></section>' +
+    '<section class="atd-q"><h4>Do bruto ao disponível <small>(estimativa)</small></h4><p class="atd-sub">FERD de ' + prodPct(cfg.ferd) + ' sobre o bruto e IR de ' + prodPct(cfg.ir) + ' sobre o líquido. Os percentuais mudam em "Ajustes do relatório".</p><div id="prodCascata"></div></section>';
+  prodLivro(m, c, P); prodIa(m); prodPerfis(m, P); prodTabela(m, c, P); prodGraficos(m, c, P); prodMesAMes(m); prodCascata(m);
+}
+
+function prodLivro(m, c, P) {
+  const d = m.dados;
+  let quinto;
+  if (c) { const v = c.dados.total ? (d.total - c.dados.total) / c.dados.total * 100 : null; quinto = ['Variação', prodPct(v, true), 'frente a ' + prodMesBr(c.chave), v != null && v < 0]; }
+  else if (d.serie) { let i = 0; d.serie.total.forEach(function (v, k) { if (v > d.serie.total[i]) i = k; }); quinto = ['Melhor dia', prodR$0(d.serie.total[i]), relDia(d.serie.dias[i])]; }
+  else quinto = ['Pessoas', String(P.filter(function (p) { return p.perfil !== 'sistema'; }).length), 'com lançamento no mês'];
+  const it = [
+    ['Faturamento bruto', prodR$(d.total), ''],
+    ['Lançamentos', atdN(d.atos), c && c.dados.atos ? prodPct((d.atos - c.dados.atos) / c.dados.atos * 100, true) + ' frente a ' + prodMesCurto(c.chave) : 'atos no mês'],
+    ['Ticket médio', prodR$(d.atos ? d.total / d.atos : 0), d.mediana != null ? 'mediana ' + prodR$(d.mediana) : ''],
+    ['Média por dia útil', prodR$0(d.total / d.diasUteis), d.diasUteis + ' dias úteis'],
+    quinto
+  ];
+  el('prodLivro').innerHTML = it.map(function (x) { return '<div><span>' + esc(x[0]) + '</span><strong' + (x[3] ? ' class="v"' : '') + '>' + esc(x[1]) + '</strong><small>' + esc(x[2]) + '</small></div>'; }).join('');
+}
+
+function prodPerfis(m, P) {
+  const d = m.dados, grupos = ['mesa', 'balcao', 'tabeliao'];
+  el('prodPerfis').innerHTML = grupos.map(function (g) {
+    const L = P.filter(function (p) { return p.perfil === g; });
+    if (!L.length) return '';
+    const t = L.reduce(function (s, p) { return s + p.total; }, 0), a = L.reduce(function (s, p) { return s + p.atos; }, 0);
+    return '<div class="prod-perfil" style="--prod-cor:' + PROD_COR[g] + '"><span class="prod-tag">' + PROD_PERFIL[g] + '</span>' +
+      '<strong>' + prodR$(t) + '</strong><small>' + prodPct(d.total ? t / d.total * 100 : 0) + ' da receita</small>' +
+      '<p>' + atdN(a) + ' atos (' + prodPct(d.atos ? a / d.atos * 100 : 0) + ' do volume) · ticket médio ' + prodR$(a ? t / a : 0) + ' · ' + L.length + (L.length === 1 ? ' pessoa' : ' pessoas') + '</p>' +
+      '<p class="prod-quem">' + L.map(function (p) { return esc(p.nomeTela); }).join(', ') + '</p></div>';
+  }).join('');
+}
+
+function prodColunas(m, c) {
+  const cols = [
+    { k: 'nomeTela', t: 'Escrevente', f: function (p) { return '<span class="prod-bola" style="background:' + PROD_COR[p.perfil] + '"></span>' + esc(p.nomeTela); } },
+    { k: 'perfil', t: 'Perfil', f: function (p) { return PROD_PERFIL[p.perfil]; } },
+    { k: 'atos', t: 'Atos', f: function (p) { return atdN(p.atos); } },
+    { k: 'shareA', t: '% atos', f: function (p) { return prodPct(p.shareA); } },
+    { k: 'total', t: 'Faturamento', f: function (p) { return prodR$(p.total); } },
+    { k: 'shareR', t: '% receita', f: function (p) { return prodPct(p.shareR); } },
+    { k: 'indice', t: 'Índice', f: function (p) { return '<b class="' + (p.indice >= 1 ? 'prod-sobe' : 'prod-desce') + '">' + prodX(p.indice) + '</b>'; } },
+    { k: 'ticket', t: 'Ticket médio', f: function (p) { return prodR$(p.ticket); } },
+    { k: 'mediana', t: 'Mediana', f: function (p) { return prodR$(p.mediana); } },
+    { k: 'max', t: 'Maior ato', f: function (p) { return prodR$(p.max); } },
+    { k: 'atosDia', t: 'Atos/dia útil', f: function (p) { return p.atosDia.toLocaleString('pt-BR', { maximumFractionDigits: 1 }); } },
+    { k: 'porDia', t: 'R$/dia útil', f: function (p) { return prodR$0(p.porDia); } }
+  ];
+  if (m.dados.serie) cols.push({ k: 'dias', t: 'Dias com lançamento', f: function (p) { return p.dias == null ? '—' : String(p.dias); } });
+  if (c) {
+    const ant = {};
+    c.dados.pessoas.forEach(function (p) { ant[p.id] = p; });
+    const delta = function (campo) { return function (p) { const a = ant[p.id]; return a && a[campo] ? (p[campo] - a[campo]) / Math.abs(a[campo]) * 100 : null; }; };
+    const dA = delta('atos'), dT = delta('total');
+    cols.push({ k: 'dAtos', t: 'Δ atos', v: dA, f: function (p) { const v = dA(p); return v == null ? '—' : '<span class="' + (v >= 0 ? 'prod-sobe' : 'prod-desce') + '">' + prodPct(v, true) + '</span>'; } });
+    cols.push({ k: 'dTot', t: 'Δ faturamento', v: dT, f: function (p) { const v = dT(p); return v == null ? '—' : '<span class="' + (v >= 0 ? 'prod-sobe' : 'prod-desce') + '">' + prodPct(v, true) + '</span>'; } });
+  }
+  return cols;
+}
+function prodTabela(m, c, P) {
+  const cols = prodColunas(m, c), d = m.dados;
+  const col = cols.filter(function (x) { return x.k === PROD.ord; })[0] || cols[4];
+  const val = function (p) { return col.v ? col.v(p) : p[col.k]; };
+  const L = P.slice().sort(function (a, b) {
+    const x = val(a), y = val(b);
+    if (typeof x === 'string' || typeof y === 'string') return PROD.dir * String(x).localeCompare(String(y), 'pt-BR');
+    return PROD.dir * ((x == null ? -Infinity : x) - (y == null ? -Infinity : y));
+  });
+  const rodape = { nomeTela: 'Total', atos: atdN(d.atos), shareA: '100,0%', total: prodR$(d.total), shareR: '100,0%', indice: '1,00×', ticket: prodR$(d.atos ? d.total / d.atos : 0), mediana: prodR$(d.mediana), porDia: prodR$0(d.total / d.diasUteis), atosDia: (d.atos / d.diasUteis).toLocaleString('pt-BR', { maximumFractionDigits: 0 }) };
+  el('prodTabela').innerHTML =
+    '<thead><tr>' + cols.map(function (x) { return '<th class="prod-ord" data-k="' + x.k + '">' + esc(x.t) + (x.k === PROD.ord ? ' <span>' + (PROD.dir < 0 ? '▼' : '▲') + '</span>' : '') + '</th>'; }).join('') + '</tr></thead>' +
+    '<tbody>' + L.map(function (p) { return '<tr>' + cols.map(function (x) { return '<td>' + x.f(p) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody>' +
+    '<tfoot><tr>' + cols.map(function (x) { return '<td>' + (rodape[x.k] || (x.k === 'perfil' ? '' : '—')) + '</td>'; }).join('') + '</tr></tfoot>';
+  el('prodTabela').querySelectorAll('th.prod-ord').forEach(function (th) {
+    th.addEventListener('click', function () {
+      const k = th.dataset.k;
+      if (PROD.ord === k) PROD.dir *= -1; else { PROD.ord = k; PROD.dir = (k === 'nomeTela' || k === 'perfil') ? 1 : -1; }
+      prodTabela(m, c, P);
+    });
+  });
+}
+
+// barras horizontais com formato próprio (dinheiro, ×, etc.) e cor por item; aceita negativos
+function prodBarras(id, itens, fmt, dicas) {
+  const linha = 32, H = itens.length * linha + 30;
+  const box = atdCaixa(id); box.style.height = H + 'px';
+  const W = atdLargura(box);
+  const maxRot = Math.max.apply(null, itens.map(function (x) { return String(x.k).length; }).concat([4]));
+  const L = Math.min(Math.round(W * 0.36), Math.max(80, maxRot * 7.8 + 12)), livre = W - L - 96;
+  const mx = Math.max.apply(null, itens.map(function (x) { return Math.abs(x.v); }).concat([1]));
+  const temNeg = itens.some(function (x) { return x.v < 0; });
+  const zero = temNeg ? L + livre / 2 : L, esc1 = (temNeg ? livre / 2 : livre) / mx;
+  const svg = atdSvg('svg', { width: W, height: H, viewBox: '0 0 ' + W + ' ' + H, role: 'img', 'aria-label': 'Gráfico de barras' }, box);
+  atdSvg('line', { x1: zero, x2: zero, y1: 2, y2: H - 22, stroke: ATD_COR.m, 'stroke-width': 1 }, svg);
+  itens.forEach(function (it, i) {
+    const y = 4 + i * linha, w = Math.max(2, Math.abs(it.v) * esc1), x = it.v < 0 ? zero - w : zero;
+    let nome = String(it.k);
+    if (nome.length * 7.8 > L - 12) nome = nome.slice(0, Math.floor((L - 12) / 7.8) - 1) + '…';
+    atdTxt(svg, L - 10, y + linha / 2 + 1, nome, { 'text-anchor': 'end', fill: ATD_COR.tx, 'font-weight': 700, 'font-size': 13 });
+    const bar = atdSvg('rect', { x: x, y: y + 5, width: w, height: linha - 12, rx: 3, fill: it.cor || ATD_COR.m }, svg);
+    atdTxt(svg, it.v < 0 ? x - 6 : x + w + 6, y + linha / 2 + 1, fmt(it.v), { 'text-anchor': it.v < 0 ? 'end' : 'start', fill: ATD_COR.tx, 'font-weight': 700, 'font-size': 12.5 });
+    const alvo = atdSvg('rect', { x: 0, y: y, width: W, height: linha, fill: 'transparent' }, svg);
+    if (dicas) {
+      alvo.addEventListener('mousemove', function (ev) { const b = box.getBoundingClientRect(); bar.setAttribute('opacity', 0.8); atdDica(box, ev.clientX - b.left, y + 6, dicas(it)); });
+      alvo.addEventListener('mouseleave', function () { bar.setAttribute('opacity', 1); atdSemDica(box); });
+    }
+  });
+}
+
+function prodGraficos(m, c, P) {
+  const d = m.dados;
+  const gente = P.filter(function (p) { return p.perfil !== 'sistema'; });
+  const dicaP = function (p) { return '<b>' + esc(p.nomeTela) + '</b><br>' + PROD_PERFIL[p.perfil] + '<br>Faturamento: ' + prodR$(p.total) + '<br>Atos: ' + atdN(p.atos) + '<br>Ticket médio: ' + prodR$(p.ticket); };
+  prodBarras('prodGFat', gente.slice().sort(function (a, b) { return b.total - a.total; }).map(function (p) { return { k: p.nomeTela, v: p.total, cor: PROD_COR[p.perfil], p: p }; }), prodR$0, function (it) { return dicaP(it.p); });
+  prodBarras('prodGAtos', gente.slice().sort(function (a, b) { return b.atos - a.atos; }).map(function (p) { return { k: p.nomeTela, v: p.atos, cor: PROD_COR[p.perfil], p: p }; }), atdN, function (it) { return dicaP(it.p); });
+  const sem = d.pgto.filter(function (x) { return x.forma === PROD_SEM_FORMA; })[0];
+  el('prodPgSub').textContent = 'Quantidade de lançamentos por forma.' + (sem ? ' "' + PROD_SEM_FORMA + '" soma ' + prodR$(sem.total) + ' em ' + atdN(sem.qtd) + ' atos — costuma ser escritura paga por guia, depósito ou baixa posterior.' : '');
+  prodBarras('prodGPg', d.pgto.slice(0, 12).map(function (x) { return { k: x.forma, v: x.qtd, x: x }; }), atdN, function (it) { return '<b>' + esc(it.k) + '</b><br>' + atdN(it.x.qtd) + ' lançamentos<br>' + prodR$(it.x.total); });
+  if (d.faixas) atdColunas('prodGFaixa', d.faixas.map(function (f) { return f.faixa.replace('R$ ', ''); }), d.faixas.map(function (f) { return f.total; }), d.faixas.map(function () { return ATD_COR.v; }), function (i) {
+    const f = d.faixas[i]; return '<b>' + esc(f.faixa) + '</b><br>Receita: ' + prodR$(f.total) + '<br>Atos: ' + atdN(f.qtd);
+  });
+  else atdVazio('prodGFaixa', 'Este mês veio do painel anterior sem as faixas de valor.');
+  if (d.serie) {
+    const s = d.serie;
+    atdLinha('prodGDia', s.dias.map(function (x) { return x.slice(8, 10) + '/' + x.slice(5, 7); }), [{ nome: 'Faturamento', v: s.total, cor: ATD_COR.v, area: true }], function (i) {
+      const top = Object.keys(s.porPessoa).map(function (id) { return [id, s.porPessoa[id][i]]; }).filter(function (x) { return x[1] > 0; }).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 5);
+      const nome = function (id) { const p = d.pessoas.filter(function (x) { return x.id === id; })[0]; return p ? prodNome(p) : id; };
+      return '<b>' + ATD_DSEM[atdDeIso(s.dias[i]).getDay()] + ', ' + relDia(s.dias[i]) + '</b><br>Total: ' + prodR$(s.total[i]) + (top.length ? '<br>' + top.map(function (x) { return esc(nome(x[0])) + ': ' + prodR$0(x[1]); }).join('<br>') : '');
+    });
+    const soma = [0, 0, 0, 0, 0, 0, 0], qt = [0, 0, 0, 0, 0, 0, 0];
+    s.dias.forEach(function (x, i) { const w = atdDeIso(x).getDay(); soma[w] += s.total[i]; qt[w]++; });
+    const ids = [1, 2, 3, 4, 5].concat(qt[6] ? [6] : []), med = ids.map(function (i) { return qt[i] ? soma[i] / qt[i] : 0; }), mx = Math.max.apply(null, med);
+    atdColunas('prodGSem', ids.map(function (i) { return ATD_DSEM[i]; }), med, med.map(function (v) { return v === mx && v > 0 ? ATD_COR.v : ATD_COR.m; }), function (k) {
+      return '<b>' + ATD_DSEM[ids[k]] + '</b><br>Média: ' + prodR$0(med[k]) + '<br>' + qt[ids[k]] + ' dia(s) no mês';
+    });
+  }
+  if (c) {
+    const ant = {};
+    c.dados.pessoas.forEach(function (p) { ant[p.id] = p; });
+    const v = gente.filter(function (p) { return ant[p.id]; }).map(function (p) { return { k: p.nomeTela, v: p.total - ant[p.id].total, a: ant[p.id].total, p: p }; }).sort(function (a, b) { return b.v - a.v; });
+    if (v.length) prodBarras('prodGVar', v.map(function (x) { return Object.assign(x, { cor: x.v >= 0 ? PROD_COR.balcao : PROD_COR.mesa }); }), function (n) { return (n > 0 ? '+' : n < 0 ? '−' : '') + prodR$0(Math.abs(n)); }, function (it) {
+      return '<b>' + esc(it.k) + '</b><br>' + prodMesBr(m.chave) + ': ' + prodR$(it.p.total) + '<br>' + prodMesBr(c.chave) + ': ' + prodR$(it.a);
+    });
+    else atdVazio('prodGVar', 'Ninguém aparece nos dois meses.');
+  }
+}
+
+function prodMesAMes(m) {
+  const ms = prodMeses();
+  atdColunas('prodGMeses', ms.map(function (x) { return prodMesCurto(x.chave); }), ms.map(function (x) { return x.dados.total; }), ms.map(function (x) { return x === m ? ATD_COR.v : ATD_COR.m18; }), function (i) {
+    const x = ms[i].dados; return '<b>' + prodMesBr(ms[i].chave) + '</b><br>' + prodR$(x.total) + '<br>' + atdN(x.atos) + ' atos · ' + x.diasUteis + ' dias úteis';
+  });
+  let tT = 0, tA = 0, tD = 0;
+  el('prodTabMeses').innerHTML = '<thead><tr><th>Mês</th><th>Faturamento</th><th>Atos</th><th>Ticket médio</th><th>Dias úteis</th><th>Média/dia útil</th><th>Atos/dia útil</th><th>Δ receita</th></tr></thead><tbody>' +
+    ms.map(function (x, i) {
+      const d = x.dados, v = i ? (d.total - ms[i - 1].dados.total) / ms[i - 1].dados.total * 100 : null;
+      tT += d.total; tA += d.atos; tD += d.diasUteis;
+      return '<tr' + (x === m ? ' class="prod-atual"' : '') + '><td>' + prodMesBr(x.chave) + '</td><td>' + prodR$(d.total) + '</td><td>' + atdN(d.atos) + '</td><td>' + prodR$(d.atos ? d.total / d.atos : 0) + '</td><td>' + d.diasUteis + '</td><td>' + prodR$0(d.total / d.diasUteis) + '</td><td>' + atdN(d.atos / d.diasUteis) + '</td><td>' +
+        (v == null ? '—' : '<span class="' + (v >= 0 ? 'prod-sobe' : 'prod-desce') + '">' + prodPct(v, true) + '</span>') + '</td></tr>';
+    }).join('') + '</tbody><tfoot><tr><td>Acumulado</td><td>' + prodR$(tT) + '</td><td>' + atdN(tA) + '</td><td>' + prodR$(tA ? tT / tA : 0) + '</td><td>' + tD + '</td><td>' + prodR$0(tD ? tT / tD : 0) + '</td><td>' + atdN(tD ? tA / tD : 0) + '</td><td>—</td></tr></tfoot>';
+}
+
+function prodCascataValores(total) {
+  const cfg = prodCfg(), ferd = total * cfg.ferd / 100, liq = total - ferd, ir = liq * cfg.ir / 100;
+  return { bruto: total, ferd: ferd, liq: liq, ir: ir, disp: liq - ir };
+}
+function prodCascata(m) {
+  const k = prodCascataValores(m.dados.total), B = k.bruto || 1;
+  const passos = [['Emolumento bruto', k.bruto, 'total lançado no mês', '#202a3a'], ['(−) FERD', k.ferd, prodPct(prodCfg().ferd) + ' do bruto', '#8A2F45', 1],
+    ['Emolumento líquido', k.liq, 'base do imposto de renda', '#631325'], ['(−) IR estimado', k.ir, prodPct(prodCfg().ir) + ' do líquido', '#A66A2E', 1],
+    ['Disponível estimado', k.disp, prodR$0(k.disp / m.dados.diasUteis) + ' por dia útil', '#2F6E63']];
+  el('prodCascata').innerHTML = passos.map(function (x) {
+    return '<div class="prod-casc' + (x[4] ? ' neg' : '') + '"><div><b>' + x[0] + '</b><small>' + esc(x[2]) + '</small></div>' +
+      '<div class="prod-casc-barra"><i style="width:' + Math.max(0, Math.min(100, x[1] / B * 100)).toFixed(1) + '%;background:' + x[3] + '"></i></div>' +
+      '<div class="prod-casc-v">' + prodR$(x[1]) + '<small>' + prodPct(x[1] / B * 100) + ' do bruto</small></div></div>';
+  }).join('');
+}
+
+/* ---------- análise da IA ---------- */
+function prodIa(m) {
+  const a = m.analise, box = el('prodQIa');
+  const P = {}; m.dados.pessoas.forEach(function (p) { P[p.id] = p; });
+  let h = '<h4>Análise do mês <small>(IA)</small></h4>';
+  if (!a) {
+    h += '<p class="atd-sub">A IA lê só os totais deste mês (e do anterior, para comparar) e escreve um resumo, um texto por escrevente, observações de gestão e o que parece fora do padrão. Confira sempre com os números acima.</p>';
+  } else {
+    h += '<p class="atd-sub">Feita em ' + esc(quandoCurto(m.analise_em)) + (a.comparado_com ? ', comparando com ' + prodMesBr(a.comparado_com) : '') + '. Texto de apoio: confira com os números acima.</p>' +
+      (a.resumo ? '<p class="prod-ia-resumo">' + esc(a.resumo) + '</p>' : '') +
+      (a.alertas && a.alertas.length ? '<ul class="prod-alertas">' + a.alertas.map(function (x) { return '<li class="' + (x.nivel === 'atencao' ? 'atencao' : '') + '"><b>' + esc(x.titulo) + '</b> ' + esc(x.detalhe) + '</li>'; }).join('') + '</ul>' : '') +
+      (a.observacoes && a.observacoes.length ? '<ol class="prod-obs">' + a.observacoes.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ol>' : '') +
+      (a.pessoas && a.pessoas.length ? '<details class="prod-ia-pessoas"><summary>Texto por escrevente</summary>' + a.pessoas.map(function (x) {
+        const p = P[x.id]; return '<div class="prod-ia-p"><b>' + esc(p ? prodNome(p) : x.id) + '</b><p>' + esc(x.texto) + '</p></div>';
+      }).join('') + '</details>' : '');
+  }
+  h += '<div class="aud-filtros"><button type="button" class="btn-vinho" id="prodIaBt">' + (a ? '↻ Refazer a análise' : '✦ Analisar com IA') + '</button></div><p class="aud-conta" id="prodIaSit"></p>';
+  box.innerHTML = h;
+  el('prodIaBt').addEventListener('click', function () { prodAnalisar(m); });
+}
+function prodAnalisar(m) {
+  if (PROD.ocupado) return;
+  const b = el('prodIaBt'), sit = el('prodIaSit');
+  PROD.ocupado = true; b.disabled = true; sit.textContent = 'A IA está lendo os números do mês… (cerca de 30 segundos)';
+  api('/hub/relatorios/produtividade/analisar', { corpo: { ano: +m.chave.slice(0, 4), mes: +m.chave.slice(5, 7) } }).then(function (r) {
+    m.analise = r.analise; m.analise_em = new Date().toISOString();
+    if (prodAberta() && PROD.cur === m.chave) prodIa(m);
+    toast('✓ Análise pronta');
+  }).catch(function (e) {
+    if (el('prodIaSit')) el('prodIaSit').textContent = e && e.status === 429 && e.dados && e.dados.motivo === 'teto' ? 'O limite diário de IA desta conta foi atingido. Volta amanhã.' : 'Não deu certo: ' + ((e && e.erro) || 'erro') + '.';
+  }).then(function () { PROD.ocupado = false; if (el('prodIaBt')) el('prodIaBt').disabled = false; });
+}
+
+/* ---------- importação ---------- */
+function prodNomeParaId() {
+  const m = {};
+  prodMeses().forEach(function (x) { x.dados.pessoas.forEach(function (p) { if (p.nome) m[p.nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim()] = p.id; }); });
+  return m;
+}
+function prodLerArquivo(f) {
+  if (f.size > 25 * 1024 * 1024) { toast('Arquivo grande demais (máx. 25 MB).', true); return; }
+  PROD.imp = { lendo: true, arquivo: f.name };
+  prodPintarImp();
+  const r = new FileReader();
+  r.onload = function () {
+    try {
+      const lido = PLANILHA.ler(r.result);
+      const x = prodInterpretar(lido.linhas, f.name, lido.formato, prodNomeParaId());
+      PROD.imp = { arquivo: f.name, formato: lido.formato, res: x, ano: x.ano || new Date().getFullYear(), mes: x.mes || '', dias: '' };
+      prodPintarImp();
+      prodDiasUteis();
+    } catch (e) {
+      PROD.imp = { arquivo: f.name, erro: (e && e.message) || 'não consegui ler o arquivo' };
+      prodPintarImp();
+    }
+  };
+  r.onerror = function () { PROD.imp = { arquivo: f.name, erro: 'não consegui abrir o arquivo' }; prodPintarImp(); };
+  r.readAsArrayBuffer(f);
+}
+function prodDiasUteis() {
+  const I = PROD.imp;
+  if (!I || !I.res || !I.mes || !I.ano) return;
+  const ym = I.ano + '-' + dd(+I.mes);
+  api('/hub/relatorios/produtividade/dias-uteis?mes=' + ym).then(function (r) {
+    if (PROD.imp !== I) return;
+    I.dias = r.dias_uteis; I.diasDe = ym;
+    if (el('prodImpDias')) el('prodImpDias').value = r.dias_uteis;
+    prodImpAviso();
+  }).catch(function () {});
+}
+function prodImpAviso() {
+  const I = PROD.imp, s = el('prodImpExiste');
+  if (!s || !I || !I.res) return;
+  const ch = I.ano + '-' + dd(+I.mes || 0);
+  s.hidden = !prodMes(ch);
+  s.textContent = prodMes(ch) ? 'Já existe ' + prodMesBr(ch) + ': ao integrar, os números e a análise da IA desse mês serão substituídos.' : '';
+}
+function prodPintarImp() {
+  const box = el('prodImp');
+  if (!box) return;
+  const I = PROD.imp;
+  if (!I) { box.innerHTML = '<p class="prod-arraste">Dica: você também pode arrastar o arquivo .xls ou .csv para esta tela.</p>'; return; }
+  if (I.lendo) { box.innerHTML = '<section class="atd-q prod-imp"><h4>Lendo ' + esc(I.arquivo) + '…</h4></section>'; return; }
+  if (I.erro) {
+    box.innerHTML = '<section class="atd-q prod-imp"><h4>Não consegui usar ' + esc(I.arquivo) + '</h4><ul class="rel-situacao"><li class="rel-alerta">' + esc(primeiraMaiuscula(I.erro)) + '.</li></ul>' +
+      '<p class="atd-sub">O arquivo esperado é a Pesquisa de Produtividade do sistema, com as colunas <b>Setor</b> (ou <b>Usuário</b>), <b>Valor</b> e <b>Forma de Pagamento</b>; a coluna <b>Criação</b> (data) é opcional.</p>' +
+      '<div class="aud-filtros"><button type="button" class="btn-fantasma" id="prodImpFechar">Fechar</button></div></section>';
+    el('prodImpFechar').addEventListener('click', function () { PROD.imp = null; prodPintarImp(); });
+    return;
+  }
+  const x = I.res, d = x.dados, gente = d.pessoas.length;
+  const anos = []; for (let a = new Date().getFullYear() + 1; a >= 2024; a--) anos.push(a);
+  box.innerHTML = '<section class="atd-q prod-imp"><h4>Conferir antes de integrar</h4>' +
+    '<p class="atd-sub">' + esc(I.arquivo) + ' · ' + (I.formato === 'xls' ? 'planilha do Excel' : I.formato === 'html' ? 'planilha exportada em HTML' : 'CSV') + (x.colunas.data ? ', com a data dos lançamentos' : ', sem data') + '</p>' +
+    '<div class="atd-livro">' +
+      '<div><span>Faturamento</span><strong>' + prodR$(d.total) + '</strong><small>soma da coluna Valor</small></div>' +
+      '<div><span>Lançamentos</span><strong>' + atdN(d.atos) + '</strong><small>' + (x.descartadas ? 'linha de total do sistema descartada' : '') + '</small></div>' +
+      '<div><span>Pessoas</span><strong>' + gente + '</strong><small>' + esc(d.pessoas.slice(0, 4).map(prodNome).join(', ') + (gente > 4 ? '…' : '')) + '</small></div>' +
+      '<div><span>Formas de pagamento</span><strong>' + d.pgto.length + '</strong><small>' + (x.colunas.forma ? '' : 'coluna não encontrada') + '</small></div>' +
+    '</div>' +
+    (x.avisos.length ? '<ul class="rel-situacao">' + x.avisos.map(function (a) { return '<li>' + esc(a) + '</li>'; }).join('') + '</ul>' : '') +
+    '<div class="aud-filtros">' +
+      '<label class="aud-campo"><span>Mês</span><select id="prodImpMes"><option value="">escolha…</option>' + MESES.map(function (n, i) { return '<option value="' + (i + 1) + '"' + (+I.mes === i + 1 ? ' selected' : '') + '>' + primeiraMaiuscula(n) + '</option>'; }).join('') + '</select></label>' +
+      '<label class="aud-campo"><span>Ano</span><select id="prodImpAno">' + anos.map(function (a) { return '<option' + (a === +I.ano ? ' selected' : '') + '>' + a + '</option>'; }).join('') + '</select></label>' +
+      '<label class="aud-campo"><span>Dias úteis</span><input type="number" id="prodImpDias" min="1" max="31" value="' + esc(I.dias) + '"></label>' +
+      '<button type="button" class="btn-vinho" id="prodImpOk">Integrar o mês</button>' +
+      '<button type="button" class="btn-fantasma" id="prodImpNao">Cancelar</button>' +
+    '</div><p class="aud-conta" id="prodImpExiste" hidden></p><p class="aud-conta" id="prodImpSit"></p></section>';
+  el('prodImpMes').addEventListener('change', function () { I.mes = this.value; I.dias = ''; el('prodImpDias').value = ''; prodImpAviso(); prodDiasUteis(); });
+  el('prodImpAno').addEventListener('change', function () { I.ano = +this.value; I.dias = ''; el('prodImpDias').value = ''; prodImpAviso(); prodDiasUteis(); });
+  el('prodImpDias').addEventListener('input', function () { I.dias = this.value; });
+  el('prodImpNao').addEventListener('click', function () { PROD.imp = null; prodPintarImp(); });
+  el('prodImpOk').addEventListener('click', prodIntegrar);
+  prodImpAviso();
+}
+function prodIntegrar() {
+  const I = PROD.imp, sit = el('prodImpSit');
+  if (!I || !I.res) return;
+  const dias = parseInt(el('prodImpDias').value, 10);
+  if (!I.mes) { sit.textContent = 'Escolha o mês da planilha.'; return; }
+  if (!(dias >= 1 && dias <= 31)) { sit.textContent = 'Informe os dias úteis do mês (1 a 31).'; return; }
+  const ch = I.ano + '-' + dd(+I.mes);
+  if (prodMes(ch) && el('prodImpOk').dataset.confirma !== ch) { relArmar(el('prodImpOk'), ch, 'Confirmar: substituir ' + prodMesCurto(ch), 'Integrar o mês'); return; }
+  const dados = Object.assign({}, I.res.dados, { diasUteis: dias });
+  el('prodImpOk').disabled = true; sit.textContent = 'Gravando…';
+  api('/hub/relatorios/produtividade/mes', { corpo: { ano: +I.ano, mes: +I.mes, dados: dados, fonte: 'Pesquisa de Produtividade · ' + prodMesBr(ch) + ' (' + I.arquivo + ')' } }).then(function () {
+    PROD.imp = null; PROD.lidoEm = 0;
+    toast('✓ ' + prodMesBr(ch) + ' integrado');
+    prodCarregar(ch);
+  }).catch(function (e) {
+    if (el('prodImpSit')) el('prodImpSit').textContent = 'Não gravou: ' + ((e && e.erro) || 'erro') + '.';
+    if (el('prodImpOk')) el('prodImpOk').disabled = false;
+  });
+}
+
+/* ---------- ajustes e exclusão ---------- */
+function prodSalvarCfg() {
+  const corpo = { corte: +el('prodCorte').value, ferd: +el('prodFerd').value, ir: +el('prodIr').value };
+  const sit = el('prodCfgSit');
+  sit.textContent = 'Salvando…';
+  api('/hub/relatorios/produtividade/config', { corpo: corpo }).then(function (r) {
+    PROD.dados.config = r.config; sit.textContent = '✓ Ajustes salvos.';
+    prodRender();
+  }).catch(function (e) { sit.textContent = 'Não salvou: ' + ((e && e.erro) || 'erro') + '.'; });
+}
+function prodApagar() {
+  const b = el('prodApagar'), m = prodMes(PROD.cur);
+  if (!m) return;
+  if (b.dataset.confirma !== m.chave) { relArmar(b, m.chave, 'Confirmar: apagar ' + prodMesCurto(m.chave), 'Apagar este mês'); return; }
+  relDesarmar(b, 'Apagar este mês');
+  api('/hub/relatorios/produtividade/apagar', { corpo: { ano: +m.chave.slice(0, 4), mes: +m.chave.slice(5, 7) } }).then(function () {
+    toast('Mês apagado'); PROD.cur = ''; prodCarregar();
+  }).catch(function (e) { el('prodCfgSit').textContent = 'Não apagou: ' + ((e && e.erro) || 'erro') + '.'; });
+}
+
+/* ---------- CSV e PDF ---------- */
+function prodCsv() {
+  const m = prodMes(PROD.cur);
+  if (!m) return;
+  const c = prodComparado(m), P = prodPessoas(m), cols = prodColunas(m, c);
+  const n2 = function (v) { return v == null || !isFinite(v) ? '' : String(Math.round(v * 100) / 100).replace('.', ','); };
+  const campo = function (s) { s = String(s == null ? '' : s); if (/^[=+\-@]/.test(s)) s = "'" + s; return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  const linhas = [cols.map(function (x) { return x.t; }).join(';')];
+  P.sort(function (a, b) { return b.total - a.total; }).forEach(function (p) {
+    linhas.push(cols.map(function (x) {
+      if (x.k === 'nomeTela') return campo(p.nomeTela);
+      if (x.k === 'perfil') return PROD_PERFIL[p.perfil];
+      return n2(x.v ? x.v(p) : p[x.k]);
+    }).join(';'));
+  });
+  const blob = new Blob(['﻿' + linhas.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'produtividade-cn2o-' + m.chave + '.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function () { URL.revokeObjectURL(a.href); }, 4000);
+}
+function prodPdf() {
+  const m = prodMes(PROD.cur);
+  if (!m || typeof PDFMini !== 'function') return;
+  const d = m.dados, c = prodComparado(m), P = prodPessoas(m).sort(function (a, b) { return b.total - a.total; }), cfg = prodCfg();
+  const pdf = new PDFMini({ pagina: 'A4' });
+  // as fontes padrão do PDF (WinAnsi) não têm −, ≥ e Δ
+  const escrever = pdf.texto.bind(pdf);
+  pdf.texto = function (x, y, s, op) { return escrever(x, y, String(s == null ? '' : s).replace(/−/g, '-').replace(/≥/g, '>=').replace(/Δ/g, 'Var.').replace(/–/g, '-'), op); };
+  const X = 14, W = pdf.larguraMm - 28, VINHO = '#631325', MARINHO = '#202a3a', CINZA = '#5a6472';
+  let y = 0, pag = 1;
+  function cabecalho() {
+    pdf.retangulo(0, 0, pdf.larguraMm, 22, { preencher: MARINHO, borda: false });
+    pdf.retangulo(0, 22, pdf.larguraMm, 1.4, { preencher: VINHO, borda: false });
+    pdf.fonte(true, 8).corTexto('#C9A15A').texto(X, 8, 'CARTÓRIO DE NOTAS DO 2º OFÍCIO · ITABAIANA/SE');
+    pdf.fonte(true, 15).corTexto('#ffffff').texto(X, 16.5, 'Produtividade em reais · ' + prodMesBr(m.chave));
+    pdf.fonte(false, 8).corTexto('#c9d1dc').texto(X, 16.5, 'folha ' + pag, { alinhar: 'dir', larguraMm: W });
+    y = 32;
+  }
+  function espaco(h) { if (y + h > pdf.alturaMm - 16) { rodape(); pdf.novaPagina(); pag++; cabecalho(); } }
+  function rodape() { pdf.fonte(false, 7).corTexto(CINZA).texto(X, pdf.alturaMm - 8, 'Hub CN2O · gerado em ' + agoraCurto() + ' · uso interno · cascata e IA são estimativa e apoio: confira com o sistema'); }
+  function titulo(t) { espaco(14); pdf.fonte(true, 11).corTexto(VINHO).texto(X, y, t); pdf.linha(X, y + 1.8, X + W, y + 1.8, { cor: '#C9A15A', espessura: 0.4 }); y += 7; }
+  function paragrafo(t, tam) { pdf.fonte(false, tam || 9).corTexto('#1c222e'); pdf.quebrar(t, W, false, tam || 9).forEach(function (l) { espaco(5); pdf.texto(X, y, l); y += (tam || 9) * 0.45; }); y += 1.5; }
+  function tabela(cab, larg, linhas, alinhar) {
+    const alt = 6;
+    const desenharCab = function () {
+      pdf.retangulo(X, y - 4.2, W, alt, { preencher: MARINHO, borda: false });
+      pdf.fonte(true, 7.5).corTexto('#ffffff');
+      let x = X; cab.forEach(function (t, i) { pdf.texto(x + 1.5, y, t, alinhar[i] === 'd' ? { alinhar: 'dir', larguraMm: larg[i] - 3 } : {}); x += larg[i]; });
+      y += alt;
+    };
+    espaco(alt * 3); desenharCab();
+    linhas.forEach(function (l, k) {
+      if (y + alt > pdf.alturaMm - 16) { espaco(alt * 3); desenharCab(); }
+      if (k % 2) pdf.retangulo(X, y - 4.2, W, alt, { preencher: '#f6f3ec', borda: false });
+      pdf.fonte(l.negrito, 8).corTexto('#1c222e');
+      let x = X; l.v.forEach(function (t, i) { pdf.texto(x + 1.5, y, t, alinhar[i] === 'd' ? { alinhar: 'dir', larguraMm: larg[i] - 3 } : {}); x += larg[i]; });
+      y += alt;
+    });
+    y += 3;
+  }
+  cabecalho();
+  // indicadores
+  const kp = [['Faturamento bruto', prodR$(d.total)], ['Lançamentos', atdN(d.atos)], ['Ticket médio', prodR$(d.atos ? d.total / d.atos : 0)], ['Média por dia útil', prodR$0(d.total / d.diasUteis)]];
+  if (c) kp.push(['Variação x ' + prodMesCurto(c.chave), prodPct(c.dados.total ? (d.total - c.dados.total) / c.dados.total * 100 : null, true)]);
+  const lk = W / kp.length;
+  kp.forEach(function (k, i) {
+    const x = X + i * lk;
+    pdf.retangulo(x + 0.8, y - 4, lk - 1.6, 15, { preencher: '#fbf9f4', corBorda: '#e4ded2', borda: true, espessura: 0.25 });
+    pdf.fonte(false, 7).corTexto(CINZA).texto(x + 3, y + 0.5, k[0].toUpperCase());
+    pdf.fonte(true, 11).corTexto(i ? MARINHO : VINHO).texto(x + 3, y + 7.5, k[1]);
+  });
+  y += 18;
+  paragrafo(d.diasUteis + ' dias úteis · ' + P.filter(function (p) { return p.perfil !== 'sistema'; }).length + ' pessoas com lançamento · fonte: ' + (m.fonte || 'Pesquisa de Produtividade'), 8);
+  titulo('Por escrevente');
+  tabela(['Escrevente', 'Perfil', 'Atos', 'Faturamento', '% receita', 'Ticket médio', 'Índice'].concat(c ? ['Δ fat.'] : []),
+    c ? [44, 26, 16, 30, 17, 25, 14, 10] : [48, 28, 17, 32, 18, 26, 13],
+    P.map(function (p) {
+      const ant = c && c.dados.pessoas.filter(function (x) { return x.id === p.id; })[0];
+      const v = [p.nomeTela, PROD_PERFIL[p.perfil], atdN(p.atos), prodR$(p.total), prodPct(p.shareR), prodR$(p.ticket), prodX(p.indice)];
+      if (c) v.push(ant && ant.total ? prodPct((p.total - ant.total) / Math.abs(ant.total) * 100, true) : '—');
+      return { v: v };
+    }).concat([{ negrito: true, v: ['Total', '', atdN(d.atos), prodR$(d.total), '100,0%', prodR$(d.atos ? d.total / d.atos : 0), '1,00×'].concat(c ? [''] : []) }]),
+    c ? ['e', 'e', 'd', 'd', 'd', 'd', 'd', 'd'] : ['e', 'e', 'd', 'd', 'd', 'd', 'd']);
+  titulo('Mesa de escrituras × balcão');
+  tabela(['Perfil', 'Pessoas', 'Atos', 'Faturamento', '% receita', 'Ticket médio'], [50, 20, 22, 36, 22, 32],
+    ['mesa', 'balcao', 'tabeliao'].map(function (g) {
+      const L = P.filter(function (p) { return p.perfil === g; });
+      const t = L.reduce(function (s, p) { return s + p.total; }, 0), a = L.reduce(function (s, p) { return s + p.atos; }, 0);
+      return L.length ? { v: [PROD_PERFIL[g] + (g === 'mesa' ? ' (≥ ' + prodR$0(cfg.corte) + ')' : ''), String(L.length), atdN(a), prodR$(t), prodPct(d.total ? t / d.total * 100 : 0), prodR$(a ? t / a : 0)] } : null;
+    }).filter(Boolean), ['e', 'd', 'd', 'd', 'd', 'd']);
+  titulo('Formas de pagamento');
+  tabela(['Forma', 'Lançamentos', 'Valor'], [100, 40, 42], d.pgto.map(function (x) { return { v: [x.forma, atdN(x.qtd), prodR$(x.total)] }; }), ['e', 'd', 'd']);
+  const k = prodCascataValores(d.total);
+  titulo('Do bruto ao disponível (estimativa)');
+  tabela(['Etapa', 'Valor', '% do bruto'], [100, 42, 40], [
+    { v: ['Emolumento bruto', prodR$(k.bruto), '100,0%'] }, { v: ['(−) FERD (' + prodPct(cfg.ferd) + ')', prodR$(k.ferd), prodPct(k.ferd / (k.bruto || 1) * 100)] },
+    { v: ['Emolumento líquido', prodR$(k.liq), prodPct(k.liq / (k.bruto || 1) * 100)] }, { v: ['(−) IR estimado (' + prodPct(cfg.ir) + ')', prodR$(k.ir), prodPct(k.ir / (k.bruto || 1) * 100)] },
+    { negrito: true, v: ['Disponível estimado', prodR$(k.disp), prodPct(k.disp / (k.bruto || 1) * 100)] }], ['e', 'd', 'd']);
+  if (m.analise) {
+    const a = m.analise, porId = {};
+    d.pessoas.forEach(function (p) { porId[p.id] = p; });
+    titulo('Análise do mês (IA — texto de apoio)');
+    if (a.resumo) paragrafo(a.resumo);
+    (a.alertas || []).forEach(function (x) { paragrafo('• ' + x.titulo + ': ' + x.detalhe); });
+    (a.observacoes || []).forEach(function (x, i) { paragrafo((i + 1) + '. ' + x); });
+    (a.pessoas || []).forEach(function (x) { espaco(10); pdf.fonte(true, 9).corTexto(MARINHO).texto(X, y, porId[x.id] ? prodNome(porId[x.id]) : x.id); y += 4.5; paragrafo(x.texto); });
+  }
+  rodape();
+  const url = URL.createObjectURL(pdf.blob()), a = document.createElement('a');
+  a.href = url; a.download = 'produtividade-cn2o-' + m.chave + '.pdf';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(function () { URL.revokeObjectURL(url); }, 4000);
+}
+
 </script>
 </body>
 </html>
 
-<!-- Hub CN2O v1.39.4 · 25/09/2026 -->
+<!-- Hub CN2O v1.40 · 26/09/2026 -->
