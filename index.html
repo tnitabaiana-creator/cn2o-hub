@@ -2666,6 +2666,9 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 .card-arte::after{content:"CN2O · Ambiente interno";position:absolute;left:18px;bottom:14px;font-family:'Montserrat',sans-serif;font-weight:600;
   font-size:11px;letter-spacing:.26em;text-transform:uppercase;color:#202a3a;background:rgba(250,247,243,.84);padding:4px 8px;border-radius:4px}
 @media (max-width:560px){.card-arte{display:none}}
+/* v1.41 — com 8 quadros, o nicho só cabe na grade de 3 colunas (1241–1360 px) */
+.card-arte{display:none}
+@media (min-width:1241px) and (max-width:1360px){.card-arte{display:block}}
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]) .hub-conteudo::before{background:var(--app-fundo)}
   :root:not([data-theme="light"]) .hub-conteudo::after{background:none}
@@ -2893,6 +2896,79 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 .prod-ia-p p{margin:3px 0 0;font-size:14px;line-height:1.55}
 @media (max-width:720px){ .prod-casc{grid-template-columns:1fr}.prod-casc-v{text-align:left} }
 
+/* ============================================================
+   v1.41 — MURAL EM TRÊS QUADROS: entra "Rodízio de Atendimento — Escrituras"
+   (escala semanal: quem sai do balcão para as escrituras). Tom pastel próprio
+   (areia/ouro), fonte generosa, dia de hoje em destaque.
+   Arranjo: Avisos e Rodízio lado a lado e a Minha Agenda embaixo em toda a largura
+   (o miolo do Hub tem ~1 075 px: três colunas fariam o Bloco de Notas descer para
+   baixo da agenda, contra a v1.33); no celular (≤ 880 px), empilhado.
+   ============================================================ */
+.mural-cards.mural-tres{grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px}
+.mural-cards.mural-tres .ficha-agenda{grid-column:1/-1;order:3}
+.mural-cards.mural-tres .ficha-rodizio{order:2}
+.mural-cards.mural-tres .ficha-luz:nth-child(3){--incl:.8deg}
+@media(max-width:880px){.mural-cards.mural-tres{grid-template-columns:1fr;gap:30px}.mural-cards.mural-tres .ficha-agenda{order:0}.mural-cards.mural-tres .ficha-rodizio{order:0}}
+.ficha-luz.tom-c{background-color:#faf6ec;background-image:linear-gradient(168deg,rgba(185,138,62,.03) 0%,rgba(185,138,62,.16) 100%),linear-gradient(#faf6ec,#faf6ec)}
+.ficha-luz.tom-c .ficha-icone{background:#8a6a2a}
+.ficha-luz.tom-c .ficha-titulo.titulo-script::after{background:#8a6a2a}
+.ficha-rodizio .pill-destaque,.ficha-rodizio .ficha-legenda{font-size:14px}
+.pill-rodizio{border-color:rgba(138,106,42,.45);color:#5a4416}
+.pill-rodizio.tem-novos{background:#8a6a2a;border-color:#8a6a2a;color:#ffffff}
+.rz-explica{font-size:15.5px;color:#202a3a;text-align:center;line-height:1.35;margin-top:-2px}
+.rz-lista{list-style:none;display:flex;flex-direction:column;gap:7px;margin-top:4px}
+.rz-lista li{display:grid;grid-template-columns:56px minmax(0,1fr);align-items:center;gap:10px;background:rgba(255,255,255,.82);border:1.5px solid rgba(32,42,58,.14);border-radius:11px;padding:8px 10px;min-height:52px}
+.rz-dia{font-family:'Montserrat',sans-serif;font-weight:800;font-size:14px;letter-spacing:.1em;text-transform:uppercase;color:rgba(32,42,58,.78);text-align:center;border-right:1.5px solid rgba(32,42,58,.14);padding-right:8px}
+.rz-nome{font-family:'Montserrat',sans-serif;font-weight:800;font-size:18px;letter-spacing:.02em;color:#202a3a;text-transform:uppercase;line-height:1.15;overflow-wrap:anywhere}
+.rz-nome.rz-livre{font-family:'Lato',sans-serif;font-weight:400;font-size:15px;text-transform:none;color:rgba(32,42,58,.7)}
+.rz-lista li.hoje{background:linear-gradient(180deg,rgba(99,19,37,.14),rgba(99,19,37,.07)),#ffffff;border:2px solid var(--vinho);box-shadow:0 10px 24px rgba(99,19,37,.22)}
+.rz-lista li.hoje .rz-dia,.rz-lista li.hoje .rz-nome{color:var(--vinho)}
+.rz-lista li.hoje .rz-dia{border-right-color:rgba(99,19,37,.35)}
+.rz-hoje-tag{display:block;font-family:'Lato',sans-serif;font-weight:700;font-size:14px;letter-spacing:.06em;text-transform:uppercase;color:var(--vinho);margin-top:2px}
+.rz-obs{font-size:14.5px;line-height:1.4;color:#202a3a;background:rgba(255,255,255,.55);border-left:3px solid #8a6a2a;border-radius:0 8px 8px 0;padding:8px 10px;margin-top:4px}
+.rz-obs:empty,.rz-desde:empty{display:none}
+.rz-desde{font-size:14px;color:rgba(32,42,58,.78);text-align:center}
+/* editor: aba Rodízio */
+.ed-rodizio{display:grid;grid-template-columns:110px minmax(0,1fr);gap:8px 10px;align-items:center;margin-top:8px}
+.ed-rodizio label{font-family:'Montserrat',sans-serif;font-weight:700;font-size:14px;letter-spacing:.08em;text-transform:uppercase;color:#202a3a}
+.ed-rodizio input,.ed-rodizio textarea{border:1.5px solid rgba(32,42,58,.22);border-radius:7px;padding:9px 11px;font-family:'Lato',sans-serif;font-size:15px;background:#ffffff;color:#202a3a;width:100%}
+.ed-rodizio input:focus,.ed-rodizio textarea:focus{outline:2px solid rgba(99,19,37,.45);outline-offset:1px}
+.ed-rodizio .larga{grid-column:1/-1}
+@media(max-width:560px){.ed-rodizio{grid-template-columns:1fr}}
+
+/* ===== v1.41 — 08 · Calculadora ITCMD/SE (escopado a #itcmdRaiz) ===== */
+
+#itcmdRaiz{
+  --vinho:#631325; --vinho-escuro:#470c1a; --marinho:#202a3a; --ouro:#b98a3e; --ouro-suave:#f3ead7;
+  --fundo:#f6f4f0; --papel:#ffffff; --texto:#202a3a; --texto-2:#3d4657; --linha:#d9d3ca; --linha-suave:#e9e4dc;
+  --chip:#f4e9eb; --chip-texto:#631325; --ok:#245c3a; --ok-fundo:#e6f1ea; --alerta:#8a5a00; --alerta-fundo:#fff4d6; --erro:#8f1d1d; --erro-fundo:#fbe7e7;
+  --foco:rgba(99,19,37,.45); --sombra:0 10px 26px rgba(32,42,58,.10); --raio:12px;
+  --fonte-corpo:'Atkinson Hyperlegible',Lato,Arial,sans-serif; --fonte-titulo:Montserrat,Arial,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #itcmdRaiz{ color-scheme:dark;
+    --fundo:#1a222e; --papel:#202a3a; --texto:#ffffff; --texto-2:#dfe4ec; --linha:#4a5568; --linha-suave:#354052;
+    --chip:#4a2230; --chip-texto:#ffffff; --ok:#cfe9d8; --ok-fundo:#25412f; --alerta:#ffe2a8; --alerta-fundo:#4a3a10; --erro:#ffc9c9; --erro-fundo:#4a2020;
+    --ouro-suave:#3b3323; --foco:rgba(255,255,255,.55); --sombra:0 10px 26px rgba(0,0,0,.35);
+  }
+}:root[data-theme="dark"] #itcmdRaiz{ color-scheme:dark;
+  --fundo:#1a222e; --papel:#202a3a; --texto:#ffffff; --texto-2:#dfe4ec; --linha:#4a5568; --linha-suave:#354052;
+  --chip:#4a2230; --chip-texto:#ffffff; --ok:#cfe9d8; --ok-fundo:#25412f; --alerta:#ffe2a8; --alerta-fundo:#4a3a10; --erro:#ffc9c9; --erro-fundo:#4a2020;
+  --ouro-suave:#3b3323; --foco:rgba(255,255,255,.55); --sombra:0 10px 26px rgba(0,0,0,.35);
+}#itcmdRaiz *{box-sizing:border-box;margin:0;padding:0}#itcmdRaiz{scroll-behavior:smooth}
+@media (prefers-reduced-motion:reduce){#itcmdRaiz{scroll-behavior:auto}#itcmdRaiz *{transition:none!important;animation:none!important}}#itcmdRaiz{background:var(--fundo);color:var(--texto);font-family:var(--fonte-corpo);font-size:17px;line-height:1.5;padding-inline:16px;padding-block:0 60px;min-height:100%}#itcmdRaiz button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer;font-size:inherit}#itcmdRaiz a{color:var(--vinho)}:root[data-theme="dark"] #itcmdRaiz a{color:#ffd9df}#itcmdRaiz :focus-visible{outline:3px solid var(--foco);outline-offset:2px;border-radius:6px}#itcmdRaiz h1, #itcmdRaiz h2, #itcmdRaiz h3{font-family:var(--fonte-titulo);text-wrap:balance;line-height:1.2}#itcmdRaiz .versalete{font-family:var(--fonte-titulo);text-transform:uppercase;letter-spacing:.14em;font-weight:600;font-size:14px}#itcmdRaiz .topo{max-width:1180px;margin:0 auto;padding-block:26px 12px;display:flex;flex-wrap:wrap;gap:14px 24px;align-items:flex-end;justify-content:space-between}#itcmdRaiz .marca{display:flex;gap:14px;align-items:center}#itcmdRaiz .mono{font-family:var(--fonte-titulo);font-weight:800;font-size:38px;line-height:.9;letter-spacing:-.01em}#itcmdRaiz .mono .ponto{display:inline-block;width:9px;height:9px;background:var(--vinho);margin-left:2px}#itcmdRaiz .barra{width:3px;align-self:stretch;background:var(--vinho)}#itcmdRaiz .topo h1{font-size:clamp(22px,3.2vw,30px);font-weight:700}#itcmdRaiz .topo .sub{color:var(--texto-2);font-size:16px;margin-top:4px;max-width:62ch}#itcmdRaiz .selo{display:inline-flex;align-items:center;gap:8px;background:var(--chip);color:var(--chip-texto);border-radius:999px;padding:6px 14px;font-family:var(--fonte-titulo);font-weight:700;font-size:14px;letter-spacing:.06em;text-transform:uppercase}#itcmdRaiz .pagina{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:minmax(0,1fr);gap:18px}#itcmdRaiz .coluna-direita{display:grid;gap:18px;min-width:0}#itcmdRaiz .coluna-esquerda, #itcmdRaiz .coluna-direita > *, #itcmdRaiz .cartao, #itcmdRaiz .orcamento, #itcmdRaiz .item, #itcmdRaiz .item .linha > *{min-width:0}#itcmdRaiz .tabela-wrap{max-width:100%}#itcmdRaiz .coluna-direita > *{margin:0!important}#itcmdRaiz .barra-viva{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--papel);border:1px solid var(--linha);border-radius:10px;padding:8px 14px;display:flex;flex-wrap:wrap;gap:6px 22px;align-items:center;box-shadow:var(--sombra);margin-top:4px}#itcmdRaiz .barra-viva .bv{display:flex;flex-direction:column;line-height:1.15}#itcmdRaiz .barra-viva .bv small{font-size:14px;font-weight:700;color:var(--texto-2);text-transform:uppercase;letter-spacing:.05em}#itcmdRaiz .barra-viva .bv b{font-family:var(--fonte-titulo);font-size:19px;font-variant-numeric:tabular-nums}#itcmdRaiz .barra-viva .bv.destaque b{color:var(--vinho)}:root[data-theme="dark"] #itcmdRaiz .barra-viva .bv.destaque b{color:#ffd9df}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #itcmdRaiz .barra-viva .bv.destaque b{color:#ffd9df}}#itcmdRaiz .barra-viva .btn{margin-left:auto}#itcmdRaiz .cartao{background:var(--papel);border:1px solid var(--linha);border-radius:var(--raio);padding:20px;box-shadow:var(--sombra)}#itcmdRaiz .cartao + .cartao{margin-top:18px}#itcmdRaiz .cartao h2{font-size:19px;display:flex;align-items:center;gap:10px;margin-bottom:6px}#itcmdRaiz .cartao h2 .num{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:50%;background:var(--vinho);color:#fff;font-size:14px;font-weight:800}#itcmdRaiz .cartao .lead{color:var(--texto-2);font-size:15.5px;margin-bottom:14px;max-width:70ch}#itcmdRaiz .cartao h3{font-size:16px;font-weight:700;margin:16px 0 8px;color:var(--vinho)}:root[data-theme="dark"] #itcmdRaiz .cartao h3{color:#ffd9df}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #itcmdRaiz .cartao h3{color:#ffd9df}}#itcmdRaiz .segmento{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media (max-width:640px){#itcmdRaiz .segmento{grid-template-columns:1fr}}#itcmdRaiz .segmento button{border:2px solid var(--linha);border-radius:10px;padding:12px 10px;text-align:left;background:var(--papel);line-height:1.3}#itcmdRaiz .segmento button b{display:block;font-family:var(--fonte-titulo);font-size:15px}#itcmdRaiz .segmento button span{display:block;font-size:14.5px;color:var(--texto-2);margin-top:3px}#itcmdRaiz .segmento button[aria-pressed="true"]{border-color:var(--vinho);background:var(--chip)}#itcmdRaiz .segmento button[aria-pressed="true"] b{color:var(--chip-texto)}#itcmdRaiz .grade{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px 14px}#itcmdRaiz .campo{display:flex;flex-direction:column;gap:5px;min-width:0}#itcmdRaiz .campo.larga{grid-column:1/-1}#itcmdRaiz label, #itcmdRaiz .rotulo{font-size:14.5px;font-weight:700;color:var(--texto);letter-spacing:.01em}#itcmdRaiz .dica{font-size:14px;color:var(--texto-2);font-weight:400}#itcmdRaiz input[type=text], #itcmdRaiz input[type=date], #itcmdRaiz input[type=number], #itcmdRaiz select, #itcmdRaiz textarea{font-family:inherit;font-size:16.5px;color:var(--texto);background:var(--papel);border:1.5px solid var(--linha);border-radius:8px;padding:10px 12px;width:100%;min-width:0}#itcmdRaiz input::placeholder{color:#5a6272;opacity:1}:root[data-theme="dark"] #itcmdRaiz input::placeholder{color:#b8c0cc}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #itcmdRaiz input::placeholder{color:#b8c0cc}}#itcmdRaiz input:focus, #itcmdRaiz select:focus, #itcmdRaiz textarea:focus{outline:none;border-color:var(--vinho);box-shadow:0 0 0 3px var(--foco)}#itcmdRaiz input.moeda{text-align:right;font-variant-numeric:tabular-nums}#itcmdRaiz input[readonly]{background:var(--fundo)}#itcmdRaiz .opcoes{display:flex;flex-wrap:wrap;gap:8px}#itcmdRaiz .opcoes button{border:1.5px solid var(--linha);border-radius:999px;padding:7px 14px;font-size:15px;background:var(--papel)}#itcmdRaiz .opcoes button[aria-pressed="true"]{background:var(--vinho);border-color:var(--vinho);color:#fff}#itcmdRaiz .marcar{display:flex;gap:10px;align-items:flex-start;font-size:15.5px;font-weight:400;line-height:1.35}#itcmdRaiz .marcar input{width:20px;height:20px;margin-top:2px;accent-color:var(--vinho);flex:none}#itcmdRaiz .lista{display:flex;flex-direction:column;gap:10px}#itcmdRaiz .item{border:1px solid var(--linha-suave);border-radius:10px;padding:12px;background:var(--fundo);display:grid;gap:10px}#itcmdRaiz .item .linha{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1.2fr) auto;gap:10px;align-items:end}#itcmdRaiz .item .linha.bem{grid-template-columns:minmax(0,2fr) minmax(0,1.3fr) minmax(0,1.2fr) minmax(0,1.1fr) minmax(0,.9fr) auto}#itcmdRaiz .item .linha.bem-doacao{grid-template-columns:minmax(0,2fr) minmax(0,1.2fr) minmax(0,1.1fr) minmax(0,1.6fr) minmax(0,.8fr) auto}#itcmdRaiz .item .linha.colateral{grid-template-columns:minmax(0,2fr) minmax(0,1fr) minmax(0,1fr) auto}#itcmdRaiz .item .linha.donatario{grid-template-columns:minmax(0,2fr) minmax(0,1.2fr) minmax(0,1.2fr) auto}
+@media (max-width:760px){#itcmdRaiz .item .linha, #itcmdRaiz .item .linha.bem, #itcmdRaiz .item .linha.bem-doacao, #itcmdRaiz .item .linha.colateral, #itcmdRaiz .item .linha.donatario{grid-template-columns:1fr 1fr}#itcmdRaiz .item .linha > .campo.larga-mobile{grid-column:1/-1}}#itcmdRaiz .item .sub{margin-left:12px;padding-left:12px;border-left:3px solid var(--ouro);display:grid;gap:8px}#itcmdRaiz .btn{border:1.5px solid var(--linha);border-radius:8px;padding:9px 14px;font-weight:700;font-size:15px;background:var(--papel);display:inline-flex;align-items:center;gap:6px;white-space:nowrap}#itcmdRaiz .btn.primario{background:var(--vinho);border-color:var(--vinho);color:#fff}#itcmdRaiz .btn.suave{border-style:dashed}#itcmdRaiz .btn.mini{padding:7px 10px;font-size:14px}#itcmdRaiz .btn.remover{color:var(--erro);border-color:transparent}#itcmdRaiz .btn:disabled{opacity:.5;cursor:not-allowed}#itcmdRaiz .acoes{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}#itcmdRaiz .aviso{border-left:4px solid var(--ouro);background:var(--ouro-suave);border-radius:0 8px 8px 0;padding:10px 12px;font-size:15px;margin-top:10px}#itcmdRaiz .aviso.erro{border-left-color:var(--erro);background:var(--erro-fundo);color:var(--erro)}#itcmdRaiz .aviso.ok{border-left-color:var(--ok);background:var(--ok-fundo)}#itcmdRaiz .aviso ul{padding-left:20px;display:grid;gap:4px}#itcmdRaiz .notinha{font-size:14.5px;color:var(--texto-2)}#itcmdRaiz .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0}#itcmdRaiz .kpi{border:1px solid var(--linha);border-radius:10px;padding:10px 12px;background:var(--fundo)}#itcmdRaiz .kpi .r{font-size:14px;font-weight:700;color:var(--texto-2);text-transform:uppercase;letter-spacing:.06em}#itcmdRaiz .kpi .v{font-family:var(--fonte-titulo);font-weight:800;font-size:20px;font-variant-numeric:tabular-nums;margin-top:2px}#itcmdRaiz .kpi.destaque{border-color:var(--vinho);background:var(--chip)}#itcmdRaiz .kpi.destaque .v{color:var(--chip-texto)}#itcmdRaiz .tabela-wrap{overflow-x:auto;margin-top:8px}#itcmdRaiz table{border-collapse:collapse;width:100%;font-size:15.5px}#itcmdRaiz th, #itcmdRaiz td{padding:8px 9px;border-bottom:1px solid var(--linha-suave);text-align:left;vertical-align:top}#itcmdRaiz th{font-family:var(--fonte-titulo);font-size:14px;letter-spacing:.04em;text-transform:uppercase;color:var(--texto-2);border-bottom:2px solid var(--linha)}#itcmdRaiz td.n, #itcmdRaiz th.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}#itcmdRaiz tr.total td{font-weight:800;border-top:2px solid var(--linha);border-bottom:none}#itcmdRaiz tr.sub td{color:var(--texto-2);font-size:14.5px}#itcmdRaiz .pill{display:inline-block;border-radius:999px;padding:2px 10px;font-size:14.5px;font-weight:700}#itcmdRaiz .pill.isento{background:var(--ok-fundo);color:var(--ok)}#itcmdRaiz .pill.tributado{background:var(--chip);color:var(--chip-texto)}#itcmdRaiz .pill.sem{background:var(--fundo);color:var(--texto-2)}#itcmdRaiz .fracao{font-family:var(--fonte-titulo);font-weight:700;font-variant-numeric:tabular-nums}#itcmdRaiz .orcamento{border:2px solid var(--vinho);border-radius:var(--raio);padding:18px 20px;background:var(--papel)}#itcmdRaiz .orcamento h2{font-size:20px}#itcmdRaiz .orcamento .cab{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:baseline;margin-bottom:8px}#itcmdRaiz .orcamento .cab small{color:var(--texto-2);font-size:14.5px}#itcmdRaiz .orcamento td input{padding:6px 8px;font-size:15.5px}#itcmdRaiz .orcamento tr.grande td{font-size:19px}#itcmdRaiz .assinatura{margin-top:16px;font-size:14.5px;color:var(--texto-2);border-top:1px dashed var(--linha);padding-top:10px}#itcmdRaiz details{border:1px solid var(--linha);border-radius:10px;padding:10px 14px;background:var(--papel)}#itcmdRaiz details summary{cursor:pointer;font-weight:700;font-family:var(--fonte-titulo);font-size:15px}#itcmdRaiz details ol, #itcmdRaiz details ul{padding-left:20px;display:grid;gap:6px;margin-top:8px;font-size:15px}#itcmdRaiz .rodape{max-width:1180px;margin:26px auto 0;color:var(--texto-2);font-size:14px;text-align:center}#itcmdRaiz .oculto{display:none!important}#itcmdRaiz .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--vinho);color:#fff;padding:10px 18px;border-radius:999px;font-weight:700;box-shadow:var(--sombra);opacity:0;pointer-events:none;transition:opacity .2s}#itcmdRaiz .toast.ativo{opacity:1}
+
+
+@media print{#itcmdRaiz{background:#fff;color:#000;font-size:12.5pt;padding:0}#itcmdRaiz .topo, #itcmdRaiz .coluna-esquerda, #itcmdRaiz .barra-viva, #itcmdRaiz .acoes, #itcmdRaiz .btn, #itcmdRaiz .toast, #itcmdRaiz .rodape, #itcmdRaiz .nao-imprimir{display:none!important}#itcmdRaiz .pagina{display:block}#itcmdRaiz .coluna-direita{position:static;max-height:none;overflow:visible}#itcmdRaiz .cartao, #itcmdRaiz .orcamento{box-shadow:none;border-color:#999;break-inside:avoid;page-break-inside:avoid}#itcmdRaiz .orcamento{border-width:1.5pt}#itcmdRaiz .kpi.destaque{background:#fff}#itcmdRaiz .pill{border:1px solid #666}#itcmdRaiz th{color:#000}#itcmdRaiz input{border:none;padding:0;background:transparent;color:#000}
+}
+
+#itcmdRaiz .itcmd-selo-linha{display:flex;justify-content:flex-end;margin-bottom:6px}
+#itcmdRaiz{font-size:17px;line-height:1.5;background:transparent;padding-inline:0}
+
 </style>
 </head>
 <body>
@@ -3024,8 +3100,9 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
               <span class="selo-semana" id="seloSemana">—</span>
             </div>
           </div>
-          <!-- v1.32 — dois quadros: "Avisos" (avisos do Tabelião + Agenda Cn2o) e "Minha Agenda" (pessoal) -->
-          <div class="mural-cards mural-dois">
+          <!-- v1.32 — "Avisos" (avisos do Tabelião + Agenda Cn2o) e "Minha Agenda" (pessoal);
+               v1.41 — terceiro quadro "Rodízio de Atendimento — Escrituras" (escala semanal do balcão) -->
+          <div class="mural-cards mural-dois mural-tres">
             <article class="ficha-luz ficha-avisos tom-a" aria-labelledby="tituloAvisos">
               <div class="ficha-central-topo">
                 <div class="ficha-icone" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 10v4h3l7 4.5v-13L7 10H4Z"/><path d="M17.5 9.5a4.2 4.2 0 0 1 0 5"/></svg></div>
@@ -3071,6 +3148,18 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
                   <button class="ficha-ver ficha-ver-notas" data-sub="notas" type="button"><span>Abrir o bloco</span><span class="seta-circulo">→</span></button>
                 </section>
               </div>
+            </article>
+            <article class="ficha-luz ficha-rodizio tom-c" aria-labelledby="tituloRodizio">
+              <div class="ficha-central-topo">
+                <div class="ficha-icone" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 13.7-5.6M20 12a8 8 0 0 1-13.7 5.6"/><path d="M17 3v4h-4M7 21v-4h4"/></svg></div>
+                <span class="pill-destaque pill-rodizio" id="pillRodizio">● Escala semanal</span>
+              </div>
+              <h3 class="ficha-titulo titulo-script" id="tituloRodizio">Rodízio de Atendimento</h3>
+              <p class="ficha-legenda">Escrituras</p>
+              <p class="rz-explica">Quem sai do balcão no dia para se dedicar às escrituras.</p>
+              <ol class="rz-lista" id="muralRodizio" aria-label="Rodízio da semana"><li class="mural-vazio">Carregando a escala…</li></ol>
+              <p class="rz-obs" id="rodizioObs"></p>
+              <p class="rz-desde" id="rodizioDesde"></p>
             </article>
           </div>
         </div>
@@ -3132,8 +3221,18 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
             <p>Pesquisa no <b>acervo da serventia</b> — os dois: o <b>antigo do 1º Ofício</b> e o do <b>2º Ofício</b>. Acha o <b>livro</b> (onde está guardado, se está digitalizado) e o <b>ato</b> (folhas, data, partes) e abre o arquivo no Drive.</p>
             <span class="card-acao">Pesquisar →</span>
           </button>
+          <!-- v1.41 — 08 · Calculadora ITCMD/SE: inventário, inventário cumulativo e doação —
+               meação, quinhões, imposto por herdeiro (Lei SE 7.724/2013), emolumentos TJSE e orçamento
+               para o advogado. Roda no navegador (frontend/src/itcmd/). -->
+          <button class="card" id="cardItcmd" type="button">
+            <div class="card-topo"><span class="card-num">08</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h3M13 11h3M8 15h3M13 15h3M8 18h3"/></svg></span><span class="chip-ia chip-guia">Cálculo</span></div>
+            <h3>Calculadora ITCMD</h3>
+            <p><b>Inventário</b>, <b>inventário cumulativo</b> e <b>doação</b>: meação, quinhão de cada herdeiro, ITCMD pela lei de Sergipe, emolumentos e o <b>orçamento completo</b> para o advogado apresentar ao cliente.</p>
+            <span class="card-acao">Calcular aqui →</span>
+          </button>
           <!-- v1.35 — o NICHO: a célula que sobra na grade vira uma peça de galeria (a arte da
-               home: arco marinho e cubo vinho). Decorativa; some em uma coluna (telefone). -->
+               home: arco marinho e cubo vinho). Decorativa; desde a v1.41 (8 quadros) só aparece
+               na grade de 3 colunas, onde sobra uma célula; some em 4, 2 e 1 colunas. -->
           <div class="card-arte" aria-hidden="true"></div>
         </div>
       </section>
@@ -4466,6 +4565,104 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
     </div>
 
     <!-- ===== VIEW: 06 · GUIA DE ITBI (v1.33; renumerado na v1.34) ===== -->
+    <!-- v1.41 — 08 · Calculadora ITCMD/SE (o miolo vem de frontend/src/itcmd/corpo.html no build) -->
+    <div id="paginaItcmd" hidden style="display:flex;flex-direction:column;gap:14px">
+      <button class="voltar" data-voltar type="button">← Voltar ao hub</button>
+      <div class="ferramenta-cab">
+        <span class="num-grande">08</span>
+        <div style="flex:1;min-width:240px">
+          <h2>Calculadora ITCMD/SE</h2>
+          <p class="desc">Lance o óbito, o regime de bens, os herdeiros e os bens (ou o doador, os donatários e os bens doados) e a ferramenta calcula a <b>meação</b>, o <b>quinhão de cada herdeiro</b>, o <b>ITCMD</b> pela Lei estadual nº 7.724/2013, os <b>emolumentos</b> da escritura e monta o <b>orçamento do ato</b> para o advogado. Nada sai do seu navegador.</p>
+        </div>
+      </div>
+      <div id="itcmdRaiz"><div class="itcmd-selo-linha"><span class="selo" id="seloUfp">UFP/SE —</span></div>
+<main class="pagina">
+  <div class="barra-viva nao-imprimir" id="barraViva" aria-live="polite">
+    <div class="bv destaque"><small>ITCMD</small><b id="bvItcmd">—</b></div>
+    <div class="bv"><small>Emolumentos</small><b id="bvEmol">—</b></div>
+    <div class="bv"><small>Total estimado</small><b id="bvTotal">—</b></div>
+    <button class="btn mini" type="button" id="btVerOrcamento">Ver orçamento ↓</button>
+  </div>
+  <div class="coluna-esquerda">
+
+    <section class="cartao" aria-labelledby="t1">
+      <h2 id="t1"><span class="num">1</span>Qual é a operação?</h2>
+      <p class="lead">Escolha o ato. Os campos abaixo mudam conforme a escolha.</p>
+      <div class="segmento" role="group" aria-label="Tipo de operação" id="segModo">
+        <button type="button" data-modo="inventario" aria-pressed="true"><b>Inventário</b><span>Um falecido: meação, herdeiros e ITCMD causa mortis.</span></button>
+        <button type="button" data-modo="cumulativo" aria-pressed="false"><b>Inventário cumulativo</b><span>Dois óbitos (ex.: pai e depois mãe): duas declarações encadeadas.</span></button>
+        <button type="button" data-modo="doacao" aria-pressed="false"><b>Doação</b><span>Doador(es), donatários e imposto por donatário, com ou sem usufruto.</span></button>
+      </div>
+      <div class="grade" style="margin-top:14px">
+        <div class="campo">
+          <label for="ufp">UFP/SE (R$) <span class="dica" id="ufpDica"></span></label>
+          <input type="text" id="ufp" class="moeda" inputmode="decimal" data-path="ufp" data-tipo="moeda">
+        </div>
+        <div class="campo">
+          <label for="hoje">Data de referência <span class="dica">para prazo de 120 dias e UFP</span></label>
+          <input type="date" id="hoje" data-path="hoje" data-tipo="texto">
+        </div>
+      </div>
+      <div id="barraRascunho" class="aviso nao-imprimir oculto">Há um rascunho salvo neste navegador.
+        <span class="acoes" style="display:inline-flex;margin:0 0 0 8px"><button class="btn mini" type="button" id="btRestaurar">Restaurar</button><button class="btn mini" type="button" id="btDescartar">Descartar</button></span>
+      </div>
+    </section>
+
+    <div id="formInventarios"></div>
+    <div id="formDoacao" class="oculto"></div>
+
+    <section class="cartao nao-imprimir">
+      <div class="acoes" style="margin:0">
+        <button class="btn" type="button" id="btExemplo">Carregar exemplo</button>
+        <button class="btn" type="button" id="btLimpar">Limpar tudo</button>
+        <button class="btn" type="button" id="btSalvar">Salvar rascunho</button>
+      </div>
+      <p class="notinha" style="margin-top:8px">Nada é enviado a servidor: o cálculo roda no seu navegador. O rascunho fica só neste computador.</p>
+    </section>
+  </div>
+
+  <div class="coluna-direita">
+    <section class="cartao" aria-live="polite" id="resultado">
+      <h2><span class="num">✓</span>Resultado</h2>
+      <div id="resCorpo"></div>
+    </section>
+    <section class="orcamento" style="margin-top:18px" id="orcamento">
+      <div class="cab">
+        <h2>Orçamento do ato</h2>
+        <small id="orcData"></small>
+      </div>
+      <div id="orcCorpo"></div>
+      <div class="acoes nao-imprimir">
+        <button class="btn primario" type="button" id="btImprimir">Imprimir orçamento</button>
+        <button class="btn" type="button" id="btCopiar">Copiar resumo</button>
+      </div>
+      <p class="assinatura">Estimativa elaborada pelo Cartório de Notas do 2º Ofício de Itabaiana/SE com base na Lei estadual nº 7.724/2013 (redação vigente) e na Tabela de Emolumentos TJSE 2026. Valores sujeitos à conferência da SEFAZ/SE, à avaliação dos bens e à data efetiva do pagamento.</p>
+    </section>
+    <details style="margin-top:18px" id="premissas">
+      <summary>Premissas e base legal do cálculo</summary>
+      <ol>
+        <li><b>Fato gerador por herdeiro/donatário</b> (art. 5º): a isenção e a faixa de alíquota são aferidas quinhão a quinhão, inclusive para quem herda por representação.</li>
+        <li><b>Isenção</b>: quinhão igual ou inferior a 500 UFP/SE (art. 8º, IV). Acima disso, a alíquota da faixa incide sobre o valor <b>integral</b> do quinhão, sem escalonamento (art. 14, §1º).</li>
+        <li><b>Causa mortis</b> (art. 14, I): 3% até 2.417 UFP; 6% de 2.417 a 12.086 UFP; 8% acima. Quotas de sociedade: 2% (I-A).</li>
+        <li><b>Doação de imóveis</b> (art. 14, II): 2% até 6.900 UFP; 4% até 12.086; 6% até 27.248; 8% acima. Bens móveis: 2% (III-A). Doações do mesmo doador no mesmo exercício somam para a isenção (art. 8º, §1º) e, havendo doações anteriores, o imposto é recalculado sobre o acumulado, deduzido o já recolhido (art. 10, §7º).</li>
+        <li><b>Meação</b> não é herança e não é tributada; o excedente de meação ou de quinhão atribuído a alguém é tributado (art. 2º, §2º). Esta versão calcula a partilha <b>ideal</b> (frações legais).</li>
+        <li><b>Concorrência do cônjuge/companheiro</b> (art. 1.829, I, CC): não concorre na comunhão universal nem na separação obrigatória; na comunhão parcial concorre só sobre os bens particulares (REsp 1.368.123/STJ); na separação convencional concorre sobre tudo (REsp 1.382.170/STJ); na participação final nos aquestos a ferramenta adota o mesmo entendimento (concorre sobre tudo), sem jurisprudência pacificada. Quota igual à dos filhos, com reserva de 1/4 quando é ascendente de todos (art. 1.832). União estável segue o cônjuge (Tema 809/STF).</li>
+        <li><b>Ascendentes</b>: cônjuge fica com 1/3 concorrendo com pai e mãe, 1/2 nos demais casos (art. 1.837); metade por linha paterna/materna (art. 1.836, §2º).</li>
+        <li><b>Colaterais</b>: irmãos bilaterais herdam o dobro dos unilaterais (art. 1.841); sobrinhos representam irmão premorto quando há irmão vivo (art. 1.840) e herdam por cabeça quando não há (art. 1.843, §1º); sobrinhos excluem tios, e o 3º grau exclui o 4º.</li>
+        <li><b>Renúncia</b> pura e simples não é tributada (art. 7º, II) e a parte acresce aos demais da classe (art. 1.810 CC).</li>
+        <li><b>Dívidas do espólio</b> são abatidas antes da meação (monte-mor − dívidas − meação = monte partível), como no sistema da SEFAZ/SE.</li>
+        <li><b>Multa</b> de 20% do imposto quando o inventário não é requerido em 120 dias do óbito (arts. 18-B, II, e 27, I). Multa de mora e juros só após o vencimento (art. 29); no extrajudicial o imposto é pago antes da lavratura (Decreto 29.994/2015, art. 23, I, a).</li>
+        <li><b>Alíquota vigente na data do fato gerador</b> (Decreto, art. 19, parágrafo único): para óbitos anteriores a 2024 a legislação da época pode diferir — use "alíquota manual" se a SEFAZ indicar outra.</li>
+        <li><b>Emolumentos</b> (TJSE 2026, Lei 8.639/2019): escritura de inventário com bens pela faixa do valor de todos os bens; FERD de 20%; R$ 4,77 por herdeiro a partir do 11º; ato acessório = metade da faixa. Registro no RI, certidões e honorários são lançados à parte.</li>
+        <li><b>Usufruto</b>: na doação com reserva, o imposto incide só sobre a doação (art. 2º, §5º); a extinção do usufruto não é tributada (art. 7º, III). A base (100% ou 50%, aplicada a todos os bens doados) é opção da ferramenta, a confirmar com a SEFAZ/SE.</li>
+        <li><b>Quotas de sociedade</b> (2%): a parcela de quotas de cada quinhão é apurada pela partilha ideal; a faixa do art. 14, I é aferida pelo quinhão total. <b>Isenção do art. 8º, VI</b>: só é oferecida quando o espólio tem um único imóvel de até 2.600 UFP e alcança apenas a parcela do imóvel.</li>
+      </ol>
+    </details>
+  </div>
+</main>
+<div class="toast" id="itcToast" role="status"></div>
+</div>
+    </div>
     <div id="paginaItbi" hidden style="display:flex;flex-direction:column;gap:14px">
       <button class="voltar" data-voltar type="button">← Voltar ao hub</button>
       <div class="ferramenta-cab">
@@ -5085,7 +5282,7 @@ function api(caminho, opcoes) {
    Lista fechada, igual à do servidor (hub.js: REGISTRO_FERRAMENTAS).
 ============================================================ */
 const REGISTRO_FERRAMENTAS = ['protocolo', 'calculadora', 'ia', 'extrator', 'analista', 'minutas',
-  'redator', 'clausulas', 'consulta', 'itbi', 'acervo', 'agenda', 'notas', 'mural', 'links', 'ajuda', 'pdf'];
+  'redator', 'clausulas', 'consulta', 'itbi', 'itcmd', 'acervo', 'agenda', 'notas', 'mural', 'links', 'ajuda', 'pdf'];
 function registrar(acao, ferramenta, detalhe) {
   if (!SESSAO.token) return;
   const corpo = { acao: acao };
@@ -5300,8 +5497,8 @@ function primeiroNome(n) {
 /* ============================================================
    NAVEGAÇÃO (com botão Voltar do navegador e atalhos #protocolo etc.)
 ============================================================ */
-const PAGINAS = ['paginaHub', 'paginaIA', 'paginaExtrator', 'paginaAnalisador', 'paginaMinutas', 'paginaConsulta', 'paginaRedator', 'paginaItbi', 'paginaAcervo', 'paginaEmbutida'];
-const ROTAS = { ia: 'paginaIA', extrator: 'paginaExtrator', analista: 'paginaAnalisador', minutas: 'paginaMinutas', consulta: 'paginaConsulta', redator: 'paginaRedator', itbi: 'paginaItbi', acervo: 'paginaAcervo', protocolo: 'protocolo', calculadora: 'calculadora', agenda: 'agenda' };
+const PAGINAS = ['paginaHub', 'paginaIA', 'paginaExtrator', 'paginaAnalisador', 'paginaMinutas', 'paginaConsulta', 'paginaRedator', 'paginaItbi', 'paginaItcmd', 'paginaAcervo', 'paginaEmbutida'];
+const ROTAS = { ia: 'paginaIA', extrator: 'paginaExtrator', analista: 'paginaAnalisador', minutas: 'paginaMinutas', consulta: 'paginaConsulta', redator: 'paginaRedator', itbi: 'paginaItbi', itcmd: 'paginaItcmd', acervo: 'paginaAcervo', protocolo: 'protocolo', calculadora: 'calculadora', agenda: 'agenda' };
 /* ============================================================
    v1.34 — IA NOTARIAL (quadro 03): as quatro ferramentas de IA saíram do quadro geral
    e passaram a morar numa subpágina (#paginaIA, rota #ia). Quem entra numa delas PELA
@@ -5476,6 +5673,10 @@ function aplicarLinks() {
     mostrarPagina('paginaItbi', false, 'itbi');
     setTimeout(function () { try { el('paginaItbi').querySelector('input, textarea').focus(); } catch (e) {} }, 80);
   });
+  el('cardItcmd').addEventListener('click', function () {   // 08 · Calculadora ITCMD/SE (v1.41)
+    mostrarPagina('paginaItcmd', false, 'itcmd');
+    setTimeout(function () { try { el('paginaItcmd').querySelector('#segModo button[aria-pressed="true"]').focus(); } catch (e) {} }, 80);
+  });
   el('cardAcervo').addEventListener('click', function () {   // 07 · Pesquisa / Acervo
     mostrarPagina('paginaAcervo', false, 'acervo');
     if (typeof acervoAoAbrir === 'function') acervoAoAbrir();
@@ -5599,8 +5800,42 @@ function normalizarLocal(d) {
     versao: 2,
     avisos: avisos,
     aniversariantes: Array.isArray(d.aniversariantes) ? d.aniversariantes : [],
-    metas: { em_breve: m.em_breve !== false, itens: Array.isArray(m.itens) ? m.itens : [] }
+    metas: { em_breve: m.em_breve !== false, itens: Array.isArray(m.itens) ? m.itens : [] },
+    rodizio: normalizarRodizio(d.rodizio)
   };
+}
+// v1.41 — Rodízio de Atendimento (Escrituras): escala semanal seg–sex; quando o mural ainda não tem, vale a tabela inicial
+const RZ_DIAS = [['seg', 'Seg', 'segunda-feira'], ['ter', 'Ter', 'terça-feira'], ['qua', 'Qua', 'quarta-feira'], ['qui', 'Qui', 'quinta-feira'], ['sex', 'Sex', 'sexta-feira']];
+const RZ_PADRAO = { dias: { seg: 'JONAS', ter: 'LARA', qua: '', qui: 'JOSILENE', sex: 'ROMÊNIA' }, obs: 'No dia do rodízio, o escrevente fica livre do atendimento ao público para se dedicar às escrituras.', desde: '28/09/2026' };
+function dataBRValida(v) {
+  const m = /^(\d{2})\/(\d{2})\/(\d{4})$/.exec(v || ''); if (!m) return false;
+  const d = new Date(+m[3], +m[2] - 1, +m[1]); return d.getFullYear() === +m[3] && d.getMonth() === +m[2] - 1 && d.getDate() === +m[1];
+}
+function normalizarRodizio(r) {
+  if (!r || typeof r !== 'object' || Array.isArray(r)) return clone(RZ_PADRAO);
+  const dias = {};
+  RZ_DIAS.forEach(function (d) { dias[d[0]] = String((r.dias && r.dias[d[0]]) || '').trim().slice(0, 60); });
+  return { dias: dias, obs: String(r.obs || '').trim().slice(0, 300), desde: dataBRValida(r.desde) ? r.desde : '' };
+}
+function renderRodizio() {
+  const rz = (MURAL && MURAL.rodizio) || clone(RZ_PADRAO);
+  const hojeIdx = new Date().getDay(); // 0 dom … 6 sáb
+  const chaveHoje = ['', 'seg', 'ter', 'qua', 'qui', 'sex', ''][hojeIdx];
+  const meuNome = String(SESSAO.nome || '').trim().split(/\s+/)[0].toUpperCase();
+  el('muralRodizio').innerHTML = RZ_DIAS.map(function (d) {
+    const nome = rz.dias[d[0]] || '';
+    const hoje = d[0] === chaveHoje;
+    const cls = hoje ? ' class="hoje"' : '';
+    const quem = nome ? '<span class="rz-nome">' + esc(nome) + '</span>' : '<span class="rz-nome rz-livre">Todos no atendimento</span>';
+    return '<li' + cls + ' aria-label="' + d[2] + ': ' + esc(nome || 'todos no atendimento') + (hoje ? ' (hoje)' : '') + '"><span class="rz-dia" aria-hidden="true">' + d[1] + '</span><span>' + quem + (hoje ? '<span class="rz-hoje-tag">hoje' + (nome ? ' · nas escrituras' : '') + '</span>' : '') + '</span></li>';
+  }).join('');
+  el('rodizioObs').textContent = rz.obs || '';
+  el('rodizioDesde').textContent = rz.desde ? 'Escala válida desde ' + rz.desde : '';
+  const pill = el('pillRodizio');
+  const deHoje = chaveHoje ? (rz.dias[chaveHoje] || '') : '';
+  const souEu = !!(deHoje && meuNome && deHoje.toUpperCase().split(/\s+/)[0] === meuNome);
+  pill.textContent = souEu ? '● Hoje é o seu dia de escrituras' : (deHoje ? '● Hoje: ' + deHoje : '● Escala semanal');
+  pill.classList.toggle('tem-novos', souEu);
 }
 function avisosOrdenados() {
   const lista = (MURAL && MURAL.avisos) || [];
@@ -5650,6 +5885,7 @@ function ligarLinhasAviso(raiz) {
 }
 function renderMural() {
   if (!MURAL) return;
+  renderRodizio();
   const mesAtual = new Date().getMonth() + 1;
   const aniver = aniverDoMes(mesAtual);
   el('muralAniversariantes').innerHTML = aniver.length
@@ -7020,7 +7256,7 @@ function htmlEditorMural() {
     '<p class="sub-data">Monte os avisos com a formatação que quiser e publique — a mudança aparece para toda a equipe na hora.</p>' +
     '<p class="sub-data">Frases do Dia: <a href="' + FRASES_EDITAR_URL + '" target="_blank" rel="noopener">editar a planilha no Drive</a> · escreva HOJE na coluna \u201cfixar\u201d para todos verem a mesma frase.</p>' +
     '<div class="ed-abas">' +
-      ['avisos:Avisos', 'aniversariantes:Aniversariantes', 'metas:Metas', 'equipe:Equipe', 'numeracao:Numeração', 'auditoria:Auditoria', 'relatorios:Relatórios', 'historico:Histórico', 'consumo:Consumo de IA'].map(function (x) {
+      ['avisos:Avisos', 'aniversariantes:Aniversariantes', 'rodizio:Rodízio', 'metas:Metas', 'equipe:Equipe', 'numeracao:Numeração', 'auditoria:Auditoria', 'relatorios:Relatórios', 'historico:Histórico', 'consumo:Consumo de IA'].map(function (x) {
         const p = x.split(':');
         return '<button type="button" class="ed-aba" data-aba="' + p[0] + '">' + p[1] + '</button>';
       }).join('') +
@@ -7049,6 +7285,7 @@ function pintarAba() {
   document.querySelectorAll('.ed-aba').forEach(function (b) { b.classList.toggle('ativa', b.dataset.aba === ED.aba); });
   if (ED.aba === 'avisos') pintarAbaAvisos(painel);
   else if (ED.aba === 'aniversariantes') pintarAbaAniver(painel);
+  else if (ED.aba === 'rodizio') pintarAbaRodizio(painel);
   else if (ED.aba === 'metas') pintarAbaMetas(painel);
   else if (ED.aba === 'equipe') pintarAbaEquipe(painel);
   else if (ED.aba === 'numeracao') pintarAbaNumeracao(painel);
@@ -7205,6 +7442,30 @@ function pintarAbaAniver(painel) {
     if (ok) marcarSujo(ok + ' aniversariante(s) adicionado(s) — publique para valer.');
     pintarAba();
     if (ruins.length) toast('Não entendi ' + ruins.length + ' linha(s): use  Nome - dd/mm', true);
+  });
+}
+
+// v1.41 — aba Rodízio: um nome por dia (vazio = todos no atendimento), observação e data da escala
+function pintarAbaRodizio(painel) {
+  if (!ED.copia.rodizio) ED.copia.rodizio = clone(RZ_PADRAO);
+  const rz = ED.copia.rodizio;
+  painel.innerHTML =
+    '<p class="sub-data">Quem sai do atendimento ao público em cada dia da semana para se dedicar às escrituras. Deixe em branco o dia em que todos ficam no atendimento.</p>' +
+    '<div class="ed-rodizio">' +
+      RZ_DIAS.map(function (d) { return '<label for="edRz_' + d[0] + '">' + d[2] + '</label><input type="text" id="edRz_' + d[0] + '" data-rz="' + d[0] + '" maxlength="60" placeholder="Todos no atendimento" value="' + esc(rz.dias[d[0]] || '') + '">'; }).join('') +
+      '<label for="edRzObs">Observação</label><textarea id="edRzObs" rows="2" maxlength="300">' + esc(rz.obs || '') + '</textarea>' +
+      '<label for="edRzDesde">Válida desde</label><input type="text" id="edRzDesde" maxlength="10" placeholder="dd/mm/aaaa" value="' + esc(rz.desde || '') + '">' +
+    '</div>' +
+    '<p class="sub-data">A escala aparece no quadro “Rodízio de Atendimento — Escrituras” do mural assim que você publicar.</p>';
+  painel.querySelectorAll('[data-rz]').forEach(function (i) {
+    i.addEventListener('input', function () { rz.dias[i.dataset.rz] = i.value.trim().toUpperCase().slice(0, 60); marcarSujo(); });
+    i.addEventListener('change', function () { i.value = i.value.trim().toUpperCase(); });   // caixa alta ao sair (não mexe no cursor)
+  });
+  el('edRzObs').addEventListener('input', function () { rz.obs = this.value.trim().slice(0, 300); marcarSujo(); });
+  el('edRzDesde').addEventListener('input', function () {
+    const v = this.value.trim();
+    rz.desde = dataBRValida(v) ? v : '';
+    marcarSujo(v && !rz.desde ? 'Data no formato dd/mm/aaaa, por favor.' : undefined);
   });
 }
 
@@ -12683,6 +12944,824 @@ restaurarSessao();
 })();
 
 /* ============================================================
+   Motor de cálculo — ITCMD/SE (inventário, inventário cumulativo, doação)
+   Base legal: Lei estadual nº 7.724/2013 (redação vigente, Lei 9.297/2023 e
+   Lei 9.774/2025), Decreto 29.994/2015 (RITCMD) e Código Civil (arts. 1.784 a 1.856).
+   Emolumentos: Tabela TJSE 2026 (Lei 8.639/2019 atualizada), lida do sistema de
+   guias do TJSE em 25/09/2026, item "Escritura de Inventário - Com Bens" /
+   "Escritura com conteúdo financeiro, com base no valor declarado".
+   Sem dependências. Frações exatas para a partilha ideal.
+   ============================================================ */
+(function (raiz) {
+  'use strict';
+
+  /* ---------- Frações exatas ---------- */
+  function mdc(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { [a, b] = [b, a % b]; } return a || 1; }
+  class Fr {
+    constructor(n, d = 1) {
+      if (d === 0) throw new Error('denominador zero');
+      if (d < 0) { n = -n; d = -d; }
+      const g = mdc(n, d); this.n = n / g; this.d = d / g;
+    }
+    static de(x) { return x instanceof Fr ? x : new Fr(x, 1); }
+    mais(o) { o = Fr.de(o); return new Fr(this.n * o.d + o.n * this.d, this.d * o.d); }
+    menos(o) { o = Fr.de(o); return new Fr(this.n * o.d - o.n * this.d, this.d * o.d); }
+    vezes(o) { o = Fr.de(o); return new Fr(this.n * o.n, this.d * o.d); }
+    div(o) { o = Fr.de(o); return new Fr(this.n * o.d, this.d * o.n); }
+    max(o) { o = Fr.de(o); return this.num() >= o.num() ? this : o; }
+    zero() { return this.n === 0; }
+    num() { return this.n / this.d; }
+    txt() { return this.d === 1 ? String(this.n) : `${this.n}/${this.d}`; }
+    pct(c = 4) { return (this.num() * 100).toFixed(c).replace('.', ',') + '%'; }
+  }
+  const ZERO = new Fr(0), UM = new Fr(1), MEIO = new Fr(1, 2);
+
+  /* ---------- Parâmetros legais (vigentes) ---------- */
+  const LEGAL = {
+    ufpPadrao: { valor: 86.25, mes: 'setembro/2026', fonte: 'Portaria SEFAZ nº 296/2026' },
+    ufpProximo: { valor: 87.19, mes: 'outubro/2026', vigencia: '2026-10-01', fonte: 'Portaria SEFAZ nº 311/2026' },
+    isencaoUfp: 500,             // art. 8º, IV — por beneficiário
+    isencaoUnicoImovelUfp: 2600, // art. 8º, VI — único imóvel do espólio
+    faixasCausaMortis: [        // art. 14, I — sobre o valor do quinhão (não escalonado)
+      { ate: 2417, aliq: 0.03 }, { ate: 12086, aliq: 0.06 }, { ate: Infinity, aliq: 0.08 }
+    ],
+    aliqQuotasCausaMortis: 0.02, // art. 14, I-A
+    faixasDoacaoImoveis: [      // art. 14, II
+      { ate: 6900, aliq: 0.02 }, { ate: 12086, aliq: 0.04 }, { ate: 27248, aliq: 0.06 }, { ate: Infinity, aliq: 0.08 }
+    ],
+    aliqDoacaoMoveis: 0.02,      // art. 14, III-A
+    multaAberturaTardia: 0.20,   // art. 27, I — inventário não requerido em 120 dias (art. 18-B, II)
+    prazoAberturaDias: 120,
+    baseDireitoReal: 0.5         // art. 13 — instituição de direitos reais (usufruto etc.)
+  };
+
+  /* ---------- Emolumentos TJSE 2026 (Tabelionato de Notas) ---------- */
+  const EMOL = {
+    ano: 2026,
+    ferd: 0.20,                       // FERD = 20% do emolumento da faixa
+    adicionalPessoa: 4.77,            // por herdeiro/outorgante/outorgado a partir do 11º
+    inventarioSemBens: 249.06,
+    atoAcessorio: 0.5,                // ato acessório = metade da faixa
+    faixa(valor) {                    // Escritura com valor declarado — ato principal
+      const v = Math.max(0, +valor || 0);
+      if (v < 6000) return 303.09;
+      if (v < 13000) return 513.01;
+      if (v <= 25000) return 708.46;
+      if (v <= 1085000) return arred(708.46 + 47.06 * Math.ceil((v - 25000) / 5000));
+      if (v <= 1200000) return arred(10685.18 + 18.70 * Math.ceil((v - 1085000) / 5000));
+      if (v <= 2000000) return arred(11115.28 + 18.70 * Math.ceil((v - 1200000) / 100000));
+      return 11264.88;
+    }
+  };
+  function arred(x) { return Math.round(x * 100) / 100; }
+
+  /* ---------- Utilidades ---------- */
+  function diasEntre(a, b) { return Math.floor((b - a) / 86400000); }
+  function ufpVigente(dataISO) {
+    const d = dataISO ? new Date(dataISO + 'T12:00:00') : new Date();
+    return d >= new Date(LEGAL.ufpProximo.vigencia + 'T00:00:00') ? LEGAL.ufpProximo : LEGAL.ufpPadrao;
+  }
+
+  /* ---------- Regime de bens → meação e concorrência ----------
+     Retorna { meacaoSobre: 'comuns'|'todos'|'nenhum', concorreDesc: 'nada'|'particulares'|'tudo' }
+     art. 1.829, I, CC; STJ REsp 1.368.123 (parcial: só bens particulares);
+     STJ REsp 1.382.170 (separação convencional: concorre); Súmula 377/STF. */
+  function regras(f) {
+    const temConjuge = !!(f.conjuge && f.conjuge.nome !== undefined && f.estadoCivil !== 'solteiro');
+    const r = { temConjuge, meacaoSobre: 'nenhum', concorreDesc: 'nada', concorreAsc: temConjuge, herdaSozinho: temConjuge };
+    if (!temConjuge) return r;
+    const c = f.conjuge || {};
+    const afastado = !!c.separadoFato; // art. 1.830 — separado de fato há mais de 2 anos / judicialmente
+    switch (f.regime) {
+      case 'universal': r.meacaoSobre = 'todos'; r.concorreDesc = 'nada'; break;
+      case 'parcial': r.meacaoSobre = 'comuns'; r.concorreDesc = 'particulares'; break;
+      case 'aquestos': r.meacaoSobre = 'comuns'; r.concorreDesc = 'tudo'; break;
+      case 'separacao_conv': r.meacaoSobre = 'nenhum'; r.concorreDesc = 'tudo'; break;
+      case 'separacao_obrig': r.meacaoSobre = c.sumula377 ? 'comuns' : 'nenhum'; r.concorreDesc = 'nada'; break;
+      default: r.meacaoSobre = 'comuns'; r.concorreDesc = 'particulares';
+    }
+    if (afastado) { r.concorreDesc = 'nada'; r.concorreAsc = false; r.herdaSozinho = false; }
+    return r;
+  }
+
+  /* ---------- Patrimônio: meação e herança ---------- */
+  function patrimonio(f) {
+    const rg = regras(f);
+    const bens = (f.bens || []).map((b, i) => {
+      const fracao = (b.fracao === '' || b.fracao == null) ? 100 : +b.fracao;
+      const valor = arred((+b.valor || 0) * (fracao / 100));
+      let comum;
+      if (rg.meacaoSobre === 'todos') comum = !b.incomunicavel;
+      else if (rg.meacaoSobre === 'comuns') comum = b.natureza !== 'particular';
+      else comum = false;
+      return { i, origem: b.origem, descricao: b.descricao || `Bem ${i + 1}`, tipo: b.tipo || 'imovel_urbano', valorBem: +b.valor || 0, fracao, valor, comum,
+               meacaoFr: comum ? MEIO : ZERO, herancaFr: comum ? MEIO : UM };
+    });
+    const totalComum = arred(bens.filter(b => b.comum).reduce((s, b) => s + b.valor, 0));
+    const totalParticular = arred(bens.filter(b => !b.comum).reduce((s, b) => s + b.valor, 0));
+    const monteMor = arred(totalComum + totalParticular);
+    const dividas = arred(+f.dividas || 0);
+    // Dívidas abatem primeiro o patrimônio comum (o meeiro suporta metade), depois os particulares.
+    const divComum = Math.min(dividas, totalComum);
+    const divPart = Math.min(Math.max(0, dividas - divComum), totalParticular);
+    const comumLiq = arred(totalComum - divComum);
+    const partLiq = arred(totalParticular - divPart);
+    const meacao = rg.temConjuge ? arred(comumLiq / 2) : 0;
+    const herancaComum = arred(comumLiq - meacao);   // metade dos comuns (ou tudo, sem cônjuge)
+    const herancaPart = partLiq;
+    const heranca = arred(herancaComum + herancaPart);
+    return { rg, bens, totalComum, totalParticular, monteMor, dividas, comumLiq, partLiq, meacao, herancaComum, herancaPart, heranca };
+  }
+
+  /* ---------- Sucessão legítima: quinhões em frações da herança ----------
+     Devolve lista de beneficiários: { id, nome, papel, viaRepresentacao, fr (fração da herança total),
+     frPart, frComum (frações sobre as parcelas particular e comum, quando o cônjuge concorre só sobre particulares) } */
+  function sucessao(f, pat) {
+    const rg = pat.rg;
+    const avisos = [];
+    const temNome = x => (x && (x.nome || '').trim() !== '');
+    const desc = (f.descendentes || []).filter(d => temNome(d) || (d.condicao === 'premorto' && (d.representantes || []).some(temNome)));
+    const todosRenunciam = desc.length > 0 && desc.every(d => d.condicao === 'renuncia');
+    if (todosRenunciam) avisos.push('Todos os filhos renunciaram: se tiverem filhos, estes herdam por cabeça (art. 1.811 CC) — cadastre os netos como herdeiros vivos. Sem netos, a herança passa à classe seguinte.');
+    // Estirpes válidas: filho vivo (não renunciante) ou premorto com representantes
+    const estirpes = [];
+    desc.forEach((d, i) => {
+      if (d.condicao === 'renuncia') { avisos.push(`${d.nome || 'Herdeiro ' + (i + 1)}: renúncia pura e simples — não incide ITCMD (art. 7º, II); a parte acresce aos demais da classe (art. 1.810 CC).`); return; }
+      if (d.condicao === 'premorto') {
+        const reps = (d.representantes || []).filter(r => (r.nome || '').trim() !== '');
+        if (!reps.length) { avisos.push(`${d.nome || 'Herdeiro ' + (i + 1)}: premorto sem representantes informados — estirpe desconsiderada.`); return; }
+        estirpes.push({ cabeca: d, reps });
+        return;
+      }
+      estirpes.push({ cabeca: d, reps: null });
+    });
+
+    const benef = [];
+    const conj = f.conjuge || {};
+    if (rg.temConjuge && !(conj.nome || '').trim()) avisos.push('Estado civil "casado/união estável" sem o nome do sobrevivente: informe o nome ou mude o estado civil, senão a meação/concorrência fica atribuída a "Cônjuge sobrevivente".');
+    const nomeConj = conj.nome || (f.estadoCivil === 'uniao' ? 'Companheiro(a) sobrevivente' : 'Cônjuge sobrevivente');
+    const papelConj = f.estadoCivil === 'uniao' ? 'companheiro(a)' : 'cônjuge';
+
+    if (estirpes.length) {
+      // ---- Classe I: descendentes (+ cônjuge concorrente, art. 1.829, I) ----
+      const n = estirpes.length;
+      let qConj = ZERO;                    // quota do cônjuge sobre a base em que concorre
+      let base = rg.concorreDesc;          // 'nada' | 'particulares' | 'tudo'
+      if (base === 'particulares' && pat.herancaPart <= 0) { base = 'nada'; if (rg.temConjuge && !conj.separadoFato) avisos.push('Comunhão parcial sem bens particulares: o cônjuge/companheiro só tem meação; não concorre com os descendentes (art. 1.829, I, CC; REsp 1.368.123/STJ).'); }
+      if (base !== 'nada') {
+        qConj = new Fr(1, n + 1);
+        if (f.filhosComuns === 'sim') qConj = qConj.max(new Fr(1, 4)); // art. 1.832 — reserva da quarta parte
+        else if (f.filhosComuns === 'nao') avisos.push('Filiação híbrida ou exclusiva do falecido: sem reserva da quarta parte ao cônjuge (art. 1.832 CC; REsp 1.617.650/STJ).');
+      }
+      // Frações sobre a herança total, separando parcela particular e comum
+      const hp = pat.herancaPart, hc = pat.herancaComum, h = pat.heranca;
+      const pesoPart = h > 0 ? hp / h : 0, pesoComum = h > 0 ? hc / h : 0;
+      // parte dos descendentes em cada parcela
+      const descPart = base === 'nada' ? UM : UM.menos(qConj);          // sobre particulares
+      const descComum = base === 'tudo' ? UM.menos(qConj) : UM;         // sobre comuns
+      const conjPart = base === 'nada' ? ZERO : qConj;
+      const conjComum = base === 'tudo' ? qConj : ZERO;
+      if (!conjPart.zero() || !conjComum.zero()) {
+        benef.push({ id: 'conj', nome: nomeConj, papel: papelConj + ' (concorrente)', frPart: conjPart, frComum: conjComum, valor: arred(conjPart.num() * hp + conjComum.num() * hc) });
+      }
+      estirpes.forEach((e, k) => {
+        const ePart = descPart.div(n), eComum = descComum.div(n);
+        if (e.reps) {
+          const m = e.reps.length;
+          e.reps.forEach((r, j) => benef.push({ id: r.uid || `d${k}r${j}`, nome: r.nome, papel: `neto(a) — por representação de ${e.cabeca.nome || 'herdeiro premorto'}`, viaRepresentacao: true, frPart: ePart.div(m), frComum: eComum.div(m), valor: arred(ePart.num() / m * hp + eComum.num() / m * hc) }));
+        } else {
+          benef.push({ id: e.cabeca.uid || `d${k}`, nome: e.cabeca.nome || `Herdeiro ${k + 1}`, papel: e.cabeca.papel || 'filho(a)', frPart: ePart, frComum: eComum, valor: arred(ePart.num() * hp + eComum.num() * hc) });
+        }
+      });
+      void pesoPart; void pesoComum;
+      return { classe: 'descendentes', benef, avisos, qConj, base };
+    }
+
+    // ---- Classe II: ascendentes (+ cônjuge, art. 1.837) ----
+    const asc = f.ascendentes || {};
+    const paiVivo = !!asc.paiVivo, maeViva = !!asc.maeViva;
+    const avosP = paiVivo ? 0 : (+asc.avosPaternos || 0), avosM = maeViva ? 0 : (+asc.avosMaternos || 0);
+    const temAsc = paiVivo || maeViva || avosP > 0 || avosM > 0;
+    if (temAsc) {
+      let qConj = ZERO;
+      if (rg.concorreAsc) qConj = (paiVivo && maeViva) ? new Fr(1, 3) : MEIO;
+      const resto = UM.menos(qConj);
+      if (!qConj.zero()) benef.push({ id: 'conj', nome: nomeConj, papel: papelConj + ' (concorrente com ascendentes)', frPart: qConj, frComum: qConj, valor: arred(qConj.num() * pat.heranca) });
+      const add = (id, nome, papel, fr) => benef.push({ id, nome, papel, frPart: fr, frComum: fr, valor: arred(fr.num() * pat.heranca) });
+      if (paiVivo && maeViva) { add('pai', asc.pai || 'Pai', 'pai', resto.div(2)); add('mae', asc.mae || 'Mãe', 'mãe', resto.div(2)); }
+      else if (paiVivo || maeViva) {
+        // art. 1.836, §1º: o mais próximo exclui o mais remoto — o genitor vivo herda a parte toda dos ascendentes
+        if (paiVivo) add('pai', asc.pai || 'Pai', 'pai', resto); else add('mae', asc.mae || 'Mãe', 'mãe', resto);
+      } else {
+        // avós: metade por linha quando as duas linhas existem (art. 1.836, §2º)
+        const linhas = (avosP > 0 ? 1 : 0) + (avosM > 0 ? 1 : 0);
+        const porLinha = resto.div(linhas);
+        for (let i = 0; i < avosP; i++) add(`avP${i}`, (asc.nomesAvosPaternos || [])[i] || `Avô/avó paterno(a) ${i + 1}`, 'ascendente de 2º grau (linha paterna)', porLinha.div(avosP));
+        for (let i = 0; i < avosM; i++) add(`avM${i}`, (asc.nomesAvosMaternos || [])[i] || `Avô/avó materno(a) ${i + 1}`, 'ascendente de 2º grau (linha materna)', porLinha.div(avosM));
+      }
+      return { classe: 'ascendentes', benef, avisos, qConj };
+    }
+
+    // ---- Classe III: cônjuge sozinho ----
+    if (rg.temConjuge && rg.herdaSozinho) {
+      benef.push({ id: 'conj', nome: nomeConj, papel: papelConj + ' (herdeiro único — art. 1.829, III)', frPart: UM, frComum: UM, valor: pat.heranca });
+      return { classe: 'conjuge', benef, avisos };
+    }
+
+    // ---- Classe IV: colaterais até o 4º grau ----
+    const col = (f.colaterais || []).filter(c => (c.nome || '').trim() !== '');
+    const irmaos = col.filter(c => c.grau === 'irmao');
+    const validos = irmaos.filter(c => c.condicao !== 'renuncia' && !(c.condicao === 'premorto' && !(c.representantes || []).some(r => (r.nome || '').trim())));
+    const algumIrmaoVivo = validos.some(c => c.condicao !== 'premorto');
+    if (validos.length && !algumIrmaoVivo) {
+      // art. 1.843, §1º: só sobrinhos → por cabeça; §2º: filhos de bilaterais herdam o dobro dos de unilaterais
+      const cabecas = [];
+      validos.forEach((c, k) => (c.representantes || []).filter(r => (r.nome || '').trim()).forEach((r, j) => cabecas.push({ id: r.uid || `c${k}r${j}`, nome: r.nome, peso: c.tipo === 'unilateral' ? 1 : 2, de: c.nome })));
+      const soma = cabecas.reduce((a, b) => a + b.peso, 0);
+      cabecas.forEach(x => { const fr = new Fr(x.peso, soma); benef.push({ id: x.id, nome: x.nome, papel: `sobrinho(a) — por cabeça (art. 1.843, §1º), filho(a) de ${x.de}`, frPart: fr, frComum: fr, valor: arred(fr.num() * pat.heranca) }); });
+      avisos.push('Sem irmãos vivos, os sobrinhos herdam por cabeça (art. 1.843, §1º CC)' + (cabecas.some(x => x.peso === 1) && cabecas.some(x => x.peso === 2) ? '; filhos de irmãos bilaterais recebem o dobro dos filhos de unilaterais (§2º).' : '.'));
+      return { classe: 'colaterais', benef, avisos };
+    }
+    if (validos.length) {
+      // art. 1.841: bilateral = 2 partes; unilateral = 1 parte. Sobrinhos representam (art. 1.840).
+      const pesos = validos.map(c => c.tipo === 'unilateral' ? 1 : 2);
+      const soma = pesos.reduce((a, b) => a + b, 0);
+      validos.forEach((c, k) => {
+        const fr = new Fr(pesos[k], soma);
+        if (c.condicao === 'premorto') {
+          const reps = (c.representantes || []).filter(r => (r.nome || '').trim());
+          reps.forEach((r, j) => benef.push({ id: r.uid || `c${k}r${j}`, nome: r.nome, papel: `sobrinho(a) — por representação de ${c.nome}`, viaRepresentacao: true, frPart: fr.div(reps.length), frComum: fr.div(reps.length), valor: arred(fr.num() / reps.length * pat.heranca) }));
+        } else benef.push({ id: c.uid || `c${k}`, nome: c.nome, papel: c.tipo === 'unilateral' ? 'irmão(ã) unilateral' : 'irmão(ã) bilateral', frPart: fr, frComum: fr, valor: arred(fr.num() * pat.heranca) });
+      });
+      if (irmaos.some(c => c.tipo === 'unilateral') && irmaos.some(c => c.tipo !== 'unilateral')) avisos.push('Irmãos bilaterais herdam o dobro dos unilaterais (art. 1.841 CC).');
+      return { classe: 'colaterais', benef, avisos };
+    }
+    // art. 1.843, caput: sem irmãos, sobrinhos; sem sobrinhos, tios; art. 1.840: 3º grau exclui o 4º
+    for (const [grau, papel] of [['sobrinho', 'sobrinho(a) (por cabeça)'], ['tio', 'tio(a)'], ['primo', 'colateral de 4º grau']]) {
+      const outros = col.filter(c => c.grau === grau && c.condicao !== 'renuncia');
+      if (!outros.length) continue;
+      outros.forEach((c, k) => benef.push({ id: c.uid || `o${k}`, nome: c.nome, papel, frPart: new Fr(1, outros.length), frComum: new Fr(1, outros.length), valor: arred(pat.heranca / outros.length) }));
+      const excluidos = col.filter(c => c.grau !== 'irmao' && c.grau !== grau && c.condicao !== 'renuncia');
+      avisos.push(`Colaterais: herdam os de grau mais próximo, por cabeça (arts. 1.840 e 1.843 CC)${excluidos.length ? ` — excluídos: ${excluidos.map(c => c.nome).join(', ')}` : ''}.`);
+      return { classe: 'colaterais', benef, avisos };
+    }
+    avisos.push('Nenhum herdeiro informado: herança jacente/vacante (arts. 1.819 a 1.823 CC) — não incide ITCMD em favor do Município (art. 6º, I).');
+    return { classe: 'vacante', benef, avisos };
+  }
+
+  /* ---------- ITCMD causa mortis por beneficiário ---------- */
+  function faixa(faixas, ufps) { for (const fx of faixas) if (ufps <= fx.ate) return fx.aliq; return faixas[faixas.length - 1].aliq; }
+
+  function itcmdCausaMortis(f, pat, suc, opts) {
+    const ufp = +opts.ufp || LEGAL.ufpPadrao.valor;
+    const hoje = opts.hoje ? new Date(opts.hoje + 'T12:00:00') : new Date();
+    const obito = f.obito ? new Date(f.obito + 'T12:00:00') : null;
+    const dias = obito ? diasEntre(obito, hoje) : null;
+    const multaCabivel = dias !== null && dias > LEGAL.prazoAberturaDias && f.multaAtraso !== false;
+    // valor efetivamente recebido por beneficiário em cada bem (usa as frações da partilha)
+    const parcela = (b, filtro) => pat.bens.filter(filtro).reduce((s, bm) => s + bm.valor * (bm.comum ? bm.herancaFr.vezes(b.frComum) : bm.herancaFr.vezes(b.frPart)).num(), 0);
+    const imoveis = pat.bens.filter(b => b.tipo === 'imovel_urbano' || b.tipo === 'imovel_rural');
+    const unicoImovelOk = f.isencaoUnicoImovel && imoveis.length === 1 && imoveis[0].valor / ufp <= LEGAL.isencaoUnicoImovelUfp;
+    const avisosItc = [];
+    if (f.isencaoUnicoImovel && !unicoImovelOk) avisosItc.push(imoveis.length !== 1 ? `Isenção do art. 8º, VI exige que o imóvel seja o único bem imóvel do espólio (há ${imoveis.length}).` : `Isenção do art. 8º, VI exige imóvel de até ${LEGAL.isencaoUnicoImovelUfp} UFP/SE (${fmtBRL(LEGAL.isencaoUnicoImovelUfp * ufp)}); o imóvel vale ${fmtBRL(imoveis[0].valor)}.`);
+    let total = 0, totalMulta = 0;
+    const linhas = suc.benef.map(b => {
+      const quinhao = b.valor;
+      const ufps = quinhao / ufp;
+      const isentoVI = !!(unicoImovelOk && f.isentosVI && f.isentosVI[b.id]);
+      const parteQuotas = arred(Math.min(quinhao, parcela(b, x => x.tipo === 'quotas')));
+      const parteImovel = arred(Math.min(quinhao, parcela(b, x => x.tipo === 'imovel_urbano' || x.tipo === 'imovel_rural')));
+      let situacao, aliq = 0, imposto = 0, detalhe = '';
+      if (quinhao <= 0) { situacao = 'sem valor'; }
+      else if (ufps <= LEGAL.isencaoUfp) { situacao = 'isento'; detalhe = `≤ ${LEGAL.isencaoUfp} UFP/SE (art. 8º, IV)`; }
+      else {
+        const baseTrib = isentoVI ? arred(quinhao - parteImovel) : quinhao; // art. 8º, VI alcança só o imóvel
+        if (isentoVI && baseTrib <= 0) { situacao = 'isento'; detalhe = 'art. 8º, VI — único imóvel (depende de reconhecimento prévio pela SEFAZ, Decreto art. 9º)'; }
+        else if (isentoVI && baseTrib / ufp <= LEGAL.isencaoUfp) { situacao = 'isento'; detalhe = `imóvel isento (art. 8º, VI) e o restante ≤ ${LEGAL.isencaoUfp} UFP (art. 8º, IV)`; }
+        else {
+          situacao = 'tributado';
+          if (f.aliquotaManual != null && f.aliquotaManual !== '') { aliq = (+f.aliquotaManual) / 100; imposto = arred(baseTrib * aliq); detalhe = 'alíquota informada manualmente' + (isentoVI ? ' sobre o que excede o imóvel isento' : ''); }
+          else {
+            const aliqGeral = faixa(LEGAL.faixasCausaMortis, isentoVI ? baseTrib / ufp : ufps); // faixa aferida pelo quinhão total (ou pelo que resta, se o imóvel é isento)
+            const quotas = Math.min(parteQuotas, baseTrib), geral = arred(baseTrib - quotas);
+            imposto = arred(geral * aliqGeral + quotas * LEGAL.aliqQuotasCausaMortis);
+            aliq = aliqGeral;
+            detalhe = quotas > 0 ? `${(aliqGeral * 100).toFixed(0)}% sobre ${fmtBRL(geral)} + 2% sobre quotas ${fmtBRL(quotas)}` : `faixa ${fmtFaixa(ufps)} → ${(aliqGeral * 100).toFixed(0)}% sobre o quinhão${isentoVI ? ' (menos o imóvel isento)' : ''}`;
+          }
+        }
+      }
+      const multa = multaCabivel ? arred(imposto * LEGAL.multaAberturaTardia) : 0;
+      total += imposto; totalMulta += multa;
+      return { ...b, quinhao, ufps: arred(ufps), situacao, aliq, imposto, multa, detalhe, parteQuotas, parteImovel };
+    });
+    return { ufp, dias, multaCabivel, linhas, total: arred(total), totalMulta: arred(totalMulta), totalGeral: arred(total + totalMulta), avisos: avisosItc, unicoImovelOk };
+  }
+  function fmtBRL(v) { return 'R$ ' + (Math.round((+v || 0) * 100) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function fmtFaixa(ufps) {
+    if (ufps <= 2417) return '500–2.417 UFP';
+    if (ufps <= 12086) return '2.417–12.086 UFP';
+    return '> 12.086 UFP';
+  }
+
+  /* ---------- Emolumentos ---------- */
+  function emolumentosEscritura(baseValor, qtdPessoas, opts = {}) {
+    const acess = !!opts.acessorio;
+    let emol = EMOL.faixa(baseValor);
+    if (acess) emol = arred(emol * EMOL.atoAcessorio);
+    const adicional = arred(Math.max(0, (qtdPessoas || 0) - 10) * EMOL.adicionalPessoa);
+    const ferd = arred(emol * EMOL.ferd);
+    return { base: baseValor, emol, adicional, ferd, total: arred(emol + adicional + ferd), acessorio: acess };
+  }
+
+  /* ---------- Inventário completo (um falecido) ---------- */
+  function inventario(f, opts = {}) {
+    const pat = patrimonio(f);
+    const suc = sucessao(f, pat);
+    const itc = itcmdCausaMortis(f, pat, suc, opts);
+    // partilha ideal por bem: meação + quinhões (frações do bem)
+    const partilha = pat.bens.map(b => {
+      const linhas = [];
+      if (!b.meacaoFr.zero() && pat.rg.temConjuge) linhas.push({ quem: (f.conjuge && f.conjuge.nome) || 'Meeiro(a)', papel: 'meação', fr: b.meacaoFr, valor: arred(b.valor * b.meacaoFr.num()) });
+      suc.benef.forEach(h => {
+        const fr = b.comum ? b.herancaFr.vezes(h.frComum) : b.herancaFr.vezes(h.frPart);
+        if (!fr.zero()) linhas.push({ quem: h.nome, papel: h.papel, fr, valor: arred(b.valor * fr.num()) });
+      });
+      return { bem: b, linhas };
+    });
+    return { falecido: f, pat, suc, itc, partilha };
+  }
+
+  /* ---------- Inventário cumulativo (2º falecido = cônjuge/companheiro do 1º) ---------- */
+  function cumulativo(f1, f2, opts = {}) {
+    const inv1 = inventario(f1, opts);
+    // O 2º falecido leva: sua meação no 1º + seu quinhão como herdeiro do 1º + bens próprios dele.
+    const conjId = 'conj';
+    const quinhaoConj = inv1.suc.benef.find(b => b.id === conjId);
+    const bensHerdados = inv1.pat.bens.map(b => {
+      let fr = b.meacaoFr; // meação
+      if (quinhaoConj) fr = fr.mais(b.comum ? b.herancaFr.vezes(quinhaoConj.frComum) : b.herancaFr.vezes(quinhaoConj.frPart));
+      return { descricao: `${b.descricao} (fração ${fr.txt()} — meação${quinhaoConj ? ' + quinhão' : ''} no inventário de ${f1.nome || '1º falecido'})`, tipo: b.tipo, valor: b.valorBem, fracao: fr.num() * 100 * (b.fracao / 100), fracaoFr: fr, natureza: 'particular', origem: 'inv1' };
+    }).filter(b => b.fracao > 0);
+    const f2c = { ...f2, bens: [...bensHerdados, ...(f2.bens || [])] };
+    const inv2 = inventario(f2c, opts);
+    return { inv1, inv2 };
+  }
+
+  /* ---------- Doação ---------- */
+  function doacao(d, opts = {}) {
+    const ufp = +opts.ufp || LEGAL.ufpPadrao.valor;
+    const todosDon = (d.donatarios || []).map((x, i) => ({ ...x, id: x.uid || String(i) }));
+    const donatarios = todosDon.filter(x => (x.nome || '').trim());
+    const bens = (d.bens || []).map((b, i) => { const fracao = (b.fracao === '' || b.fracao == null) ? 100 : +b.fracao; return { ...b, i, valor: arred((+b.valor || 0) * (fracao / 100)) }; });
+    const avisos = [];
+    const baseUsufruto = d.reservaUsufruto ? (d.baseNuaPropriedade === '50' ? LEGAL.baseDireitoReal : 1) : 1;
+    if (d.reservaUsufruto) avisos.push(baseUsufruto === 1 ? 'Doação com reserva de usufruto: imposto só sobre a doação (art. 2º, §5º), calculado sobre o valor integral dos bens. A extinção futura do usufruto não é tributada (art. 7º, III).' : 'Doação com reserva de usufruto: base reduzida a 50% (nua-propriedade) em todos os bens doados, por analogia ao art. 13 — confirmar entendimento da SEFAZ/SE.');
+    const semDestino = bens.filter(b => b.destino && b.destino !== 'todos' && !donatarios.some(x => x.id === String(b.destino)));
+    if (semDestino.length) avisos.push(`Bem sem donatário válido (foi rateado entre todos): ${semDestino.map(b => b.descricao || 'Bem ' + (b.i + 1)).join(', ')}.`);
+    const linhas = donatarios.map(dn => {
+      let imoveis = 0, moveis = 0;
+      bens.forEach(b => {
+        const especifico = b.destino && b.destino !== 'todos' && donatarios.some(x => x.id === String(b.destino));
+        const parte = !especifico ? b.valor / (donatarios.length || 1) : (String(b.destino) === dn.id ? b.valor : 0);
+        if (b.tipo === 'imovel_urbano' || b.tipo === 'imovel_rural') imoveis += parte; else moveis += parte;
+      });
+      imoveis = arred(imoveis * baseUsufruto); moveis = arred(moveis * baseUsufruto);
+      const anteriores = arred(+dn.doacoesAnteriores || 0), impostoAnterior = arred(+dn.impostoAnterior || 0);
+      const quinhao = arred(imoveis + moveis);
+      const acumulado = arred(quinhao + anteriores);
+      const ufps = acumulado / ufp;
+      let situacao, imposto = 0, detalhe = '', aliq = 0;
+      if (quinhao <= 0) situacao = 'sem valor';
+      else if (ufps <= LEGAL.isencaoUfp) { situacao = 'isento'; detalhe = `≤ ${LEGAL.isencaoUfp} UFP/SE no exercício (art. 8º, IV e §1º)`; }
+      else {
+        situacao = 'tributado';
+        if (d.aliquotaManual != null && d.aliquotaManual !== '') { aliq = +d.aliquotaManual / 100; imposto = arred(quinhao * aliq); detalhe = 'alíquota informada manualmente'; }
+        else if (anteriores > 0) {
+          // art. 10, §7º: doações sucessivas em 12 meses — recalcula sobre o acumulado e deduz o imposto já recolhido
+          const propIm = quinhao > 0 ? imoveis / quinhao : 0;
+          const aliqIm = faixa(LEGAL.faixasDoacaoImoveis, ufps);
+          const impostoAcum = arred(acumulado * propIm * aliqIm + acumulado * (1 - propIm) * LEGAL.aliqDoacaoMoveis);
+          imposto = Math.max(0, arred(impostoAcum - impostoAnterior));
+          aliq = imoveis > 0 ? aliqIm : LEGAL.aliqDoacaoMoveis;
+          detalhe = `art. 10, §7º: ${(aliq * 100).toFixed(0)}% sobre o acumulado ${fmtBRL(acumulado)} = ${fmtBRL(impostoAcum)} − ${fmtBRL(impostoAnterior)} já recolhido`;
+        } else {
+          const aliqIm = faixa(LEGAL.faixasDoacaoImoveis, ufps);
+          imposto = arred(imoveis * aliqIm + moveis * LEGAL.aliqDoacaoMoveis);
+          aliq = imoveis > 0 ? aliqIm : LEGAL.aliqDoacaoMoveis;
+          detalhe = (imoveis > 0 ? `${(aliqIm * 100).toFixed(0)}% sobre imóveis ${fmtBRL(imoveis)}` : '') + (moveis > 0 ? `${imoveis > 0 ? ' + ' : ''}2% sobre bens móveis ${fmtBRL(moveis)}` : '');
+        }
+      }
+      return { id: dn.id, nome: dn.nome, papel: 'donatário(a)', quinhao, imoveis, moveis, anteriores, impostoAnterior, ufps: arred(ufps), situacao, aliq, imposto, multa: 0, detalhe };
+    });
+    const total = arred(linhas.reduce((s, l) => s + l.imposto, 0));
+    const valorTotal = arred(bens.reduce((s, b) => s + b.valor, 0));
+    return { ufp, linhas, total, totalMulta: 0, totalGeral: total, valorTotal, avisos, bens };
+  }
+
+  const API = { Fr, LEGAL, EMOL, arred, ufpVigente, regras, patrimonio, sucessao, itcmdCausaMortis, emolumentosEscritura, inventario, cumulativo, doacao, faixa };
+  if (typeof module !== 'undefined' && module.exports) module.exports = API; else raiz.ITCMD = API;
+})(typeof window !== 'undefined' ? window : globalThis);
+
+/* ============ Interface — Calculadora ITCMD/SE (Hub CN2O) ============ */
+(function () {
+  'use strict';
+  const M = window.ITCMD;
+  const $ = (s, r = document) => r.querySelector(s);
+  const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+  const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const fmt = v => 'R$ ' + (Math.round((+v || 0) * 100) / 100).toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const fmtN = (v, c = 2) => (+v || 0).toLocaleString('pt-BR', { minimumFractionDigits: c, maximumFractionDigits: c });
+  const pct = v => (v * 100).toLocaleString('pt-BR', { maximumFractionDigits: 2 }) + '%';
+  const parseMoeda = s => { if (typeof s === 'number') return s; s = String(s || '').trim(); if (!s) return 0; if (/,\d{1,2}$/.test(s) || (s.includes(',') && !s.includes('.'))) s = s.replace(/\./g, '').replace(',', '.'); else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, ''); const n = parseFloat(s.replace(/[^\d.-]/g, '')); return isNaN(n) ? 0 : n; };
+  const hojeISO = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  const dataBR = iso => iso && /^\d{4}-\d{2}-\d{2}$/.test(iso) ? iso.split('-').reverse().join('/') : '—';
+  const TIPOS = [['imovel_urbano', 'Imóvel urbano'], ['imovel_rural', 'Imóvel rural'], ['veiculo', 'Veículo'], ['quotas', 'Quotas de sociedade'], ['dinheiro', 'Dinheiro / aplicações'], ['outros', 'Outros bens móveis']];
+  const REGIMES = [['parcial', 'Comunhão parcial de bens'], ['universal', 'Comunhão universal de bens'], ['separacao_conv', 'Separação convencional de bens'], ['separacao_obrig', 'Separação obrigatória (legal) de bens'], ['aquestos', 'Participação final nos aquestos']];
+
+  /* ---------- Estado ---------- */
+  const uid = () => 'u' + Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-3);
+  const pessoa = (o = {}) => ({ uid: uid(), ...o });
+  const novoFalecido = (n = '', estadoCivil = 'casado') => ({ nome: n, obito: '', estadoCivil, regime: 'parcial', conjuge: { nome: '', separadoFato: false, sumula377: false }, filhosComuns: 'sim',
+    descendentes: [pessoa({ nome: '', condicao: 'vivo', representantes: [] })], ascendentes: { paiVivo: false, pai: '', maeViva: false, mae: '', avosPaternos: 0, avosMaternos: 0 },
+    colaterais: [], bens: [{ descricao: '', tipo: 'imovel_urbano', valor: 0, natureza: 'comum', fracao: 100 }], dividas: 0, multaAtraso: true, aliquotaManual: '', isencaoUnicoImovel: false, isentosVI: {} });
+  const novaDoacao = () => ({ doadores: [{ nome: '' }], data: hojeISO(), reservaUsufruto: false, baseNuaPropriedade: '100', usufrutoAcessorio: true, donatarios: [pessoa({ nome: '', doacoesAnteriores: 0, impostoAnterior: 0 })], bens: [{ descricao: '', tipo: 'imovel_urbano', valor: 0, fracao: 100, destino: 'todos' }], aliquotaManual: '' });
+  let S = estadoInicial();
+  function estadoInicial() {
+    const u = M.ufpVigente(hojeISO());
+    return { modo: 'inventario', ufp: u.valor, ufpManual: false, hoje: hojeISO(), inv: [novoFalecido(), novoFalecido('', 'solteiro')], doa: novaDoacao(), emol: { inv2Acessorio: false }, orc: { honorarios: '', certidoes: '', registro: '', outros: '' } };
+  }
+  function exemplo() {
+    const s = estadoInicial();
+    s.modo = 'cumulativo';
+    s.inv[0] = { ...novoFalecido('José da Silva'), obito: '2019-04-12', estadoCivil: 'casado', regime: 'parcial', conjuge: { nome: 'Maria da Silva', separadoFato: false, sumula377: false }, filhosComuns: 'sim',
+      descendentes: [pessoa({ nome: 'Ana da Silva', condicao: 'vivo', representantes: [] }), pessoa({ nome: 'Carlos da Silva', condicao: 'vivo', representantes: [] }), pessoa({ nome: 'Pedro da Silva', condicao: 'premorto', representantes: [pessoa({ nome: 'Lucas da Silva (neto)' }), pessoa({ nome: 'Júlia da Silva (neta)' })] })],
+      bens: [{ descricao: 'Casa na Rua Quintino Bocaiúva, 120 — matrícula 12.345', tipo: 'imovel_urbano', valor: 380000, natureza: 'comum', fracao: 100 }, { descricao: 'Sítio Boa Vista, 12 ha — matrícula 9.876', tipo: 'imovel_rural', valor: 260000, natureza: 'particular', fracao: 100 }, { descricao: 'Fiat Strada 2018', tipo: 'veiculo', valor: 62000, natureza: 'comum', fracao: 100 }], dividas: 0 };
+    s.inv[1] = { ...novoFalecido('Maria da Silva'), obito: '2026-02-03', estadoCivil: 'solteiro', regime: 'parcial', conjuge: { nome: '', separadoFato: false, sumula377: false },
+      descendentes: [pessoa({ nome: 'Ana da Silva', condicao: 'vivo', representantes: [] }), pessoa({ nome: 'Carlos da Silva', condicao: 'vivo', representantes: [] }), pessoa({ nome: 'Pedro da Silva', condicao: 'premorto', representantes: [pessoa({ nome: 'Lucas da Silva (neto)' }), pessoa({ nome: 'Júlia da Silva (neta)' })] })],
+      bens: [{ descricao: 'Saldo em poupança Banese', tipo: 'dinheiro', valor: 18500, natureza: 'particular', fracao: 100 }] };
+    s.doa = { ...novaDoacao(), doadores: [{ nome: 'Antônio Pereira' }, { nome: 'Rita Pereira' }], reservaUsufruto: true, donatarios: [pessoa({ nome: 'Bruno Pereira', doacoesAnteriores: 0, impostoAnterior: 0 }), pessoa({ nome: 'Carla Pereira', doacoesAnteriores: 0, impostoAnterior: 0 })],
+      bens: [{ descricao: 'Apartamento na Av. Ivo de Carvalho — matrícula 4.321', tipo: 'imovel_urbano', valor: 420000, fracao: 100, destino: 'todos' }] };
+    return s;
+  }
+
+  /* ---------- Acesso por caminho ---------- */
+  function get(obj, path) { return path.split('.').reduce((o, k) => (o == null ? undefined : o[k]), obj); }
+  function set(obj, path, val) { const ks = path.split('.'); let o = obj; for (let i = 0; i < ks.length - 1; i++) { if (o[ks[i]] == null) o[ks[i]] = /^\d+$/.test(ks[i + 1]) ? [] : {}; o = o[ks[i]]; } o[ks[ks.length - 1]] = val; }
+
+  /* ---------- Blocos de formulário ---------- */
+  const campo = (path, rotulo, tipo, extra = {}) => {
+    const id = 'c_' + path.replace(/\W/g, '_');
+    const v = get(S, path);
+    let ctl;
+    if (tipo === 'select') ctl = `<select id="${id}" data-path="${path}" data-tipo="select" ${extra.estrutural ? 'data-estrutural="1"' : ''}>${extra.opcoes.map(([k, t]) => `<option value="${k}" ${String(v) === String(k) ? 'selected' : ''}>${esc(t)}</option>`).join('')}</select>`;
+    else if (tipo === 'moeda') ctl = `<input type="text" id="${id}" class="moeda" inputmode="decimal" data-path="${path}" data-tipo="moeda" value="${v ? fmtN(v) : ''}" placeholder="0,00">`;
+    else if (tipo === 'numero') ctl = `<input type="number" id="${id}" data-path="${path}" data-tipo="numero" value="${esc(v ?? '')}" ${extra.attrs || ''} ${extra.estrutural ? 'data-estrutural="1"' : ''}>`;
+    else if (tipo === 'data') ctl = `<input type="date" id="${id}" data-path="${path}" data-tipo="texto" value="${esc(v || '')}">`;
+    else ctl = `<input type="text" id="${id}" data-path="${path}" data-tipo="texto" value="${esc(v || '')}" placeholder="${esc(extra.ph || '')}" ${extra.estrutural ? 'data-estrutural="1"' : ''}>`;
+    return `<div class="campo ${extra.classe || ''}"><label for="${id}">${rotulo}${extra.dica ? ` <span class="dica">${extra.dica}</span>` : ''}</label>${ctl}</div>`;
+  };
+  const marcar = (path, texto, estrutural = true) => { const id = 'c_' + path.replace(/\W/g, '_'); return `<label class="marcar" for="${id}"><input type="checkbox" id="${id}" data-path="${path}" data-tipo="bool" ${estrutural ? 'data-estrutural="1"' : ''} ${get(S, path) ? 'checked' : ''}><span>${texto}</span></label>`; };
+  const opcoes = (path, lista) => `<div class="opcoes" role="group">${lista.map(([k, t]) => `<button type="button" data-opcao="${path}" data-valor="${k}" aria-pressed="${String(get(S, path)) === String(k)}">${esc(t)}</button>`).join('')}</div>`;
+
+  function blocoRepresentantes(base, lista) {
+    return `<div class="sub"><div class="rotulo">Representantes (filhos do premorto — herdam por estirpe, cada um com fato gerador próprio)</div>
+      ${lista.map((r, j) => `<div class="linha" style="grid-template-columns:minmax(0,1fr) auto">${campo(`${base}.${j}.nome`, `Neto(a) ${j + 1}`, 'texto', { ph: 'Nome completo' })}<button type="button" class="btn mini remover" data-acao="remover" data-lista="${base}" data-i="${j}" aria-label="Remover representante">✕</button></div>`).join('')}
+      <div><button type="button" class="btn mini suave" data-acao="adicionar" data-lista="${base}" data-modelo="rep">+ Representante</button></div></div>`;
+  }
+
+  function blocoFalecido(k, titulo) {
+    const b = `inv.${k}`, f = S.inv[k];
+    const temConj = f.estadoCivil !== 'solteiro';
+    const rg = M.regras(f);
+    const temNome = x => (x && (x.nome || '').trim() !== '');
+    const temDesc = f.descendentes.some(d => temNome(d) || (d.condicao === 'premorto' && (d.representantes || []).some(temNome)));
+    const cumul2 = S.modo === 'cumulativo' && k === 1;
+    let h = `<section class="cartao" aria-labelledby="tf${k}"><h2 id="tf${k}"><span class="num">${cumul2 ? 3 : 2}</span>${titulo}</h2>`;
+    if (cumul2) h += `<p class="lead">Normalmente é o cônjuge/companheiro sobrevivente do primeiro falecido. A meação e o quinhão que recebeu no 1º inventário entram automaticamente no patrimônio dele; abaixo, lance só os bens próprios que ele tinha além disso.</p>`;
+    else h += `<p class="lead">Dados do óbito, do regime de bens e de quem herda. O cálculo segue o Código Civil (arts. 1.829 a 1.844).</p>`;
+    h += `<div class="grade">${campo(`${b}.nome`, 'Nome do(a) falecido(a)', 'texto', { ph: 'Nome completo', classe: 'larga' })}${campo(`${b}.obito`, 'Data do óbito', 'data')}
+      ${campo(`${b}.estadoCivil`, 'Estado civil ao falecer', 'select', { opcoes: [['casado', 'Casado(a)'], ['uniao', 'União estável'], ['solteiro', 'Solteiro(a), viúvo(a) ou divorciado(a)']], estrutural: true })}`;
+    if (temConj) h += `${campo(`${b}.regime`, 'Regime de bens', 'select', { opcoes: REGIMES, estrutural: true })}${campo(`${b}.conjuge.nome`, f.estadoCivil === 'uniao' ? 'Companheiro(a) sobrevivente' : 'Cônjuge sobrevivente', 'texto', { ph: 'Nome completo' })}`;
+    h += `</div>`;
+    if (temConj) {
+      h += `<div class="grade" style="margin-top:10px">`;
+      h += `<div class="campo">${marcar(`${b}.conjuge.separadoFato`, 'Separados de fato há mais de 2 anos ou judicialmente (art. 1.830 CC): mantém a meação, mas não herda')}</div>`;
+      if (f.regime === 'separacao_obrig') h += `<div class="campo">${marcar(`${b}.conjuge.sumula377`, 'Aplicar Súmula 377/STF: os bens adquiridos na constância (marcados como comuns) têm meação')}</div>`;
+      h += `</div>`;
+      if (rg.concorreDesc !== 'nada' && temDesc) h += `<div class="campo" style="margin-top:10px"><span class="rotulo">Todos os descendentes são também filhos do(a) sobrevivente? <span class="dica">define a reserva de 1/4 (art. 1.832 CC)</span></span>${opcoes(`${b}.filhosComuns`, [['sim', 'Sim, todos são comuns'], ['nao', 'Não (só do falecido ou filiação híbrida)']])}</div>`;
+      if (f.regime === 'parcial') h += `<p class="notinha" style="margin-top:8px">Comunhão parcial: marque cada bem como <b>comum</b> (adquirido onerosamente na constância) ou <b>particular</b> (anterior ao casamento, herdado ou doado). O sobrevivente tem meação nos comuns e concorre com os descendentes só nos particulares.</p>`;
+      if (f.regime === 'universal') h += `<p class="notinha" style="margin-top:8px">Comunhão universal: todos os bens são comuns (meação de 50%) e o sobrevivente não concorre com os descendentes. Marque "incomunicável" só para bens excluídos por cláusula (art. 1.668 CC).</p>`;
+    }
+    // Descendentes
+    h += `<h3>Descendentes (filhos; netos por representação)</h3><div class="lista">`;
+    f.descendentes.forEach((d, i) => {
+      h += `<div class="item"><div class="linha">${campo(`${b}.descendentes.${i}.nome`, `Herdeiro ${i + 1}`, 'texto', { ph: 'Nome completo', classe: 'larga-mobile' })}
+        ${campo(`${b}.descendentes.${i}.condicao`, 'Situação', 'select', { opcoes: [['vivo', 'Vivo(a) — herda'], ['premorto', 'Premorto(a) — netos representam'], ['renuncia', 'Renuncia à herança']], estrutural: true })}
+        <button type="button" class="btn mini remover" data-acao="remover" data-lista="${b}.descendentes" data-i="${i}" aria-label="Remover herdeiro">✕</button></div>`;
+      if (d.condicao === 'premorto') h += blocoRepresentantes(`${b}.descendentes.${i}.representantes`, d.representantes || []);
+      h += `</div>`;
+    });
+    h += `</div><div class="acoes"><button type="button" class="btn suave" data-acao="adicionar" data-lista="${b}.descendentes" data-modelo="desc">+ Filho(a)</button></div>`;
+    // Ascendentes
+    const a = f.ascendentes;
+    h += `<details style="margin-top:14px" ${!temDesc ? 'open' : ''}><summary>Ascendentes ${temDesc ? '<span class="dica">— ignorados: há descendentes</span>' : '<span class="dica">— herdam quando não há descendentes</span>'}</summary>
+      <div class="grade" style="margin-top:10px"><div class="campo">${marcar(`${b}.ascendentes.paiVivo`, 'Pai vivo')}</div>${a.paiVivo ? campo(`${b}.ascendentes.pai`, 'Nome do pai', 'texto') : ''}<div class="campo">${marcar(`${b}.ascendentes.maeViva`, 'Mãe viva')}</div>${a.maeViva ? campo(`${b}.ascendentes.mae`, 'Nome da mãe', 'texto') : ''}</div>
+      ${(!a.paiVivo && !a.maeViva) ? `<div class="grade" style="margin-top:10px">${campo(`${b}.ascendentes.avosPaternos`, 'Avós paternos vivos', 'numero', { attrs: 'min="0" max="2"', dica: '(0 a 2)' })}${campo(`${b}.ascendentes.avosMaternos`, 'Avós maternos vivos', 'numero', { attrs: 'min="0" max="2"', dica: '(0 a 2)' })}</div>` : '<p class="notinha" style="margin-top:8px">Com pai ou mãe vivo, os avós não herdam (art. 1.836, §1º CC).</p>'}</details>`;
+    // Colaterais
+    h += `<details style="margin-top:10px" ${(!temDesc && !temConj && !a.paiVivo && !a.maeViva && !(+a.avosPaternos) && !(+a.avosMaternos)) ? 'open' : ''}><summary>Colaterais <span class="dica">— só herdam sem descendentes, ascendentes e cônjuge</span></summary><div class="lista" style="margin-top:10px">`;
+    f.colaterais.forEach((c, i) => {
+      h += `<div class="item"><div class="linha colateral">${campo(`${b}.colaterais.${i}.nome`, `Colateral ${i + 1}`, 'texto', { ph: 'Nome completo' })}
+        ${campo(`${b}.colaterais.${i}.grau`, 'Parentesco', 'select', { opcoes: [['irmao', 'Irmão/irmã'], ['sobrinho', 'Sobrinho(a) (por cabeça)'], ['tio', 'Tio(a)'], ['primo', 'Primo(a) / 4º grau']], estrutural: true })}
+        ${c.grau === 'irmao' ? campo(`${b}.colaterais.${i}.tipo`, 'Vínculo', 'select', { opcoes: [['bilateral', 'Bilateral (mesmo pai e mãe)'], ['unilateral', 'Unilateral']] }) : '<div></div>'}
+        <button type="button" class="btn mini remover" data-acao="remover" data-lista="${b}.colaterais" data-i="${i}" aria-label="Remover colateral">✕</button></div>
+        ${c.grau === 'irmao' ? `<div class="linha" style="grid-template-columns:minmax(0,1fr)">${campo(`${b}.colaterais.${i}.condicao`, 'Situação', 'select', { opcoes: [['vivo', 'Vivo(a)'], ['premorto', 'Premorto(a) — sobrinhos representam'], ['renuncia', 'Renuncia']], estrutural: true })}</div>${c.condicao === 'premorto' ? blocoRepresentantes(`${b}.colaterais.${i}.representantes`, c.representantes || []) : ''}` : ''}</div>`;
+    });
+    h += `</div><div class="acoes"><button type="button" class="btn suave mini" data-acao="adicionar" data-lista="${b}.colaterais" data-modelo="col">+ Colateral</button></div></details>`;
+    // Bens
+    h += `<h3>${cumul2 ? 'Bens próprios do 2º falecido (além do que recebeu no 1º inventário)' : 'Bens do espólio'}</h3>`;
+    h += `<p class="notinha">Valor = base de cálculo (valor venal/avaliação, nunca inferior ao do ITBI/IPTU, ITR ou IPVA — art. 10, §4º). "Fração do falecido/casal" serve para bens em condomínio com terceiros.</p><div class="lista" style="margin-top:8px">`;
+    const mostraNat = temConj && (rg.meacaoSobre === 'comuns');
+    f.bens.forEach((bm, i) => {
+      h += `<div class="item"><div class="linha bem">${campo(`${b}.bens.${i}.descricao`, `Bem ${i + 1}`, 'texto', { ph: 'Descrição, matrícula…', classe: 'larga-mobile' })}
+        ${campo(`${b}.bens.${i}.tipo`, 'Tipo', 'select', { opcoes: TIPOS })}${campo(`${b}.bens.${i}.valor`, 'Valor (R$)', 'moeda')}
+        ${mostraNat ? campo(`${b}.bens.${i}.natureza`, 'Natureza', 'select', { opcoes: [['comum', 'Comum (do casal)'], ['particular', 'Particular (só do falecido)']] }) : (temConj && rg.meacaoSobre === 'todos' ? `<div class="campo"><span class="rotulo">&nbsp;</span>${marcar(`${b}.bens.${i}.incomunicavel`, 'Incomunicável', false)}</div>` : '<div></div>')}
+        ${campo(`${b}.bens.${i}.fracao`, 'Fração (%)', 'numero', { attrs: 'min="0" max="100" step="0.01"' })}
+        <button type="button" class="btn mini remover" data-acao="remover" data-lista="${b}.bens" data-i="${i}" aria-label="Remover bem">✕</button></div></div>`;
+    });
+    h += `</div><div class="acoes"><button type="button" class="btn suave" data-acao="adicionar" data-lista="${b}.bens" data-modelo="bem">+ Bem</button></div>`;
+    h += `<div class="grade" style="margin-top:12px">${campo(`${b}.dividas`, 'Dívidas do espólio (R$)', 'moeda', { dica: 'abatem antes da meação' })}${campo(`${b}.aliquotaManual`, 'Alíquota manual (%)', 'numero', { attrs: 'min="0" max="10" step="0.5"', dica: 'deixe vazio para usar a lei vigente' })}</div>`;
+    h += `<div class="grade" style="margin-top:10px"><div class="campo">${marcar(`${b}.multaAtraso`, 'Aplicar multa de 20% se o inventário não foi requerido em 120 dias do óbito (art. 27, I)', false)}</div>
+      <div class="campo">${marcar(`${b}.isencaoUnicoImovel`, 'Único imóvel do espólio até 2.600 UFP: habilitar isenção do art. 8º, VI por sucessor (sem outro imóvel e renda ≤ 3 salários mínimos)')}</div></div>`;
+    if (f.isencaoUnicoImovel) {
+      const inv = M.inventario(f, { ufp: S.ufp, hoje: S.hoje });
+      h += `<div class="aviso">Marque os sucessores que atendem aos requisitos (reconhecimento depende de pedido prévio à SEFAZ — Decreto, art. 9º):<div class="opcoes" style="margin-top:6px">${inv.suc.benef.map(x => marcar(`${b}.isentosVI.${x.id}`, esc(x.nome), false)).join('')}</div></div>`;
+    }
+    h += `</section>`;
+    return h;
+  }
+
+  function blocoDoacao() {
+    const d = S.doa;
+    let h = `<section class="cartao" aria-labelledby="td"><h2 id="td"><span class="num">2</span>Doação</h2><p class="lead">Cada donatário é um fato gerador (art. 5º): isenção e alíquota são aferidas por donatário, somando as doações do mesmo exercício.</p>`;
+    h += `<h3>Doador(es)</h3><div class="lista">${d.doadores.map((x, i) => `<div class="item"><div class="linha" style="grid-template-columns:minmax(0,1fr) auto">${campo(`doa.doadores.${i}.nome`, `Doador ${i + 1}`, 'texto', { ph: 'Nome completo' })}<button type="button" class="btn mini remover" data-acao="remover" data-lista="doa.doadores" data-i="${i}" aria-label="Remover doador">✕</button></div></div>`).join('')}</div>
+      <div class="acoes"><button type="button" class="btn suave mini" data-acao="adicionar" data-lista="doa.doadores" data-modelo="doador">+ Doador (ex.: casal)</button></div>`;
+    h += `<div class="grade" style="margin-top:12px">${campo('doa.data', 'Data prevista da escritura', 'data')}${campo('doa.aliquotaManual', 'Alíquota manual (%)', 'numero', { attrs: 'min="0" max="10" step="0.5"', dica: 'vazio = lei vigente' })}</div>`;
+    h += `<div class="grade" style="margin-top:10px"><div class="campo">${marcar('doa.reservaUsufruto', 'Doação com reserva de usufruto em favor do(s) doador(es)')}</div>${d.reservaUsufruto ? campo('doa.baseNuaPropriedade', 'Base de cálculo da nua-propriedade', 'select', { opcoes: [['100', '100% do valor do bem (art. 2º, §5º)'], ['50', '50% do valor (art. 13, por analogia)']] }) : ''}</div>`;
+    if (d.reservaUsufruto) h += `<div class="campo" style="margin-top:8px">${marcar('doa.usufrutoAcessorio', 'Emolumentos: cobrar a reserva de usufruto como ato acessório (metade da faixa)', false)}</div>`;
+    h += `<h3>Donatários</h3><div class="lista">${d.donatarios.map((x, i) => `<div class="item"><div class="linha donatario">${campo(`doa.donatarios.${i}.nome`, `Donatário ${i + 1}`, 'texto', { ph: 'Nome completo' })}${campo(`doa.donatarios.${i}.doacoesAnteriores`, 'Doações anteriores no ano (R$)', 'moeda', { dica: 'do mesmo doador (art. 8º, §1º)' })}${campo(`doa.donatarios.${i}.impostoAnterior`, 'ITCMD já recolhido nelas (R$)', 'moeda', { dica: 'art. 10, §7º' })}<button type="button" class="btn mini remover" data-acao="remover" data-lista="doa.donatarios" data-i="${i}" aria-label="Remover donatário">✕</button></div></div>`).join('')}</div>
+      <div class="acoes"><button type="button" class="btn suave" data-acao="adicionar" data-lista="doa.donatarios" data-modelo="donatario">+ Donatário</button></div>`;
+    const dest = [['todos', 'Todos os donatários, em partes iguais'], ...d.donatarios.map((x, i) => [x.uid, x.nome || `Donatário ${i + 1}`])];
+    d.bens.forEach(bm => { if (bm.destino && bm.destino !== 'todos' && !d.donatarios.some(x => x.uid === bm.destino)) bm.destino = 'todos'; });
+    h += `<h3>Bens doados</h3><div class="lista">${d.bens.map((bm, i) => `<div class="item"><div class="linha bem bem-doacao">${campo(`doa.bens.${i}.descricao`, `Bem ${i + 1}`, 'texto', { ph: 'Descrição, matrícula…', classe: 'larga-mobile' })}${campo(`doa.bens.${i}.tipo`, 'Tipo', 'select', { opcoes: TIPOS })}${campo(`doa.bens.${i}.valor`, 'Valor (R$)', 'moeda')}${campo(`doa.bens.${i}.destino`, 'Para quem', 'select', { opcoes: dest })}${campo(`doa.bens.${i}.fracao`, 'Fração (%)', 'numero', { attrs: 'min="0" max="100" step="0.01"' })}<button type="button" class="btn mini remover" data-acao="remover" data-lista="doa.bens" data-i="${i}" aria-label="Remover bem">✕</button></div></div>`).join('')}</div>
+      <div class="acoes"><button type="button" class="btn suave" data-acao="adicionar" data-lista="doa.bens" data-modelo="bemDoa">+ Bem</button></div>`;
+    h += `</section>`;
+    return h;
+  }
+
+  function renderForm() {
+    const fi = $('#formInventarios'), fd = $('#formDoacao');
+    $$('#segModo button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.modo === S.modo)));
+    if (S.modo === 'doacao') { fi.classList.add('oculto'); fd.classList.remove('oculto'); fd.innerHTML = blocoDoacao(); }
+    else {
+      fd.classList.add('oculto'); fi.classList.remove('oculto');
+      fi.innerHTML = blocoFalecido(0, S.modo === 'cumulativo' ? '1º falecido e sua sucessão' : 'Falecido(a) e sucessão') + (S.modo === 'cumulativo' ? blocoFalecido(1, '2º falecido (inventário cumulativo)') : '');
+    }
+    $('#ufp').value = fmtN(S.ufp); $('#hoje').value = S.hoje;
+    atualizarSelo();
+  }
+  function ufpDoCalculo() { return (S.modo === 'doacao' && !S.ufpManual && S.doa.data) ? M.ufpVigente(S.doa.data).valor : S.ufp; }
+  function atualizarSelo() {
+    const u = M.ufpVigente(S.hoje);
+    $('#ufpDica').textContent = S.ufpManual ? 'valor informado manualmente' : `vigente em ${u.mes} (${u.fonte})`;
+    $('#seloUfp').textContent = S.ufpManual ? `UFP/SE ${fmt(S.ufp)} · manual` : `UFP/SE ${fmt(S.ufp)} · ${u.mes}`;
+  }
+
+  /* ---------- Resultado ---------- */
+  function tabelaHerdeiros(inv, tituloExtra) {
+    const it = inv.itc;
+    let h = `<div class="tabela-wrap"><table><thead><tr><th>Beneficiário</th><th>Título</th><th class="n">Fração</th><th class="n">Quinhão</th><th class="n">UFP</th><th>Situação</th><th class="n">ITCMD</th>${it.multaCabivel ? '<th class="n">Multa 20%</th>' : ''}</tr></thead><tbody>`;
+    if (inv.pat.rg.temConjuge && inv.pat.meacao > 0) h += `<tr class="sub"><td>${esc(inv.falecido.conjuge.nome || 'Meeiro(a)')}</td><td>meação (não é herança)</td><td class="n fracao">${inv.pat.rg.meacaoSobre === 'todos' ? '1/2' : '1/2 dos comuns'}</td><td class="n">${fmt(inv.pat.meacao)}</td><td class="n">—</td><td><span class="pill sem">não incide</span></td><td class="n">—</td>${it.multaCabivel ? '<td class="n">—</td>' : ''}</tr>`;
+    it.linhas.forEach(l => {
+      let fr;
+      if (inv.pat.herancaPart > 0 && inv.pat.herancaComum > 0 && l.frPart.txt() !== l.frComum.txt()) fr = [l.frPart.zero() ? '' : `${l.frPart.txt()} <span class="dica">da herança nos bens particulares</span>`, l.frComum.zero() ? '' : `${l.frComum.txt()} <span class="dica">da herança nos bens comuns</span>`].filter(Boolean).join('<br>');
+      else fr = `${(inv.pat.herancaPart > 0 ? l.frPart : l.frComum).txt()} <span class="dica">da herança</span>`;
+      h += `<tr><td>${esc(l.nome)}</td><td>${esc(l.papel)}</td><td class="n fracao" style="white-space:nowrap">${fr}</td><td class="n">${fmt(l.quinhao)}</td><td class="n">${fmtN(l.ufps, 1)}</td><td><span class="pill ${l.situacao === 'isento' ? 'isento' : l.situacao === 'tributado' ? 'tributado' : 'sem'}">${l.situacao === 'tributado' ? pct(l.aliq) : l.situacao}</span><div class="notinha">${esc(l.detalhe)}</div></td><td class="n">${fmt(l.imposto)}</td>${it.multaCabivel ? `<td class="n">${fmt(l.multa)}</td>` : ''}</tr>`;
+    });
+    h += `<tr class="total"><td colspan="3">Total ITCMD${tituloExtra || ''}</td><td class="n">${fmt(it.linhas.reduce((s, l) => s + l.quinhao, 0))}</td><td></td><td></td><td class="n">${fmt(it.total)}</td>${it.multaCabivel ? `<td class="n">${fmt(it.totalMulta)}</td>` : ''}</tr></tbody></table></div>`;
+    return h;
+  }
+  function tabelaPartilha(inv) {
+    let h = `<div class="tabela-wrap"><table><thead><tr><th>Bem</th><th>Quem recebe</th><th class="n">Fração do bem</th><th class="n">%</th><th class="n">Valor</th></tr></thead><tbody>`;
+    inv.partilha.forEach(p => {
+      p.linhas.forEach((l, j) => { h += `<tr>${j === 0 ? `<td rowspan="${p.linhas.length}"><b>${esc(p.bem.descricao)}</b><div class="notinha">${fmt(p.bem.valor)}${p.bem.fracao !== 100 ? ` (${fmtN(p.bem.fracao, 4)}% de ${fmt(p.bem.valorBem)})` : ''} · ${p.bem.comum ? 'comum' : 'particular'}</div></td>` : ''}<td>${esc(l.quem)}<div class="notinha">${esc(l.papel)}</div></td><td class="n fracao">${l.fr.txt()}</td><td class="n">${l.fr.pct(4)}</td><td class="n">${fmt(l.valor)}</td></tr>`; });
+    });
+    h += `</tbody></table></div>`;
+    return h;
+  }
+  function resumoInventario(inv, rotulo) {
+    const p = inv.pat, it = inv.itc;
+    let h = `<h3>${esc(rotulo)}</h3><div class="kpis"><div class="kpi"><div class="r">Monte-mor</div><div class="v">${fmt(p.monteMor)}</div></div>${p.dividas ? `<div class="kpi"><div class="r">Dívidas</div><div class="v">− ${fmt(p.dividas)}</div></div>` : ''}${p.rg.temConjuge ? `<div class="kpi"><div class="r">Meação</div><div class="v">${fmt(p.meacao)}</div></div>` : ''}<div class="kpi"><div class="r">Herança (monte partível)</div><div class="v">${fmt(p.heranca)}</div></div><div class="kpi destaque"><div class="r">ITCMD${it.multaCabivel ? ' + multa' : ''}</div><div class="v">${fmt(it.totalGeral)}</div></div></div>`;
+    if (it.dias !== null) h += `<p class="notinha">Óbito em ${dataBR(inv.falecido.obito)} — ${it.dias} dias até a data de referência.${it.multaCabivel ? ' Prazo de 120 dias ultrapassado: multa de 20% do imposto (art. 27, I), salvo se o inventário já foi requerido no prazo.' : it.dias > 120 ? ' Multa desativada.' : ''}</p>`;
+    const avs = [...inv.suc.avisos, ...(inv.itc.avisos || [])];
+    const graves = avs.filter(a => /sem o nome/.test(a)), demais = avs.filter(a => !/sem o nome/.test(a));
+    if (graves.length) h += `<div class="aviso erro"><ul>${graves.map(a => `<li>${esc(a)}</li>`).join('')}</ul></div>`;
+    if (demais.length) h += `<div class="aviso"><ul>${demais.map(a => `<li>${esc(a)}</li>`).join('')}</ul></div>`;
+    if (inv.falecido.obito && inv.falecido.obito < '2024-01-01' && !inv.falecido.aliquotaManual) h += `<div class="aviso">Óbito anterior a 2024: a alíquota é a vigente na data do fato gerador. Esta versão aplica a tabela atual; confira na SEFAZ/SE e, se for o caso, informe a alíquota manual.</div>`;
+    h += tabelaHerdeiros(inv);
+    h += `<h3>Partilha ideal por bem (para a declaração)</h3>${p.dividas ? '<p class="notinha">Frações e valores brutos dos bens, antes do abatimento das dívidas.</p>' : ''}` + tabelaPartilha(inv);
+    return h;
+  }
+
+  let ULT = null; // último cálculo (para o orçamento e a cópia)
+  function calcular() {
+    const opts = { ufp: S.ufp, hoje: S.hoje };
+    atualizarSelo();
+    const rc = $('#resCorpo'); let h = '';
+    try {
+      if (S.modo === 'doacao') {
+        const d = M.doacao(S.doa, { ufp: ufpDoCalculo(), hoje: S.doa.data || S.hoje });
+        ULT = { modo: 'doacao', d };
+        if (!S.ufpManual && S.doa.data && M.ufpVigente(S.doa.data).valor !== S.ufp) h += `<div class="aviso">Escritura prevista para ${dataBR(S.doa.data)}: usada a UFP/SE de ${M.ufpVigente(S.doa.data).mes} (${fmt(d.ufp)}).</div>`;
+        h += `<div class="kpis"><div class="kpi"><div class="r">Valor doado</div><div class="v">${fmt(d.valorTotal)}</div></div><div class="kpi"><div class="r">Donatários</div><div class="v">${d.linhas.length}</div></div><div class="kpi destaque"><div class="r">ITCMD</div><div class="v">${fmt(d.total)}</div></div></div>`;
+        if (d.avisos.length) h += `<div class="aviso"><ul>${d.avisos.map(a => `<li>${esc(a)}</li>`).join('')}</ul></div>`;
+        h += `<div class="tabela-wrap"><table><thead><tr><th>Donatário</th><th class="n">Imóveis</th><th class="n">Móveis</th><th class="n">Base (+ anteriores)</th><th class="n">UFP</th><th>Situação</th><th class="n">ITCMD</th></tr></thead><tbody>`;
+        d.linhas.forEach(l => { h += `<tr><td>${esc(l.nome)}</td><td class="n">${fmt(l.imoveis)}</td><td class="n">${fmt(l.moveis)}</td><td class="n">${fmt(l.quinhao + l.anteriores)}</td><td class="n">${fmtN(l.ufps, 1)}</td><td><span class="pill ${l.situacao === 'isento' ? 'isento' : l.situacao === 'tributado' ? 'tributado' : 'sem'}">${l.situacao === 'tributado' ? pct(l.aliq) : l.situacao}</span><div class="notinha">${esc(l.detalhe)}</div></td><td class="n">${fmt(l.imposto)}</td></tr>`; });
+        h += `<tr class="total"><td colspan="6">Total ITCMD</td><td class="n">${fmt(d.total)}</td></tr></tbody></table></div>`;
+      } else if (S.modo === 'cumulativo') {
+        const c = M.cumulativo(S.inv[0], S.inv[1], opts);
+        ULT = { modo: 'cumulativo', c };
+        h += resumoInventario(c.inv1, `1ª declaração — ${S.inv[0].nome || '1º falecido'}`);
+        h += `<div class="aviso ok">O 2º falecido leva para o próprio inventário: meação ${fmt(c.inv1.pat.meacao)}${c.inv1.suc.benef.find(b => b.id === 'conj') ? ` + quinhão ${fmt(c.inv1.suc.benef.find(b => b.id === 'conj').valor)}` : ''} = ${fmt(c.inv2.pat.bens.filter(b => b.origem === 'inv1').reduce((s, b) => s + b.valor, 0))} (já lançado como bens particulares do 2º inventário).</div>`;
+        h += resumoInventario(c.inv2, `2ª declaração — ${S.inv[1].nome || '2º falecido'}`);
+      } else {
+        const inv = M.inventario(S.inv[0], opts);
+        ULT = { modo: 'inventario', inv };
+        h += resumoInventario(inv, S.inv[0].nome ? `Espólio de ${S.inv[0].nome}` : 'Espólio');
+      }
+    } catch (e) { h = `<div class="aviso erro">Não foi possível calcular: ${esc(e.message)}</div>`; ULT = null; console.error(e); }
+    rc.innerHTML = h;
+    orcamento();
+  }
+
+  const ORC_EDITAVEIS = [['honorarios', 'Honorários advocatícios', 'a combinar com o cliente'], ['certidoes', 'Certidões e diligências', 'RI, negativas, avaliações'], ['registro', 'Registro/averbação no RI', 'tabela do Registro de Imóveis'], ['outros', 'Outros custos', '']];
+  function montarOrcamentoFixo() { // campos editáveis são criados uma única vez (não perdem o foco nem o valor)
+    const oc = $('#orcCorpo');
+    oc.innerHTML = `<p class="notinha" id="orcTitulo"></p><div class="tabela-wrap"><table><thead><tr><th>Item</th><th class="n">Valor</th></tr></thead><tbody id="orcLinhas"></tbody><tbody id="orcEditaveis">${ORC_EDITAVEIS.map(([k, r, d]) => `<tr><td><label for="orc_${k}">${r}</label>${d ? `<div class="notinha">${d}</div>` : ''}</td><td class="n" style="min-width:150px"><input type="text" id="orc_${k}" class="moeda" inputmode="decimal" data-path="orc.${k}" data-tipo="moedatexto" placeholder="0,00" aria-label="${r}"></td></tr>`).join('')}</tbody><tbody><tr class="total grande"><td>Total estimado do ato</td><td class="n" id="orcTotal">—</td></tr></tbody></table></div><div id="orcOpcoes" class="nao-imprimir"></div>`;
+  }
+  function orcamento() {
+    if (!$('#orcLinhas')) montarOrcamentoFixo();
+    ORC_EDITAVEIS.forEach(([k]) => { const el = $('#orc_' + k); if (el && document.activeElement !== el) el.value = S.orc[k] || ''; });
+    if (!ULT) { $('#orcLinhas').innerHTML = '<tr><td colspan="2" class="notinha">Preencha os dados para montar o orçamento.</td></tr>'; $('#orcTotal').textContent = '—'; return; }
+    const linhas = []; // {rotulo, detalhe, valor}
+    let titulo = '';
+    if (ULT.modo === 'doacao') {
+      const d = ULT.d; titulo = 'Escritura pública de doação';
+      linhas.push({ rotulo: 'ITCMD — doação', detalhe: `${d.linhas.length} donatário(s)`, valor: d.total });
+      const e = M.emolumentosEscritura(d.valorTotal, S.doa.doadores.length + S.doa.donatarios.length);
+      linhas.push({ rotulo: 'Emolumentos da escritura', detalhe: `faixa ${fmt(d.valorTotal)} → ${fmt(e.emol)}${e.adicional ? ` + ${fmt(e.adicional)} adicionais` : ''} + FERD 20% ${fmt(e.ferd)}`, valor: e.total });
+      if (S.doa.reservaUsufruto && S.doa.usufrutoAcessorio) { const ea = M.emolumentosEscritura(d.valorTotal, 0, { acessorio: true }); linhas.push({ rotulo: 'Reserva de usufruto (ato acessório)', detalhe: `metade da faixa ${fmt(ea.emol)} + FERD ${fmt(ea.ferd)}`, valor: ea.total }); }
+    } else {
+      const invs = ULT.modo === 'cumulativo' ? [ULT.c.inv1, ULT.c.inv2] : [ULT.inv];
+      titulo = ULT.modo === 'cumulativo' ? 'Escritura pública de inventário cumulativo e partilha' : 'Escritura pública de inventário e partilha';
+      invs.forEach((inv, k) => {
+        const nome = inv.falecido.nome || (k ? '2º falecido' : 'falecido');
+        linhas.push({ rotulo: `ITCMD causa mortis — ${nome}`, detalhe: `${inv.itc.linhas.filter(l => l.situacao === 'tributado').length} quinhão(ões) tributado(s), ${inv.itc.linhas.filter(l => l.situacao === 'isento').length} isento(s)`, valor: inv.itc.total });
+        if (inv.itc.multaCabivel && inv.itc.totalMulta) linhas.push({ rotulo: `Multa 20% (art. 27, I) — ${nome}`, detalhe: 'inventário fora do prazo de 120 dias', valor: inv.itc.totalMulta });
+      });
+      invs.forEach((inv, k) => {
+        const pessoas = inv.itc.linhas.length + (inv.pat.rg.temConjuge && inv.pat.meacao > 0 ? 1 : 0) + (inv.falecido.descendentes || []).filter(x => x.condicao === 'renuncia' && (x.nome || '').trim()).length;
+        const acess = k === 1 && S.emol.inv2Acessorio;
+        const e = M.emolumentosEscritura(inv.pat.monteMor, pessoas, { acessorio: acess });
+        linhas.push({ rotulo: `Emolumentos — inventário de ${inv.falecido.nome || (k ? '2º falecido' : 'falecido')}${acess ? ' (ato acessório)' : ''}`, detalhe: `faixa ${fmt(inv.pat.monteMor)} → ${fmt(e.emol)}${e.adicional ? ` + ${fmt(e.adicional)} (${pessoas} pessoas)` : ''} + FERD 20% ${fmt(e.ferd)}`, valor: e.total });
+      });
+    }
+    const fixos = linhas.reduce((s, l) => s + l.valor, 0);
+    const edSoma = ORC_EDITAVEIS.reduce((s, [k]) => s + parseMoeda(S.orc[k]), 0);
+    $('#orcTitulo').innerHTML = `<b>${esc(titulo)}</b>${ULT.modo !== 'doacao' ? ` · ${[...new Set((ULT.modo === 'cumulativo' ? [ULT.c.inv1, ULT.c.inv2] : [ULT.inv]).map(i => i.falecido.nome).filter(Boolean))].map(esc).join(' e ')}` : ''}`;
+    let h = '';
+    linhas.forEach(l => { h += `<tr><td>${esc(l.rotulo)}<div class="notinha">${esc(l.detalhe)}</div></td><td class="n">${fmt(l.valor)}</td></tr>`; });
+    h += `<tr class="sub"><td>Subtotal — imposto e emolumentos</td><td class="n"><b id="orcSubtotal">${fmt(fixos)}</b></td></tr>`;
+    $('#orcLinhas').innerHTML = h;
+    $('#orcTotal').textContent = fmt(fixos + edSoma);
+    const op = ULT.modo === 'cumulativo' ? `<div style="margin-top:8px">${marcar('emol.inv2Acessorio', 'Cobrar o 2º inventário como ato acessório (metade da faixa)', false)}</div>` : '';
+    const opEl = $('#orcOpcoes'); if (opEl.dataset.modo !== ULT.modo || (op && !opEl.contains(document.activeElement) && opEl.innerHTML !== op)) { opEl.innerHTML = op; opEl.dataset.modo = ULT.modo; }
+    const itcmdTot = linhas.filter(l => /^ITCMD|^Multa/.test(l.rotulo)).reduce((s, l) => s + l.valor, 0), emolTot = linhas.filter(l => /^Emolumentos|^Reserva/.test(l.rotulo)).reduce((s, l) => s + l.valor, 0);
+    $('#bvItcmd').textContent = fmt(itcmdTot); $('#bvEmol').textContent = fmt(emolTot); $('#bvTotal').textContent = fmt(fixos + edSoma);
+    $('#orcData').textContent = `Referência: ${dataBR(S.hoje)} · UFP/SE ${fmt(ULT.modo === 'doacao' ? ULT.d.ufp : S.ufp)}`;
+  }
+
+  function textoResumo() {
+    if (!ULT) return '';
+    const L = [];
+    L.push(`ORÇAMENTO — ${ULT.modo === 'doacao' ? 'ESCRITURA DE DOAÇÃO' : ULT.modo === 'cumulativo' ? 'INVENTÁRIO CUMULATIVO' : 'INVENTÁRIO E PARTILHA'}`);
+    L.push(`Cartório de Notas do 2º Ofício de Itabaiana/SE · referência ${dataBR(S.hoje)} · UFP/SE ${fmt(ULT.modo === 'doacao' ? ULT.d.ufp : S.ufp)}`); L.push('');
+    const bloco = (inv, t) => { L.push(t); L.push(`Monte-mor ${fmt(inv.pat.monteMor)}${inv.pat.dividas ? ` − dívidas ${fmt(inv.pat.dividas)}` : ''}${inv.pat.rg.temConjuge ? ` − meação ${fmt(inv.pat.meacao)}` : ''} = herança ${fmt(inv.pat.heranca)}`); inv.itc.linhas.forEach(l => L.push(`  • ${l.nome} (${l.papel}): quinhão ${fmt(l.quinhao)} = ${fmtN(l.ufps, 1)} UFP → ${l.situacao === 'tributado' ? pct(l.aliq) + ' = ' + fmt(l.imposto) : l.situacao}${l.multa ? ` + multa ${fmt(l.multa)}` : ''}`)); L.push(`  ITCMD: ${fmt(inv.itc.totalGeral)}`); L.push(''); };
+    if (ULT.modo === 'doacao') { L.push('Donatários:'); ULT.d.linhas.forEach(l => L.push(`  • ${l.nome}: base ${fmt(l.quinhao)} (${fmtN(l.ufps, 1)} UFP) → ${l.situacao === 'tributado' ? pct(l.aliq) + ' = ' + fmt(l.imposto) : l.situacao}`)); L.push(`  ITCMD: ${fmt(ULT.d.total)}`); L.push(''); }
+    else if (ULT.modo === 'cumulativo') { bloco(ULT.c.inv1, `1ª declaração — ${S.inv[0].nome}`); bloco(ULT.c.inv2, `2ª declaração — ${S.inv[1].nome}`); }
+    else bloco(ULT.inv, `Espólio de ${S.inv[0].nome}`);
+    $$('#orcCorpo tbody tr').forEach(tr => { const td = tr.children; if (td.length < 2) return; const rot = td[0].querySelector('label') ? td[0].querySelector('label').textContent : td[0].childNodes[0].textContent; const inp = td[1].querySelector('input'); L.push(`${rot.trim()}: ${inp ? fmt(parseMoeda(inp.value)) : td[1].textContent.trim()}`); });
+    return L.join('\n');
+  }
+
+  /* ---------- Eventos ---------- */
+  function aplicarEntrada(el) {
+    const p = el.dataset.path, t = el.dataset.tipo; if (!p) return;
+    let v;
+    if (t === 'bool') v = el.checked; else if (t === 'moeda') v = parseMoeda(el.value); else if (t === 'numero') v = el.value === '' ? '' : +el.value; else v = el.value;
+    if (t === 'moedatexto') v = el.value;
+    set(S, p, v);
+    if (p === 'ufp') { if (!v) { set(S, p, M.ufpVigente(S.hoje).valor); S.ufpManual = false; } else S.ufpManual = Math.abs(v - M.ufpVigente(S.hoje).valor) > 0.001; }
+  }
+  // Dentro do Hub, a ferramenta vive em #itcmdRaiz: os ouvintes ficam presos a ela para não
+  // reagir a botões de outras páginas (o Guia de ITBI também usa data-modo).
+  const RAIZ = document.getElementById('itcmdRaiz') || document;
+  RAIZ.addEventListener('input', e => {
+    const el = e.target; if (!el.dataset || !el.dataset.path) return;
+    if (el.dataset.estrutural) return; // trata no change
+    aplicarEntrada(el); agendar();
+  });
+  RAIZ.addEventListener('change', e => {
+    const el = e.target; if (!el.dataset || !el.dataset.path) return;
+    aplicarEntrada(el);
+    if (el.dataset.tipo === 'moeda') el.value = get(S, el.dataset.path) ? fmtN(get(S, el.dataset.path)) : '';
+    if (el.dataset.path === 'hoje' || el.dataset.path === 'doa.data') { if (el.dataset.path === 'hoje' && !S.ufpManual) { S.ufp = M.ufpVigente(S.hoje).valor; } renderForm(); }
+    if (el.dataset.estrutural) renderForm();
+    calcular(); salvarAuto();
+  });
+  RAIZ.addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    if (b.id === 'btVerOrcamento') { const o = $('#orcamento'); if (o) o.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    if (b.dataset.modo && ['inventario', 'cumulativo', 'doacao'].includes(b.dataset.modo)) { S.modo = b.dataset.modo; renderForm(); calcular(); salvarAuto(); return; }
+    if (b.dataset.opcao) { set(S, b.dataset.opcao, b.dataset.valor); renderForm(); calcular(); salvarAuto(); return; }
+    if (b.dataset.acao === 'adicionar') {
+      const lista = get(S, b.dataset.lista) || []; const m = b.dataset.modelo;
+      const novo = m === 'desc' ? pessoa({ nome: '', condicao: 'vivo', representantes: [] }) : m === 'rep' ? pessoa({ nome: '' }) : m === 'col' ? pessoa({ nome: '', grau: 'irmao', tipo: 'bilateral', condicao: 'vivo', representantes: [] }) : m === 'bem' ? { descricao: '', tipo: 'imovel_urbano', valor: 0, natureza: 'comum', fracao: 100 } : m === 'bemDoa' ? { descricao: '', tipo: 'imovel_urbano', valor: 0, fracao: 100, destino: 'todos' } : m === 'donatario' ? pessoa({ nome: '', doacoesAnteriores: 0, impostoAnterior: 0 }) : { nome: '' };
+      lista.push(novo); set(S, b.dataset.lista, lista); renderForm(); calcular(); salvarAuto();
+      const foco = $(`[data-path="${b.dataset.lista}.${lista.length - 1}.${m === 'bem' || m === 'bemDoa' ? 'descricao' : 'nome'}"]`); if (foco) foco.focus();
+      return;
+    }
+    if (b.dataset.acao === 'remover') { const lista = get(S, b.dataset.lista); lista.splice(+b.dataset.i, 1); renderForm(); calcular(); salvarAuto(); return; }
+  });
+  let timer = null;
+  function agendar() { clearTimeout(timer); timer = setTimeout(() => { calcular(); salvarAuto(); }, 250); }
+
+  $('#btExemplo').addEventListener('click', () => { S = exemplo(); renderForm(); calcular(); salvarAuto(); toast('Exemplo carregado'); });
+  $('#btLimpar').addEventListener('click', () => { S = estadoInicial(); renderForm(); calcular(); try { localStorage.removeItem('itcmd-rascunho'); } catch (e) { } toast('Formulário limpo'); });
+  $('#btSalvar').addEventListener('click', () => { salvarAuto(true); });
+  $('#btImprimir').addEventListener('click', imprimirOrcamento);
+  function imprimirOrcamento() {
+    if (!ULT) return;
+    let quem = ''; try { quem = (typeof SESSAO !== 'undefined' && SESSAO && SESSAO.nome) ? String(SESSAO.nome) : ''; } catch (e) { }
+    const css = `body{font-family:Arial,Helvetica,sans-serif;color:#000;font-size:12.5pt;margin:18mm 16mm;line-height:1.35}
+      h1{font-size:18pt;margin:0 0 2px}h2{font-size:14pt;margin:18px 0 6px;border-bottom:1.5pt solid #631325;padding-bottom:3px}h3{font-size:12.5pt;margin:14px 0 4px;color:#631325}
+      .cab{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2pt solid #631325;padding-bottom:6px;margin-bottom:10px}.cab small{color:#333}
+      table{border-collapse:collapse;width:100%;font-size:11pt;margin-top:4px}th,td{border-bottom:.6pt solid #999;padding:4px 6px;text-align:left;vertical-align:top}th{font-size:9.5pt;text-transform:uppercase;letter-spacing:.04em;background:#f2eee6}
+      td.n,th.n{text-align:right;white-space:nowrap}tr.total td{font-weight:bold;border-top:1.5pt solid #333}tr.grande td{font-size:14pt}.notinha{font-size:10pt;color:#333}.dica{font-size:9.5pt;color:#333}
+      .pill{border:.6pt solid #666;border-radius:8px;padding:0 6px;font-size:10pt}.kpis{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}.kpi{border:.8pt solid #999;border-radius:6px;padding:6px 10px;min-width:140px}.kpi .r{font-size:9.5pt;text-transform:uppercase}.kpi .v{font-weight:bold;font-size:13pt}
+      .aviso{border-left:3pt solid #b98a3e;padding:4px 8px;margin:6px 0;font-size:10.5pt}.aviso ul{margin:0;padding-left:16px}.fracao{font-weight:bold}.assinatura{margin-top:22px;font-size:10pt;color:#333;border-top:.6pt dashed #999;padding-top:8px}
+      .nao-imprimir,button,input{display:none}details{display:block}summary{font-weight:bold;margin-top:14px}ol,ul{font-size:10.5pt}@page{size:A4;margin:12mm}`;
+    // valores digitados no orçamento entram como texto (os inputs não imprimem)
+    const orc = $('#orcCorpo').cloneNode(true);
+    orc.querySelectorAll('input').forEach(i => { const s = document.createElement('span'); s.textContent = i.value ? fmt(parseMoeda(i.value)) : 'R$ 0,00'; i.replaceWith(s); });
+    const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Orçamento — ${esc($('#orcTitulo') ? $('#orcTitulo').textContent : 'ITCMD')}</title><style>${css}</style></head><body>
+      <div class="cab"><div><h1>Cartório de Notas do 2º Ofício de Itabaiana/SE</h1><div>Orçamento de custos do ato — ITCMD, emolumentos e despesas</div></div><small>${esc($('#orcData').textContent)}</small></div>
+      <h2>Orçamento do ato</h2>${orc.innerHTML}
+      <p class="assinatura">${esc($('#orcamento .assinatura').textContent)}${quem ? '<br>Elaborado por ' + esc(quem) + '.' : ''}</p>
+      <h2>Memória de cálculo</h2>${$('#resCorpo').innerHTML}
+      <details open><summary>Premissas e base legal</summary>${$('#premissas ol').outerHTML}</details>
+      </body></html>`;
+    const w = window.open('', '_blank');
+    if (!w) { toast('O navegador bloqueou a janela de impressão — libere pop-ups para o Hub.'); return; }
+    w.document.open(); w.document.write(html); w.document.close();
+    w.focus(); setTimeout(() => { try { w.print(); } catch (e) { } }, 350);
+  }
+  $('#btCopiar').addEventListener('click', () => {
+    const t = textoResumo();
+    const ok = () => toast('Resumo copiado');
+    const fallback = () => { const ta = document.createElement('textarea'); ta.value = t; ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select(); try { document.execCommand('copy'); ok(); } catch (e) { toast('Selecione e copie manualmente'); } document.body.removeChild(ta); };
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(t).then(ok).catch(fallback); else fallback();
+  });
+  function migrar(r) {
+    const base = estadoInicial(); const s = { ...base, ...r, orc: { ...base.orc, ...(r.orc || {}) }, emol: { ...base.emol, ...(r.emol || {}) } };
+    s.inv = [0, 1].map(k => { const f = { ...novoFalecido('', k ? 'solteiro' : 'casado'), ...((r.inv || [])[k] || {}) }; f.conjuge = { nome: '', separadoFato: false, sumula377: false, ...(f.conjuge || {}) }; f.ascendentes = { ...base.inv[0].ascendentes, ...(f.ascendentes || {}) }; ['descendentes', 'colaterais', 'bens'].forEach(c => { if (!Array.isArray(f[c])) f[c] = []; }); f.descendentes.concat(f.colaterais).forEach(x => { if (!x.uid) x.uid = uid(); if (!Array.isArray(x.representantes)) x.representantes = []; x.representantes.forEach(y => { if (!y.uid) y.uid = uid(); }); }); if (!f.isentosVI) f.isentosVI = {}; return f; });
+    s.doa = { ...novaDoacao(), ...(r.doa || {}) }; ['doadores', 'donatarios', 'bens'].forEach(c => { if (!Array.isArray(s.doa[c])) s.doa[c] = []; }); s.doa.donatarios.forEach(x => { if (!x.uid) x.uid = uid(); });
+    return s;
+  }
+  $('#btRestaurar').addEventListener('click', () => { try { const r = JSON.parse(localStorage.getItem('itcmd-rascunho')); if (r && r.S) { S = migrar(r.S); renderForm(); calcular(); toast('Rascunho restaurado'); } } catch (e) { toast('Rascunho ilegível'); } $('#barraRascunho').classList.add('oculto'); });
+  $('#btDescartar').addEventListener('click', () => { try { localStorage.removeItem('itcmd-rascunho'); } catch (e) { } $('#barraRascunho').classList.add('oculto'); });
+  function salvarAuto(avisar) { try { localStorage.setItem('itcmd-rascunho', JSON.stringify({ S, em: Date.now() })); if (avisar) toast('Rascunho salvo neste navegador'); } catch (e) { if (avisar) toast('Não foi possível salvar aqui'); } }
+  let toastTimer = null;
+  function toast(m) { if (typeof window.toast === 'function') { try { window.toast(m); return; } catch (e) { } } const t = $('#itcToast'); if (!t) return; t.textContent = m; t.classList.add('ativo'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('ativo'), 2200); }
+
+  /* ---------- Início ---------- */
+  if (/claude\.ai|claudeusercontent|anthropic/.test(location.hostname)) $('#btImprimir').classList.add('oculto');
+  let rascunho = null; try { rascunho = JSON.parse(localStorage.getItem('itcmd-rascunho')); } catch (e) { }
+  if (rascunho && rascunho.S) { S = exemplo(); $('#barraRascunho').classList.remove('oculto'); } else S = exemplo();
+  renderForm(); calcular();
+  window.ITCMD_UI = { get estado() { return S; }, set estado(v) { S = v; renderForm(); calcular(); }, calcular, textoResumo, get ultimo() { return ULT; } };
+})();
+
+/* ============================================================
    RELATÓRIOS · PRODUTIVIDADE EM REAIS  ·  v1.40
    ------------------------------------------------------------
    Terceira visão da aba Relatórios (só o Tabelião). Lê a "Pesquisa de
@@ -13637,5 +14716,3 @@ function prodPdf() {
 </script>
 </body>
 </html>
-
-<!-- Hub CN2O v1.40 · 26/09/2026 -->
