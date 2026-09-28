@@ -13381,7 +13381,7 @@ restaurarSessao();
   /* ---------- Estado ---------- */
   const uid = () => 'u' + Math.random().toString(36).slice(2, 9) + Date.now().toString(36).slice(-3);
   const pessoa = (o = {}) => ({ uid: uid(), ...o });
-  const novoFalecido = (n = '', estadoCivil = 'casado') => ({ nome: n, obito: '', estadoCivil, regime: 'parcial', conjuge: { nome: '', separadoFato: false, sumula377: false }, filhosComuns: 'sim',
+  const novoFalecido = (n = '', estadoCivil = 'solteiro') => ({ nome: n, obito: '', estadoCivil, regime: 'parcial', conjuge: { nome: '', separadoFato: false, sumula377: false }, filhosComuns: 'sim',
     descendentes: [pessoa({ nome: '', condicao: 'vivo', representantes: [] })], ascendentes: { paiVivo: false, pai: '', maeViva: false, mae: '', avosPaternos: 0, avosMaternos: 0 },
     colaterais: [], bens: [{ descricao: '', tipo: 'imovel_urbano', valor: 0, natureza: 'comum', fracao: 100 }], dividas: 0, multaAtraso: true, aliquotaManual: '', isencaoUnicoImovel: false, isentosVI: {} });
   const novaDoacao = () => ({ doadores: [{ nome: '' }], data: hojeISO(), reservaUsufruto: false, baseNuaPropriedade: '100', usufrutoAcessorio: true, donatarios: [pessoa({ nome: '', doacoesAnteriores: 0, impostoAnterior: 0 })], bens: [{ descricao: '', tipo: 'imovel_urbano', valor: 0, fracao: 100, destino: 'todos' }], aliquotaManual: '' });
@@ -13423,72 +13423,91 @@ restaurarSessao();
   const marcar = (path, texto, estrutural = true) => { const id = 'c_' + path.replace(/\W/g, '_'); return `<label class="marcar" for="${id}"><input type="checkbox" id="${id}" data-path="${path}" data-tipo="bool" ${estrutural ? 'data-estrutural="1"' : ''} ${get(S, path) ? 'checked' : ''}><span>${texto}</span></label>`; };
   const opcoes = (path, lista) => `<div class="opcoes" role="group">${lista.map(([k, t]) => `<button type="button" data-opcao="${path}" data-valor="${k}" aria-pressed="${String(get(S, path)) === String(k)}">${esc(t)}</button>`).join('')}</div>`;
 
-  function blocoRepresentantes(base, lista) {
-    return `<div class="sub"><div class="rotulo">Representantes (filhos do premorto — herdam por estirpe, cada um com fato gerador próprio)</div>
+  function blocoRepresentantes(base, lista, deQuem) {
+    return `<div class="sub"><div class="rotulo">Filhos de ${esc(deQuem || 'quem já faleceu')} <span class="dica">— herdam no lugar dele(a), por estirpe; cada um é um contribuinte do ITCMD</span></div>
       ${lista.map((r, j) => `<div class="linha" style="grid-template-columns:minmax(0,1fr) auto">${campo(`${base}.${j}.nome`, `Neto(a) ${j + 1}`, 'texto', { ph: 'Nome completo' })}<button type="button" class="btn mini remover" data-acao="remover" data-lista="${base}" data-i="${j}" aria-label="Remover representante">✕</button></div>`).join('')}
-      <div><button type="button" class="btn mini suave" data-acao="adicionar" data-lista="${base}" data-modelo="rep">+ Representante</button></div></div>`;
+      <div><button type="button" class="btn mini suave" data-acao="adicionar" data-lista="${base}" data-modelo="rep">+ Neto(a)</button></div></div>`;
   }
+  const REGIME_EXPLICA = {
+    parcial: 'Comunhão parcial: o(a) sobrevivente tem <b>meação</b> (metade) nos bens comuns do casal e <b>herda junto com os filhos só nos bens particulares</b> do(a) falecido(a). Sem bens particulares, fica só com a meação.',
+    universal: 'Comunhão universal: todos os bens são do casal — o(a) sobrevivente fica com a <b>meação</b> (metade) e <b>não herda</b> junto com os filhos.',
+    separacao_conv: 'Separação convencional (pacto): <b>não há meação</b>; o(a) sobrevivente <b>herda junto com os filhos</b> sobre toda a herança.',
+    separacao_obrig: 'Separação obrigatória (art. 1.641 CC): <b>não há meação</b> (salvo Súmula 377, abaixo) e o(a) sobrevivente <b>não herda</b> junto com os filhos.',
+    aquestos: 'Participação final nos aquestos: <b>meação</b> nos bens adquiridos na constância e o(a) sobrevivente <b>herda junto com os filhos</b>.'
+  };
+  const temNomeP = x => (x && (x.nome || '').trim() !== '');
 
   function blocoFalecido(k, titulo) {
     const b = `inv.${k}`, f = S.inv[k];
     const temConj = f.estadoCivil !== 'solteiro';
     const rg = M.regras(f);
-    const temNome = x => (x && (x.nome || '').trim() !== '');
-    const temDesc = f.descendentes.some(d => temNome(d) || (d.condicao === 'premorto' && (d.representantes || []).some(temNome)));
+    const temDesc = f.descendentes.some(d => temNomeP(d) || (d.condicao === 'premorto' && (d.representantes || []).some(temNomeP)));
+    const a = f.ascendentes;
+    const temAsc = !!(a.paiVivo || a.maeViva || (+a.avosPaternos) || (+a.avosMaternos));
     const cumul2 = S.modo === 'cumulativo' && k === 1;
     let h = `<section class="cartao" aria-labelledby="tf${k}"><h2 id="tf${k}"><span class="num">${cumul2 ? 3 : 2}</span>${titulo}</h2>`;
-    if (cumul2) h += `<p class="lead">Normalmente é o cônjuge/companheiro sobrevivente do primeiro falecido. A meação e o quinhão que recebeu no 1º inventário entram automaticamente no patrimônio dele; abaixo, lance só os bens próprios que ele tinha além disso.</p>`;
-    else h += `<p class="lead">Dados do óbito, do regime de bens e de quem herda. O cálculo segue o Código Civil (arts. 1.829 a 1.844).</p>`;
-    h += `<div class="grade">${campo(`${b}.nome`, 'Nome do(a) falecido(a)', 'texto', { ph: 'Nome completo', classe: 'larga' })}${campo(`${b}.obito`, 'Data do óbito', 'data')}
-      ${campo(`${b}.estadoCivil`, 'Estado civil ao falecer', 'select', { opcoes: [['casado', 'Casado(a)'], ['uniao', 'União estável'], ['solteiro', 'Solteiro(a), viúvo(a) ou divorciado(a)']], estrutural: true })}`;
-    if (temConj) h += `${campo(`${b}.regime`, 'Regime de bens', 'select', { opcoes: REGIMES, estrutural: true })}${campo(`${b}.conjuge.nome`, f.estadoCivil === 'uniao' ? 'Companheiro(a) sobrevivente' : 'Cônjuge sobrevivente', 'texto', { ph: 'Nome completo' })}`;
-    h += `</div>`;
+    if (cumul2) h += `<p class="lead">Normalmente é quem sobreviveu ao 1º falecido. A meação e o quinhão que recebeu no 1º inventário entram automaticamente no patrimônio dele(a); abaixo, lance só os bens próprios que tinha além disso.</p>`;
+    else h += `<p class="lead">Preencha na ordem: quem faleceu → se deixou viúvo(a) ou companheiro(a) → quem são os herdeiros → os bens. O cálculo segue o Código Civil (arts. 1.829 a 1.844).</p>`;
+
+    // ---- A. Falecido ----
+    h += `<h3>A · Quem faleceu</h3><div class="grade">${campo(`${b}.nome`, 'Nome do(a) falecido(a)', 'texto', { ph: 'Nome completo', classe: 'larga' })}${campo(`${b}.obito`, 'Data do óbito', 'data')}</div>`;
+
+    // ---- B. Viúvo(a) / meeiro(a) ----
+    h += `<h3>B · Deixou viúvo(a) ou companheiro(a)?</h3>`;
+    h += opcoes(`${b}.estadoCivil`, [['solteiro', 'Não (solteiro, viúvo ou divorciado)'], ['casado', 'Sim — era casado(a)'], ['uniao', 'Sim — vivia em união estável']]);
     if (temConj) {
-      h += `<div class="grade" style="margin-top:10px">`;
-      h += `<div class="campo">${marcar(`${b}.conjuge.separadoFato`, 'Separados de fato há mais de 2 anos ou judicialmente (art. 1.830 CC): mantém a meação, mas não herda')}</div>`;
-      if (f.regime === 'separacao_obrig') h += `<div class="campo">${marcar(`${b}.conjuge.sumula377`, 'Aplicar Súmula 377/STF: os bens adquiridos na constância (marcados como comuns) têm meação')}</div>`;
+      h += `<div class="grade" style="margin-top:12px">${campo(`${b}.conjuge.nome`, f.estadoCivil === 'uniao' ? 'Nome do(a) companheiro(a) sobrevivente' : 'Nome do(a) viúvo(a)', 'texto', { ph: 'Nome completo' })}${campo(`${b}.regime`, 'Regime de bens', 'select', { opcoes: REGIMES, estrutural: true })}</div>`;
+      h += `<div class="aviso ok" style="margin-top:10px">${REGIME_EXPLICA[f.regime] || REGIME_EXPLICA.parcial}${rg.concorreDesc === 'nada' && rg.meacaoSobre !== 'nenhum' ? ' <b>Não precisa cadastrar o(a) viúvo(a) como herdeiro(a)</b>: a meação é calculada sozinha.' : ''}${rg.concorreDesc !== 'nada' ? ' <b>Não cadastre o(a) viúvo(a) na lista de filhos</b>: a parte dele(a) na herança é calculada sozinha.' : ''}</div>`;
+      h += `<div class="grade" style="margin-top:10px"><div class="campo">${marcar(`${b}.conjuge.separadoFato`, 'Estavam separados de fato há mais de 2 anos (ou judicialmente): mantém a meação, mas não herda (art. 1.830 CC)')}</div>`;
+      if (f.regime === 'separacao_obrig') h += `<div class="campo">${marcar(`${b}.conjuge.sumula377`, 'Aplicar a Súmula 377/STF: os bens adquiridos na constância (marcados como "do casal") têm meação')}</div>`;
       h += `</div>`;
-      if (rg.concorreDesc !== 'nada' && temDesc) h += `<div class="campo" style="margin-top:10px"><span class="rotulo">Todos os descendentes são também filhos do(a) sobrevivente? <span class="dica">define a reserva de 1/4 (art. 1.832 CC)</span></span>${opcoes(`${b}.filhosComuns`, [['sim', 'Sim, todos são comuns'], ['nao', 'Não (só do falecido ou filiação híbrida)']])}</div>`;
-      if (f.regime === 'parcial') h += `<p class="notinha" style="margin-top:8px">Comunhão parcial: marque cada bem como <b>comum</b> (adquirido onerosamente na constância) ou <b>particular</b> (anterior ao casamento, herdado ou doado). O sobrevivente tem meação nos comuns e concorre com os descendentes só nos particulares.</p>`;
-      if (f.regime === 'universal') h += `<p class="notinha" style="margin-top:8px">Comunhão universal: todos os bens são comuns (meação de 50%) e o sobrevivente não concorre com os descendentes. Marque "incomunicável" só para bens excluídos por cláusula (art. 1.668 CC).</p>`;
+      if (rg.concorreDesc !== 'nada' && temDesc) h += `<div class="campo" style="margin-top:10px"><span class="rotulo">Todos os filhos são filhos do(a) sobrevivente também? <span class="dica">define a reserva de 1/4 (art. 1.832 CC)</span></span>${opcoes(`${b}.filhosComuns`, [['sim', 'Sim, todos são do casal'], ['nao', 'Não (há filhos só do(a) falecido(a))']])}</div>`;
     }
-    // Descendentes
-    h += `<h3>Descendentes (filhos; netos por representação)</h3><div class="lista">`;
+
+    // ---- C. Herdeiros ----
+    h += `<h3>C · Quem herda</h3>`;
+    h += `<p class="notinha">Cadastre os <b>filhos</b> do(a) falecido(a). Se algum filho já tinha morrido antes, marque "já falecido(a)" e cadastre os filhos dele(a) — os netos herdam no lugar. Não inclua aqui o(a) viúvo(a).</p><div class="lista" style="margin-top:8px">`;
     f.descendentes.forEach((d, i) => {
-      h += `<div class="item"><div class="linha">${campo(`${b}.descendentes.${i}.nome`, `Herdeiro ${i + 1}`, 'texto', { ph: 'Nome completo', classe: 'larga-mobile' })}
-        ${campo(`${b}.descendentes.${i}.condicao`, 'Situação', 'select', { opcoes: [['vivo', 'Vivo(a) — herda'], ['premorto', 'Premorto(a) — netos representam'], ['renuncia', 'Renuncia à herança']], estrutural: true })}
-        <button type="button" class="btn mini remover" data-acao="remover" data-lista="${b}.descendentes" data-i="${i}" aria-label="Remover herdeiro">✕</button></div>`;
-      if (d.condicao === 'premorto') h += blocoRepresentantes(`${b}.descendentes.${i}.representantes`, d.representantes || []);
+      h += `<div class="item"><div class="linha">${campo(`${b}.descendentes.${i}.nome`, `Filho(a) ${i + 1}`, 'texto', { ph: 'Nome completo', classe: 'larga-mobile' })}
+        ${campo(`${b}.descendentes.${i}.condicao`, 'Este filho(a) está…', 'select', { opcoes: [['vivo', 'Vivo(a)'], ['premorto', 'Já falecido(a) — os filhos dele(a) herdam no lugar'], ['renuncia', 'Renunciou à herança']], estrutural: true })}
+        <button type="button" class="btn mini remover" data-acao="remover" data-lista="${b}.descendentes" data-i="${i}" aria-label="Remover filho(a)">✕</button></div>`;
+      if (d.condicao === 'premorto') h += blocoRepresentantes(`${b}.descendentes.${i}.representantes`, d.representantes || [], d.nome);
       h += `</div>`;
     });
     h += `</div><div class="acoes"><button type="button" class="btn suave" data-acao="adicionar" data-lista="${b}.descendentes" data-modelo="desc">+ Filho(a)</button></div>`;
-    // Ascendentes
-    const a = f.ascendentes;
-    h += `<details style="margin-top:14px" ${!temDesc ? 'open' : ''}><summary>Ascendentes ${temDesc ? '<span class="dica">— ignorados: há descendentes</span>' : '<span class="dica">— herdam quando não há descendentes</span>'}</summary>
+
+    // Ascendentes: só aparecem quando não há filhos/netos (é quando herdam)
+    if (!temDesc) {
+      h += `<div class="aviso" style="margin-top:12px"><b>Sem filhos nem netos?</b> Então herdam os pais (ou os avós)${temConj && rg.concorreAsc ? ', junto com o(a) sobrevivente' : ''}. Marque quem está vivo:</div>
       <div class="grade" style="margin-top:10px"><div class="campo">${marcar(`${b}.ascendentes.paiVivo`, 'Pai vivo')}</div>${a.paiVivo ? campo(`${b}.ascendentes.pai`, 'Nome do pai', 'texto') : ''}<div class="campo">${marcar(`${b}.ascendentes.maeViva`, 'Mãe viva')}</div>${a.maeViva ? campo(`${b}.ascendentes.mae`, 'Nome da mãe', 'texto') : ''}</div>
-      ${(!a.paiVivo && !a.maeViva) ? `<div class="grade" style="margin-top:10px">${campo(`${b}.ascendentes.avosPaternos`, 'Avós paternos vivos', 'numero', { attrs: 'min="0" max="2"', dica: '(0 a 2)' })}${campo(`${b}.ascendentes.avosMaternos`, 'Avós maternos vivos', 'numero', { attrs: 'min="0" max="2"', dica: '(0 a 2)' })}</div>` : '<p class="notinha" style="margin-top:8px">Com pai ou mãe vivo, os avós não herdam (art. 1.836, §1º CC).</p>'}</details>`;
-    // Colaterais
-    h += `<details style="margin-top:10px" ${(!temDesc && !temConj && !a.paiVivo && !a.maeViva && !(+a.avosPaternos) && !(+a.avosMaternos)) ? 'open' : ''}><summary>Colaterais <span class="dica">— só herdam sem descendentes, ascendentes e cônjuge</span></summary><div class="lista" style="margin-top:10px">`;
-    f.colaterais.forEach((c, i) => {
-      h += `<div class="item"><div class="linha colateral">${campo(`${b}.colaterais.${i}.nome`, `Colateral ${i + 1}`, 'texto', { ph: 'Nome completo' })}
-        ${campo(`${b}.colaterais.${i}.grau`, 'Parentesco', 'select', { opcoes: [['irmao', 'Irmão/irmã'], ['sobrinho', 'Sobrinho(a) (por cabeça)'], ['tio', 'Tio(a)'], ['primo', 'Primo(a) / 4º grau']], estrutural: true })}
-        ${c.grau === 'irmao' ? campo(`${b}.colaterais.${i}.tipo`, 'Vínculo', 'select', { opcoes: [['bilateral', 'Bilateral (mesmo pai e mãe)'], ['unilateral', 'Unilateral']] }) : '<div></div>'}
-        <button type="button" class="btn mini remover" data-acao="remover" data-lista="${b}.colaterais" data-i="${i}" aria-label="Remover colateral">✕</button></div>
-        ${c.grau === 'irmao' ? `<div class="linha" style="grid-template-columns:minmax(0,1fr)">${campo(`${b}.colaterais.${i}.condicao`, 'Situação', 'select', { opcoes: [['vivo', 'Vivo(a)'], ['premorto', 'Premorto(a) — sobrinhos representam'], ['renuncia', 'Renuncia']], estrutural: true })}</div>${c.condicao === 'premorto' ? blocoRepresentantes(`${b}.colaterais.${i}.representantes`, c.representantes || []) : ''}` : ''}</div>`;
-    });
-    h += `</div><div class="acoes"><button type="button" class="btn suave mini" data-acao="adicionar" data-lista="${b}.colaterais" data-modelo="col">+ Colateral</button></div></details>`;
-    // Bens
-    h += `<h3>${cumul2 ? 'Bens próprios do 2º falecido (além do que recebeu no 1º inventário)' : 'Bens do espólio'}</h3>`;
-    h += `<p class="notinha">Valor = base de cálculo (valor venal/avaliação, nunca inferior ao do ITBI/IPTU, ITR ou IPVA — art. 10, §4º). "Fração do falecido/casal" serve para bens em condomínio com terceiros.</p><div class="lista" style="margin-top:8px">`;
+      ${(!a.paiVivo && !a.maeViva) ? `<div class="grade" style="margin-top:10px">${campo(`${b}.ascendentes.avosPaternos`, 'Avós paternos vivos', 'numero', { attrs: 'min="0" max="2"', dica: '(0 a 2)' })}${campo(`${b}.ascendentes.avosMaternos`, 'Avós maternos vivos', 'numero', { attrs: 'min="0" max="2"', dica: '(0 a 2)' })}</div>` : '<p class="notinha" style="margin-top:8px">Com pai ou mãe vivo, os avós não herdam (art. 1.836, §1º CC).</p>'}`;
+      // Colaterais: só sem descendentes, ascendentes e sobrevivente que herde
+      if (!temAsc && !(temConj && rg.herdaSozinho)) {
+        h += `<div class="aviso" style="margin-top:12px"><b>Sem filhos, pais nem viúvo(a) que herde?</b> Então herdam os irmãos (e sobrinhos no lugar dos irmãos falecidos); sem irmãos, os sobrinhos; sem sobrinhos, os tios.</div><div class="lista" style="margin-top:10px">`;
+        f.colaterais.forEach((c, i) => {
+          h += `<div class="item"><div class="linha colateral">${campo(`${b}.colaterais.${i}.nome`, `Colateral ${i + 1}`, 'texto', { ph: 'Nome completo' })}
+            ${campo(`${b}.colaterais.${i}.grau`, 'Parentesco', 'select', { opcoes: [['irmao', 'Irmão/irmã'], ['sobrinho', 'Sobrinho(a) (sem irmãos vivos)'], ['tio', 'Tio(a)'], ['primo', 'Primo(a) / 4º grau']], estrutural: true })}
+            ${c.grau === 'irmao' ? campo(`${b}.colaterais.${i}.tipo`, 'Vínculo', 'select', { opcoes: [['bilateral', 'Mesmo pai e mãe'], ['unilateral', 'Só pai ou só mãe em comum']] }) : '<div></div>'}
+            <button type="button" class="btn mini remover" data-acao="remover" data-lista="${b}.colaterais" data-i="${i}" aria-label="Remover colateral">✕</button></div>
+            ${c.grau === 'irmao' ? `<div class="linha" style="grid-template-columns:minmax(0,1fr)">${campo(`${b}.colaterais.${i}.condicao`, 'Este irmão(ã) está…', 'select', { opcoes: [['vivo', 'Vivo(a)'], ['premorto', 'Já falecido(a) — os filhos dele(a) herdam no lugar'], ['renuncia', 'Renunciou à herança']], estrutural: true })}</div>${c.condicao === 'premorto' ? blocoRepresentantes(`${b}.colaterais.${i}.representantes`, c.representantes || [], c.nome) : ''}` : ''}</div>`;
+        });
+        h += `</div><div class="acoes"><button type="button" class="btn suave mini" data-acao="adicionar" data-lista="${b}.colaterais" data-modelo="col">+ Irmão(ã) / sobrinho(a) / tio(a)</button></div>`;
+      }
+    }
+
+    // ---- D. Bens ----
+    h += `<h3>${cumul2 ? 'D · Bens próprios do 2º falecido (além do que recebeu no 1º inventário)' : 'D · Bens deixados'}</h3>`;
     const mostraNat = temConj && (rg.meacaoSobre === 'comuns');
+    h += `<p class="notinha">Valor = base de cálculo (valor venal/avaliação, nunca inferior ao do ITBI/IPTU, ITR ou IPVA — art. 10, §4º).${mostraNat ? ' Em cada bem, diga se era <b>do casal</b> (comprado na constância) ou <b>só do(a) falecido(a)</b> (anterior ao casamento, herdado ou doado).' : ''} "Fração" serve para bens em condomínio com terceiros.</p><div class="lista" style="margin-top:8px">`;
     f.bens.forEach((bm, i) => {
       h += `<div class="item"><div class="linha bem">${campo(`${b}.bens.${i}.descricao`, `Bem ${i + 1}`, 'texto', { ph: 'Descrição, matrícula…', classe: 'larga-mobile' })}
         ${campo(`${b}.bens.${i}.tipo`, 'Tipo', 'select', { opcoes: TIPOS })}${campo(`${b}.bens.${i}.valor`, 'Valor (R$)', 'moeda')}
-        ${mostraNat ? campo(`${b}.bens.${i}.natureza`, 'Natureza', 'select', { opcoes: [['comum', 'Comum (do casal)'], ['particular', 'Particular (só do falecido)']] }) : (temConj && rg.meacaoSobre === 'todos' ? `<div class="campo"><span class="rotulo">&nbsp;</span>${marcar(`${b}.bens.${i}.incomunicavel`, 'Incomunicável', false)}</div>` : '<div></div>')}
+        ${mostraNat ? campo(`${b}.bens.${i}.natureza`, 'De quem era', 'select', { opcoes: [['comum', 'Do casal (comum)'], ['particular', 'Só do(a) falecido(a) (particular)']] }) : (temConj && rg.meacaoSobre === 'todos' ? `<div class="campo"><span class="rotulo">&nbsp;</span>${marcar(`${b}.bens.${i}.incomunicavel`, 'Incomunicável (cláusula)', false)}</div>` : '<div></div>')}
         ${campo(`${b}.bens.${i}.fracao`, 'Fração (%)', 'numero', { attrs: 'min="0" max="100" step="0.01"' })}
         <button type="button" class="btn mini remover" data-acao="remover" data-lista="${b}.bens" data-i="${i}" aria-label="Remover bem">✕</button></div></div>`;
     });
     h += `</div><div class="acoes"><button type="button" class="btn suave" data-acao="adicionar" data-lista="${b}.bens" data-modelo="bem">+ Bem</button></div>`;
+    h += `<details style="margin-top:12px"><summary>Opções: dívidas, alíquota manual, multa e isenção do único imóvel</summary>`;
     h += `<div class="grade" style="margin-top:12px">${campo(`${b}.dividas`, 'Dívidas do espólio (R$)', 'moeda', { dica: 'abatem antes da meação' })}${campo(`${b}.aliquotaManual`, 'Alíquota manual (%)', 'numero', { attrs: 'min="0" max="10" step="0.5"', dica: 'deixe vazio para usar a lei vigente' })}</div>`;
     h += `<div class="grade" style="margin-top:10px"><div class="campo">${marcar(`${b}.multaAtraso`, 'Aplicar multa de 20% se o inventário não foi requerido em 120 dias do óbito (art. 27, I)', false)}</div>
       <div class="campo">${marcar(`${b}.isencaoUnicoImovel`, 'Único imóvel do espólio até 2.600 UFP: habilitar isenção do art. 8º, VI por sucessor (sem outro imóvel e renda ≤ 3 salários mínimos)')}</div></div>`;
@@ -13496,7 +13515,7 @@ restaurarSessao();
       const inv = M.inventario(f, { ufp: S.ufp, hoje: S.hoje });
       h += `<div class="aviso">Marque os sucessores que atendem aos requisitos (reconhecimento depende de pedido prévio à SEFAZ — Decreto, art. 9º):<div class="opcoes" style="margin-top:6px">${inv.suc.benef.map(x => marcar(`${b}.isentosVI.${x.id}`, esc(x.nome), false)).join('')}</div></div>`;
     }
-    h += `</section>`;
+    h += `</details></section>`;
     return h;
   }
 
@@ -13743,7 +13762,7 @@ restaurarSessao();
   });
   function migrar(r) {
     const base = estadoInicial(); const s = { ...base, ...r, orc: { ...base.orc, ...(r.orc || {}) }, emol: { ...base.emol, ...(r.emol || {}) } };
-    s.inv = [0, 1].map(k => { const f = { ...novoFalecido('', k ? 'solteiro' : 'casado'), ...((r.inv || [])[k] || {}) }; f.conjuge = { nome: '', separadoFato: false, sumula377: false, ...(f.conjuge || {}) }; f.ascendentes = { ...base.inv[0].ascendentes, ...(f.ascendentes || {}) }; ['descendentes', 'colaterais', 'bens'].forEach(c => { if (!Array.isArray(f[c])) f[c] = []; }); f.descendentes.concat(f.colaterais).forEach(x => { if (!x.uid) x.uid = uid(); if (!Array.isArray(x.representantes)) x.representantes = []; x.representantes.forEach(y => { if (!y.uid) y.uid = uid(); }); }); if (!f.isentosVI) f.isentosVI = {}; return f; });
+    s.inv = [0, 1].map(k => { const f = { ...novoFalecido('', 'solteiro'), ...((r.inv || [])[k] || {}) }; f.conjuge = { nome: '', separadoFato: false, sumula377: false, ...(f.conjuge || {}) }; f.ascendentes = { ...base.inv[0].ascendentes, ...(f.ascendentes || {}) }; ['descendentes', 'colaterais', 'bens'].forEach(c => { if (!Array.isArray(f[c])) f[c] = []; }); f.descendentes.concat(f.colaterais).forEach(x => { if (!x.uid) x.uid = uid(); if (!Array.isArray(x.representantes)) x.representantes = []; x.representantes.forEach(y => { if (!y.uid) y.uid = uid(); }); }); if (!f.isentosVI) f.isentosVI = {}; return f; });
     s.doa = { ...novaDoacao(), ...(r.doa || {}) }; ['doadores', 'donatarios', 'bens'].forEach(c => { if (!Array.isArray(s.doa[c])) s.doa[c] = []; }); s.doa.donatarios.forEach(x => { if (!x.uid) x.uid = uid(); });
     return s;
   }
