@@ -1,0 +1,8 @@
+{
+  "file": "hub-cn2o-v1.44.1-fontes-2026-10-03.zip",
+  "bytes": 8855694,
+  "sha256": "2038e9a803c4c542bf1af571c5a44c8dd42b9b7ed2925a2319ade7984b001cc6",
+  "base": "v1.43 oficial",
+  "backend_commit": "1707240cf5944fa33c9bf6dc5a0195a8467e7602",
+  "frontend_commit": "98403aaa0f923769fe421c299e5edb66e0bbb222"
+}
