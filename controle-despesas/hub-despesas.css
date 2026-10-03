@@ -19,3 +19,7 @@ html[data-theme=dark] .notice,html[data-theme=dark] .ocr-controls,html[data-them
 html[data-theme=dark] .btn.primary,html[data-theme=dark] .nav button.active{background:#631325;color:white}
 html[data-theme=dark] .source-hint,html[data-theme=dark] .doc-card .ocr-line{color:#edb5c1}
 @media(max-width:720px){.sidebar{padding:8px}.main{padding:18px 12px}.topbar{padding:12px}.nav button{padding:10px}.grid{grid-template-columns:1fr}}
+
+.export-card{margin-bottom:22px}.export-buttons{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:18px}.export-buttons .btn{min-height:44px;white-space:normal}#google-admin{margin-top:16px}#google-admin summary{cursor:pointer;font-weight:700}#report-dialog{width:min(1200px,calc(100vw - 26px))}.report-preview{overflow-x:auto;font-size:14px}.report-preview h1{font-size:23px}.report-preview h2{margin:20px 0 8px}.report-preview p{margin:9px 0}.report-preview th,.report-preview td{padding:10px;font-size:12px}.report-preview .evidence{break-inside:avoid}
+@media(max-width:720px){.export-buttons{grid-template-columns:1fr}#report-dialog .form-foot{flex-wrap:wrap}}
+@media print{@page{size:A4 landscape;margin:14mm}.report{color:#202a3a;background:white}.report th,.report td{border:1px solid #ded9d5;color:#202a3a}.report thead{display:table-header-group}.report .evidence{break-inside:avoid}}
