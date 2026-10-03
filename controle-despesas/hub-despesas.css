@@ -1,0 +1,21 @@
+:root{--navy:#202a3a;--blue:#631325;--ink:#202a3a;--muted:#636a76;--line:#e2ddd9;--bg:#faf9f7;--radius:8px}
+body{font:15px/1.55 Lato,sans-serif}
+h1,h2,h3,.btn,.nav button{font-family:Montserrat,sans-serif}
+h1{font-size:27px;font-weight:700;letter-spacing:.01em}h2{font-size:17px;font-weight:600}h3{font-weight:600}
+.shell{display:flex;flex-direction:column;min-height:0}
+.sidebar{position:static;height:auto;padding:8px 24px;background:white;color:var(--ink);border-bottom:1px solid var(--line)}
+.brand,.sidebar-bottom{display:none}.nav{display:flex;gap:8px;overflow:auto}
+.nav button{color:var(--muted);padding:11px 14px;font-size:12px;font-weight:600;letter-spacing:.025em;white-space:nowrap;border-radius:6px}
+.nav button.active{background:var(--blue);color:#fff}.nav svg{width:17px;height:17px}
+.topbar{padding:12px 24px}.main{padding:24px;max-width:1500px}
+.notice,.ocr-controls,.ocr-evidence,.rule{background:#faf6f2;border-color:#e6dbd3;color:var(--ink)}
+.local-badge{background:#f8f3e8;color:#74520c;border-color:#d9c490}
+.drop{background:#fdfaf5;border-color:#cbbca9}.queue-item,.checks{background:#f7f5f1}
+.source-hint,.doc-card .ocr-line{color:#631325}.btn{font-size:12px;letter-spacing:.02em;border-radius:6px}.btn.primary{background:var(--blue);border-color:var(--blue)}
+.stat .num{font-family:Montserrat,sans-serif;font-size:25px}.row-action{color:#631325;background:#f7efed}
+html[data-theme=dark]{--bg:#18212e;--ink:#edf0f5;--muted:#bac2cf;--line:#414754;--navy:#202a3a;--blue:#c46a7d}
+html[data-theme=dark] .sidebar,html[data-theme=dark] .topbar,html[data-theme=dark] .card,html[data-theme=dark] .stat,html[data-theme=dark] .btn,html[data-theme=dark] input,html[data-theme=dark] select,html[data-theme=dark] textarea,html[data-theme=dark] dialog{background:#202a3a;color:var(--ink)}
+html[data-theme=dark] .notice,html[data-theme=dark] .ocr-controls,html[data-theme=dark] .ocr-evidence,html[data-theme=dark] .rule,html[data-theme=dark] .queue-item,html[data-theme=dark] .checks,html[data-theme=dark] .drop,html[data-theme=dark] th,html[data-theme=dark] .ocr-text{background:#283243;color:var(--ink);border-color:var(--line)}
+html[data-theme=dark] .btn.primary,html[data-theme=dark] .nav button.active{background:#631325;color:white}
+html[data-theme=dark] .source-hint,html[data-theme=dark] .doc-card .ocr-line{color:#edb5c1}
+@media(max-width:720px){.sidebar{padding:8px}.main{padding:18px 12px}.topbar{padding:12px}.nav button{padding:10px}.grid{grid-template-columns:1fr}}

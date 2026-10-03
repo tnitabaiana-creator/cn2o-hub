@@ -1,3 +1,7 @@
+[build]
+  command = "python3 build-despesas-assets.py"
+  publish = "."
+
 # netlify.toml — Hub CN2O (v1.39.2, segurança · pacote B)
 #
 # 1) Os pacotes de fontes (versoes/*.zip) ficam no repositório, mas NÃO são servidos pelo
@@ -25,3 +29,10 @@
     X-Frame-Options = "SAMEORIGIN"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+
+# WASM restrito à página de leitura documental; política do restante do Hub preservada.
+[[headers]]
+  for = "/controle-despesas/*"
+  [headers.values]
+    Content-Security-Policy = "default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https://cn2o-hub-backend-production.up.railway.app https://docs.google.com https://*.googleusercontent.com; frame-src 'self' blob: https://calendar.google.com; media-src 'self' blob: data:; worker-src 'self' blob:; object-src 'none'; base-uri 'none'; form-action 'self'; frame-ancestors 'self'"
+    Cache-Control = "no-cache"
