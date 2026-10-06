@@ -1,0 +1,118 @@
+<header class="topo">
+  <div class="marca">
+    <div class="mono">CN<br>2O<span class="ponto"></span></div>
+    <div class="barra"></div>
+    <div>
+      <div class="versalete" style="color:var(--vinho)">Hub CN2O · Ferramenta</div>
+      <h1>Calculadora ITCMD/SE</h1>
+      <p class="sub">Inventário, inventário cumulativo e doação: meação, quinhões, imposto por herdeiro e orçamento completo para o advogado.</p>
+    </div>
+  </div>
+  <div class="selo" id="seloUfp">UFP/SE —</div>
+</header>
+
+<main class="pagina">
+  <div class="barra-viva nao-imprimir" id="barraViva" aria-live="polite">
+    <div class="bv destaque"><small>ITCMD</small><b id="bvItcmd">—</b></div>
+    <div class="bv"><small>Emolumentos</small><b id="bvEmol">—</b></div>
+    <div class="bv"><small>Total estimado</small><b id="bvTotal">—</b></div>
+    <button class="btn mini" type="button" id="btVerOrcamento">Ver orçamento ↓</button>
+  </div>
+  <div class="coluna-esquerda">
+
+    <!-- v1.42 — Importação do dossiê: o requerimento do advogado e os documentos que o
+         instruem vão à IA do servidor (POST /hub/ia/itcmd) e voltam como dados que
+         preenchem a sucessão; só o VALOR DECLARADO dos bens fica para a escrevente.
+         O miolo é montado pelo ui.js (só dentro do Hub, onde existem api() e criarAnexos()). -->
+    <section class="cartao nao-imprimir" aria-labelledby="t0" id="itcmdImportar">
+      <h2 id="t0"><span class="num">IA</span>Importar do dossiê (PDF)</h2>
+      <p class="lead">Anexe o <b>requerimento do advogado</b> e os documentos que o instruem (certidões de óbito, casamento, nascimento, matrículas, avaliações). O Hub lê tudo e preenche a sucessão e os bens; <b>só o valor declarado de cada bem fica para você lançar</b>. Confira cada campo antes de fechar o orçamento.</p>
+      <div id="itcmdImportarMiolo"><p class="notinha">A importação por PDF funciona dentro do Hub CN2O (IA do servidor da serventia).</p></div>
+      <div id="itcmdImportado" class="importado-painel oculto" aria-live="polite"></div>
+    </section>
+
+    <section class="cartao" aria-labelledby="t1">
+      <h2 id="t1"><span class="num">1</span>Qual é a operação?</h2>
+      <p class="lead">Escolha o ato. Os campos abaixo mudam conforme a escolha.</p>
+      <div class="segmento" role="group" aria-label="Tipo de operação" id="segModo">
+        <button type="button" data-modo="inventario" aria-pressed="true"><b>Inventário</b><span>Um falecido: meação, herdeiros e ITCMD causa mortis.</span></button>
+        <button type="button" data-modo="cumulativo" aria-pressed="false"><b>Inventário cumulativo</b><span>Dois óbitos (ex.: pai e depois mãe): duas declarações encadeadas.</span></button>
+        <button type="button" data-modo="doacao" aria-pressed="false"><b>Doação</b><span>Doador(es), donatários e imposto por donatário, com ou sem usufruto.</span></button>
+      </div>
+      <div class="grade" style="margin-top:14px">
+        <div class="campo">
+          <label for="ufp">UFP/SE (R$) <span class="dica" id="ufpDica"></span></label>
+          <input type="text" id="ufp" class="moeda" inputmode="decimal" data-path="ufp" data-tipo="moeda">
+        </div>
+        <div class="campo">
+          <label for="hoje">Data de referência <span class="dica">para prazo de 120 dias e UFP</span></label>
+          <input type="date" id="hoje" data-path="hoje" data-tipo="texto">
+        </div>
+      </div>
+      <div id="barraRascunho" class="aviso nao-imprimir oculto">Há um rascunho salvo neste navegador.
+        <span class="acoes" style="display:inline-flex;margin:0 0 0 8px"><button class="btn mini" type="button" id="btRestaurar">Restaurar</button><button class="btn mini" type="button" id="btDescartar">Descartar</button></span>
+      </div>
+    </section>
+
+    <div id="formInventarios"></div>
+    <div id="formDoacao" class="oculto"></div>
+
+    <section class="cartao nao-imprimir">
+      <div class="acoes" style="margin:0">
+        <button class="btn" type="button" id="btExemplo">Carregar exemplo</button>
+        <button class="btn" type="button" id="btLimpar">Limpar tudo</button>
+        <button class="btn" type="button" id="btSalvar">Salvar rascunho</button>
+      </div>
+      <p class="notinha" style="margin-top:8px">Nada é enviado a servidor: o cálculo roda no seu navegador. O rascunho fica só neste computador.</p>
+    </section>
+  </div>
+
+  <div class="coluna-direita">
+    <section class="cartao" aria-live="polite" id="resultado">
+      <h2><span class="num">✓</span>Resultado</h2>
+      <div id="resCorpo"></div>
+    </section>
+    <section class="orcamento" style="margin-top:18px" id="orcamento">
+      <div class="cab">
+        <h2>Orçamento do ato</h2>
+        <small id="orcData"></small>
+      </div>
+      <div id="orcCorpo"></div>
+      <div class="acoes nao-imprimir">
+        <button class="btn primario" type="button" id="btImprimir">Imprimir orçamento</button>
+        <button class="btn" type="button" id="btCopiar">Copiar resumo</button>
+      </div>
+      <!-- v1.43 — Declaração do ITCMD "causa mortis" (SEFAZ/SE) preenchida com o que a
+           Calculadora apurou + o bloco E do formulário; PDF pelo PDFMini do Hub. -->
+      <div class="decl-caixa nao-imprimir" id="declCaixa">
+        <div class="decl-cab"><b>Declaração do ITCMD "causa mortis" (SEFAZ/SE)</b><span class="notinha">Quando a documentação já foi apresentada: gera o formulário oficial preenchido (quadros 1 a 12) para o advogado conferir, assinar e protocolar. Havendo excedente de meação/quinhão por transmissão não onerosa (bloco F), sai também a <b>Declaração Inter Vivos I</b>, uma por beneficiário.</span></div>
+        <div class="acoes" style="margin-top:8px"><button class="btn primario" type="button" id="btDeclaracao">Gerar Declaração ITCMD (PDF)</button><a class="btn oculto" id="declBaixar" download>Baixar de novo (causa mortis)</a><a class="btn oculto" id="declBaixarIV" download>Baixar de novo (Inter Vivos I)</a></div>
+        <div id="declAviso" class="oculto"></div>
+      </div>
+      <p class="assinatura">Estimativa elaborada pelo Cartório de Notas do 2º Ofício de Itabaiana/SE com base na Lei estadual nº 7.724/2013 (redação vigente) e na Tabela de Emolumentos TJSE 2026. Valores sujeitos à conferência da SEFAZ/SE, à avaliação dos bens e à data efetiva do pagamento.</p>
+    </section>
+    <details style="margin-top:18px" id="premissas">
+      <summary>Premissas e base legal do cálculo</summary>
+      <ol>
+        <li><b>Fato gerador por herdeiro/donatário</b> (art. 5º): a isenção e a faixa de alíquota são aferidas quinhão a quinhão, inclusive para quem herda por representação.</li>
+        <li><b>Isenção</b>: quinhão igual ou inferior a 500 UFP/SE (art. 8º, IV). Acima disso, a alíquota da faixa incide sobre o valor <b>integral</b> do quinhão, sem escalonamento (art. 14, §1º).</li>
+        <li><b>Causa mortis</b> (art. 14, I): 3% até 2.417 UFP; 6% de 2.417 a 12.086 UFP; 8% acima. Quotas de sociedade: 2% (I-A).</li>
+        <li><b>Doação de imóveis</b> (art. 14, II): 2% até 6.900 UFP; 4% até 12.086; 6% até 27.248; 8% acima. Bens móveis: 2% (III-A). Doações do mesmo doador no mesmo exercício somam para a isenção (art. 8º, §1º) e, havendo doações anteriores, o imposto é recalculado sobre o acumulado, deduzido o já recolhido (art. 10, §7º).</li>
+        <li><b>Meação</b> não é herança e não é tributada; o excedente de meação ou de quinhão atribuído a alguém é tributado (art. 2º, §2º). A partilha segue as frações legais; quando os herdeiros acordam outra divisão (bloco F), o excedente de cada beneficiário é tratado como transmissão <i>inter vivos</i> — ITCMD doação sobre o total do excedente (isenção do art. 8º, IV aferida no total, sem fracionar por cedente) e Declaração Inter Vivos I; a cessão onerosa fica fora (ITBI). Os centavos que sobram do rateio vão para os últimos quinhões da lista; as frações exatas prevalecem sobre os arredondamentos.</li>
+        <li><b>Bens em outra UF</b>: a ferramenta pressupõe todos os bens em Sergipe (quadro 10, "Base de Cálculo — total do Estado de SE"). Havendo imóvel em outro Estado, o ITCMD dele é do outro Estado — retire-o da base ou confira com a SEFAZ.</li>
+        <li><b>Concorrência do cônjuge/companheiro</b> (art. 1.829, I, CC): não concorre na comunhão universal nem na separação obrigatória; na comunhão parcial concorre só sobre os bens particulares (REsp 1.368.123/STJ); na separação convencional concorre sobre tudo (REsp 1.382.170/STJ); na participação final nos aquestos a ferramenta adota o mesmo entendimento (concorre sobre tudo), sem jurisprudência pacificada. Quota igual à dos filhos, com reserva de 1/4 quando é ascendente de todos (art. 1.832). União estável segue o cônjuge (Tema 809/STF).</li>
+        <li><b>Ascendentes</b>: cônjuge fica com 1/3 concorrendo com pai e mãe, 1/2 nos demais casos (art. 1.837); metade por linha paterna/materna (art. 1.836, §2º).</li>
+        <li><b>Colaterais</b>: irmãos bilaterais herdam o dobro dos unilaterais (art. 1.841); sobrinhos representam irmão premorto quando há irmão vivo (art. 1.840) e herdam por cabeça quando não há (art. 1.843, §1º); sobrinhos excluem tios, e o 3º grau exclui o 4º.</li>
+        <li><b>Renúncia</b> pura e simples não é tributada (art. 7º, II) e a parte acresce aos demais da classe (art. 1.810 CC).</li>
+        <li><b>Dívidas do espólio</b> são abatidas antes da meação (monte-mor − dívidas − meação = monte partível), como no sistema da SEFAZ/SE.</li>
+        <li><b>Multa</b> de 20% do imposto quando o inventário não é requerido em 120 dias do óbito (arts. 18-B, II, e 27, I). Multa de mora e juros só após o vencimento (art. 29); no extrajudicial o imposto é pago antes da lavratura (Decreto 29.994/2015, art. 23, I, a).</li>
+        <li><b>Alíquota vigente na data do fato gerador</b> (Decreto, art. 19, parágrafo único): para óbitos anteriores a 2024 a legislação da época pode diferir — use "alíquota manual" se a SEFAZ indicar outra.</li>
+        <li><b>Emolumentos</b> (TJSE 2026, Lei 8.639/2019, Anexo I, Nota 24, incluída pela Lei 9.840/2025): a <b>meação é excluída</b> da base da escritura de inventário. A base corresponde à herança bruta: metade dos bens comuns sujeitos à meação, mais os bens particulares; sem meação, o valor integral da parcela inventariada. A fração de condomínio é aplicada uma única vez. Esta base não abate dívidas e não se confunde com o monte partível líquido do ITCMD. No cumulativo, calcula-se cada sucessão separadamente. FERD de 20%; R$ 4,77 por herdeiro a partir do 11º; ato acessório = metade da faixa. Registro no RI, certidões e honorários são lançados à parte.</li>
+        <li><b>Usufruto</b>: na doação com reserva, o imposto incide só sobre a doação (art. 2º, §5º); a extinção do usufruto não é tributada (art. 7º, III). A base (100% ou 50%, aplicada a todos os bens doados) é opção da ferramenta, a confirmar com a SEFAZ/SE.</li>
+        <li><b>Quotas de sociedade</b> (2%): a parcela de quotas de cada quinhão é apurada pela partilha ideal; a faixa do art. 14, I é aferida pelo quinhão total. <b>Isenção do art. 8º, VI</b>: só é oferecida quando o espólio tem um único imóvel de até 2.600 UFP e alcança apenas a parcela do imóvel.</li>
+      </ol>
+    </details>
+  </div>
+</main>
+<p class="rodape">Uso interno — Time CN2O · Cartório de Notas do 2º Ofício de Itabaiana/SE · Av. Ivo de Carvalho, 441</p>
+<div class="toast" id="itcToast" role="status"></div>

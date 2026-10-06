@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>CN2O · Revisão da conferência</title>
+<style>
+/* ============ IDENTIDADE CN2O — Brandbook jan/2026 ============
+   Paleta oficial (exclusiva): #631325 vinho · #202a3a marinho · #ffffff
+   Tons intermediários derivados só por transparência das cores oficiais.
+   Tipografia: Ambient Bold (títulos) / Lato Regular (texto).
+   Ambient Bold não existe como webfont — Montserrat 700/800 é o
+   substituto de tela; troque pelo arquivo licenciado quando disponível. */
+:root{
+  --vinho:#631325; --marinho:#202a3a; --branco:#ffffff;
+  --linha:rgba(32,42,58,.24); --linha-suave:rgba(32,42,58,.12);
+  --texto:var(--marinho); --texto-suave:rgba(32,42,58,.66);
+  --vinho-fundo:rgba(99,19,37,.06);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Lato',sans-serif;background:var(--branco);color:var(--texto);font-size:15px;line-height:1.5}
+.versalete{font-family:'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.14em;font-weight:600}
+
+/* Cabeçalho — assinatura da marca sobre branco, filete vinho no topo */
+header{background:var(--branco);border-top:4px solid var(--vinho);border-bottom:1px solid var(--linha);padding:24px 28px;position:relative;overflow:hidden}
+header svg.topo{position:absolute;right:-30px;top:-14px;height:150%;opacity:.10}
+.marca{display:flex;align-items:center;gap:18px;position:relative}
+.mono{font-family:'Montserrat',sans-serif;font-weight:800;color:var(--marinho);font-size:34px;line-height:.85;letter-spacing:-.01em}
+.mono .ponto{display:inline-block;width:9px;height:9px;background:var(--vinho);margin-left:3px}
+.barra{width:3px;align-self:stretch;background:var(--vinho)}
+.nomes h1{font-family:'Montserrat',sans-serif;font-weight:700;font-size:19px;letter-spacing:.04em;color:var(--marinho);text-transform:uppercase}
+.nomes .oficio{font-family:'Montserrat',sans-serif;font-weight:600;font-size:11.5px;letter-spacing:.3em;color:var(--vinho);text-transform:uppercase;margin-top:3px}
+.nomes .tab{font-size:12px;letter-spacing:.14em;color:var(--texto-suave);margin-top:4px}
+
+.selo{display:inline-block;font-size:10px;background:var(--vinho-fundo);color:var(--vinho);border:1px solid rgba(99,19,37,.25);border-radius:4px;padding:3px 8px;letter-spacing:.1em;margin-left:10px;vertical-align:middle;text-transform:uppercase;font-family:'Montserrat',sans-serif;font-weight:600}
+
+.wrap{max-width:1180px;margin:0 auto;padding:26px 20px 90px;display:grid;grid-template-columns:minmax(0,1fr) 360px;gap:28px;align-items:start}
+@media(max-width:920px){.wrap{grid-template-columns:1fr}.rail{position:static!important;order:2}}
+
+/* Blocos */
+.bloco{background:var(--branco);border:1px solid var(--linha);border-radius:10px;padding:20px 22px;margin-bottom:18px}
+.bloco h2{font-size:12.5px;color:var(--vinho);margin-bottom:15px}
+.bloco h2 span.n{display:inline-block;background:var(--vinho);color:var(--branco);border-radius:50%;width:20px;height:20px;text-align:center;line-height:20px;font-size:11px;margin-right:8px}
+.oculto{display:none!important}
+
+/* Chips de ato */
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{border:1.5px solid var(--linha);background:var(--branco);border-radius:8px;padding:12px 16px;cursor:pointer;font-family:'Montserrat',sans-serif;font-size:12px;font-weight:600;letter-spacing:.06em;color:var(--marinho);transition:.15s}
+.chip:hover{border-color:var(--vinho)}
+.chip.ativo{background:var(--vinho);border-color:var(--vinho);color:var(--branco)}
+
+/* Campos */
+.grade{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media(max-width:640px){.grade{grid-template-columns:1fr}}
+label.rotulo{display:block;font-size:12.5px;color:var(--vinho);font-weight:700;letter-spacing:.09em;margin-bottom:7px}
+input[type=text],input[type=tel],input[type=date],select,textarea{width:100%;border:1.5px solid var(--linha);border-radius:7px;padding:11px 12px;font-family:'Lato',sans-serif;font-size:15px;background:var(--branco);color:var(--texto)}
+textarea{resize:vertical;min-height:70px}
+input::placeholder,textarea::placeholder{color:rgba(32,42,58,.38)}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--vinho);outline-offset:1px;border-color:var(--vinho)}
+
+/* Opções */
+.opcoes{display:flex;flex-wrap:wrap;gap:8px}
+.op{border:1.5px solid var(--linha);border-radius:7px;padding:9px 13px;cursor:pointer;font-size:13.5px;background:var(--branco);transition:.12s;user-select:none}
+.op:hover{border-color:var(--vinho)}
+.op.sel{background:var(--vinho);border-color:var(--vinho);color:var(--branco)}
+.op.tog.sel{background:var(--marinho);border-color:var(--marinho)}
+.pergunta{margin-bottom:16px}
+.pergunta:last-child{margin-bottom:0}
+.pergunta .titulo-p{font-size:14px;font-weight:700;color:var(--marinho);margin-bottom:9px;border-left:3px solid var(--vinho);padding-left:9px;line-height:1.25}
+.sub{border-left:3px solid var(--linha);padding-left:14px;margin-top:12px}
+
+/* Avisos — vinho institucional, sem cor estranha à paleta */
+.aviso{background:var(--vinho-fundo);border-left:3px solid var(--vinho);border-radius:0 7px 7px 0;padding:10px 12px;font-size:12.5px;color:var(--marinho);margin-top:10px}
+.badge-parceiro{display:inline-block;margin-top:7px;background:var(--vinho);color:var(--branco);border-radius:6px;padding:5px 10px;font-family:'Montserrat',sans-serif;font-size:11px;font-weight:700;letter-spacing:.08em}
+.bola{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:6px;vertical-align:middle;box-shadow:0 0 0 1px rgba(255,255,255,.55)}
+.bolas{display:inline-block;margin-left:7px;white-space:nowrap}
+.bolas .bola{margin-right:3px}
+
+/* Trilho do dossiê — painel marinho, acentos vinho e branco */
+.rail{position:sticky;top:18px}
+.dossie{background:var(--marinho);color:var(--branco);border-radius:10px;padding:20px 20px 22px;border-top:4px solid var(--vinho)}
+.dossie h3{font-size:12px;letter-spacing:.16em;color:rgba(255,255,255,.82);margin-bottom:4px}
+.dossie .titulo-prev{font-family:'Montserrat',sans-serif;font-size:13px;font-weight:600;margin-bottom:14px;min-height:18px;color:var(--branco);word-break:break-word}
+.dossie ul{list-style:none}
+.dossie li{display:flex;align-items:flex-start;gap:9px;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.10);font-size:13.5px;cursor:pointer}
+.dossie li:last-child{border-bottom:none}
+.dossie li .cx{width:17px;height:17px;border:1.5px solid rgba(255,255,255,.45);border-radius:4px;flex:none;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:11px}
+.dossie li.marcado .cx{background:var(--vinho);border-color:var(--vinho);color:var(--branco);font-weight:700}
+.dossie li.marcado{color:var(--branco)}
+.dossie li:not(.marcado){color:rgba(255,255,255,.70)}
+.dossie li.inj{animation:entra .25s ease}
+@keyframes entra{from{opacity:0;transform:translateX(8px)}to{opacity:1;transform:none}}
+.dossie .contagem{margin-top:14px;font-size:12.5px;color:rgba(255,255,255,.82);letter-spacing:.08em}
+.btn-prot{width:100%;margin-top:14px;background:var(--vinho);color:var(--branco);border:none;border-radius:8px;padding:14px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:13px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;transition:.15s}
+.btn-prot:hover{filter:brightness(1.15)}
+.btn-prot:disabled{background:rgba(255,255,255,.18);color:rgba(255,255,255,.5);cursor:not-allowed}
+.nota-rail{font-size:11.5px;color:var(--texto-suave);margin-top:10px;text-align:center}
+.dossie .nota-rail{color:rgba(255,255,255,.55)}
+
+/* Modais */
+.veu{position:fixed;inset:0;background:rgba(32,42,58,.65);display:none;align-items:flex-start;justify-content:center;padding:30px 16px;overflow:auto;z-index:50}
+.veu.aberto{display:flex}
+.modal{background:var(--branco);border-radius:12px;border-top:4px solid var(--vinho);max-width:640px;width:100%;padding:26px 26px 22px}
+.modal h3{font-size:12px;color:var(--vinho);margin-bottom:14px}
+.recibo{background:var(--vinho-fundo);border:1px solid rgba(99,19,37,.20);border-radius:10px;padding:16px 18px;font-size:14px;white-space:pre-wrap;line-height:1.6;color:var(--marinho)}
+.payload{background:var(--marinho);color:rgba(255,255,255,.85);border-radius:10px;padding:16px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;white-space:pre;overflow:auto;margin-top:16px;max-height:260px}
+.fechar{margin-top:16px;background:var(--marinho);color:var(--branco);border:none;border-radius:7px;padding:11px 18px;font-family:'Montserrat',sans-serif;font-size:12px;letter-spacing:.1em;cursor:pointer;text-transform:uppercase}
+.btn-check{position:fixed;bottom:18px;right:18px;z-index:40;background:var(--marinho);color:var(--branco);border:none;border-radius:50px;padding:13px 19px;font-family:'Montserrat',sans-serif;font-weight:600;font-size:12px;letter-spacing:.08em;cursor:pointer;box-shadow:0 4px 16px rgba(32,42,58,.35);display:none}
+.btn-check.on{display:block}
+.ck-grp{font-family:'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-weight:600;font-size:10.5px;color:var(--vinho);margin:0 0 5px;grid-column:1/-1;border-bottom:1px solid var(--linha);padding-bottom:4px}
+.ck-grp.dep{margin-top:12px}
+.ck-it{display:flex;align-items:flex-start;gap:7px;padding:2px 4px 2px 0;font-size:11.5px;line-height:1.28;break-inside:avoid}
+.ck-it .txt span{color:var(--texto-suave);font-size:11px}
+.ck-it .cxk{width:14px;height:14px;border:1.5px solid var(--linha);border-radius:4px;flex:none;margin-top:1px;display:flex;align-items:center;justify-content:center;font-size:10px;color:transparent}
+.ck-it.tick{cursor:pointer;border-radius:6px;padding-left:5px;margin-left:-5px}
+.ck-it.tick:hover{background:var(--vinho-fundo)}
+.ck-it.tick.on .cxk{background:var(--vinho);border-color:var(--vinho);color:var(--branco);font-weight:700}
+.ck-it.ref{color:var(--texto-suave);font-size:11px}
+.ck-it.ref .cxk{border-style:dashed;color:var(--texto-suave)}
+.veu.check{align-items:center;padding:14px}
+.modal-check{max-width:min(1220px,97vw);max-height:95vh;display:flex;flex-direction:column;padding:18px 22px 14px}
+.modal-check h3{margin-bottom:6px}
+.modal-check .lista-ck{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:0 20px;align-content:start;overflow:auto;flex:1 1 auto;padding-right:4px}
+.ck-rodape{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-top:10px;border-top:1px solid var(--linha);padding-top:10px}
+.ck-cont{font-size:12px;color:var(--texto-suave);text-align:left;max-width:70%}
+.ck-cont b{color:var(--vinho)}
+.modal-check .fechar{margin-top:0}
+.modo-test .cel-padrao{display:none!important}
+.bloco.destaque{border:2px solid var(--vinho);background:var(--vinho-fundo)}
+.bloco.destaque h2{font-size:14px}
+.qual-grp{font-family:'Montserrat',sans-serif;text-transform:uppercase;letter-spacing:.12em;font-weight:700;font-size:12px;color:var(--vinho);margin:16px 0 8px;border-left:3px solid var(--vinho);padding-left:9px}
+.qual-grp:first-child{margin-top:0}
+</style>
+<style id="harmonia-v112">
+/* ===== v1.12 · Harmonia com o Hub CN2O — sobriedade e leitura ===== */
+:root{--texto-suave:rgba(32,42,58,.78)}
+body{background:#f7f4ef;font-size:16px;line-height:1.6}
+header{background:#fdfcfa;padding:22px 28px}
+.wrap{padding-top:28px}
+.bloco{border-radius:12px;border-color:rgba(32,42,58,.13);box-shadow:0 8px 22px rgba(32,42,58,.05);padding:22px 24px}
+.bloco h2{font-size:13.5px}
+.chip{font-size:13px;padding:13px 18px;border-radius:10px}
+label.rotulo{font-size:13.5px}
+input[type=text],input[type=tel],input[type=date],select,textarea{font-size:16px;border-radius:9px;padding:12px 13px}
+.op{font-size:14.5px;padding:10px 15px;border-radius:9px}
+.pergunta .titulo-p{font-size:15.5px}
+.aviso{font-size:14px;line-height:1.55}
+.nomes .tab{font-size:13px}
+.dossie{border-radius:12px}
+.dossie li{font-size:14.5px}
+.dossie .titulo-prev{font-size:14px}
+.dossie .contagem{font-size:13.5px}
+.btn-prot{font-size:13.5px;border-radius:10px;padding:15px}
+.btn-check{font-size:13px}
+.selo{font-size:10.5px}
+/* v1.36 — CERTIDÃO: campo com o botão "não consta" ao lado, e a lista de anexos */
+.linha-nc{display:flex;gap:8px;align-items:stretch}
+/* v1.37.5 — pessoa física / jurídica / múltiplos na identificação */
+.ident-partes .pergunta{margin:12px 0 0}
+.ident-partes .pergunta.sub{margin-left:0;padding-left:14px;border-left:3px solid rgba(32,42,58,.22)}
+.ident-partes .titulo-p{font-size:15px}
+.ident-partes .op{font-size:15px}
+.ident-partes .aviso{font-size:14.5px}
+.ident-partes-cel{border-top:1px dashed rgba(32,42,58,.18);padding-top:4px}
+#identTSlotCV .ident-partes{margin-top:4px}
+.ident-partes button.op{font-family:inherit;line-height:1.25}
+.ident-partes button.op:not(.sel){color:var(--marinho)}
+.ident-partes button.op:focus-visible{outline:3px solid rgba(99,19,37,.55);outline-offset:2px}
+.linha-nc input{flex:1;min-width:0}
+.nc{flex:0 0 auto;border:2px solid #c9ced8;background:#fff;color:#44506b;border-radius:10px;
+    padding:0 12px;font:inherit;font-size:15px;line-height:1.1;cursor:pointer;white-space:nowrap} /* v1.36.1: 15px */
+.nc:hover{border-color:#9aa4b6}
+.nc.sel{background:#631325;border-color:#631325;color:#fff;font-weight:700}
+.campo-nc input:disabled{background:#fff;color:#202a3a;font-style:italic} /* v1.36.1: sem cinza-claro */
+/* v1.36.1 — legibilidade do bloco CERT: placeholder escuro o bastante (≥ 4,5:1) */
+#blCert input::placeholder{color:#5a6272;opacity:1}
+#blCert input:disabled::placeholder{color:#202a3a;opacity:1;font-style:italic}
+/* v1.37 — campo de preço ajustado */
+input.moeda{font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+#perguntas input::placeholder{color:#5a6272;opacity:1}   /* dicas legíveis também na triagem */
+/* v1.36.1 — rótulos e título do bloco CERT em fonte generosa (só neste bloco) */
+#blCert h2{font-size:15.5px}
+#blCert h2 span.n{font-size:14px}
+#blCert label.rotulo{font-size:15px}
+.nota-cert{font-size:15px;line-height:1.55;color:#202a3a;text-align:left}
+.lista-anexos{list-style:none;margin:10px 0 0;padding:0}
+.lista-anexos li{display:flex;align-items:center;gap:10px;background:#fbf5dd;border:1px solid #e3d9b4;
+    border-radius:10px;padding:9px 12px;margin-bottom:7px;font-size:15px} /* v1.36.1: 15px */
+.lista-anexos .arq-nome{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lista-anexos .arq-tam{color:#44506b;font-size:14px;white-space:nowrap} /* v1.36.1: 14px */
+.lista-anexos .arq-x{border:0;background:#631325;color:#fff;border-radius:8px;padding:5px 10px;
+    font:inherit;font-size:14px;cursor:pointer} /* v1.36.1: 14px */
+#certArq{font-size:15px}
+.aviso-fil{margin-top:12px}
+.arq-oculto{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+.btn-arq{display:inline-block;background:#fff;color:#202a3a;border:2px solid #202a3a;border-radius:10px;
+    padding:11px 18px;font-size:15.5px;font-weight:700;cursor:pointer;line-height:1.1}
+.btn-arq:hover{background:#202a3a;color:#fff}
+</style>
+<style id="curadoria-estilo">
+#blCuradoria .intro-curadoria{margin-bottom:16px;font-size:15px}
+#blCuradoria fieldset{border:0;padding:0;margin:16px 0}
+#blCuradoria legend{font-weight:700;margin-bottom:9px}
+.curadoria-opcao{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--linha);border-radius:8px;margin:7px 0;cursor:pointer}
+.curadoria-opcao input{margin-top:5px;accent-color:var(--vinho);flex:none}
+.curadoria-opcao:has(input:checked){background:var(--vinho-fundo);border-color:var(--vinho)}
+.curadoria-opcao small{display:block;font-size:13px;color:var(--texto-suave)}
+.curadoria-btn{font:inherit;font-weight:700;border:1px solid var(--vinho);border-radius:8px;background:white;color:var(--vinho);padding:9px 12px;cursor:pointer}
+.curadoria-btn:focus-visible{outline:3px solid var(--vinho);outline-offset:3px}
+.curadoria-item{border:1px solid var(--linha);border-radius:10px;padding:14px;margin:12px 0}
+.curadoria-item .grade{margin:10px 0}
+.curadoria-item label{display:block;font-size:14px;font-weight:700}
+.curadoria-item label input,.curadoria-item label select,.curadoria-item label textarea{margin-top:5px;font-weight:400}
+.curadoria-item h3{font-size:16px}
+.curadoria-resumo{font-size:14px;margin:10px 0}
+#curadoriaErros ul{padding-left:20px}
+#curadoriaConfirmacao{margin-top:18px;font-weight:700}
+#curadoriaResumoRail{font-size:13px;color:rgba(255,255,255,.9);margin-top:10px}
+</style>
+<style>main.revisao{max-width:940px;margin:24px auto;padding:0 20px 60px}.consulta-fonte{display:flex;gap:12px;align-items:end;flex-wrap:wrap}.consulta-fonte label{flex:1;min-width:220px}.consulta-fonte button{min-height:48px}pre.dados{font:13px/1.55 ui-monospace,Consolas,monospace;white-space:pre-wrap;overflow-wrap:anywhere;max-height:420px;overflow:auto;background:#f6f4f0;border:1px solid var(--linha);padding:14px;border-radius:9px;margin:12px 0}summary{cursor:pointer;font-weight:700;padding:8px 0}#mensagem{margin-bottom:18px}header a{color:var(--vinho)}.revisao .acoes{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}.revisao .acoes button{width:auto;margin:0}.revisao .btn-prot:disabled{background:#d5d8dc;color:#4f5866}dt{font-weight:700;margin-top:10px}dd{white-space:pre-wrap;margin:4px 0 10px}.fonte-nota{font-size:14px;color:var(--texto-suave);margin:9px 0}</style></head><body>
+<header><div class="nomes"><h1>Conferência do protocolo</h1><p class="tab" id="sessaoInfo"></p><p style="margin-top:12px"><a href="protocolo.html">Voltar ao e-Protocolo</a> · <a href="index.html">Hub CN2O</a></p></div></header>
+<main class="revisao">
+<section class="bloco"><h2 class="versalete">Localizar protocolo</h2><div class="consulta-fonte"><label class="rotulo" for="numeroProtocolo">Número do protocolo<input type="text" id="numeroProtocolo" inputmode="numeric" maxlength="10" placeholder="Número do protocolo"></label><button type="button" id="carregarFonte" class="curadoria-btn">Carregar protocolo</button></div><p class="fonte-nota">A consulta usa sua sessão do Hub. A edição depende da autorização do servidor para o responsável ou o Tabelião.</p></section>
+<div id="mensagem" class="aviso oculto" role="status" aria-live="polite"></div>
+<div class="acoes"><button id="consultarAtual" class="curadoria-btn oculto" type="button">Consultar e comparar versão atual</button><button id="sincronizarFonte" class="curadoria-btn oculto" type="button">Tentar sincronização com Trello</button></div>
+<section id="comparacao" class="bloco oculto"><h2 class="versalete">Revisão alterada no servidor</h2><p>Sua edição permanece nos campos abaixo. Compare os lançamentos e a curadoria registrada na versão atual antes de usá-la como base.</p><details><summary>Versão usada no início da sua edição</summary><pre id="comparacaoAnterior" class="dados"></pre></details><details open><summary>Versão atual do servidor</summary><pre id="comparacaoAtual" class="dados"></pre></details><button id="adotarVersao" type="button" class="curadoria-btn">Usar versão atual e manter minha edição</button></section>
+<div id="edicao" class="oculto">
+<section class="bloco"><h2 id="protocoloTitulo" class="versalete"></h2><p id="fonteRevisao" class="fonte-nota"></p><p>Lançamentos do protocolo na versão carregada, exibidos para conferência. A revisão abaixo atualiza apenas a curadoria e as parcelas; os demais dados permanecem preservados.</p><dl><dt>Preço / valor declarado</dt><dd id="precoOriginal"></dd><dt>Pagamento informado na triagem</dt><dd id="pagamentoOriginal"></dd></dl><details><summary>Consultar todos os dados do protocolo</summary><pre id="dadosOriginais" class="dados"></pre></details></section>
+  <!-- 5 · CURADORIA DOS DADOS DECLARADOS E DOS DOCUMENTOS -->
+  <section class="bloco" id="blCuradoria" aria-labelledby="curadoriaTitulo">
+    <h2 class="versalete" id="curadoriaTitulo">Conferência das informações</h2>
+    <p class="intro-curadoria">O protocolo é a fonte inicial da minuta. Confira nomes, papéis das partes, poderes, bens, valores, condições e pagamentos com os documentos do pedido. Se houver oposição sobre <b>o mesmo fato e negócio</b>, identifique-a: o documento pertinente prevalece nesse ponto, sem apagar a declaração original.</p>
+    <div class="aviso">Esta tela não lê nem compara o conteúdo dos documentos. Marcar um documento como recebido no checklist não significa que seus dados foram conferidos. A conferência abaixo é feita por você.</div>
+
+    <div id="curadoriaPagamentos" class="oculto">
+      <h3 style="font-size:16px;margin-top:22px">Pagamentos discriminados</h3>
+      <p class="curadoria-resumo">Registre cada parcela, inclusive pagamentos previstos. Use os valores e nomes efetivamente informados; campos desconhecidos podem permanecer vazios. Este registro complementa as respostas da triagem e não confirma quitação.</p>
+      <div id="pagamentosLista"></div>
+      <button type="button" class="curadoria-btn" id="adicionarPagamento">Adicionar parcela</button>
+      <p id="pagamentosResumo" class="curadoria-resumo" aria-live="polite"></p>
+    </div>
+
+    <div id="curadoriaAlertas" aria-live="polite"></div>
+    <fieldset>
+      <legend>Como está a conferência do pedido?</legend>
+      <label class="curadoria-opcao"><input type="radio" name="curadoriaEstado" value="compativeis"><span>Dados e documentos conferidos, sem divergência identificada<small>Considere todos os aspectos relevantes do pedido, e não apenas o preço.</small></span></label>
+      <label class="curadoria-opcao"><input type="radio" name="curadoriaEstado" value="sem_comprovante"><span>Pagamento declarado sem comprovante disponível<small>A ausência fica registrada; não impede, por si só, protocolar pagamento em espécie.</small></span></label>
+      <label class="curadoria-opcao"><input type="radio" name="curadoriaEstado" value="nao_conferidos"><span>Conferência pendente ou parcial<small>O pedido pode ser protocolado com esta pendência expressa.</small></span></label>
+      <label class="curadoria-opcao"><input type="radio" name="curadoriaEstado" value="divergentes"><span>Identifiquei divergência entre informações ou documentos<small>Informe o fato, a referência do documento e o que precisa ser conciliado.</small></span></label>
+    </fieldset>
+    <div id="divergenciasBox" class="oculto">
+      <div id="divergenciasLista"></div>
+      <button type="button" class="curadoria-btn" id="adicionarDivergencia">Adicionar outra divergência</button>
+    </div>
+    <label class="rotulo" for="curadoriaObservacao">Observações da conferência (opcional)</label>
+    <textarea id="curadoriaObservacao" rows="3" maxlength="4000" placeholder="Indique o que ainda falta conferir, o alcance da conferência ou a origem da informação."></textarea>
+    <label class="curadoria-opcao" id="curadoriaConfirmacao"><input type="checkbox" id="curadoriaConfirmado"><span>Confirmo que registrei a situação real da conferência e suas pendências.<small>A confirmação será vinculada à minha sessão pelo servidor. Alterar os dados do pedido exige confirmar novamente.</small></span></label>
+    <div class="aviso" id="curadoriaErros" role="status"></div>
+  </section>
+
+<div class="acoes"><button id="salvarCuradoria" class="btn-prot" type="button" disabled>Salvar conferência</button></div>
+</div></main>
+<script src="protocolo-curadoria.js"></script><script src="protocolo-curadoria-form.js"></script><script src="curadoria.js"></script>
+</body></html>

@@ -2981,6 +2981,31 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 #itcmdRaiz{font-size:17px;line-height:1.5;background:transparent;padding-inline:0}
 
 </style>
+
+<style id="estilo-grupos-ferramentas">
+/* Consultas e Calculadoras: os acessos antigos permanecem como submodulos. */
+#secFerramentas .cards{grid-template-columns:repeat(3,minmax(0,1fr))}
+#secFerramentas .card-arte{display:none}
+.card-grupo .grupo-quantidade{margin-left:auto;font-size:11px;font-weight:700;color:var(--texto-suave)}
+.grupo-previa{display:flex;gap:12px;flex-wrap:wrap;margin:4px 0 2px}
+.grupo-item{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600;color:var(--texto)}
+.grupo-previa .card-ico{width:29px;height:29px;border-radius:8px;flex:none}
+.grupo-previa .card-ico svg{width:17px;height:17px}
+.pagina-grupo{display:flex;flex-direction:column;gap:22px}
+.pagina-grupo .ferramenta-cab>div{flex:1;min-width:0}
+.pagina-grupo .cards{grid-template-columns:repeat(3,minmax(0,1fr));align-items:stretch}
+.grupo-calculadoras .cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+.pagina-grupo .card{min-height:235px;padding:24px;gap:14px}
+.pagina-grupo .card h3{font-size:19px;line-height:1.4}
+.pagina-grupo .card p{font-size:14px;line-height:1.65;color:var(--texto-suave)}
+.pagina-grupo .card-topo{display:flex;align-items:center;gap:12px}
+.pagina-grupo .card .chip-ia{margin-left:auto}
+.pagina-grupo .card .chip-trello{background:#174a74;color:#fff}
+.pagina-grupo .card-acao{margin-top:auto}
+.pagina-grupo .card:focus-visible,.card-grupo:focus-visible{outline:3px solid var(--vinho);outline-offset:4px}
+@media(max-width:1240px){#secFerramentas .cards,.pagina-grupo .cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:620px){#secFerramentas .cards,.pagina-grupo .cards{grid-template-columns:1fr}.pagina-grupo .card{min-height:0;padding:20px}}
+</style>
 </head>
 <body>
 <!-- ================= TELA DE LOGIN ================= -->
@@ -3191,11 +3216,12 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
             <p>Protocolo de escrituras com triagem guiada, dossiê documental e recibo — os 14 atos do CN2O.</p>
             <span class="card-acao">Abrir aqui →</span>
           </button>
-          <button class="card" id="cardCalculadora" type="button">
-            <div class="card-topo"><span class="card-num">02</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 15.5h.01M12 15.5h.01M15.5 15.5h.01M8.5 12v.01"/></svg></span></div>
-            <h3>Calculadora de Emolumentos</h3>
-            <p>Faixa de cobrança para imóveis rurais. Tabela Emdagro 2026/2027 — tarefas/hectares e Valor de Referência por Município.</p>
-            <span class="card-acao">Abrir aqui →</span>
+          <button class="card card-grupo" id="cardCalculadoras" type="button">
+            <div class="card-topo"><span class="card-num">02</span><span class="grupo-quantidade">2 ferramentas</span></div>
+            <h3>Calculadoras</h3>
+            <p>Cálculos e orçamentos para o trabalho notarial.</p>
+            <span class="grupo-previa" aria-hidden="true"><span class="grupo-item"><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 15.5h.01M12 15.5h.01M15.5 15.5h.01M8.5 12v.01"/></svg></span><span>Imóvel rural</span></span><span class="grupo-item"><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h3M13 11h3M8 15h3M13 15h3M8 18h3"/></svg></span><span>ITCMD</span></span></span>
+            <span class="card-acao">Escolher calculadora →</span>
           </button>
           <!-- v1.34 — QUADRO ÚNICO DA IA. Os quatro assistentes (Extrator, e-Analista,
                Gerador de Minuta e Redator) saíram do quadro geral e passaram a viver
@@ -3214,11 +3240,12 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
             <span class="card-acao">Abrir cláusulas →</span>
           </button>
 
-          <button class="card" id="cardConsulta" type="button">
-            <div class="card-topo"><span class="card-num">05</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="5.5"/><path d="M14.6 14.6 20 20"/><path d="M8 9.2h5M8 11.8h3.2"/></svg></span><span class="chip-ia chip-trello">Trello</span></div>
-            <h3>T-Consulta</h3>
-            <p>Digite o número do protocolo de entrada e receba o extrato do andamento: partes, tipo de ato, fases percorridas e com quem a escritura está agora.</p>
-            <span class="card-acao">Consultar aqui →</span>
+          <button class="card card-grupo" id="cardConsultas" type="button">
+            <div class="card-topo"><span class="card-num">05</span><span class="grupo-quantidade">3 ferramentas</span></div>
+            <h3>Consultas</h3>
+            <p>Andamento dos protocolos, pesquisa de acervo e localização de pastas.</p>
+            <span class="grupo-previa" aria-hidden="true"><span class="grupo-item"><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="5.5"/><path d="M14.6 14.6 20 20"/><path d="M8 9.2h5M8 11.8h3.2"/></svg></span><span>T-Consulta</span></span><span class="grupo-item"><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4.5h3.2v15H4zM8.6 4.5h3v15h-3z"/><path d="M13.6 5.2 16.5 4.6l1.6 7.3"/><circle cx="16.4" cy="16.2" r="3.4"/><path d="m18.9 18.7 2.4 2.4"/></svg></span><span>Acervo</span></span><span class="grupo-item"><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/><path d="M3 7V5h6l2 2"/><path d="M8 13h8"/></svg></span><span>Pastas</span></span></span>
+            <span class="card-acao">Escolher consulta →</span>
           </button>
           <button class="card" id="cardItbi" type="button">
             <div class="card-topo"><span class="card-num">06</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M6 3h9l3 3v15H6z"/><path d="M15 3v3h3"/><path d="M9 11h6M9 14h6M9 17h3.5"/></svg></span><span class="chip-ia chip-pdf">PDF</span></div>
@@ -3226,36 +3253,21 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
             <p>Gera a guia de ITBI da Prefeitura de Itabaiana no layout oficial — com a profissão das partes e o botão “não consta” em cada campo. Sai em PDF, numa página A4, pronta para imprimir e assinar.</p>
             <span class="card-acao">Preencher aqui →</span>
           </button>
-          <button class="card" id="cardAcervo" type="button">
-            <div class="card-topo"><span class="card-num">07</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4.5h3.2v15H4zM8.6 4.5h3v15h-3z"/><path d="M13.6 5.2 16.5 4.6l1.6 7.3"/><circle cx="16.4" cy="16.2" r="3.4"/><path d="m18.9 18.7 2.4 2.4"/></svg></span><span class="chip-ia chip-acervo">Acervo</span></div>
-            <h3>Pesquisa / Acervo</h3>
-            <p>Pesquisa no <b>acervo da serventia</b> — os dois: o <b>antigo do 1º Ofício</b> e o do <b>2º Ofício</b>. Acha o <b>livro</b> (onde está guardado, se está digitalizado) e o <b>ato</b> (folhas, data, partes) e abre o arquivo no Drive.</p>
-            <span class="card-acao">Pesquisar →</span>
-          </button>
+
           <!-- v1.41 — 08 · Calculadora ITCMD/SE: inventário, inventário cumulativo e doação —
                meação, quinhões, imposto por herdeiro (Lei SE 7.724/2013), emolumentos TJSE e orçamento
                para o advogado. Roda no navegador (frontend/src/itcmd/). -->
-          <button class="card" id="cardItcmd" type="button">
-            <div class="card-topo"><span class="card-num">08</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h3M13 11h3M8 15h3M13 15h3M8 18h3"/></svg></span><span class="chip-ia chip-guia">Cálculo</span></div>
-            <h3>Calculadora ITCMD</h3>
-            <p><b>Inventário</b>, <b>inventário cumulativo</b> e <b>doação</b>: meação, quinhão de cada herdeiro, ITCMD pela lei de Sergipe, emolumentos e o <b>orçamento completo</b> para o advogado apresentar ao cliente.</p>
-            <span class="card-acao">Calcular aqui →</span>
-          </button>
+
           <!-- v1.35 — o NICHO: a célula que sobra na grade vira uma peça de galeria (a arte da
                home: arco marinho e cubo vinho). Decorativa; desde a v1.41 (8 quadros) só aparece
                na grade de 3 colunas, onde sobra uma célula; some em 4, 2 e 1 colunas. -->
           <button class="card card-despesas" id="cardDespesas" type="button" hidden>
-            <div class="card-topo"><span class="card-num">09</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h3M13 15h3M8 18h3"/></svg></span><span class="chip-ia chip-guia">Restrito</span></div>
+            <div class="card-topo"><span class="card-num">07</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h8M8 15h3M13 15h3M8 18h3"/></svg></span><span class="chip-ia chip-guia">Restrito</span></div>
             <h3>Controle de Despesas</h3>
             <p>Comprovantes, notas e contratos reunidos. Leitura automática, lançamentos e fechamento mensal com conferência.</p>
             <span class="card-acao">Organizar despesas →</span>
           </button>
-          <button class="card" id="cardPastas" type="button">
-            <div class="card-topo"><span class="card-num">10</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/><path d="M3 7V5h6l2 2"/><path d="M8 13h8"/></svg></span></div>
-            <h3>Ficheiro de Pastas</h3>
-            <p>Em qual pasta está cada protocolo. Pastas 001 a 300 em giro: a pasta volta ao montante quando o cartão vai para o Arquivo Geral.</p>
-            <span class="card-acao">Abrir o ficheiro →</span>
-          </button>
+
           <div class="card-arte" aria-hidden="true"></div>
         </div>
       </section>
@@ -3316,6 +3328,56 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
         </div>
       </div>
       <div class="moldura" id="molduraEmbutida"></div>
+    </div>
+
+    <div id="paginaCalculadoras" class="pagina-grupo grupo-calculadoras" hidden>
+      <button class="voltar" data-voltar type="button">← Voltar ao hub</button>
+      <div class="ferramenta-cab">
+        <span class="num-grande">02</span>
+        <div><h2 tabindex="-1">Calculadoras</h2><p class="desc">Escolha o cálculo que você precisa realizar.</p></div>
+      </div>
+      <div class="cards">
+          <button class="card" id="cardCalculadora" type="button">
+            <div class="card-topo"><span class="card-num">2.1</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M8.5 12h.01M12 12h.01M15.5 12h.01M8.5 15.5h.01M12 15.5h.01M15.5 15.5h.01M8.5 12v.01"/></svg></span></div>
+            <h3>Calculadora de emolumentos — imóvel rural</h3>
+            <p>Faixa de cobrança para imóveis rurais. Tabela Emdagro 2026/2027 — tarefas/hectares e Valor de Referência por Município.</p>
+            <span class="card-acao">Abrir aqui →</span>
+          </button>
+          <button class="card" id="cardItcmd" type="button">
+            <div class="card-topo"><span class="card-num">2.2</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8M8 11h3M13 11h3M8 15h3M13 15h3M8 18h3"/></svg></span><span class="chip-ia chip-guia">Cálculo</span></div>
+            <h3>Calculadora ITCMD</h3>
+            <p><b>Inventário</b>, <b>inventário cumulativo</b> e <b>doação</b>: meação, quinhão de cada herdeiro, ITCMD pela lei de Sergipe, emolumentos e o <b>orçamento completo</b> para o advogado apresentar ao cliente.</p>
+            <span class="card-acao">Calcular aqui →</span>
+          </button>
+      </div>
+    </div>
+
+    <div id="paginaConsultas" class="pagina-grupo grupo-consultas" hidden>
+      <button class="voltar" data-voltar type="button">← Voltar ao hub</button>
+      <div class="ferramenta-cab">
+        <span class="num-grande">05</span>
+        <div><h2 tabindex="-1">Consultas</h2><p class="desc">Escolha o que você precisa encontrar.</p></div>
+      </div>
+      <div class="cards">
+          <button class="card" id="cardConsulta" type="button">
+            <div class="card-topo"><span class="card-num">5.1</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="5.5"/><path d="M14.6 14.6 20 20"/><path d="M8 9.2h5M8 11.8h3.2"/></svg></span><span class="chip-ia chip-trello">Trello</span></div>
+            <h3>T-Consulta</h3>
+            <p>Digite o número do protocolo de entrada e receba o extrato do andamento: partes, tipo de ato, fases percorridas e com quem a escritura está agora.</p>
+            <span class="card-acao">Consultar aqui →</span>
+          </button>
+          <button class="card" id="cardAcervo" type="button">
+            <div class="card-topo"><span class="card-num">5.2</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4.5h3.2v15H4zM8.6 4.5h3v15h-3z"/><path d="M13.6 5.2 16.5 4.6l1.6 7.3"/><circle cx="16.4" cy="16.2" r="3.4"/><path d="m18.9 18.7 2.4 2.4"/></svg></span><span class="chip-ia chip-acervo">Acervo</span></div>
+            <h3>Pesquisa / Acervo</h3>
+            <p>Pesquisa no <b>acervo da serventia</b> — os dois: o <b>antigo do 1º Ofício</b> e o do <b>2º Ofício</b>. Acha o <b>livro</b> (onde está guardado, se está digitalizado) e o <b>ato</b> (folhas, data, partes) e abre o arquivo no Drive.</p>
+            <span class="card-acao">Pesquisar →</span>
+          </button>
+          <button class="card" id="cardPastas" type="button">
+            <div class="card-topo"><span class="card-num">5.3</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/><path d="M3 7V5h6l2 2"/><path d="M8 13h8"/></svg></span></div>
+            <h3>Ficheiro de Pastas</h3>
+            <p>Em qual pasta está cada protocolo. Pastas 001 a 300 em giro: a pasta volta ao montante quando o cartão vai para o Arquivo Geral.</p>
+            <span class="card-acao">Abrir o ficheiro →</span>
+          </button>
+      </div>
     </div>
 
     <!-- ===== VIEW: 03 · IA NOTARIAL (v1.34) =====
@@ -3399,6 +3461,17 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
            seguintes são as do ato escolhido ([data-entrevista] — só o bloco do ato aberto
            fica sem [hidden]); a última é comum. Todos os ids, data-attributes, chips e
            textos da entrevista v1.29 foram preservados — só a distribuição mudou. -->
+      <section class="min-caixa" aria-labelledby="minFonteTitulo">
+        <h3 id="minFonteTitulo">Dados do e-Protocolo</h3>
+        <p class="min-nota">O protocolo é o ponto de partida da minuta. Os documentos pertinentes ao mesmo fato prevalecem em caso de contradição; a divergência fica registrada para conferência.</p>
+        <div class="min-linha">
+          <label class="min-campo">Número do protocolo<input id="minFonteNumero" type="text" inputmode="numeric" autocomplete="off" maxlength="10" placeholder="Número do atendimento"></label>
+          <button id="minFonteCarregar" type="button" class="btn-vinho">Carregar protocolo</button>
+        </div>
+        <label class="min-nota"><input id="minFonteAusente" type="checkbox"> Este atendimento ainda não tem protocolo.</label>
+        <p id="minFonteStatus" class="min-nota" role="status" aria-live="polite">Carregue o protocolo para usar os dados do atendimento.</p>
+      </section>
+
       <div class="min-linha-tempo" id="minLinhaTempo">
         <div class="lt-passos" id="minLtPassos" role="tablist" aria-label="Fases do Gerador de Minuta"></div>
       </div>
@@ -4382,6 +4455,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
             <div class="md-texto" id="minDevolvidaTexto"></div>
           </div>
         </div>
+        <details id="minFonteConferencia" class="min-caixa" hidden><summary>Conferência dos dados do protocolo</summary><p id="minFonteConferenciaResumo" class="min-nota"></p><ul id="minFonteConferenciaLinhas" class="min-nota"></ul></details>
         <div class="saida vazia" id="saidaMinuta">Escolha o ato, anexe os documentos apresentados, caminhe pelas fases e clique em GERAR MINUTA.</div>
         <p class="assinatura" id="metaMin"></p>
       </div>
@@ -4695,7 +4769,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
         <li><b>Dívidas do espólio</b> são abatidas antes da meação (monte-mor − dívidas − meação = monte partível), como no sistema da SEFAZ/SE.</li>
         <li><b>Multa</b> de 20% do imposto quando o inventário não é requerido em 120 dias do óbito (arts. 18-B, II, e 27, I). Multa de mora e juros só após o vencimento (art. 29); no extrajudicial o imposto é pago antes da lavratura (Decreto 29.994/2015, art. 23, I, a).</li>
         <li><b>Alíquota vigente na data do fato gerador</b> (Decreto, art. 19, parágrafo único): para óbitos anteriores a 2024 a legislação da época pode diferir — use "alíquota manual" se a SEFAZ indicar outra.</li>
-        <li><b>Emolumentos</b> (TJSE 2026, Lei 8.639/2019): escritura de inventário com bens pela faixa do valor de todos os bens; FERD de 20%; R$ 4,77 por herdeiro a partir do 11º; ato acessório = metade da faixa. Registro no RI, certidões e honorários são lançados à parte.</li>
+        <li><b>Emolumentos</b> (TJSE 2026, Lei 8.639/2019, Anexo I, Nota 24, incluída pela Lei 9.840/2025): a <b>meação é excluída</b> da base da escritura de inventário. A base corresponde à herança bruta: metade dos bens comuns sujeitos à meação, mais os bens particulares; sem meação, o valor integral da parcela inventariada. A fração de condomínio é aplicada uma única vez. Esta base não abate dívidas e não se confunde com o monte partível líquido do ITCMD. No cumulativo, calcula-se cada sucessão separadamente. FERD de 20%; R$ 4,77 por herdeiro a partir do 11º; ato acessório = metade da faixa. Registro no RI, certidões e honorários são lançados à parte.</li>
         <li><b>Usufruto</b>: na doação com reserva, o imposto incide só sobre a doação (art. 2º, §5º); a extinção do usufruto não é tributada (art. 7º, III). A base (100% ou 50%, aplicada a todos os bens doados) é opção da ferramenta, a confirmar com a SEFAZ/SE.</li>
         <li><b>Quotas de sociedade</b> (2%): a parcela de quotas de cada quinhão é apurada pela partilha ideal; a faixa do art. 14, I é aferida pelo quinhão total. <b>Isenção do art. 8º, VI</b>: só é oferecida quando o espólio tem um único imóvel de até 2.600 UFP e alcança apenas a parcela do imóvel.</li>
       </ol>
@@ -5178,6 +5252,7 @@ const CLAUSULAS = [
 ];
 </script>
 
+<script src="protocolo-minuta.js"></script>
 <script>
 /* ============================================================
    HUB CN2O — o hub do Time CN2O · versão definitiva
@@ -5192,7 +5267,7 @@ const CONFIG = {
     despesas: { url: 'controle-despesas/', titulo: 'Controle de Despesas' },
     pastas:      { url: 'ficheiro-pastas.html', titulo: 'Ficheiro de Pastas' },   // v1.44
     protocolo:   { url: 'protocolo.html',   titulo: 'e-Protocolo' },
-    calculadora: { url: 'calculadora.html', titulo: 'Calculadora de Emolumentos' }, // site próprio, sempre na versão atual
+    calculadora: { url: 'calculadora.html', titulo: 'Calculadora de emolumentos — imóvel rural' }, // site próprio, sempre na versão atual
     agenda:      { // Google Agenda do Tabelião (tnitabaiana@gmail.com), embutida no hub
       url: 'https://calendar.google.com/calendar/embed?src=tnitabaiana%40gmail.com&ctz=America%2FMaceio&hl=pt_BR&mode=WEEK&showTitle=0&showPrint=0&showCalendars=0&showTz=0&wkst=1',
       abrir: 'https://calendar.google.com/calendar/u/0?cid=dG5pdGFiYWlhbmFAZ21haWwuY29t',
@@ -5542,8 +5617,8 @@ function primeiroNome(n) {
 /* ============================================================
    NAVEGAÇÃO (com botão Voltar do navegador e atalhos #protocolo etc.)
 ============================================================ */
-const PAGINAS = ['paginaHub', 'paginaIA', 'paginaExtrator', 'paginaAnalisador', 'paginaMinutas', 'paginaConsulta', 'paginaRedator', 'paginaItbi', 'paginaItcmd', 'paginaAcervo', 'paginaEmbutida'];
-const ROTAS = { ia: 'paginaIA', extrator: 'paginaExtrator', analista: 'paginaAnalisador', minutas: 'paginaMinutas', consulta: 'paginaConsulta', redator: 'paginaRedator', itbi: 'paginaItbi', itcmd: 'paginaItcmd', acervo: 'paginaAcervo', protocolo: 'protocolo', calculadora: 'calculadora', agenda: 'agenda', despesas: 'despesas' };
+const PAGINAS = ['paginaHub', 'paginaConsultas', 'paginaCalculadoras', 'paginaIA', 'paginaExtrator', 'paginaAnalisador', 'paginaMinutas', 'paginaConsulta', 'paginaRedator', 'paginaItbi', 'paginaItcmd', 'paginaAcervo', 'paginaEmbutida'];
+const ROTAS = { consultas: 'paginaConsultas', calculadoras: 'paginaCalculadoras', ia: 'paginaIA', extrator: 'paginaExtrator', analista: 'paginaAnalisador', minutas: 'paginaMinutas', consulta: 'paginaConsulta', redator: 'paginaRedator', itbi: 'paginaItbi', itcmd: 'paginaItcmd', acervo: 'paginaAcervo', protocolo: 'protocolo', calculadora: 'calculadora', agenda: 'agenda', despesas: 'despesas' };
 /* ============================================================
    v1.34 — IA NOTARIAL (quadro 03): as quatro ferramentas de IA saíram do quadro geral
    e passaram a morar numa subpágina (#paginaIA, rota #ia). Quem entra numa delas PELA
@@ -5553,6 +5628,8 @@ const ROTAS = { ia: 'paginaIA', extrator: 'paginaExtrator', analista: 'paginaAna
 const PAGINAS_IA = ['paginaExtrator', 'paginaAnalisador', 'paginaMinutas', 'paginaRedator'];
 const VOLTAR_HUB = '← Voltar ao hub';
 const VOLTAR_IA = '← Voltar aos assistentes';
+const GRUPO_POR_ROTA = { consulta: 'paginaConsultas', acervo: 'paginaConsultas', pastas: 'paginaConsultas', calculadora: 'paginaCalculadoras', itcmd: 'paginaCalculadoras' };
+const ROTA_DO_GRUPO = { paginaConsultas: 'consultas', paginaCalculadoras: 'calculadoras' };
 let VOLTAR_PARA = '';
 function paginaAtual() {
   for (let i = 0; i < PAGINAS.length; i++) { const p = el(PAGINAS[i]); if (p && !p.hidden) return PAGINAS[i]; }
@@ -5562,19 +5639,22 @@ function voltarPelaIA(id) { return VOLTAR_PARA === 'paginaIA' && PAGINAS_IA.inde
 function pintarVoltar(id) {
   const alvo = el(id);
   if (!alvo) return;
-  const rotulo = voltarPelaIA(id) ? VOLTAR_IA : VOLTAR_HUB;
+  const rotulo = VOLTAR_PARA === 'paginaConsultas' ? '← Voltar às consultas' : VOLTAR_PARA === 'paginaCalculadoras' ? '← Voltar às calculadoras' : voltarPelaIA(id) ? VOLTAR_IA : VOLTAR_HUB;
   alvo.querySelectorAll('[data-voltar]').forEach(function (b) { if (b.textContent.indexOf('Voltar') >= 0) b.textContent = rotulo; });
 }
 function mostrarPagina(id, semHistorico, rota) {
   PAGINAS.forEach(function (p) { el(p).hidden = (p !== id); });
   el('wrapPrincipal').classList.toggle('largo', id === 'paginaEmbutida');
-  if (!voltarPelaIA(id)) VOLTAR_PARA = '';
+  const grupo = GRUPO_POR_ROTA[(rota || '').split('=')[0]];
+  if (grupo) VOLTAR_PARA = grupo;
+  else if (!voltarPelaIA(id)) VOLTAR_PARA = '';
   pintarVoltar(id);
   window.scrollTo({ top: 0 });
   if (!semHistorico) {
     const hash = id === 'paginaHub' ? '' : '#' + (rota || '');
     try { history.pushState({ pagina: id, rota: rota || '' }, '', location.pathname + location.search + hash); } catch (e) {}
   }
+  if (ROTA_DO_GRUPO[id]) { const titulo = el(id).querySelector('h2'); if (titulo) titulo.focus({ preventScroll: true }); }
   registrarAbertura(rota);   // v1.34 — trilha de auditoria (também cobre abrirEmbutida)
 }
 /* abre uma ferramenta a partir do quadro 03 · IA Notarial (o Voltar dela volta para lá) */
@@ -5627,19 +5707,26 @@ function abrirRota(rota, semHistorico) {
     return;
   }
   if (rota && rota.indexOf('minuta=') === 0) {
+    if (FERRAMENTAS.paginaMinutas && FERRAMENTAS.paginaMinutas.ocupada()) { toast('Aguarde ou interrompa a geração antes de abrir outra minuta.'); return; }
+    const versaoHistorico = ++MINUTA_EXIBICAO_VERSAO;
+    MINUTA_COPIAVEL = ''; MINUTA_ESTADO = ''; MINUTA_ESTADO_COD = '';
     mostrarPagina('paginaMinutas', semHistorico, rota);
+    CN2OFonteMinuta.prepararHistorico(document);
     const id = rota.slice(7);
     api('/hub/minutas/' + encodeURIComponent(id)).then(function (m) {
+      if (versaoHistorico !== MINUTA_EXIBICAO_VERSAO) return;
       // v1.27 — o link guarda a resposta INTEIRA do Gerador; ao reabrir, ela passa
       // pelo mesmo processar da ferramenta (quadro da decisão + minuta copiável).
       const s = el('saidaMinuta');
       s.classList.remove('vazia'); s.textContent = processarMinuta(m.texto);
+      CN2OFonteMinuta.mostrarConferencia(document, { conferencia_fonte: m.conferencia_fonte, fonte_protocolo: m.fonte_snapshot ? { numero: m.fonte_snapshot.protocolo.numero } : null, fonte_desatualizada: m.fonte_desatualizada, fonte_status: m.fonte_status, fonte_conferencia_estado: m.fonte_conferencia_estado });
       el('btnCopiarMin').hidden = !MINUTA_COPIAVEL;
       el('minutaLinkBox').hidden = true;
       // v1.29 — a minuta guardada com doc_url reabre com o botão do Google Docs
       mostrarDocMinuta(m.doc_url ? { url: m.doc_url, titulo: '' } : null, '');
       el('metaMin').textContent = m.titulo + ' · guardada por ' + (m.criado_por || '—') + ' · ' + quandoCurto(m.em);
     }).catch(function (e) {
+      if (versaoHistorico !== MINUTA_EXIBICAO_VERSAO) return;
       const s = el('saidaMinuta');
       s.classList.add('vazia');
       s.textContent = e.status === 404 ? 'Minuta não encontrada. O link pode estar errado, a minuta pode ter passado de 90 dias, ou ela foi guardada por outra pessoa: só quem guardou e o Tabelião abrem.' : 'Não consegui carregar a minuta (' + (e.erro || 'erro') + ').';
@@ -5702,6 +5789,8 @@ function abrirEmbutida(chave, semHistorico) {
   mostrarPagina('paginaEmbutida', semHistorico, chave);
 }
 function aplicarLinks() {
+  el('cardConsultas').addEventListener('click', function () { abrirRota('consultas'); });
+  el('cardCalculadoras').addEventListener('click', function () { abrirRota('calculadoras'); });
   el('cardDespesas').addEventListener('click', function () { abrirRota('despesas'); });
   // v1.34 — mini-quadro 3.3, dentro de #paginaIA
   el('cardMinutas').addEventListener('click', function () {
@@ -9104,10 +9193,11 @@ function mensagemErroIA(e) {
   if (e.status === 429) return 'Muitas análises seguidas. Aguarde ' + Math.ceil(((e.dados && e.dados.tente_em_s) || 60) / 60) + ' min e tente de novo.';
   if (e.status === 503 && e.dados && e.dados.motivo === 'congestionado') return 'O provedor da IA está congestionado neste momento (pico de uso) — não é problema do seu documento.\n\nAguarde uns 20 segundos e clique de novo: seus anexos continuam aqui.';
   if (e.status === 503) return 'A IA ainda não foi ligada no servidor — avise o Tabelião.';
-  if (e.status === 404) return 'Esta ferramenta ainda está sendo implantada no servidor — tente daqui a pouco.';
+  if (e.status === 409) return primeiraMaiuscula(e.erro || 'O protocolo foi atualizado. Recarregue os dados antes de gerar novamente') + '.';
+  if (e.status === 404) return primeiraMaiuscula(e.erro || 'Recurso não encontrado no servidor') + '.';
   if (e.status === 400 || e.status === 413) return primeiraMaiuscula(e.erro) + '.';
   if (e.status === 0) return 'Sem conexão com o servidor. Verifique a internet e tente de novo — seus anexos continuam aqui.';
-  return 'A IA não conseguiu concluir: ' + e.erro + '\n\nTente de novo em instantes; se persistir, avise o Tabelião.';
+  return 'A IA não conseguiu concluir: ' + (e.erro || e.message || 'erro não identificado') + '\n\nTente de novo em instantes; se persistir, avise o Tabelião.';
 }
 
 const EXEMPLO_EXTRATOR = '== EXEMPLO FICTÍCIO — apenas para testar a ferramenta ==\nREPUBLICA FEDERATIVA DO BRASIL  SECRETARIA DE SEGURANCA PUBLICA  SSP SE\nCARTEIRA DE IDENTIDADE  RG 3.845.216  MARILIA FONTES DE JESUS\nFILIACAO JOSE ARNALDO DE JESUS / MARIA APARECIDA FONTES DE JESUS   NASC 12/04/1991  ITABAIANA SE\nCPF 054 318 276 90\nENERGISA SERGIPE - FATURA   TITULAR: MARILIA F DE JESUS\nRUA BOANERGES PINHEIRO 214  CENTRO  ITABAIANA SE  CEP 49500-121\ncertidao de nascimento: MARÍLIA FONTES DE JESUS, solteira\nprofissao declarada no balcao: farmaceutica';
@@ -9300,6 +9390,7 @@ document.querySelectorAll('[data-voltar]').forEach(function (b) {
     // v1.34 — quem entrou na ferramenta pelo quadro 03 · IA Notarial volta para lá;
     // quem veio do atalho direto (#extrator, #analista, #minutas, #redator) volta ao hub.
     // O Voltar da própria página IA sempre volta ao hub.
+    if (ROTA_DO_GRUPO[VOLTAR_PARA]) { const grupo = VOLTAR_PARA; mostrarPagina(grupo, false, ROTA_DO_GRUPO[grupo]); return; }
     if (voltarPelaIA(paginaAtual())) { VOLTAR_PARA = ''; mostrarPagina('paginaIA', false, 'ia'); return; }
     mostrarPagina('paginaHub');
   });
@@ -9558,6 +9649,7 @@ const RE_MARCADOR_FIM = /===\s*FIM_MINUTA\s*===/g;
 let MINUTA_COPIAVEL = '';    // o que o botão Copiar leva (vazio = sem minuta = botão escondido)
 let MINUTA_ESTADO = '';      // a linha "Estado:" como veio do modelo (nome + código — motivo)
 let MINUTA_ESTADO_COD = '';  // PRONTA | PRELIMINAR | BLOQUEADA | DECISAO | FORA ('' = sem resposta)
+let MINUTA_EXIBICAO_VERSAO = 0; // Invalida histórico/link assíncrono quando a tela passa a outro resultado.
 const ESTADO_ROTULO = { PRONTA: 'PRONTA PARA MINUTA', PRELIMINAR: 'PRELIMINAR COM PENDÊNCIAS', BLOQUEADA: 'BLOQUEADA', DECISAO: 'DECISÃO DO TABELIÃO', FORA: 'FORA DO ESCOPO' };
 // Classifica a linha "Estado:": aceita o nome em português, só o código em inglês, ou os
 // dois. O estado é o PRIMEIRO valor que aparece na linha — o motivo vem depois (com
@@ -9770,6 +9862,8 @@ function linhasPendencias(alvo, txt) {
 (function () {
   const pag = el('paginaMinutas');
   if (!pag) return;
+  const fonteProtocolo = CN2OFonteMinuta.ligar(document, api);
+  let extraFonteEmCurso = null;
   const ATOS = ['PROC', 'UE', 'DISS_UE', 'DIV', 'EMANC'];
   const NOME_ATO = { PROC: 'PROC', UE: 'UE', DISS_UE: 'DISS_UE', DIV: 'DIV', EMANC: 'EMANC' };
   // v1.29 — texto de ajuda da zona "Documentos das partes", por ato (o título é fixo)
@@ -10389,6 +10483,8 @@ function linhasPendencias(alvo, txt) {
     return msg;
   }
   function validar() {
+    const erroFonte = fonteProtocolo.validar(ATO);
+    if (erroFonte) return erroFonte;
     if (ATO === 'PROC') {
       if (!chip('proc.finalidade')) return faltou('[data-min-chips="proc.finalidade"] .ed-chip', 'Escolha a finalidade da procuração — o que o cliente quer.');
       if (!v('minPOutNome1')) return faltou('#minPOutNome1', 'Informe o nome completo do outorgante.');
@@ -10415,9 +10511,9 @@ function linhasPendencias(alvo, txt) {
       : ATO === 'DIV' ? 'DIV — ' + e('minDvC1Nome') + ' e ' + e('minDvC2Nome')
       : 'EMANC — ' + e('minEmNome');
   }
-  function tituloDaMinuta() {
+  function tituloDaMinuta(baseCongelada) {
     const sufixo = { PRELIMINAR: ' · PRELIMINAR', BLOQUEADA: ' · BLOQUEADA', DECISAO: ' · DECISÃO DO TABELIÃO', FORA: ' · FORA DO ESCOPO' }[MINUTA_ESTADO_COD];
-    return tituloBase() + (sufixo || '');
+    return (baseCongelada || tituloBase()) + (sufixo || '');
   }
 
   // v1.30 — o "Termo de ciência" (duas caixas que liberavam o botão) saiu da tela por
@@ -10435,6 +10531,8 @@ function linhasPendencias(alvo, txt) {
   document.addEventListener('cn2o-ia-status', reverCiencia);
 
   function esconderDecisao() {
+    MINUTA_EXIBICAO_VERSAO++;
+    CN2OFonteMinuta.mostrarConferencia(document, null);
     MINUTA_COPIAVEL = ''; MINUTA_ESTADO = ''; MINUTA_ESTADO_COD = '';
     el('minDecisao').hidden = true;
     el('minDecisao').classList.remove('bloqueada', 'preliminar');
@@ -11118,9 +11216,15 @@ function linhasPendencias(alvo, txt) {
     processar: processarMinuta,
     textoParaCopiar: function () { return MINUTA_COPIAVEL || el('saidaMinuta').textContent; },
     // v1.29 — titulo_base: o servidor nomeia o Google Doc com ele (≤ 120 caracteres)
-    corpoExtra: function () { return { titulo_base: tituloBase().slice(0, 120) }; },
-    aoIniciar: esconderDecisao,
+    corpoExtra: function () { return extraFonteEmCurso; },
+    aoIniciar: function () {
+      const rodando = FERRAMENTAS.paginaMinutas.ocupada();
+      extraFonteEmCurso = rodando ? Object.assign({ titulo_base: tituloBase().slice(0, 120) }, fonteProtocolo.payload(ATO)) : null;
+      fonteProtocolo.travar(rodando); esconderDecisao();
+    },
+    aoTerminar: function () { fonteProtocolo.travar(false); extraFonteEmCurso = null; },
     aoConcluir: function (r) {
+      CN2OFonteMinuta.mostrarConferencia(document, r);
       // v1.30 — o resultado entra na vista de novo (a página cresce quando a minuta chega)
       setTimeout(function () { try { el('minResultado').scrollIntoView({ behavior: REDUZ_MOVIMENTO ? 'auto' : 'smooth', block: 'start' }); } catch (e) {} }, 60);
       // sem minuta (bloqueada / decisão do Tabelião / fora do escopo) não há o que copiar;
@@ -11132,9 +11236,12 @@ function linhasPendencias(alvo, txt) {
       el('minDocCriar').hidden = !r.doc_disponivel;   // v1.39.3: o Doc só nasce no clique
       // o link guarda a resposta inteira — a decisão do roteador faz parte do resultado
       // (e a URL do Google Doc, quando houver, para reabrir com o botão)
-      const guardar = { titulo: tituloDaMinuta(), texto: r.texto };
+      const versaoParaGuardar = MINUTA_EXIBICAO_VERSAO;
+      const guardar = { titulo: tituloDaMinuta(extraFonteEmCurso && extraFonteEmCurso.titulo_base), texto: r.texto };
+      if (r.fonte_geracao_id) guardar.fonte_geracao_id = r.fonte_geracao_id;
       if (doc && !el('minDocBox').hidden) guardar.doc_url = doc.url;
       api('/hub/minutas', { corpo: guardar }).then(function (resp) {
+        if (versaoParaGuardar !== MINUTA_EXIBICAO_VERSAO) return;
         const link = location.origin + location.pathname + '#minuta=' + resp.id;
         el('minutaLinkA').textContent = link;
         el('minutaLinkA').href = link;
@@ -11148,6 +11255,7 @@ function linhasPendencias(alvo, txt) {
   // Limpar: além da saída e dos anexos (montarFerramenta), zera a entrevista do ato
   // aberto — inclusive os módulos, os poderes do CPC 105, a forma do ato e as particularidades
   el('btnLimparMin').addEventListener('click', function () {
+    if (FERRAMENTAS.paginaMinutas.ocupada()) return;
     const bloco = pag.querySelector('[data-entrevista="' + ATO + '"]');
     const grupos = [];
     if (bloco) {
@@ -11162,6 +11270,7 @@ function linhasPendencias(alvo, txt) {
       if (padrao) { padrao.classList.add('ativo'); padrao.setAttribute('aria-pressed', 'true'); }
     });
     el('minObs').value = '';
+    fonteProtocolo.limpar();
     esconderDecisao();
     limparTransposicao();   // v1.29 — o painel "Dados transpostos" e o seu estado também zeram
     reverCondicionais();
@@ -11244,7 +11353,9 @@ function filtrarHub(txt) {
   document.querySelectorAll('#secFerramentas .card, #linksUteis .link-item').forEach(function (n) {
     // v1.37.3 — os links úteis viraram ícones com nome curto: o nome por extenso mora no aria-label
     const alvo = n.querySelector('[aria-label]');
-    const texto = (n.textContent + ' ' + (alvo ? alvo.getAttribute('aria-label') : '')).toLowerCase();
+    if (n.id === 'cardDespesas' && !podeDespesas()) { n.hidden = true; return; }
+    const folhas = n.id === 'cardConsultas' ? el('paginaConsultas').textContent : n.id === 'cardCalculadoras' ? el('paginaCalculadoras').textContent : '';
+    const texto = (n.textContent + ' ' + folhas + ' ' + (alvo ? alvo.getAttribute('aria-label') : '')).toLowerCase();
     n.hidden = !!t && texto.indexOf(t) === -1;
   });
 }
@@ -13461,6 +13572,24 @@ restaurarSessao();
     return { base: baseValor, emol, adicional, ferd, total: arred(emol + adicional + ferd), acessorio: acess };
   }
 
+  /* Inventário: a meação não integra a base de emolumentos (Lei SE 8.639/2019,
+     Anexo I, Nota 24, incluída pela Lei 9.840/2025). Usa o patrimônio já calculado,
+     nunca um valor de base sugerido pela IA. A fração de condomínio já foi aplicada
+     por patrimonio(); não se divide novamente a herança nem os bens particulares.
+     A Nota 24 exclui a meação: preserva-se a base bruta, sem introduzir dedução de
+     dívidas. O monte partível líquido e o ITCMD continuam com suas regras próprias. */
+  function emolumentosInventario(pat, qtdPessoas, opts = {}) {
+    const patrimonioBruto = arred(Math.max(0, +pat.monteMor || 0));
+    const meacaoExcluida = arred(Math.max(0, +pat.totalComum || 0) / 2);
+    const base = arred(Math.max(0, patrimonioBruto - meacaoExcluida));
+    // Sem valor transmitido, não estimar automaticamente uma escritura com bens.
+    // Inventário negativo/sem bens exige enquadramento próprio, fora deste fluxo.
+    const e = base > 0 ? emolumentosEscritura(base, qtdPessoas, opts) :
+      { base: 0, emol: 0, adicional: 0, ferd: 0, total: 0, acessorio: !!opts.acessorio };
+    return { ...e, patrimonioBruto, meacaoExcluida, semBase: base <= 0,
+      fundamento: 'Lei SE 8.639/2019, Anexo I, Nota 24 (Lei 9.840/2025)' };
+  }
+
   /* ---------- Inventário completo (um falecido) ---------- */
   function inventario(f, opts = {}) {
     const pat = patrimonio(f);
@@ -13546,7 +13675,7 @@ restaurarSessao();
     return { ufp, linhas, total, totalMulta: 0, totalGeral: total, valorTotal, avisos, bens };
   }
 
-  const API = { Fr, LEGAL, EMOL, arred, ufpVigente, regras, patrimonio, sucessao, itcmdCausaMortis, emolumentosEscritura, inventario, cumulativo, doacao, faixa, linhasPartilha, partilhaReal, aplicarCessao, itcmdExcedente };
+  const API = { Fr, LEGAL, EMOL, arred, ufpVigente, regras, patrimonio, sucessao, itcmdCausaMortis, emolumentosEscritura, emolumentosInventario, inventario, cumulativo, doacao, faixa, linhasPartilha, partilhaReal, aplicarCessao, itcmdExcedente };
   if (typeof module !== 'undefined' && module.exports) module.exports = API; else raiz.ITCMD = API;
 })(typeof window !== 'undefined' ? window : globalThis);
 
@@ -13696,7 +13825,7 @@ restaurarSessao();
     // ---- D. Bens ----
     h += `<h3>${cumul2 ? 'D · Bens próprios do 2º falecido (além do que recebeu no 1º inventário)' : 'D · Bens deixados'}</h3>`;
     const mostraNat = temConj && (rg.meacaoSobre === 'comuns');
-    h += `<p class="notinha">Valor = base de cálculo (valor venal/avaliação, nunca inferior ao do ITBI/IPTU, ITR ou IPVA — art. 10, §4º).${mostraNat ? ' Em cada bem, diga se era <b>do casal</b> (comprado na constância) ou <b>só do(a) falecido(a)</b> (anterior ao casamento, herdado ou doado).' : ''} "Fração" serve para bens em condomínio com terceiros.</p><div class="lista" style="margin-top:8px">`;
+    h += `<p class="notinha">Valor = base de cálculo (valor venal/avaliação, nunca inferior ao do ITBI/IPTU, ITR ou IPVA — art. 10, §4º).${mostraNat ? ' Em cada bem, diga se era <b>do casal</b> (comprado na constância) ou <b>só do(a) falecido(a)</b> (anterior ao casamento, herdado ou doado).' : ''} Informe o valor do bem inteiro; "Fração" é a parcela do casal (bem comum) ou do(a) falecido(a) (bem particular) em condomínio com terceiros. <b>Não desconte a meação no valor nem na fração dos bens comuns:</b> a ferramenta a exclui automaticamente, uma única vez.</p><div class="lista" style="margin-top:8px">`;
     f.bens.forEach((bm, i) => {
       h += `<div class="item"><div class="linha bem">${campo(`${b}.bens.${i}.descricao`, `Bem ${i + 1}`, 'texto', { ph: 'Descrição, matrícula…', classe: 'larga-mobile' })}
         ${campo(`${b}.bens.${i}.tipo`, 'Tipo', 'select', { opcoes: TIPOS })}${campo(`${b}.bens.${i}.valor`, 'Valor (R$)', 'moeda', extrasValor(bm))}
@@ -13978,8 +14107,8 @@ restaurarSessao();
       invs.forEach((inv, k) => {
         const pessoas = inv.itc.linhas.length + (inv.pat.rg.temConjuge && inv.pat.meacao > 0 ? 1 : 0) + (inv.falecido.descendentes || []).filter(x => x.condicao === 'renuncia' && (x.nome || '').trim()).length;
         const acess = k === 1 && S.emol.inv2Acessorio;
-        const e = M.emolumentosEscritura(inv.pat.monteMor, pessoas, { acessorio: acess });
-        linhas.push({ rotulo: `Emolumentos — inventário de ${inv.falecido.nome || (k ? '2º falecido' : 'falecido')}${acess ? ' (ato acessório)' : ''}`, detalhe: `faixa ${fmt(inv.pat.monteMor)} → ${fmt(e.emol)}${e.adicional ? ` + ${fmt(e.adicional)} (${pessoas} pessoas)` : ''} + FERD 20% ${fmt(e.ferd)}`, valor: e.total });
+        const e = M.emolumentosInventario(inv.pat, pessoas, { acessorio: acess });
+        linhas.push({ rotulo: `Emolumentos — inventário de ${inv.falecido.nome || (k ? '2º falecido' : 'falecido')}${acess ? ' (ato acessório)' : ''}`, detalhe: e.semBase ? 'Sem valor de herança informado: emolumentos pendentes de apuração; inventário sem bens exige enquadramento próprio.' : `base dos emolumentos (herança bruta): ${fmt(e.patrimonioBruto)} − meação excluída ${fmt(e.meacaoExcluida)} = ${fmt(e.base)}${inv.pat.dividas > 0 ? '; sem abatimento de dívidas nesta base' : ''} → ${fmt(e.emol)}${e.adicional ? ` + ${fmt(e.adicional)} (${pessoas} pessoas)` : ''} + FERD 20% ${fmt(e.ferd)} · ${e.fundamento}`, valor: e.total });
       });
     }
     const fixos = linhas.reduce((s, l) => s + l.valor, 0);
@@ -14006,7 +14135,7 @@ restaurarSessao();
     if (ULT.modo === 'doacao') { L.push('Donatários:'); ULT.d.linhas.forEach(l => L.push(`  • ${l.nome}: base ${fmt(l.quinhao)} (${fmtN(l.ufps, 1)} UFP) → ${l.situacao === 'tributado' ? pct(l.aliq) + ' = ' + fmt(l.imposto) : l.situacao}`)); L.push(`  ITCMD: ${fmt(ULT.d.total)}`); L.push(''); }
     else if (ULT.modo === 'cumulativo') { bloco(ULT.c.inv1, `1ª declaração — ${S.inv[0].nome}`); bloco(ULT.c.inv2, `2ª declaração — ${S.inv[1].nome}`); }
     else bloco(ULT.inv, `Espólio de ${S.inv[0].nome}`);
-    $$('#orcCorpo tbody tr').forEach(tr => { const td = tr.children; if (td.length < 2) return; const rot = td[0].querySelector('label') ? td[0].querySelector('label').textContent : td[0].childNodes[0].textContent; const inp = td[1].querySelector('input'); L.push(`${rot.trim()}: ${inp ? fmt(parseMoeda(inp.value)) : td[1].textContent.trim()}`); });
+    $$('#orcCorpo tbody tr').forEach(tr => { const td = tr.children; if (td.length < 2) return; const rot = td[0].querySelector('label') ? td[0].querySelector('label').textContent : td[0].childNodes[0].textContent; const inp = td[1].querySelector('input'); L.push(`${rot.trim()}: ${inp ? fmt(parseMoeda(inp.value)) : td[1].textContent.trim()}`); const detalhe = td[0].querySelector('.notinha'); if (detalhe && /^Emolumentos/.test(rot.trim())) L.push(`  ${detalhe.textContent.trim()}`); });
     return L.join('\n');
   }
 

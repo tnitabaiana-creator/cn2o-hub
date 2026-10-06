@@ -199,6 +199,26 @@ input.moeda{font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.01
     padding:11px 18px;font-size:15.5px;font-weight:700;cursor:pointer;line-height:1.1}
 .btn-arq:hover{background:#202a3a;color:#fff}
 </style>
+<style id="curadoria-estilo">
+#blCuradoria .intro-curadoria{margin-bottom:16px;font-size:15px}
+#blCuradoria fieldset{border:0;padding:0;margin:16px 0}
+#blCuradoria legend{font-weight:700;margin-bottom:9px}
+.curadoria-opcao{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;border:1px solid var(--linha);border-radius:8px;margin:7px 0;cursor:pointer}
+.curadoria-opcao input{margin-top:5px;accent-color:var(--vinho);flex:none}
+.curadoria-opcao:has(input:checked){background:var(--vinho-fundo);border-color:var(--vinho)}
+.curadoria-opcao small{display:block;font-size:13px;color:var(--texto-suave)}
+.curadoria-btn{font:inherit;font-weight:700;border:1px solid var(--vinho);border-radius:8px;background:white;color:var(--vinho);padding:9px 12px;cursor:pointer}
+.curadoria-btn:focus-visible{outline:3px solid var(--vinho);outline-offset:3px}
+.curadoria-item{border:1px solid var(--linha);border-radius:10px;padding:14px;margin:12px 0}
+.curadoria-item .grade{margin:10px 0}
+.curadoria-item label{display:block;font-size:14px;font-weight:700}
+.curadoria-item label input,.curadoria-item label select,.curadoria-item label textarea{margin-top:5px;font-weight:400}
+.curadoria-item h3{font-size:16px}
+.curadoria-resumo{font-size:14px;margin:10px 0}
+#curadoriaErros ul{padding-left:20px}
+#curadoriaConfirmacao{margin-top:18px;font-weight:700}
+#curadoriaResumoRail{font-size:13px;color:rgba(255,255,255,.9);margin-top:10px}
+</style>
 </head>
 <body>
 
@@ -213,6 +233,7 @@ input.moeda{font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.01
     <div class="barra"></div>
     <div class="nomes">
       <h1>Hub de Protocolo<span class="selo">Protótipo — simulação</span></h1>
+      <p style="margin-top:8px"><a href="curadoria.html" style="color:var(--vinho)">Revisar conferência de um protocolo</a></p>
       <p class="oficio">2º Ofício de Itabaiana - SE</p>
       <p class="tab">César Bravo &nbsp;|&nbsp; Tabelião</p>
       <p class="tab" id="sessaoInfo" style="margin-top:2px"></p>
@@ -396,6 +417,38 @@ input.moeda{font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.01
     <div class="nota-rail" style="text-align:left;margin-top:6px">Uso interno — vai para a descrição do cartão, não para o recibo do cliente.</div>
   </section>
 
+  <!-- 5 · CURADORIA DOS DADOS DECLARADOS E DOS DOCUMENTOS -->
+  <section class="bloco oculto" id="blCuradoria" aria-labelledby="curadoriaTitulo">
+    <h2 class="versalete" id="curadoriaTitulo"><span class="n">5</span>Conferência das informações</h2>
+    <p class="intro-curadoria">O protocolo é a fonte inicial da minuta. Confira nomes, papéis das partes, poderes, bens, valores, condições e pagamentos com os documentos do pedido. Se houver oposição sobre <b>o mesmo fato e negócio</b>, identifique-a: o documento pertinente prevalece nesse ponto, sem apagar a declaração original.</p>
+    <div class="aviso">Esta tela não lê nem compara o conteúdo dos documentos. Marcar um documento como recebido no checklist não significa que seus dados foram conferidos. A conferência abaixo é feita por você.</div>
+
+    <div id="curadoriaPagamentos" class="oculto">
+      <h3 style="font-size:16px;margin-top:22px">Pagamentos discriminados</h3>
+      <p class="curadoria-resumo">Registre cada parcela, inclusive pagamentos previstos. Use os valores e nomes efetivamente informados; campos desconhecidos podem permanecer vazios. Este registro complementa as respostas da triagem e não confirma quitação.</p>
+      <div id="pagamentosLista"></div>
+      <button type="button" class="curadoria-btn" id="adicionarPagamento">Adicionar parcela</button>
+      <p id="pagamentosResumo" class="curadoria-resumo" aria-live="polite"></p>
+    </div>
+
+    <div id="curadoriaAlertas" aria-live="polite"></div>
+    <fieldset>
+      <legend>Como está a conferência do pedido?</legend>
+      <label class="curadoria-opcao"><input type="radio" name="curadoriaEstado" value="compativeis"><span>Dados e documentos conferidos, sem divergência identificada<small>Considere todos os aspectos relevantes do pedido, e não apenas o preço.</small></span></label>
+      <label class="curadoria-opcao"><input type="radio" name="curadoriaEstado" value="sem_comprovante"><span>Pagamento declarado sem comprovante disponível<small>A ausência fica registrada; não impede, por si só, protocolar pagamento em espécie.</small></span></label>
+      <label class="curadoria-opcao"><input type="radio" name="curadoriaEstado" value="nao_conferidos"><span>Conferência pendente ou parcial<small>O pedido pode ser protocolado com esta pendência expressa.</small></span></label>
+      <label class="curadoria-opcao"><input type="radio" name="curadoriaEstado" value="divergentes"><span>Identifiquei divergência entre informações ou documentos<small>Informe o fato, a referência do documento e o que precisa ser conciliado.</small></span></label>
+    </fieldset>
+    <div id="divergenciasBox" class="oculto">
+      <div id="divergenciasLista"></div>
+      <button type="button" class="curadoria-btn" id="adicionarDivergencia">Adicionar outra divergência</button>
+    </div>
+    <label class="rotulo" for="curadoriaObservacao">Observações da conferência (opcional)</label>
+    <textarea id="curadoriaObservacao" rows="3" maxlength="4000" placeholder="Indique o que ainda falta conferir, o alcance da conferência ou a origem da informação."></textarea>
+    <label class="curadoria-opcao" id="curadoriaConfirmacao"><input type="checkbox" id="curadoriaConfirmado"><span>Confirmo que registrei a situação real da conferência e suas pendências.<small>A confirmação será vinculada à minha sessão pelo servidor. Alterar os dados do pedido exige confirmar novamente.</small></span></label>
+    <div class="aviso" id="curadoriaErros" role="status"></div>
+  </section>
+
 </main>
 
 <!-- TRILHO: DOSSIÊ -->
@@ -405,6 +458,7 @@ input.moeda{font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.01
     <div class="titulo-prev" id="tituloPrev">Escolha o tipo de ato para começar</div>
     <ul id="listaDossie"></ul>
     <div class="contagem" id="contagem"></div>
+    <div id="curadoriaResumoRail" aria-live="polite"></div>
     <button class="btn-prot" id="btnProt" disabled>Protocolizar</button>
     <div class="nota-rail">O recibo sai no WhatsApp do interessado com esta relação de documentos.</div>
   </div>
@@ -428,17 +482,20 @@ input.moeda{font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.01
     <h3 class="versalete">Recibo (prévia do WhatsApp)</h3>
     <div class="nota-rail" style="text-align:left;margin:0 0 10px" id="reciboDest"></div>
     <div class="recibo" id="reciboTxt"></div>
+    <p id="revisarRecibo" class="oculto" style="margin-top:12px"><a id="revisarReciboLink" href="curadoria.html">Revisar a conferência deste protocolo</a></p>
     <h3 class="versalete" style="margin-top:18px">Payload → Railway (contrato de dados)</h3>
     <div class="payload" id="payloadTxt"></div>
     <button class="fechar" onclick="document.getElementById('veu').classList.remove('aberto')">Fechar</button>
   </div>
 </div>
 
+<script src="protocolo-curadoria.js"></script>
+<script src="protocolo-curadoria-form.js"></script>
 <script>
 /* ============================================================
    ESTADO
 ============================================================ */
-const S = { ato:null, urgente:false, respostas:{}, dossie:{}, cert:{nc:{}, arquivos:[]} };
+const S = { ato:null, urgente:false, respostas:{}, dossie:{}, cert:{nc:{}, arquivos:[]}, pagamentos:[], divergencias:[], curadoriaFingerprint:null };
 
 const PAPEIS = {
   'CV-Urbano':{t:'Vendedor(es)',a:'Comprador(es)',parte:'Comprador(a)',ra:'Comprador(a)'},
@@ -1144,18 +1201,18 @@ function perguntasDoAto(ato){
     Q.push({id:'pag_momento', titulo:'Momento do pagamento do preço', ops:[
       {v:'Já pago integralmente (data anterior)', aviso:'Se por transferência ou cheque, exigir o comprovante DE IMEDIATO, antes de protocolar.'},
       {v:'Integralmente no ato da lavratura'},
-      {v:'Misto — parte já paga, parte no ato', aviso:'Discriminar os VALORES de cada parte no campo Observações.'}
+      {v:'Misto — parte já paga, parte no ato', aviso:'Discrimine cada parcela na seção Pagamentos discriminados, com valor, forma e situação.'}
     ]});
     // Já pago
     Q.push({id:'pag_ant_forma', titulo:'Pagamento já realizado — forma', dependeDe:['pag_momento','Já pago integralmente (data anterior)'], ops:[
-      {v:'Dinheiro em espécie (moeda manual)', aviso:'Cláusula específica: preço pago em moeda corrente manual, contado e conferido pelo vendedor, na data indicada abaixo.'},
+      {v:'Dinheiro em espécie (moeda manual)', aviso:'Registre a declaração de pagamento em espécie. Confira se há comprovante bancário relativo ao mesmo pagamento e, havendo oposição, registre a divergência na conferência abaixo.'},
       {v:'Transferência / depósito / PIX', inj:['Comprovante bancário da transferência'], aviso:'Exigir o comprovante DE IMEDIATO.'},
       {v:'Cheque', inj:['Cópia do cheque (banco, agência, número)'], aviso:'Quitação plena só com a compensação — avaliar pro soluto × pro solvendo.'}
     ]});
     Q.push({id:'pag_ant_data', tipo:'data', titulo:'Data do pagamento realizado', dependeDe:['pag_momento','Já pago integralmente (data anterior)']});
     // No ato
     Q.push({id:'pag_ato_forma', titulo:'Pagamento no ato da lavratura — forma', dependeDe:['pag_momento','Integralmente no ato da lavratura'], ops:[
-      {v:'Dinheiro em espécie (moeda manual)', aviso:'Cláusula: preço pago em moeda corrente manual, contado e conferido pelo vendedor no ato.'},
+      {v:'Dinheiro em espécie (moeda manual)', aviso:'Pagamento previsto em espécie: não declarar realizado ou quitado antes de sua confirmação. Confira eventual comprovante bancário do mesmo negócio.'},
       {v:'Cheque', inj:['Cópia do cheque (banco, agência, número)'], aviso:'Consignar banco e número; avaliar pro soluto × pro solvendo.'},
       {v:'Transferência / PIX', inj:['Comprovante bancário (exibido no ato)'], aviso:'Comprovante exibido e conferido no ato; cópia para o arquivamento.'},
       {v:'Financiamento bancário', inj:['Cédula/contrato de financiamento'], aviso:'Consignar a instituição e a parte paga com recursos próprios, se houver.'}
@@ -1168,7 +1225,7 @@ function perguntasDoAto(ato){
     ]});
     Q.push({id:'pag_m_antes_data', tipo:'data', titulo:'Parte já paga — data do pagamento', dependeDe:['pag_momento','Misto — parte já paga, parte no ato']});
     Q.push({id:'pag_m_ato_forma', titulo:'Parte NO ATO da lavratura — forma', dependeDe:['pag_momento','Misto — parte já paga, parte no ato'], ops:[
-      {v:'Dinheiro em espécie (moeda manual)', aviso:'Cláusula: parcela final em moeda corrente manual, contada e conferida pelo vendedor no ato.'},
+      {v:'Dinheiro em espécie (moeda manual)', aviso:'Parcela prevista em espécie: conferir forma e valor efetivos antes da lavratura; registrar eventual divergência com documento do mesmo pagamento.'},
       {v:'Cheque', inj:['Cópia do cheque (parcela do ato)']},
       {v:'Transferência / PIX', inj:['Comprovante bancário (parcela do ato)']},
       {v:'Financiamento bancário', inj:['Cédula/contrato de financiamento']}
@@ -1418,6 +1475,7 @@ document.querySelectorAll('#chipsAto .chip').forEach(c=>{
     document.querySelectorAll('#chipsAto .chip').forEach(x=>x.classList.remove('ativo'));
     c.classList.add('ativo');
     S.ato=c.dataset.ato; S.respostas={}; S.dossie={};
+    resetCuradoria();
     if(S.ato!=='TEST'){ S.qual={}; S.qtest={civil:null,regime:null,benefNat:null,benefQtd:'1',enot:null}; }
     S.enot={t:null,a:null}; S.extras={};
     el('btnCheck').classList.add('on');
@@ -1870,8 +1928,59 @@ function renderDossie(){
     : !!(el('apresNome').value.trim() && el('apresTel').value.trim() && el('parteNome').value.trim());
   const faltaPartes = identPartesFaltando();
   const avP=el('identAviso'); if(avP){ avP.classList.toggle('oculto', !faltaPartes.length); avP.textContent = faltaPartes.length ? '⚠ Para protocolizar, responda: '+faltaPartes.join(' · ') : ''; }
-  el('btnProt').disabled=!(pronto && enotRespondido() && extrasOk() && certOk() && textosObrigatoriosOk() && !faltaPartes.length);
+  const conferencia = atualizarCuradoria();
+  el('btnProt').disabled=!(pronto && enotRespondido() && extrasOk() && certOk() && textosObrigatoriosOk() && !faltaPartes.length && conferencia.ok) || !!S.enviando;
 }
+
+
+
+
+/* CURADORIA_UI_INICIO */
+function resetCuradoria(){
+  S.pagamentos=[]; S.divergencias=[]; S.curadoriaFingerprint=null;
+  document.querySelectorAll('[name="curadoriaEstado"]').forEach(r=>{r.checked=false;});
+  el('curadoriaConfirmado').checked=false; el('curadoriaObservacao').value='';
+  el('blCuradoria').classList.remove('oculto');
+  el('divergenciasBox').classList.add('oculto');
+  el('curadoriaPagamentos').classList.toggle('oculto',!CN2OCuradoria.atosPagamento.includes(S.ato));
+  renderPagamentos(); renderDivergencias();
+}
+function lerCuradoria(){
+  const estado=document.querySelector('[name="curadoriaEstado"]:checked')?.value||'';
+  return {versao:1,estado,confirmado:el('curadoriaConfirmado').checked,
+    observacao:el('curadoriaObservacao').value.trim(),
+    divergencias:estado==='divergentes' ? S.divergencias.map(d=>({fato:(d.fato||'').trim(),documento:(d.documento||'').trim(),descricao:(d.descricao||'').trim()})) : []};
+}
+const formularioCuradoria=criarFormularioCuradoria({estado:S,obterElemento:el,atualizar:renderDossie});
+function renderPagamentos(){formularioCuradoria.renderPagamentos();}
+function renderDivergencias(){formularioCuradoria.renderDivergencias();}
+function atualizarCuradoria(){
+  const c=lerCuradoria();
+  const fingerprint=JSON.stringify({ato:S.ato,triagem:S.respostas,dossie:S.dossie,pagamentos:S.pagamentos,curadoria:{...c,confirmado:undefined},qual:S.qual,qtest:S.qtest,enot:S.enot,extras:S.extras,cert:{nc:S.cert.nc,arquivos:S.cert.arquivos.map(a=>({nome:a.nome,tamanho:a.tamanho,tipo:a.tipo}))},
+    formulario:Array.from(document.querySelectorAll('main input, main select, main textarea')).filter(campo=>!campo.closest('#blCuradoria')).map(campo=>({id:campo.id,valor:campo.value,marcado:campo.checked})),vendCat:S.vendCat});
+  if(S.curadoriaFingerprint!==null && fingerprint!==S.curadoriaFingerprint){el('curadoriaConfirmado').checked=false;c.confirmado=false;}
+  S.curadoriaFingerprint=fingerprint;
+  const resultado=CN2OCuradoria.avaliar({ato:S.ato,triagem:S.respostas,pagamentos:S.pagamentos,curadoria:c});
+  const alertas=el('curadoriaAlertas');alertas.replaceChildren();
+  resultado.alertas.forEach(txt=>{const av=document.createElement('p');av.className='aviso';av.textContent=txt;alertas.appendChild(av);});
+  el('pagamentosResumo').textContent=resultado.soma_centavos===null ? 'Nenhuma soma de parcelas confirmada.' : 'Soma das parcelas informadas: '+(resultado.soma_centavos/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'})+'. Não equivale a quitação.';
+  const erros=el('curadoriaErros');erros.replaceChildren();erros.classList.toggle('oculto',resultado.ok);
+  if(!resultado.ok){const ul=document.createElement('ul');resultado.erros.forEach(txt=>{const li=document.createElement('li');li.textContent=txt;ul.appendChild(li);});erros.appendChild(ul);}
+  el('curadoriaResumoRail').textContent=resultado.ok ? (c.estado==='compativeis'?'Conferência declarada: sem divergência identificada.':'O protocolo registrará a pendência/divergência da conferência.') : 'Complete e confirme a conferência das informações (etapa 5).';
+  return resultado;
+}
+document.querySelectorAll('[name="curadoriaEstado"]').forEach(r=>r.addEventListener('change',()=>{
+  const divergente=r.checked&&r.value==='divergentes';el('divergenciasBox').classList.toggle('oculto',!divergente);
+  if(divergente&&!S.divergencias.length){S.divergencias.push({});renderDivergencias();}renderDossie();
+}));
+el('adicionarPagamento').addEventListener('click',()=>{S.pagamentos.push({});renderPagamentos();renderDossie();});
+el('adicionarDivergencia').addEventListener('click',()=>{S.divergencias.push({});renderDivergencias();renderDossie();});
+el('curadoriaObservacao').addEventListener('input',renderDossie);
+el('curadoriaConfirmado').addEventListener('change',renderDossie);
+// Campos antigos (inclusive TEST/CERT) também invalidam uma confirmação anterior.
+document.querySelector('main').addEventListener('input',e=>{if(!e.target.closest('#blCuradoria'))renderDossie();});
+document.querySelector('main').addEventListener('change',e=>{if(!e.target.closest('#blCuradoria'))renderDossie();});
+/* CURADORIA_UI_FIM */
 
 /* ============================================================
    PROTOCOLIZAR
@@ -1916,6 +2025,8 @@ if(ENDPOINT_RAILWAY){
 }
 
 el('btnProt').addEventListener('click',async ()=>{
+  const conferencia = atualizarCuradoria();
+  if(!conferencia.ok || S.enviando){ el('blCuradoria').scrollIntoView({behavior:'smooth',block:'start'}); return; }
   const itens=itensDossie();
   const recebidos=itens.filter(i=>S.dossie[i]);
   const pendentes=itens.filter(i=>!S.dossie[i]);
@@ -2008,6 +2119,8 @@ el('btnProt').addEventListener('click',async ()=>{
     escrevente: NOME_SESSAO || null, // informativo — o backend usa a sessão
     preco: (S.respostas.preco || S.respostas.valores || S.respostas.valor || null),   // v1.37 — preço ajustado / valor declarado (ATA-U: 'valor')
     triagem:S.respostas,
+    curadoria: lerCuradoria(),
+    pagamentos: CN2OCuradoria.normalizarPagamentos(S.pagamentos),
     observacoes_nao_documentadas: el('obs').value.trim() || null,
     dossie:{recebidos, pendentes},
     titulo_modelo:`Prot. (${S.ato}) {NNNN} - ${parte}`
@@ -2039,6 +2152,7 @@ Guarde este número: use-o para consultar o andamento do seu ato em cn2oita.com.
 
   let numeroReal='{NNNN}';
   if(ENDPOINT_RAILWAY){
+    S.enviando=true;
     el('btnProt').disabled=true; el('btnProt').textContent='Protocolando…';
     try{
       const r=await fetch(ENDPOINT_RAILWAY+'/protocolo',{
@@ -2052,11 +2166,11 @@ Guarde este número: use-o para consultar o andamento do seu ato em cn2oita.com.
       numeroReal=j.numero;
       if(j.prazo) S.prazoInfo=(ehCert?' · Prazo p/ expedição: ':' · Prazo p/ lavratura: ')+new Date(j.prazo).toLocaleDateString('pt-BR');
     }catch(e){
-      alert('Falha ao protocolar: '+e.message+'\nNada foi criado. Tente novamente ou avise o tabelião.');
-      el('btnProt').disabled=false; el('btnProt').textContent='Protocolizar';
+      alert('Não foi possível confirmar a conclusão do protocolo: '+e.message+'\nO pedido pode ter sido registrado antes da falha. Consulte o protocolo/cartão ou avise o tabelião antes de repetir, para evitar duplicidade.');
+      S.enviando=false; el('btnProt').textContent='Protocolizar'; renderDossie();
       return;
     }
-    el('btnProt').disabled=false; el('btnProt').textContent='Protocolizar';
+    S.enviando=false; el('btnProt').textContent='Protocolizar'; renderDossie();
   }
 
   el('reciboDest').textContent = ehTest
@@ -2068,6 +2182,8 @@ Guarde este número: use-o para consultar o andamento do seu ato em cn2oita.com.
   if(S.prazoInfo){ el('reciboDest').textContent += S.prazoInfo; S.prazoInfo=null; }
   el('reciboTxt').textContent = el('reciboTxt').textContent.split('{NNNN}').join(numeroReal);
   el('payloadTxt').textContent='POST '+(ENDPOINT_RAILWAY||'(simulação)')+'/protocolo\n\n'+JSON.stringify(payload,null,2);
+  el('revisarRecibo').classList.toggle('oculto',!/^\d+$/.test(String(numeroReal)));
+  el('revisarReciboLink').href='curadoria.html?protocolo='+encodeURIComponent(numeroReal);
   el('veu').classList.add('aberto');
 });
 </script>
