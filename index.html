@@ -2939,7 +2939,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 /* Controle de Despesas: identidade do Hub, destaque dourado somente no cartão. */
 #cardDespesas{background:linear-gradient(145deg,#fffaf0,#f2dfa8);border-color:#bc902c;box-shadow:inset 0 3px 0 #b78a22;color:#202a3a}
 #cardDespesas h3,#cardDespesas .card-acao,#cardDespesas .card-ico{color:#74520c}
-#cardDespesas:not([hidden])~.card-arte{display:none}
+#cardDespesas:not([hidden])~.card-arte{display:none} #cardPastas~.card-arte{display:none}
 #cardDespesas .chip-ia{background:#f7edcf;color:#74520c;border-color:#d7ba68}
 :root[data-theme="dark"] #cardDespesas{background:linear-gradient(145deg,#3b3425,#292c32);color:#f4efe4;border-color:#b78a22}
 :root[data-theme="dark"] #cardDespesas h3,:root[data-theme="dark"] #cardDespesas .card-acao,:root[data-theme="dark"] #cardDespesas .card-ico{color:#ebc563}
@@ -3249,6 +3249,12 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
             <h3>Controle de Despesas</h3>
             <p>Comprovantes, notas e contratos reunidos. Leitura automática, lançamentos e fechamento mensal com conferência.</p>
             <span class="card-acao">Organizar despesas →</span>
+          </button>
+          <button class="card" id="cardPastas" type="button">
+            <div class="card-topo"><span class="card-num">10</span><span class="card-ico" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/><path d="M3 7V5h6l2 2"/><path d="M8 13h8"/></svg></span></div>
+            <h3>Ficheiro de Pastas</h3>
+            <p>Em qual pasta está cada protocolo. Pastas 001 a 300 em giro: a pasta volta ao montante quando o cartão vai para o Arquivo Geral.</p>
+            <span class="card-acao">Abrir o ficheiro →</span>
           </button>
           <div class="card-arte" aria-hidden="true"></div>
         </div>
@@ -5184,6 +5190,7 @@ const CONFIG = {
   endpoint: 'https://cn2o-hub-backend-production.up.railway.app',
   ferramentas: {
     despesas: { url: 'controle-despesas/', titulo: 'Controle de Despesas' },
+    pastas:      { url: 'ficheiro-pastas.html', titulo: 'Ficheiro de Pastas' },   // v1.44
     protocolo:   { url: 'protocolo.html',   titulo: 'e-Protocolo' },
     calculadora: { url: 'calculadora.html', titulo: 'Calculadora de Emolumentos' }, // site próprio, sempre na versão atual
     agenda:      { // Google Agenda do Tabelião (tnitabaiana@gmail.com), embutida no hub
@@ -5639,7 +5646,7 @@ function abrirRota(rota, semHistorico) {
     });
     return;
   }
-  if (rota === 'protocolo' || rota === 'calculadora' || rota === 'agenda') { abrirEmbutida(rota, semHistorico); return; }
+  if (rota === 'protocolo' || rota === 'calculadora' || rota === 'agenda' || rota === 'pastas') { abrirEmbutida(rota, semHistorico); return; }
   // v1.33 — #acervo=antigo1 / #acervo=cn2o abre o quadro 07 já no submódulo pedido
   // (mesma ideia do #minuta=ID do Gerador). #acervo sozinho abre o último escolhido.
   if (rota && rota.indexOf('acervo=') === 0) {
@@ -9273,6 +9280,7 @@ el('btnSair').addEventListener('click', sair);
 el('btnTema').addEventListener('click', alternarTema);
 el('cardProtocolo').addEventListener('click', function () { abrirEmbutida('protocolo'); });
 el('cardCalculadora').addEventListener('click', function () { abrirEmbutida('calculadora'); });
+  el('cardPastas').addEventListener('click', function () { abrirEmbutida('pastas'); });   // v1.44
 el('cardIA').addEventListener('click', function () { mostrarPagina('paginaIA', false, 'ia'); });   // v1.34 — quadro 03
 el('cardExtrator').addEventListener('click', function () { abrirDaIA('paginaExtrator', 'extrator'); });     // 3.1
 el('cardAnalisador').addEventListener('click', function () { abrirDaIA('paginaAnalisador', 'analista'); }); // 3.2

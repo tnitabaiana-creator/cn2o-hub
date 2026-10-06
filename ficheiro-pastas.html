@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ficheiro de Pastas · Hub CN2O</title>
+<!-- v1.44 — Ficheiro de Pastas: pastas fixas 001–300 em giro circular, ligadas ao Trello.
+     Abre embutido no Hub (quadro 10); a sessão é a do Hub (sessionStorage cn2o_token). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Montserrat:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --vinho:#631325; --marinho:#202a3a; --branco:#fff;
+    --linha:rgba(32,42,58,.35); --vinho-pastel:#f6e7eb; --ocupada:#ecc8d1; --vinho-claro:#fbf3f5; --marinho-pastel:#e4eaf4;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--branco);color:var(--marinho)}
+  body{font:18px/1.55 "Atkinson Hyperlegible",Arial,sans-serif;padding:20px 22px 36px;max-width:1180px;margin:0 auto}
+  h1{font:800 26px/1.2 Montserrat,Arial,sans-serif;margin:0 0 4px}
+  h2{font:700 20px/1.3 Montserrat,Arial,sans-serif;margin:0 0 8px}
+  .sub{margin:0 0 18px}
+  button,input{font:inherit;color:inherit}
+  .btn{border:2px solid var(--marinho);background:var(--branco);padding:10px 16px;border-radius:6px;cursor:pointer;font-weight:700}
+  .btn.forte{border-color:var(--vinho);background:var(--vinho-pastel);color:var(--vinho)}
+  .btn:disabled{opacity:.55;cursor:default}
+  .btn:focus-visible,.p:focus-visible,input:focus-visible{outline:3px solid var(--vinho);outline-offset:2px}
+
+  .busca{display:flex;gap:12px;flex-wrap:wrap}
+  .busca input{flex:1;min-width:220px;padding:12px 14px;border:2px solid var(--marinho);border-radius:6px;font-size:22px;font-weight:700;letter-spacing:.02em}
+  #resultado{margin:14px 0 4px;min-height:64px}
+  .achado{display:flex;align-items:baseline;gap:16px;flex-wrap:wrap;padding:14px 18px;background:var(--vinho-pastel);border-left:8px solid var(--vinho);border-radius:4px}
+  .achado b{font:800 38px/1 Montserrat,Arial,sans-serif;color:var(--vinho)}
+  .achado span{font-weight:700;font-size:20px}
+  .nada{padding:14px 18px;background:var(--marinho-pastel);border-left:8px solid var(--marinho);border-radius:4px;font-weight:700}
+
+  .resumo{display:flex;gap:34px;flex-wrap:wrap;margin:24px 0 10px}
+  .resumo strong{display:block;font:800 30px/1.1 Montserrat,Arial,sans-serif}
+  .barra{height:12px;border:2px solid var(--marinho);border-radius:6px;overflow:hidden;margin-bottom:6px}
+  .barra i{display:block;height:100%;background:var(--marinho)}
+  .barra.alerta i{background:var(--vinho)}
+  #alerta{color:var(--vinho);font-weight:700;min-height:1.5em}
+
+  .gavetas{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,430px),1fr));gap:20px;margin-top:12px}
+  .gaveta{border:2px solid var(--marinho);border-radius:6px;padding:12px}
+  .gaveta h2{display:flex;justify-content:space-between;align-items:baseline;gap:8px;font-size:18px}
+  .gaveta h2 small{font:700 16px "Atkinson Hyperlegible",Arial,sans-serif}
+  .grade{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+  .p{min-height:38px;border:2px solid var(--linha);background:var(--branco);border-radius:4px;padding:0;
+     font:700 15px/1 "Atkinson Hyperlegible",Arial,sans-serif;color:var(--marinho);cursor:pointer}
+  .p.oc{background:var(--ocupada);border-color:var(--vinho);color:var(--vinho)}
+  .p.ult{box-shadow:0 0 0 3px var(--marinho)}
+  .p.sel{box-shadow:0 0 0 4px var(--vinho)}
+  .legenda{display:flex;gap:20px;flex-wrap:wrap;margin-top:12px;font-weight:700}
+  .legenda i{display:inline-block;width:18px;height:18px;border:2px solid var(--linha);border-radius:3px;vertical-align:-3px;margin-right:6px}
+  .legenda i.oc{background:var(--ocupada);border-color:var(--vinho)}
+  .legenda i.ult{box-shadow:0 0 0 3px var(--marinho)}
+
+  #admin{margin-top:30px;padding:16px 18px;border:2px dashed var(--vinho);border-radius:6px;background:var(--vinho-claro)}
+  #admin p{margin:0 0 12px}
+  .acoes{display:flex;gap:10px;flex-wrap:wrap}
+  #previa{margin-top:14px;max-height:420px;overflow:auto}
+  #previa table{border-collapse:collapse;width:100%;font-size:16px}
+  #previa th,#previa td{border-bottom:1px solid var(--linha);padding:6px 8px;text-align:left}
+  #aviso{padding:16px 18px;background:var(--marinho-pastel);border-left:8px solid var(--marinho);border-radius:4px;font-weight:700}
+  #aviso a{color:var(--vinho)}
+  [hidden]{display:none!important}
+  @media (max-width:520px){ body{padding:14px} .p{min-height:32px;font-size:13px} .grade{gap:3px} }
+  @media print{
+    body{padding:0} .busca,#resultado,.resumo,.barra,#alerta,.gavetas,.legenda,#admin>p,.acoes,h1,.sub{display:none!important}
+    #admin{border:0;background:none;padding:0;margin:0} #previa{max-height:none;overflow:visible}
+  }
+</style>
+</head>
+<body>
+<h1>Ficheiro de Pastas</h1>
+<p class="sub">Procure pelo número do protocolo ou da pasta.</p>
+
+<div id="aviso" hidden></div>
+
+<div id="painel" hidden>
+  <div class="busca">
+    <input id="q" inputmode="numeric" autocomplete="off" placeholder="Ex.: 1531 ou 127" aria-label="Número do protocolo ou da pasta">
+    <button class="btn forte" id="buscar">Procurar</button>
+  </div>
+  <div id="resultado" aria-live="polite"></div>
+
+  <div class="resumo">
+    <div><strong id="nOc">–</strong>ocupadas</div>
+    <div><strong id="nLv">–</strong>livres</div>
+    <div><strong id="nPc">–</strong>de ocupação</div>
+    <div><strong id="nUlt">–</strong>última entregue</div>
+  </div>
+  <div class="barra" id="barra"><i id="barraI" style="width:0"></i></div>
+  <div id="alerta"></div>
+
+  <div class="gavetas" id="gavetas"></div>
+  <div class="legenda"><span><i class="oc"></i>ocupada</span><span><i></i>livre</span><span><i class="ult"></i>última entregue</span></div>
+
+  <section id="admin" hidden>
+    <h2>Tabelião</h2>
+    <p id="estado"></p>
+    <div class="acoes">
+      <button class="btn" id="btnPrevia">Prévia da carga inicial</button>
+      <button class="btn forte" id="btnCarga" disabled>Executar carga inicial</button>
+      <button class="btn" id="btnImprimir" hidden>Imprimir lista</button>
+      <button class="btn" id="btnCsv">Baixar relação para conferência</button>
+    </div>
+    <div id="previa"></div>
+  </section>
+</div>
+
+<script>
+const ENDPOINT_RAILWAY = 'https://cn2o-hub-backend-production.up.railway.app';
+const pega = (k) => { try { return sessionStorage.getItem(k); } catch (e) { return null; } };
+const TOKEN = pega('cn2o_token');
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s == null ? '' : s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const S = { dados: null };
+
+function aviso(html) { $('aviso').innerHTML = html; $('aviso').hidden = false; $('painel').hidden = true; }
+
+async function api(caminho, opt) {
+  opt = opt || {};
+  const r = await fetch(ENDPOINT_RAILWAY + '/hub/pastas' + caminho, Object.assign({}, opt, {
+    headers: Object.assign({ 'Content-Type': 'application/json', 'X-Auth-Token': TOKEN || '' }, opt.headers || {}),
+  }));
+  if (r.status === 401) { aviso('Sua sessão do Hub terminou. <a href="index.html" target="_top">Entrar no Hub CN2O</a> e abrir o Ficheiro de Pastas de novo.'); throw new Error('sessão'); }
+  const ct = r.headers.get('content-type') || '';
+  const corpo = ct.indexOf('json') >= 0 ? await r.json() : await r.blob();
+  if (!r.ok) throw new Error((corpo && corpo.erro) || 'Não foi possível consultar agora.');
+  return corpo;
+}
+
+async function carregar() {
+  const d = await api('/');
+  S.dados = d;
+  const o = d.ocupacao;
+  $('nOc').textContent = o.ocupadas; $('nLv').textContent = o.livres;
+  $('nPc').textContent = o.percentual.toLocaleString('pt-BR') + '%';
+  $('nUlt').textContent = o.ultima_entregue || '—';
+  $('barraI').style.width = Math.min(100, o.percentual) + '%';
+  $('barra').classList.toggle('alerta', o.alerta);
+  $('alerta').textContent = o.alerta ? 'Ocupação acima de ' + o.alerta_pct + '% — avaliar ampliar o ficheiro.' : '';
+  $('admin').hidden = !d.admin;
+  $('estado').textContent = o.ativo
+    ? 'Ficheiro ativo: as pastas são entregues e liberadas automaticamente pelo Trello.'
+    : 'Aguardando a carga inicial. Nenhuma pasta é entregue antes dela.';
+  $('btnPrevia').hidden = o.ativo; $('btnCarga').hidden = o.ativo;
+  desenhar(d.pastas, o.ultima_entregue);
+  $('painel').hidden = false;
+}
+
+function desenhar(lista, ultima) {
+  const g = $('gavetas'); g.textContent = '';
+  for (let i = 0; i < lista.length; i += 75) {
+    const bloco = lista.slice(i, i + 75);
+    const oc = bloco.filter((p) => p.protocolo).length;
+    const el = document.createElement('div'); el.className = 'gaveta';
+    el.innerHTML = '<h2>Gaveta ' + bloco[0].pasta + ' a ' + bloco[bloco.length - 1].pasta + '<small>' + oc + ' ocupadas</small></h2><div class="grade"></div>';
+    const grade = el.querySelector('.grade');
+    for (const p of bloco) {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'p' + (p.protocolo ? ' oc' : '') + (p.pasta === ultima ? ' ult' : '');
+      b.textContent = String(Number(p.pasta));
+      b.title = p.protocolo ? 'Pasta ' + p.pasta + ' · Protocolo ' + p.protocolo : 'Pasta ' + p.pasta + ' · livre';
+      b.setAttribute('aria-label', b.title);
+      b.dataset.pasta = p.pasta;
+      b.onclick = () => mostrarPasta(p);
+      grade.appendChild(b);
+    }
+    g.appendChild(el);
+  }
+}
+
+function marcar(pasta) {
+  document.querySelectorAll('.p.sel').forEach((e) => e.classList.remove('sel'));
+  const el = document.querySelector('.p[data-pasta="' + pasta + '"]');
+  if (el) el.classList.add('sel');
+}
+function mostrarPasta(p) {
+  $('resultado').innerHTML = p.protocolo
+    ? '<div class="achado"><b>Pasta ' + esc(p.pasta) + '</b><span>Protocolo ' + esc(p.protocolo) + '</span></div>'
+    : '<div class="nada">A pasta ' + esc(p.pasta) + ' está livre.</div>';
+  marcar(p.pasta);
+}
+
+async function buscar() {
+  const v = $('q').value.replace(/\D/g, '');
+  if (!v) return;
+  const n = Number(v);
+  const r = await api('/protocolo/' + n);
+  if (r.pasta) {
+    $('resultado').innerHTML = '<div class="achado"><b>Pasta ' + esc(r.pasta) + '</b><span>Protocolo ' + esc(r.protocolo) + '</span></div>';
+    marcar(r.pasta); return;
+  }
+  // até 3 dígitos e dentro do ficheiro: procura também como número de pasta
+  if (v.length <= 3 && S.dados && n >= 1 && n <= S.dados.ocupacao.total && S.dados.pastas[n - 1]) {
+    return mostrarPasta(S.dados.pastas[n - 1]);
+  }
+  $('resultado').innerHTML = '<div class="nada">' + (r.excluido
+    ? 'O protocolo ' + esc(r.protocolo) + ' é antigo e fica fora da numeração de pastas.'
+    : 'O protocolo ' + esc(r.protocolo) + ' não está em nenhuma pasta.') + '</div>';
+}
+
+function tabela(linhas) {
+  return '<table><thead><tr><th>Pasta</th><th>Protocolo</th><th>Quadro</th><th>Lista</th></tr></thead><tbody>' +
+    linhas.map((d) => '<tr><td><b>' + esc(d.pasta) + '</b></td><td>' + esc(d.protocolo) + '</td><td>' + esc(d.quadro) + '</td><td>' + esc(d.lista) + '</td></tr>').join('') +
+    '</tbody></table>';
+}
+
+async function previa() {
+  $('previa').textContent = 'Lendo os 7 quadros do Trello…';
+  const r = await api('/carga-inicial', { method: 'POST', body: JSON.stringify({ simular: true }) });
+  const extra = (r.semNumero.length ? '<p><b>' + r.semNumero.length + ' cartão(ões) sem número legível</b> (ficam sem pasta): ' + r.semNumero.map((s) => esc(s.titulo)).join('; ') + '</p>' : '') +
+                (r.duplicados.length ? '<p><b>' + r.duplicados.length + ' duplicado(s)</b> ignorado(s): ' + r.duplicados.map((s) => esc(s.titulo)).join('; ') + '</p>' : '');
+  $('previa').innerHTML = '<p><b>' + r.total + ' protocolos</b> receberão as pastas 001 a ' + String(r.total).padStart(3, '0') + '. Nada foi gravado ainda.</p>' + extra + tabela(r.distribuicao);
+  $('btnCarga').disabled = false;
+}
+
+async function cargaReal() {
+  if (!confirm('Executar a carga inicial agora?\n\nFaça isso no dia do remanejamento físico. Depois imprima a lista gerada e remaneje por ela. Protocolos que chegarem em seguida recebem pasta automaticamente.')) return;
+  $('btnCarga').disabled = true;
+  $('previa').textContent = 'Gravando as pastas e o campo "Pasta" nos cartões… pode levar alguns minutos.';
+  const r = await api('/carga-inicial', { method: 'POST', body: JSON.stringify({ simular: false, confirmar: 'CARGA' }) });
+  $('previa').innerHTML = '<p><b>Carga concluída em ' + new Date().toLocaleString('pt-BR') + ':</b> ' + r.total + ' protocolos distribuídos.' +
+    (r.falhas.length ? ' ' + r.falhas.length + ' cartão(ões) não receberam o campo no Trello — a pasta está gravada no Hub.' : '') + '</p>' + tabela(r.distribuicao);
+  $('btnImprimir').hidden = false;
+  await carregar();
+}
+
+async function baixarCsv() {
+  const blob = await api('/conferencia?formato=csv');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'conferencia-pastas.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+}
+
+const tentar = (fn) => async () => {
+  try { await fn(); }
+  catch (e) { if (e.message !== 'sessão') $('resultado').innerHTML = '<div class="nada">' + esc(e.message) + '</div>'; }
+};
+$('buscar').onclick = tentar(buscar);
+$('q').onkeydown = (e) => { if (e.key === 'Enter') $('buscar').click(); };
+$('btnPrevia').onclick = tentar(previa);
+$('btnCarga').onclick = tentar(cargaReal);
+$('btnImprimir').onclick = () => window.print();
+$('btnCsv').onclick = tentar(baixarCsv);
+
+if (!TOKEN) {
+  aviso('Abra o Ficheiro de Pastas pelo quadro 10 do Hub. <a href="index.html" target="_top">Entrar no Hub CN2O</a>.');
+} else {
+  carregar().then(() => $('q').focus()).catch((e) => { if (e.message !== 'sessão') aviso(esc(e.message)); });
+  setInterval(() => { carregar().catch(() => {}); }, 60000);
+}
+</script>
+</body>
+</html>
