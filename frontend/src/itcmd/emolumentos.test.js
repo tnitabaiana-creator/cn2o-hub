@@ -94,10 +94,12 @@ test('tela de orçamento, barra de totais e PDF arquivado usam a herança como b
   assert.match(context.resumo, /R\$ 6\.214,99/);
   // O fluxo real arquiva o PDF com o estado antes de oferecê-lo para impressão.
   const eventos = []; let arquivado;
-  context.window = { ITCMDArquivo: require('../../../itcmd-arquivo.js') };
-  context.capturarEstado = () => context.S; context.gerarOrcamentoPdf = () => new Blob([context.resumo]); context.toast = () => {};
-  context.ARQUIVO = { modelo: {}, guardarDocumentos: async docs => { eventos.push('salvar'); arquivado = docs[0]; }, oferecerPdf: () => eventos.push('oferecer') };
-  const start = ui.indexOf('  async function imprimirOrcamento()'), end = ui.indexOf("  $('#btCopiar')", start);
+  context.window = { ITCMDArquivo: { ...require('../../../itcmd-arquivo.js'), pdfOrcamento: () => new Blob([context.resumo]) } };
+  context.capturarEstado = () => context.S; context.obterDadosOrcamento = () => ({}); context.carregarLogoOrcamento = async () => ({}); context.PDFMini = function () {}; context.toast = () => {};
+  context.SESSAO = { token: 'sessao-ficticia' }; context.impressaoEmAndamento = false;
+  const ticket = { contexto: 1, revisao: 1 };
+  context.ARQUIVO = { modelo: { ticket: () => ticket, validoContexto: () => true, mesmaRevisao: () => true }, guardarDocumentos: async (docs, estado, origem) => { assert.equal(origem, ticket); eventos.push('salvar'); arquivado = docs[0]; }, oferecerPdf: () => eventos.push('oferecer') };
+  const start = ui.indexOf('  async function imprimirOrcamento('), end = ui.indexOf("  $('#btCopiar')", start);
   await vm.runInNewContext(ui.slice(start, end) + '\nimprimirOrcamento();', context);
   assert.deepEqual(eventos, ['salvar', 'oferecer']);
   assert.equal(arquivado.tipo, 'orcamento');

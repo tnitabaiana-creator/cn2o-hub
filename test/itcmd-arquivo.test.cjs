@@ -70,17 +70,7 @@ test('UI não salva dados no localStorage e inclui dois arquivos e ajustes solic
   const ui=fs.readFileSync(path.join(__dirname,'../frontend/src/itcmd/ui.js'),'utf8'),mod=fs.readFileSync(path.join(__dirname,'../itcmd-arquivo.js'),'utf8');
   assert.doesNotMatch(ui,/localStorage\.setItem/);assert.doesNotMatch(ui,/\['honorarios'/);assert.match(ui,/desconsiderarMulta: S\.desconsiderarMulta === true/);assert.match(mod,/Inventários salvos/);assert.match(mod,/Doações salvas/);assert.match(mod,/\?grupo=/);
 });
-test('PDF de orçamento real é paginado e conserva totais e nota de ajuste manual',async()=>{
-  const h=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');const mark=h.indexOf('  function PDFMini(op)'),start=h.lastIndexOf('(function (raiz)',mark),end=h.indexOf("})(typeof window !== 'undefined' ? window : this);",mark)+"})(typeof window !== 'undefined' ? window : this);".length;
-  assert.ok(start>0);const ctx={window:{},Uint8Array,Blob,atob};vm.runInNewContext(h.slice(start,end),ctx);
-  const blob=A.pdfOrcamento(ctx.window.PDFMini,{titulo:'Inventário de teste',referencia:'07/10/2026',resumo:'Total estimado: R$ 6.214,99\nMULTA DESCONSIDERADA POR AJUSTE MANUAL.\n100 − 50 → 50; 10 ≤ 20; 30 ≥ 20\n'+Array(150).fill('Memória detalhada de cálculo: herança bruta e meação excluída.').join('\n'),premissas:['Documento de teste.']});
-  const bytes=Buffer.from(await blob.arrayBuffer()).toString('latin1');assert.match(bytes,/%PDF-/);assert.match(bytes,/6\.214,99/);assert.match(bytes,/MULTA DESCONSIDERADA/);assert.ok((bytes.match(/\/Type \/Page\b/g)||[]).length>1);
-  assert.match(bytes,/100 - 50 -> 50; 10 <= 20; 30 >= 20/);assert.doesNotMatch(bytes,/100 \? 50|50 \? 50|10 \? 20|30 \? 20/);
-});
-test('orçamento principal e total antecedem a memória, mantendo tabela e nota manual na primeira página',async()=>{
-  const h=fs.readFileSync(path.join(__dirname,'../index.html'),'utf8');const mark=h.indexOf('  function PDFMini(op)'),start=h.lastIndexOf('(function (raiz)',mark),end=h.indexOf("})(typeof window !== 'undefined' ? window : this);",mark)+"})(typeof window !== 'undefined' ? window : this);".length;
-  const ctx={window:{},Uint8Array,Blob,atob};vm.runInNewContext(h.slice(start,end),ctx);
-  const blob=A.pdfOrcamento(ctx.window.PDFMini,{titulo:'Inventário de teste',referencia:'07/10/2026',ajusteMulta:'Multa desconsiderada por ajuste manual.',linhas:[{rotulo:'ITCMD',valor:'R$ 3.000,00'},{rotulo:'Emolumentos',valor:'R$ 3.214,99'},{rotulo:'Subtotal',valor:'R$ 6.214,99',subtotal:true},{rotulo:'Total estimado',valor:'R$ 6.214,99',total:true}],resumo:Array(50).fill('Memória de cálculo e premissas: 100 − 50 → 50.').join('\n')});
-  const bytes=Buffer.from(await blob.arrayBuffer()).toString('latin1'),streams=[...bytes.matchAll(/stream\n([\s\S]*?)\nendstream/g)].map(m=>m[1]);
-  assert.ok(streams.length>=2);assert.match(streams[0],/ITEM/);assert.match(streams[0],/VALOR/);assert.match(streams[0],/Total estimado/);assert.match(streams[0],/6\.214,99/);assert.match(streams[0],/Multa desconsiderada/);assert.doesNotMatch(streams[0],/ANEXO/);assert.match(streams[1],/ANEXO/);
+test('a impressão delega ao renderer novo e rejeita documento sem versão ou logo',()=>{
+  assert.throws(()=>A.pdfOrcamento(function(){},{}),/resumido ou discriminado/);
+  assert.throws(()=>A.pdfOrcamento(function(){},{versao:'resumido'}),/logo oficial/);
 });

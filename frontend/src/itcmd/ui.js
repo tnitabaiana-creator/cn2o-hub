@@ -550,7 +550,8 @@
   $('#btExemplo').addEventListener('click', () => { if (ARQUIVO && ARQUIVO.novo(exemplo())) toast('Exemplo carregado'); });
   $('#btLimpar').addEventListener('click', () => { if (ARQUIVO) ARQUIVO.novo(); });
   $('#btSalvar').addEventListener('click', () => { if (ARQUIVO) ARQUIVO.salvar().catch(e => toast(e.erro || e.message || 'Não foi possível salvar.')); });
-  $('#btImprimir').addEventListener('click', imprimirOrcamento);
+  $('#btImprimir').addEventListener('click', () => imprimirOrcamento('resumido'));
+  $('#btImprimirDiscriminado').addEventListener('click', () => imprimirOrcamento('discriminado'));
   function capturarEstado() {
     clearTimeout(timer); calcular();
     if (S.orc) delete S.orc.honorarios;
@@ -562,7 +563,7 @@
     const av = $('#declAviso'); if (av) { av.replaceChildren(); av.classList.add('oculto'); }
   }
   function aplicarEstadoSalvo(v) { clearTimeout(timer); S = migrar(v); ABERTOS = {}; ANTES_IMPORTACAO = null; limparPdfsAtuais(); renderForm(); calcular(); }
-  function gerarOrcamentoPdf() {
+  function obterDadosOrcamento(versao = 'resumido', logo) {
     const id = ARQUIVO ? ARQUIVO.identificacao() : {};
     const linhas = $$('#orcCorpo tbody tr').map(tr => {
       const td = tr.children; if (td.length < 2) return null;
@@ -571,25 +572,56 @@
         valor: input ? fmt(parseMoeda(input.value)) : td[1].textContent.trim(),
         total: tr.classList.contains('total'), subtotal: tr.classList.contains('sub') };
     }).filter(Boolean);
-    return window.ITCMDArquivo.pdfOrcamento(PDFMini, {
-      titulo: id.titulo || window.ITCMDArquivo.tituloPadrao(S), protocolo: id.protocolo || '',
-      linhas, ajusteMulta: S.modo !== 'doacao' && S.desconsiderarMulta === true ? 'Multa desconsiderada por ajuste manual. Imposto principal mantido.' + (S.motivoMulta ? ' Motivo: ' + S.motivoMulta : '') : '',
-      referencia: $('#orcData').textContent, resumo: textoResumo(),
-      premissas: [...new Set([...$$('#premissas li').map(x => x.textContent.trim()), ...$$('#resCorpo .aviso').map(x => x.textContent.trim())])],
-      assinatura: $('#orcamento .assinatura').textContent, quem: SESSAO.nome || ''
+    return window.ITCMDOrcamentoDados.montar({
+      estado: S, resultado: ULT, versao, logo, identificacao: id,
+      linhas, referencia: $('#orcData').textContent
     });
   }
-  async function imprimirOrcamento() {
-    if (!ARQUIVO || ARQUIVO.modelo.ocupado) return;
-    const btn = $('#btImprimir'); btn.disabled = true;
+  function gerarOrcamentoPdf(versao = 'resumido', logo) {
+    return window.ITCMDArquivo.pdfOrcamento(PDFMini, obterDadosOrcamento(versao, logo));
+  }
+  let logoOrcamentoPendente = null, impressaoEmAndamento = false;
+  function carregarLogoOrcamento() {
+    if (!logoOrcamentoPendente) logoOrcamentoPendente = new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        try {
+          // A marca oficial é mantida intacta. Só retiramos as margens transparentes
+          // para dimensioná-la de maneira previsível na folha branca do orçamento.
+          if (img.naturalWidth !== 842 || img.naturalHeight !== 596) throw new Error('A identidade visual do orçamento precisa ser conferida.');
+          const canvas = document.createElement('canvas'); canvas.width = 892; canvas.height = 364;
+          const ctx = canvas.getContext('2d'); if (!ctx) throw new Error('Não foi possível preparar a identidade visual.');
+          ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 198, 207, 446, 182, 0, 0, canvas.width, canvas.height);
+          const base64 = canvas.toDataURL('image/jpeg', 0.96).split(',')[1];
+          if (!base64) throw new Error('Não foi possível preparar a identidade visual.');
+          resolve({ base64, largura: canvas.width, altura: canvas.height });
+        } catch (e) { reject(e); }
+      };
+      img.onerror = () => reject(new Error('Não foi possível carregar a logo do cartório. Recarregue a página e tente novamente.'));
+      img.src = 'assets/itcmd-logo-oficial.png';
+    }).catch(e => { logoOrcamentoPendente = null; throw e; });
+    return logoOrcamentoPendente;
+  }
+  async function imprimirOrcamento(versao = 'resumido') {
+    if (!ARQUIVO || ARQUIVO.modelo.ocupado || impressaoEmAndamento) return;
+    if (!SESSAO.token) { toast('Entre no Hub para gerar e arquivar o orçamento.'); return; }
+    const botoes = [$('#btImprimir'), $('#btImprimirDiscriminado')];
+    impressaoEmAndamento = true; botoes.forEach(b => { b.disabled = true; });
+    const btn = versao === 'discriminado' ? botoes[1] : botoes[0], rotulo = btn.textContent;
+    btn.textContent = 'Preparando PDF…';
     try {
       const estado = capturarEstado(); if (!ULT) throw new Error('Confira os dados antes de gerar o orçamento.');
-      const blob = gerarOrcamentoPdf();
-      const nome = 'Orcamento-ITCMD-' + (window.ITCMDArquivo.tituloPadrao(estado).replace(/[^\p{L}\p{N}]+/gu, '-')).slice(0,90) + '-' + estado.hoje + '.pdf';
-      await ARQUIVO.guardarDocumentos([{ tipo: 'orcamento', nome, blob }], estado);
+      const dados = obterDadosOrcamento(versao), origem = ARQUIVO.modelo.ticket();
+      dados.logo = await carregarLogoOrcamento();
+      if (!ARQUIVO.modelo.validoContexto(origem)) throw { cancelado: true };
+      if (!ARQUIVO.modelo.mesmaRevisao(origem)) throw new Error('Os dados foram alterados durante a preparação. Gere o orçamento novamente para usar os valores atuais.');
+      const blob = window.ITCMDArquivo.pdfOrcamento(PDFMini, dados);
+      const nome = 'Orcamento-ITCMD-' + (versao === 'discriminado' ? 'Discriminado-' : 'Resumido-') + (window.ITCMDArquivo.tituloPadrao(estado).replace(/[^\p{L}\p{N}]+/gu, '-')).slice(0,90) + '-' + estado.hoje + '.pdf';
+      await ARQUIVO.guardarDocumentos([{ tipo: 'orcamento', nome, blob }], estado, origem);
       ARQUIVO.oferecerPdf(blob, nome); toast('Orçamento salvo no Hub. Abra o PDF para imprimir.');
     } catch (e) { if (!e.cancelado) toast(e.erro || e.message || 'Não foi possível arquivar o orçamento.'); }
-    finally { btn.disabled = false; }
+    finally { btn.textContent = rotulo; botoes.forEach(b => { b.disabled = false; }); impressaoEmAndamento = false; }
   }
   $('#btCopiar').addEventListener('click', () => {
     const t = textoResumo();
@@ -908,7 +940,7 @@
   });
 
   /* ---------- Início ---------- */
-  if (/claude\.ai|claudeusercontent|anthropic/.test(location.hostname)) $('#btImprimir').classList.add('oculto');
+  if (/claude\.ai|claudeusercontent|anthropic/.test(location.hostname)) [$('#btImprimir'), $('#btImprimirDiscriminado')].forEach(b => b.classList.add('oculto'));
   try { if (localStorage.getItem('itcmd-rascunho')) $('#barraRascunho').classList.remove('oculto'); } catch (e) {}
   S = estadoInicial(); renderForm(); calcular();
   ARQUIVO = window.ITCMDArquivo.montar({
@@ -917,6 +949,6 @@
   });
   ARQUIVO.limparSessao = function () { ARQUIVO.reset(); aplicarEstadoSalvo(estadoInicial()); };
   window.ITCMD_ARQUIVO = ARQUIVO;
-  window.ITCMD_UI = { get estado() { return S; }, set estado(v) { aplicarEstadoSalvo(v); ARQUIVO.marcar(); }, calcular, textoResumo, gerarOrcamentoPdf, get ultimo() { return ULT; } };
+  window.ITCMD_UI = { get estado() { return S; }, set estado(v) { aplicarEstadoSalvo(v); ARQUIVO.marcar(); }, calcular, textoResumo, obterDadosOrcamento, gerarOrcamentoPdf, get ultimo() { return ULT; } };
 
 })();

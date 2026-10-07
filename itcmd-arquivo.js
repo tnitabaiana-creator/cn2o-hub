@@ -81,53 +81,11 @@
     return { tipo, nome, mime: 'application/pdf', base64: btoa(binario) };
   }
   function pdfOrcamento(PDF, dados) {
-    const pdf = new PDF({ pagina: 'A4' }); let y = 18;
-    const equivalentes = { '−': '-', '→': '->', '←': '<-', '≤': '<=', '≥': '>=', '≠': '!=', '≈': 'aproximadamente' };
-    const textoPdf = texto => String(texto || '').replace(/[−→←≤≥≠≈]/g, c => !PDF.paraWinAnsi || PDF.paraWinAnsi(c)[0] === 63 ? equivalentes[c] : c);
-    function pagina() { pdf.novaPagina(); y = 18; }
-    function escrever(texto, forte = false, tam = 10) {
-      pdf.fonte(forte, tam).corTexto('#202a3a');
-      for (const linha of pdf.quebrar(textoPdf(texto), 178, forte, tam)) { if (y > 275) pagina(); pdf.fonte(forte, tam).texto(16, y, linha); y += tam * 1.4 / (72 / 25.4); }
-      y += 1.5;
-    }
-    escrever('CN2O · ORÇAMENTO DO ATO', true, 15);
-    escrever('Cartório de Notas do 2º Ofício de Itabaiana/SE', false, 10);
-    escrever(dados.titulo, true, 12); escrever(dados.referencia);
-    if (dados.protocolo) escrever('Protocolo / referência: ' + dados.protocolo);
-    y += 3;
-    const linhas = Array.isArray(dados.linhas) ? dados.linhas : [];
-    if (linhas.length) {
-      if (dados.ajusteMulta) escrever(dados.ajusteMulta, true, 9);
-      escrever('ORÇAMENTO DO ATO', true, 11);
-      function cabecalhoTabela() {
-        pdf.retangulo(16, y - 4, 178, 8, { preencher: '#F2EEF0', borda: false });
-        pdf.fonte(true, 9).texto(18, y + 1, 'ITEM').texto(155, y + 1, 'VALOR', { alinhar: 'dir', larguraMm: 37 }); y += 10;
-      }
-      cabecalhoTabela();
-      linhas.forEach(l => {
-        const forte = !!(l.total || l.subtotal), tam = l.total ? 11 : 10;
-        const item = pdf.quebrar(textoPdf(l.rotulo), 132, forte, tam), altura = Math.max(8, item.length * 5 + 4);
-        if (y + altura > 275) { pagina(); cabecalhoTabela(); }
-        if (forte) pdf.retangulo(16, y - 4, 178, altura, { preencher: l.total ? '#F2EEF0' : '#F7F7F7', borda: false });
-        pdf.fonte(forte, tam).corTexto('#202a3a');
-        item.forEach((t, i) => pdf.texto(18, y + i * 5, t));
-        pdf.texto(155, y, textoPdf(l.valor), { alinhar: 'dir', larguraMm: 37 });
-        y += altura; pdf.linha(16, y - 4, 194, y - 4, { cor: '#D9D9D9', espessura: 0.15 });
-      });
-      y += 5; escrever(dados.assinatura || 'Valores estimados, sujeitos à conferência documental e fiscal.', false, 9);
-      if (dados.quem) escrever('Elaborado por ' + dados.quem + '.', false, 9);
-      pagina();
-    }
-    escrever(linhas.length ? 'ANEXO · MEMÓRIA DE CÁLCULO' : 'ORÇAMENTO E MEMÓRIA DE CÁLCULO', true, 11);
-    String(dados.resumo || '').split('\n').forEach(l => escrever(l, /^Total estimado|^Subtotal/.test(l), 10));
-    y += 3; if (y > 250) pagina(); escrever('PREMISSAS E CONFERÊNCIA', true, 11);
-    (dados.premissas || []).forEach((l, i) => escrever((i + 1) + '. ' + l));
-    escrever(dados.assinatura || 'Valores estimados, sujeitos à conferência documental e fiscal.');
-    if (dados.quem) escrever('Elaborado por ' + dados.quem + '.');
-    const total = pdf.totalPaginas();
-    for (let i = 0; i < total; i++) { pdf.atual = i; pdf.fonte(false, 8).corTexto('#666666').texto(16, 287, 'CN2O · Orçamento arquivado · página ' + (i + 1) + ' de ' + total); }
-    return pdf.blob();
+    const gerador = root.ITCMDOrcamentoPDF || (typeof require === 'function' ? require('./itcmd-orcamento-pdf.js') : null);
+    if (!gerador) throw new Error('A impressão de orçamentos não foi carregada. Atualize a página.');
+    return gerador.gerar(PDF, dados);
   }
+
   function montar(op) {
     const host = op.host, esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]);
     const q = s => host.querySelector(s); const urls = new Set(); let buscaSeq = 0, docSeq = 0;
@@ -208,7 +166,7 @@
     window.addEventListener('beforeunload', e => { if (modelo.sujo || modelo.ocupado || modelo.pendente) { e.preventDefault(); e.returnValue = ''; } });
     return { modelo, pesquisar, reset, marcar: modelo.marcar, novo: s => { const ok = modelo.novo(s); if (ok) limparLinks(); return ok; },
       salvar: (...args) => modelo.salvar(...args), oferecerPdf, identificacao: opcoes.identificacao,
-      guardarDocumentos: async (docs, estado) => { if (docs.length > 4 || docs.reduce((n,d) => n + d.blob.size,0) > MAX_TOTAL) throw new Error('Máximo de 4 PDFs e 15 MB por versão.'); const t = modelo.ticket(); const arqs = await Promise.all(docs.map(d => pdfParaDocumento(d.blob, d.tipo, d.nome))); if (!modelo.valido(t)) throw { cancelado: true }; return modelo.salvar(arqs, estado, false, t); } };
+      guardarDocumentos: async (docs, estado, origem) => { if (docs.length > 4 || docs.reduce((n,d) => n + d.blob.size,0) > MAX_TOTAL) throw new Error('Máximo de 4 PDFs e 15 MB por versão.'); const t = origem || modelo.ticket(); if (!modelo.valido(t)) throw { cancelado: true }; if (origem && !modelo.mesmaRevisao(t)) throw new Error('Os dados foram alterados. Gere o orçamento novamente.'); const arqs = await Promise.all(docs.map(d => pdfParaDocumento(d.blob, d.tipo, d.nome))); if (!modelo.valido(t)) throw { cancelado: true }; if (origem && !modelo.mesmaRevisao(t)) throw new Error('Os dados foram alterados. Gere o orçamento novamente.'); return modelo.salvar(arqs, estado, false, t); } };
   }
   const API = { criar, montar, copiar, tituloPadrao, pdfParaDocumento, pdfOrcamento };
   if (typeof module === 'object' && module.exports) module.exports = API; else root.ITCMDArquivo = API;
