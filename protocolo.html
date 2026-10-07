@@ -218,6 +218,16 @@ input.moeda{font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.01
 #curadoriaErros ul{padding-left:20px}
 #curadoriaConfirmacao{margin-top:18px;font-weight:700}
 #curadoriaResumoRail{font-size:13px;color:rgba(255,255,255,.9);margin-top:10px}
+/* v1.47 — Protocolizar sempre clicável + a lista do que falta */
+.btn-prot.pendente{box-shadow:inset 0 0 0 2px #E3CFA6}
+.prot-falta{font-size:13.5px;line-height:1.4;color:#F3E2BC;margin-top:8px;text-align:center;font-weight:600}
+.modal-pend{max-width:560px}
+.modal-pend h3{margin:0 0 6px;font-family:'Montserrat',sans-serif;font-size:19px;color:var(--marinho)}
+.pend-sub{margin:0 0 12px;font-size:14px;color:#3a4454}
+.pend-lista{margin:0 0 16px 20px;padding:0;display:grid;gap:8px}
+.pend-item{display:block;width:100%;text-align:left;background:#fbf5f6;border:1.5px solid rgba(99,19,37,.35);border-radius:8px;padding:10px 12px;font:600 14.5px/1.45 inherit;color:#202a3a;cursor:pointer}
+.pend-item:hover,.pend-item:focus-visible{background:#f3e6e9;outline:2px solid #631325;outline-offset:1px}
+.pend-destaque{outline:3px solid #C9A15A !important;outline-offset:4px;border-radius:8px;transition:outline-color .3s}
 </style>
 </head>
 <body>
@@ -446,6 +456,7 @@ input.moeda{font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.01
     <label class="rotulo" for="curadoriaObservacao">Observações da conferência (opcional)</label>
     <textarea id="curadoriaObservacao" rows="3" maxlength="4000" placeholder="Indique o que ainda falta conferir, o alcance da conferência ou a origem da informação."></textarea>
     <label class="curadoria-opcao" id="curadoriaConfirmacao"><input type="checkbox" id="curadoriaConfirmado"><span>Confirmo que registrei a situação real da conferência e suas pendências.<small>A confirmação será vinculada à minha sessão pelo servidor. Alterar os dados do pedido exige confirmar novamente.</small></span></label>
+    <div class="aviso oculto" id="curadoriaDesfeitaAviso" role="status">⚠ A confirmação acima foi desmarcada porque você alterou dados do pedido depois de confirmar. Confira e marque de novo.</div>
     <div class="aviso" id="curadoriaErros" role="status"></div>
   </section>
 
@@ -459,10 +470,22 @@ input.moeda{font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.01
     <ul id="listaDossie"></ul>
     <div class="contagem" id="contagem"></div>
     <div id="curadoriaResumoRail" aria-live="polite"></div>
-    <button class="btn-prot" id="btnProt" disabled>Protocolizar</button>
+    <!-- v1.47: sempre clicável — se faltar algo, o clique mostra a lista do que falta -->
+    <button class="btn-prot" id="btnProt">Protocolizar</button>
+    <div class="prot-falta" id="protFalta" aria-live="polite"></div>
     <div class="nota-rail">O recibo sai no WhatsApp do interessado com esta relação de documentos.</div>
   </div>
 </aside>
+</div>
+
+<!-- MODAL (v1.47): o que falta para protocolizar — abre ao clicar em Protocolizar com pendência -->
+<div class="veu" id="veuPend" role="dialog" aria-modal="true" aria-labelledby="pendTitulo">
+  <div class="modal modal-pend">
+    <h3 id="pendTitulo">Falta pouco para protocolizar</h3>
+    <p class="pend-sub">Resolva os itens abaixo. Clique num item para ir direto ao campo.</p>
+    <ol class="pend-lista" id="pendLista"></ol>
+    <button type="button" class="btn-prot" id="pendFechar">Entendi</button>
+  </div>
 </div>
 
 <!-- MODAL: CONFERÊNCIA DOCUMENTAL (abre ao escolher o ato) -->
@@ -1923,21 +1946,102 @@ function renderDossie(){
   const marcados=itens.filter(i=>S.dossie[i]).length;
   el('contagem').textContent=`${marcados} de ${itens.length} documentos na pasta física`;
   if(S.ato==='CERT') el('certAvisoFil').classList.toggle('oculto', !(certSemReferencia() && !certFiliacaoOk()));
-  const pronto = S.ato==='TEST'
-    ? !!((S.qual['testador_nome']||'').trim() && (S.qual['testador_telefone']||'').trim())
-    : !!(el('apresNome').value.trim() && el('apresTel').value.trim() && el('parteNome').value.trim());
   const faltaPartes = identPartesFaltando();
   const avP=el('identAviso'); if(avP){ avP.classList.toggle('oculto', !faltaPartes.length); avP.textContent = faltaPartes.length ? '⚠ Para protocolizar, responda: '+faltaPartes.join(' · ') : ''; }
   const conferencia = atualizarCuradoria();
-  el('btnProt').disabled=!(pronto && enotRespondido() && extrasOk() && certOk() && textosObrigatoriosOk() && !faltaPartes.length && conferencia.ok) || !!S.enviando;
+  // v1.47: o botão não fica mais cinza por pendência (as escreventes não sabiam o que faltava).
+  // Ele só trava durante o envio; o que falta aparece embaixo dele e, no clique, numa lista.
+  const falta = pendenciasProtocolo(conferencia);
+  el('btnProt').disabled = !!S.enviando;
+  el('btnProt').classList.toggle('pendente', falta.length>0);
+  const pf=el('protFalta');
+  if(pf) pf.textContent = S.enviando ? '' : (falta.length
+    ? (falta.length===1 ? 'Falta 1 item' : 'Faltam '+falta.length+' itens')+' — clique em Protocolizar para ver.'
+    : '✓ Tudo pronto para protocolizar.');
 }
+
+/* ============================================================
+   v1.47 — O QUE FALTA PARA PROTOCOLIZAR
+   Os mesmos critérios que antes deixavam o botão cinza, agora um a um e em
+   linguagem de balcão, cada um com o campo para onde levar a escrevente.
+============================================================ */
+function pendenciasProtocolo(conferencia){
+  const L=[]; const add=(msg,alvo)=>L.push({msg:msg,alvo:alvo});
+  if(!S.ato){ add('Escolha o tipo de ato (etapa 1).','chipsAto'); return L; }
+  const P=PAPEIS[S.ato]||{};
+  if(S.ato==='TEST'){
+    if(!(S.qual['testador_nome']||'').trim()) add('Informe o nome completo do(a) testador(a).','qualCampos');
+    if(!(S.qual['testador_telefone']||'').trim()) add('Informe o telefone do(a) testador(a).','qualCampos');
+    if(!S.qtest.enot) add('Responda se a assinatura do testamento será pelo e-Notariado.','qualCampos');
+  } else {
+    if(!el('apresNome').value.trim()) add('Informe o nome do apresentante.','apresNome');
+    if(!el('apresTel').value.trim()) add('Informe o telefone (WhatsApp) do apresentante — é para onde vai o recibo.','apresTel');
+    if(!el('parteNome').value.trim()) add('Informe o nome do(a) '+String(P.parte||'parte').toLowerCase()+'.','parteNome');
+  }
+  if(S.ato && (IDENT_T.includes(S.ato) || IDENT_A.includes(S.ato))){
+    perguntasDoAto(S.ato).filter(q=>q.ident && visivel(q) && !S.respostas[q.id]).forEach(q=>
+      add('Identificação: responda "'+q.titulo.replace(/\?$/,'')+'".', q.ident==='a' ? 'identA' : 'identT'));
+  }
+  if(S.ato!=='TEST'){
+    const pe=papeisEnot();
+    if(pe.t && !S.enot.t) add(pe.t+': responda se assina pelo e-Notariado (Sim ou Não).','enotT');
+    if(pe.a && !S.enot.a) add(pe.a+': responda se assina pelo e-Notariado (Sim ou Não).','enotA');
+  }
+  (P.extras||[]).forEach(function(x){ if(!(S.extras[x[0]]||'').trim()) add('Informe o nome do(a) '+x[1]+'.','extrasBox'); });
+  if(S.ato==='CERT' && !certFiliacaoOk()) add('Sem livro, folhas ou data do ato, informe a filiação (pai ou mãe) de quem está sendo pesquisado.','certPai');
+  perguntasDoAto(S.ato).forEach(q=>{
+    if(!(q.obrigatorio && visivel(q))) return;
+    const v=(S.respostas[q.id]||'').trim();
+    if(q.tipo==='moeda' ? formatarMoeda(v)!==null : !!v) return;
+    add((q.tipo==='moeda' ? 'Informe um valor válido em "' : 'Responda "')+q.titulo.replace(/\?$/,'')+'".','q_'+q.id);
+  });
+  const c=conferencia || atualizarCuradoria();
+  if(!c.ok){
+    if(S.curadoriaDesfeita) add('Etapa 5: a confirmação da conferência foi desmarcada porque você alterou dados depois de confirmar. Confira e marque "Confirmo" de novo.','curadoriaConfirmacao');
+    c.erros.forEach(e=>{
+      if(S.curadoriaDesfeita && /^Confirme expressamente/.test(e)) return;
+      let msg='Etapa 5 (conferência): '+e;
+      if(/diferença entre preço e parcelas/.test(e) && c.soma_centavos!==null && c.preco_centavos!==null){
+        const r=n=>(n/100).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+        msg+=' As parcelas somam '+r(c.soma_centavos)+' e o preço é '+r(c.preco_centavos)+': lance as parcelas que faltam ou escolha "Conferência pendente ou parcial".';
+      }
+      const alvo=/^Parcela/.test(e) ? 'curadoriaPagamentos' : /^Diverg/.test(e) ? 'divergenciasBox' : /Confirme expressamente/.test(e) ? 'curadoriaConfirmacao' : 'blCuradoria';
+      add(msg,alvo);
+    });
+  }
+  return L;
+}
+function irParaPendencia(alvo){
+  const e=el(alvo); if(!e) return;
+  e.scrollIntoView({behavior:'smooth',block:'center'});
+  e.classList.add('pend-destaque'); setTimeout(()=>e.classList.remove('pend-destaque'),2600);
+  const foco=e.matches('input,select,textarea,button') ? e : e.querySelector('input,select,textarea,button,.op');
+  if(foco && foco.focus) setTimeout(()=>{ try{ foco.focus({preventScroll:true}); }catch(_){ } },350);
+}
+function mostrarPendencias(lista){
+  const ol=el('pendLista'); ol.replaceChildren();
+  lista.forEach(p=>{
+    const li=document.createElement('li');
+    const b=document.createElement('button'); b.type='button'; b.className='pend-item'; b.textContent=p.msg;
+    b.addEventListener('click',()=>{ el('veuPend').classList.remove('aberto'); irParaPendencia(p.alvo); });
+    li.appendChild(b); ol.appendChild(li);
+  });
+  el('veuPend').classList.add('aberto');
+  setTimeout(()=>{ const b=ol.querySelector('button'); if(b) b.focus(); },50);
+}
+el('pendFechar').addEventListener('click',()=>{
+  el('veuPend').classList.remove('aberto');
+  const primeiro=pendenciasProtocolo()[0]; if(primeiro) irParaPendencia(primeiro.alvo);
+});
+el('veuPend').addEventListener('click',e=>{ if(e.target===el('veuPend')) el('veuPend').classList.remove('aberto'); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && el('veuPend').classList.contains('aberto')) el('veuPend').classList.remove('aberto'); });
 
 
 
 
 /* CURADORIA_UI_INICIO */
 function resetCuradoria(){
-  S.pagamentos=[]; S.divergencias=[]; S.curadoriaFingerprint=null;
+  S.pagamentos=[]; S.divergencias=[]; S.curadoriaFingerprint=null; S.curadoriaDesfeita=false;
   document.querySelectorAll('[name="curadoriaEstado"]').forEach(r=>{r.checked=false;});
   el('curadoriaConfirmado').checked=false; el('curadoriaObservacao').value='';
   el('blCuradoria').classList.remove('oculto');
@@ -1958,7 +2062,12 @@ function atualizarCuradoria(){
   const c=lerCuradoria();
   const fingerprint=JSON.stringify({ato:S.ato,triagem:S.respostas,dossie:S.dossie,pagamentos:S.pagamentos,curadoria:{...c,confirmado:undefined},qual:S.qual,qtest:S.qtest,enot:S.enot,extras:S.extras,cert:{nc:S.cert.nc,arquivos:S.cert.arquivos.map(a=>({nome:a.nome,tamanho:a.tamanho,tipo:a.tipo}))},
     formulario:Array.from(document.querySelectorAll('main input, main select, main textarea')).filter(campo=>!campo.closest('#blCuradoria')).map(campo=>({id:campo.id,valor:campo.value,marcado:campo.checked})),vendCat:S.vendCat});
-  if(S.curadoriaFingerprint!==null && fingerprint!==S.curadoriaFingerprint){el('curadoriaConfirmado').checked=false;c.confirmado=false;}
+  if(S.curadoriaFingerprint!==null && fingerprint!==S.curadoriaFingerprint){
+    if(el('curadoriaConfirmado').checked) S.curadoriaDesfeita=true;   // v1.47: avisa em vez de desmarcar calado
+    el('curadoriaConfirmado').checked=false;c.confirmado=false;
+  }
+  if(c.confirmado) S.curadoriaDesfeita=false;
+  el('curadoriaDesfeitaAviso').classList.toggle('oculto',!S.curadoriaDesfeita);
   S.curadoriaFingerprint=fingerprint;
   const resultado=CN2OCuradoria.avaliar({ato:S.ato,triagem:S.respostas,pagamentos:S.pagamentos,curadoria:c});
   const alertas=el('curadoriaAlertas');alertas.replaceChildren();
@@ -2025,6 +2134,10 @@ if(ENDPOINT_RAILWAY){
 }
 
 el('btnProt').addEventListener('click',async ()=>{
+  if(S.enviando) return;
+  // v1.47: com pendência, mostra a lista do que falta (e não envia nada)
+  const falta = pendenciasProtocolo();
+  if(falta.length){ mostrarPendencias(falta); return; }
   const conferencia = atualizarCuradoria();
   if(!conferencia.ok || S.enviando){ el('blCuradoria').scrollIntoView({behavior:'smooth',block:'start'}); return; }
   const itens=itensDossie();
