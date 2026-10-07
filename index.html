@@ -3006,6 +3006,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 @media(max-width:1240px){#secFerramentas .cards,.pagina-grupo .cards{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:620px){#secFerramentas .cards,.pagina-grupo .cards{grid-template-columns:1fr}.pagina-grupo .card{min-height:0;padding:20px}}
 </style>
+<link rel="stylesheet" href="agenda-imagens.css">
 </head>
 <body>
 <!-- ================= TELA DE LOGIN ================= -->
@@ -5253,6 +5254,7 @@ const CLAUSULAS = [
 </script>
 
 <script src="protocolo-minuta.js"></script>
+<script src="agenda-imagens.js"></script>
 <script>
 /* ============================================================
    HUB CN2O — o hub do Time CN2O · versão definitiva
@@ -5474,6 +5476,8 @@ function migrarSessaoAntiga() {
   chaves.concat(['cn2o_hub_key']).forEach(function (c) { store.del(c); });
 }
 function limparSessao() {
+  MA_IMAGENS.reset();   // remove blobs privados e cancela uploads/prévias da sessão anterior
+  MA.salvando = 0;      // respostas tardias da sessão anterior não alteram os contadores atuais
   SESSAO.token = SESSAO.nome = SESSAO.login = SESSAO.cargo = null; SESSAO.admin = false;
   el('navRelatorios').hidden = true;   // v1.38.2: o atalho some junto com a sessão
   const k = CONFIG.sessao;
@@ -5572,6 +5576,7 @@ function restaurarSessao() {
   });
 }
 function sair() {
+  if (MA_IMAGENS.ocupado()) { toast('Aguarde o print terminar de salvar antes de sair.'); return; }
   const token = SESSAO.token;
   registrar('logout', '', '');   // v1.34: com o token ainda válido e keepalive
   maSair();   // v1.32: despacha o que ainda não foi salvo na agenda (com o token) e zera o estado
@@ -6200,6 +6205,7 @@ function cabecalhoSub(eyebrow, titulo) {
     '<div class="sub-cab"><h2>' + titulo + '</h2><button class="fechar-x" data-fechar-sub type="button" aria-label="Fechar">✕</button></div>';
 }
 function abrirSub(tipo, chave) {
+  if (tipo !== 'agenda' && MA.subAberta && MA_IMAGENS.ocupado()) { toast('Aguarde o print terminar de salvar antes de sair da agenda.'); return; }
   if (!MURAL && tipo !== 'editar' && tipo !== 'agenda' && tipo !== 'notas') { toast('O mural ainda está carregando…'); return; }
   const box = el('subConteudo');
   el('subpagina').classList.toggle('larga', tipo === 'editar');
@@ -6268,6 +6274,7 @@ function abrirSub(tipo, chave) {
   if (tipo === 'aviso') renderMural();
 }
 function fecharSubMural(forcar) {
+  if (!forcar && MA.subAberta && MA_IMAGENS.ocupado()) { toast('O print está sendo salvo. Aguarde antes de fechar a agenda.'); return; }
   if (!forcar && ED && ED.sujo && el('veuMural').classList.contains('aberto') && !ED.confirmarSaida) {
     ED.confirmarSaida = true;
     const st = el('edStatus');
@@ -6275,6 +6282,7 @@ function fecharSubMural(forcar) {
     return;
   }
   if (MA.subAberta) maDescarregarSub();   // v1.32: a agenda salva sozinha — só despacha o que falta
+  MA_IMAGENS.fechar();
   if (NT.subAberta) ntDescarregarSub();   // v1.33: o Bloco de Notas também
   el('veuMural').classList.remove('aberto');
   ED = null;
@@ -6302,6 +6310,15 @@ const MA_RE_DIA = /^\d{4}-\d{2}-\d{2}$/;
 const MA_JANELA_DIAS = 61;   // a janela do servidor vai até 62 dias (de ≤ ate); hoje + 61 = 62 dias
 const MA_PROX_DIAS = 60;     // "Próximos": de amanhã até hoje + 60
 const MA = { itens: {}, semanas: {}, periodos: {}, pendentes: {}, timers: {}, tentativas: {}, salvando: 0, ultimoSalvo: null, erro: null, segunda: null, dia: null, vista: 'dia', proximosAte: null, subAberta: false, dono: null };
+const MA_IMAGENS = AgendaImagens.criar({
+  getSession: function () { return SESSAO; }, getEndpoint: function () { return CONFIG.endpoint; },
+  request: api, escape: esc, onExpired: sessaoExpirada,
+  onChange: function () { maRenderCard(); if (MA.subAberta) { maPintarChips(); maPintarProximos(); maStatus(); } }
+});
+function maResumoTexto(dia, faixa) {
+  const texto = String(MA.itens[maChave(dia, faixa)] || '').trim();
+  return texto + (MA_IMAGENS.tem(dia, faixa) ? (texto ? ' · Print anexado' : 'Print anexado') : '');
+}
 
 function maIso(d) { return d.getFullYear() + '-' + dd(d.getMonth() + 1) + '-' + dd(d.getDate()); }
 function maData(iso) { const p = String(iso).split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
@@ -6324,8 +6341,8 @@ function maTituloSemana(segunda) {
     ' a ' + dd(ult.getDate()) + ' de ' + MESES[ult.getMonth()] + (ult.getFullYear() !== ag.getFullYear() ? ' de ' + ult.getFullYear() : '');
 }
 function maItensDoDia(dia) {
-  return MA_FAIXAS.filter(function (f) { return String(MA.itens[maChave(dia, f)] || '').trim(); })
-    .map(function (f) { return { faixa: f, texto: String(MA.itens[maChave(dia, f)]).trim() }; });
+  return MA_FAIXAS.filter(function (f) { return maResumoTexto(dia, f); })
+    .map(function (f) { return { faixa: f, texto: maResumoTexto(dia, f) }; });
 }
 /* v1.33 — a data por extenso do cabeçalho da vista do dia: "quarta-feira, 16 de setembro de 2026" */
 function maTituloDia(dia) {
@@ -6345,15 +6362,20 @@ function maCarregarPeriodo(de, ate, forcar) {
   if (!maDiaValido(de) || !maDiaValido(ate) || ate < de) return Promise.resolve();
   const chave = de + '|' + ate;
   if (!forcar && MA.periodos[chave] === 'ok') return Promise.resolve();
-  return api('/hub/agenda?de=' + de + '&ate=' + ate).then(function (r) {
+  const ticket = MA_IMAGENS.capturar();
+  return api('/hub/agenda?de=' + de + '&ate=' + ate, { semRedirecionar: true }).then(function (r) {
+    if (!MA_IMAGENS.atual(ticket)) return;
     // o servidor manda a verdade deste período; o que ainda não foi salvo aqui tem prioridade
     Object.keys(MA.itens).forEach(function (k) { const d = k.split('|')[0]; if (d >= de && d <= ate && !MA.pendentes[k]) delete MA.itens[k]; });
     ((r && r.itens) || []).forEach(function (i) { const k = maChave(i.dia, i.faixa); if (!MA.pendentes[k]) MA.itens[k] = i.texto; });
+    MA_IMAGENS.receberPeriodo(de, ate, (r && r.itens) || [], ticket);
     MA.periodos[chave] = 'ok';
     MA.erro = null;
   }).catch(function (e) {
+    if (!MA_IMAGENS.atual(ticket)) return;
     MA.periodos[chave] = 'erro';
     MA.erro = e.erro || 'sem conexão';
+    if (e.status === 401) sessaoExpirada();
     throw e;
   });
 }
@@ -6362,9 +6384,12 @@ function maCarregarSemana(segunda, forcar) {
   const seg = maIso(segunda), dom = maIso(maSomarDias(segunda, 6));
   if (!SESSAO.token) return Promise.resolve();
   if (!forcar && MA.semanas[seg] === 'ok') return Promise.resolve();
+  const ticket = MA_IMAGENS.capturar();
   return maCarregarPeriodo(seg, dom, true).then(function () {
+    if (!MA_IMAGENS.atual(ticket)) return;
     MA.semanas[seg] = 'ok';
   }, function (e) {
+    if (!MA_IMAGENS.atual(ticket)) return;
     MA.semanas[seg] = 'erro';
     throw e;
   });
@@ -6391,11 +6416,14 @@ function maAtualizarSemanaAtual() {
   // anotações que ficaram pendentes (ex.: a sessão expirou no meio do salvamento) vão agora
   maPendentes().forEach(function (k) { const p = k.split('|'); MA.tentativas[k] = 0; maSalvarAgora(p[0], +p[1]); });
   const j = maJanelaMural(), seg = maIso(j.segunda);
+  const ticket = MA_IMAGENS.capturar();
   MA.proximosAte = j.ate;
   return maCarregarPeriodo(j.de, j.ate, true).then(function () {
+    if (!MA_IMAGENS.atual(ticket)) return;
     MA.semanas[seg] = 'ok';   // a janela cobre seg–dom desta semana
     maRenderCard();
   }, function () {
+    if (!MA_IMAGENS.atual(ticket)) return;
     MA.semanas[seg] = 'erro';
     maRenderCard();
   });
@@ -6403,11 +6431,12 @@ function maAtualizarSemanaAtual() {
 /* v1.33 — o que está marcado depois de um dia (usado pelo quadro e pela lista "Próximos") */
 function maProximos(depoisDe, ate, excluir) {
   const dias = {};
-  Object.keys(MA.itens).forEach(function (k) {
+  Array.from(new Set(Object.keys(MA.itens).concat(MA_IMAGENS.chaves()))).forEach(function (k) {
     const p = k.split('|'), dia = p[0];
     if (dia <= depoisDe || dia > ate || dia === excluir) return;
-    if (!String(MA.itens[k] || '').trim()) return;
-    (dias[dia] = dias[dia] || []).push({ faixa: +p[1], texto: String(MA.itens[k]).trim() });
+    const texto = maResumoTexto(dia, +p[1]);
+    if (!texto) return;
+    (dias[dia] = dias[dia] || []).push({ faixa: +p[1], texto: texto });
   });
   return Object.keys(dias).sort().map(function (dia) {
     return { dia: dia, itens: dias[dia].sort(function (a, b) { return a.faixa - b.faixa; }) };
@@ -6520,10 +6549,10 @@ function maHtmlDia() {
     const k = maChave(dia, f), v = String(MA.itens[k] || ''), id = maIdCampo(dia, f);
     lista += '<div class="ma-linha' + (f === 0 ? ' ma-linha-prazo' : '') + '">' +
       '<label class="ma-rot" for="' + id + '">' + maRotuloFaixa(f) + '</label>' +
-      '<textarea id="' + id + '" class="ma-campo' + (v.trim() ? ' tem' : '') +
+      '<div class="ma-anotacao"><textarea id="' + id + '" class="ma-campo' + (v.trim() ? ' tem' : '') +
         (MA.pendentes[k] ? ((MA.tentativas[k] || 0) > 6 ? ' erro' : ' pendente') : '') +
         '" data-ma-dia="' + dia + '" data-ma-faixa="' + f + '" rows="1" maxlength="2000" spellcheck="true" aria-label="' +
-        esc(maTituloDia(dia) + ' — ' + maRotuloFaixa(f)) + '"' + (f === 0 ? ' placeholder="prazo, lembrete…"' : '') + '>' + esc(v) + '</textarea></div>';
+        esc(maTituloDia(dia) + ' — ' + maRotuloFaixa(f)) + '"' + (f === 0 ? ' placeholder="prazo, lembrete…"' : '') + '>' + esc(v) + '</textarea>' + MA_IMAGENS.html(dia, f) + '</div></div>';
   });
   lista += '</div>';
   return cabecalhoSub('Mural · Minha Agenda — pessoal, só você vê',
@@ -6549,7 +6578,7 @@ function maHtmlDia() {
       '<div class="ma-chips" id="maChips" role="group" aria-label="Dias desta semana">' + maHtmlChips() + '</div>' +
     '</div>' +
     '<p class="ma-ajuda">Escreva na linha do horário: prazos, providências, observações, compromissos. Cada anotação é guardada sozinha no servidor logo depois que você para de digitar — não há botão de salvar. A linha <b>Dia inteiro / prazos</b> é para o que não tem hora marcada.</p>' +
-    lista +
+    '<p class="ma-ajuda">Cole um print com <b>Ctrl+V</b> no campo da anotação ou anexe uma imagem. Uma imagem por horário, reduzida automaticamente para até 1 MB. PNG, JPG ou WebP.</p>' + lista +
     '<section class="ma-prox" aria-labelledby="maProxTitulo">' +
       '<h3 class="ma-prox-titulo" id="maProxTitulo">Próximos</h3>' +
       '<p class="ma-prox-sub">o que já está marcado nos próximos ' + MA_PROX_DIAS + ' dias, fora deste dia — clique para abrir a data</p>' +
@@ -6578,7 +6607,7 @@ function maHtmlSemana() {
       const rotulo = DIAS_SEMANA[d.getDay()] + ' ' + dd(d.getDate()) + '/' + dd(d.getMonth() + 1) + ' — ' + maRotuloFaixa(f);
       grade += '<div class="ma-cel' + (dia === hoje ? ' hoje' : '') + (dia === MA.dia && dia !== hoje ? ' alvo' : '') + (f === 0 ? ' ma-cel-dia' : '') + '">' +
         '<textarea class="ma-campo' + (v.trim() ? ' tem' : '') + (MA.pendentes[k] ? ((MA.tentativas[k] || 0) > 6 ? ' erro' : ' pendente') : '') + '" data-ma-dia="' + dia + '" data-ma-faixa="' + f + '" rows="1" maxlength="2000" spellcheck="true" aria-label="' + esc(rotulo) + '"' +
-        (f === 0 ? ' placeholder="prazo, lembrete…"' : '') + '>' + esc(v) + '</textarea></div>';
+        (f === 0 ? ' placeholder="prazo, lembrete…"' : '') + '>' + esc(v) + '</textarea>' + MA_IMAGENS.html(dia, f) + '</div>';
     });
   });
   grade += '</div>';
@@ -6593,6 +6622,7 @@ function maHtmlSemana() {
       '<p class="ma-status" id="maStatus" aria-live="polite"></p>' +
     '</div>' +
     '<p class="ma-ajuda">A semana inteira de uma vez. Clique na célula do dia e do horário e escreva — cada anotação é guardada sozinha logo depois que você para de digitar. Clique no <b>cabeçalho de um dia</b> (ou em <b>Ver o dia</b>) para voltar à vista de um dia só.</p>' +
+    '<p class="ma-ajuda">Cole um print com <b>Ctrl+V</b> no campo da anotação ou anexe uma imagem. Uma imagem por horário, reduzida automaticamente para até 1 MB.</p>' +
     '<div class="ma-rolagem">' + grade + '</div>';
 }
 function maAjustarAltura(ta) {
@@ -6634,6 +6664,7 @@ function maTrocarVista(vista) {
   else maAbrirDia(MA.dia);
 }
 function maAposAbrir(box) {
+  MA_IMAGENS.ligar(box);
   box.querySelectorAll('[data-ma-nav]').forEach(function (b) {   // vista da semana: semana anterior / hoje / seguinte
     b.addEventListener('click', function () {
       const n = +b.dataset.maNav;
@@ -6702,6 +6733,7 @@ function maPintarProximos() {
 }
 /* depois que o período chega do servidor, atualiza só as células que não estão sendo editadas */
 function maAtualizarCelulas() {
+  MA_IMAGENS.pintar();
   document.querySelectorAll('#subConteudo .ma-campo').forEach(function (ta) {
     const k = maChave(ta.dataset.maDia, +ta.dataset.maFaixa);
     if (MA.pendentes[k] || document.activeElement === ta) return;
@@ -6729,9 +6761,11 @@ function maSalvarAgora(dia, faixa, aoFechar) {
   clearTimeout(MA.timers[k]); delete MA.timers[k];
   if (!MA.pendentes[k] || !SESSAO.token) return Promise.resolve();
   const texto = String(MA.itens[k] || '');
+  const ticket = MA_IMAGENS.capturar();
   MA.salvando++;
   maStatus();
   return api('/hub/agenda', { corpo: { dia: dia, faixa: faixa, texto: texto }, keepalive: !!aoFechar, semRedirecionar: true }).then(function (r) {
+    if (!MA_IMAGENS.atual(ticket)) return;
     MA.salvando--;
     if (String(MA.itens[k] || '') === texto) {   // não mudou enquanto salvava
       delete MA.pendentes[k];
@@ -6745,6 +6779,7 @@ function maSalvarAgora(dia, faixa, aoFechar) {
     maRenderCard();
     if (MA.subAberta) { maPintarChips(); maPintarProximos(); }
   }).catch(function (e) {
+    if (!MA_IMAGENS.atual(ticket)) return;
     MA.salvando--;
     MA.erro = e.erro || 'sem conexão';
     const ta = maCampo(dia, faixa);
@@ -6773,6 +6808,7 @@ function maStatus() {
   if (!st) return;
   const pend = maPendentes().length;
   st.classList.remove('salvando', 'erro', 'ok');
+  if (MA_IMAGENS.ocupado()) { st.textContent = 'Salvando print… aguarde antes de sair.'; st.classList.add('salvando'); return; }
   if (MA.salvando > 0 || (pend && !MA.erro)) { st.textContent = 'Salvando…'; st.classList.add('salvando'); return; }
   if (MA.erro && pend) {
     st.classList.add('erro');
@@ -6800,6 +6836,7 @@ function maDescarregarSub(aoFechar) {
   MA.subAberta = false;
 }
 function maReiniciarEstado() {
+  MA_IMAGENS.reset();
   Object.keys(MA.timers).forEach(function (k) { clearTimeout(MA.timers[k]); });
   MA.itens = {}; MA.semanas = {}; MA.periodos = {}; MA.pendentes = {}; MA.timers = {}; MA.tentativas = {};
   MA.salvando = 0; MA.ultimoSalvo = null; MA.erro = null; MA.segunda = null; MA.dia = null; MA.vista = 'dia';
@@ -6814,6 +6851,9 @@ function maSair() {
   maReiniciarEstado();
 }
 window.addEventListener('pagehide', function () { if (maPendentes().length) maDescarregarSub(true); });
+window.addEventListener('beforeunload', function (e) {
+  if (MA_IMAGENS.ocupado()) { e.preventDefault(); e.returnValue = ''; }
+});
 
 /* ============================================================
    v1.33 — BLOCO DE NOTAS (pedido do Tabelião: ao lado da Minha Agenda)
