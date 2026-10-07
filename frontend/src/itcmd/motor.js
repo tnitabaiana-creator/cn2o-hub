@@ -299,7 +299,7 @@
     const hoje = opts.hoje ? new Date(opts.hoje + 'T12:00:00') : new Date();
     const obito = f.obito ? new Date(f.obito + 'T12:00:00') : null;
     const dias = obito ? diasEntre(obito, hoje) : null;
-    const multaCabivel = dias !== null && dias > LEGAL.prazoAberturaDias && f.multaAtraso !== false;
+    const multaCabivel = dias !== null && dias > LEGAL.prazoAberturaDias && f.multaAtraso !== false && opts.desconsiderarMulta !== true;
     // valor efetivamente recebido por beneficiário em cada bem (usa as frações da partilha)
     const parcela = (b, filtro) => pat.bens.filter(filtro).reduce((s, bm) => s + bm.valor * (bm.comum ? bm.herancaFr.vezes(b.frComum) : bm.herancaFr.vezes(b.frPart)).num(), 0);
     const imoveis = pat.bens.filter(b => b.tipo === 'imovel_urbano' || b.tipo === 'imovel_rural');

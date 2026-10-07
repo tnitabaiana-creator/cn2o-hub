@@ -11,6 +11,7 @@
   <div class="selo" id="seloUfp">UFP/SE —</div>
 </header>
 
+<div id="itcmdArquivo"></div>
 <main class="pagina">
   <div class="barra-viva nao-imprimir" id="barraViva" aria-live="polite">
     <div class="bv destaque"><small>ITCMD</small><b id="bvItcmd">—</b></div>
@@ -49,8 +50,9 @@
           <input type="date" id="hoje" data-path="hoje" data-tipo="texto">
         </div>
       </div>
-      <div id="barraRascunho" class="aviso nao-imprimir oculto">Há um rascunho salvo neste navegador.
-        <span class="acoes" style="display:inline-flex;margin:0 0 0 8px"><button class="btn mini" type="button" id="btRestaurar">Restaurar</button><button class="btn mini" type="button" id="btDescartar">Descartar</button></span>
+      <div id="itcmdAjusteMulta" class="aviso nao-imprimir"><label class="marcar"><input type="checkbox" data-path="desconsiderarMulta" data-tipo="bool" id="itcmdSemMulta"><span>Desconsiderar multa (ajuste manual)</span></label><p class="notinha">Zera a multa nesta estimativa por decisão do responsável, sem alterar o imposto principal nem afirmar isenção legal.</p><label for="itcmdMotivoMulta">Motivo / referência da conferência (opcional)</label><input type="text" id="itcmdMotivoMulta" data-path="motivoMulta" data-tipo="texto" maxlength="1000"></div>
+      <div id="barraRascunho" class="aviso nao-imprimir oculto">Existe um rascunho antigo neste computador, sem identificação do autor. Importe apenas se reconhecer que é seu; depois salve no Hub.
+        <span class="acoes" style="display:inline-flex;margin:0 0 0 8px"><button class="btn mini" type="button" id="btRestaurar">Importar rascunho antigo</button><button class="btn mini" type="button" id="btDescartar">Descartar rascunho antigo</button></span>
       </div>
     </section>
 
@@ -60,10 +62,10 @@
     <section class="cartao nao-imprimir">
       <div class="acoes" style="margin:0">
         <button class="btn" type="button" id="btExemplo">Carregar exemplo</button>
-        <button class="btn" type="button" id="btLimpar">Limpar tudo</button>
-        <button class="btn" type="button" id="btSalvar">Salvar rascunho</button>
+        <button class="btn" type="button" id="btLimpar">Novo cálculo</button>
+        <button class="btn" type="button" id="btSalvar">Salvar trabalho</button>
       </div>
-      <p class="notinha" style="margin-top:8px">Nada é enviado a servidor: o cálculo roda no seu navegador. O rascunho fica só neste computador.</p>
+      <p class="notinha" style="margin-top:8px">O cálculo roda no navegador. Use Salvar trabalho para guardar os dados no Hub; PDFs gerados são arquivados com uma versão dos dados.</p>
     </section>
   </div>
 
@@ -107,12 +109,11 @@
         <li><b>Dívidas do espólio</b> são abatidas antes da meação (monte-mor − dívidas − meação = monte partível), como no sistema da SEFAZ/SE.</li>
         <li><b>Multa</b> de 20% do imposto quando o inventário não é requerido em 120 dias do óbito (arts. 18-B, II, e 27, I). Multa de mora e juros só após o vencimento (art. 29); no extrajudicial o imposto é pago antes da lavratura (Decreto 29.994/2015, art. 23, I, a).</li>
         <li><b>Alíquota vigente na data do fato gerador</b> (Decreto, art. 19, parágrafo único): para óbitos anteriores a 2024 a legislação da época pode diferir — use "alíquota manual" se a SEFAZ indicar outra.</li>
-        <li><b>Emolumentos</b> (TJSE 2026, Lei 8.639/2019, Anexo I, Nota 24, incluída pela Lei 9.840/2025): a <b>meação é excluída</b> da base da escritura de inventário. A base corresponde à herança bruta: metade dos bens comuns sujeitos à meação, mais os bens particulares; sem meação, o valor integral da parcela inventariada. A fração de condomínio é aplicada uma única vez. Esta base não abate dívidas e não se confunde com o monte partível líquido do ITCMD. No cumulativo, calcula-se cada sucessão separadamente. FERD de 20%; R$ 4,77 por herdeiro a partir do 11º; ato acessório = metade da faixa. Registro no RI, certidões e honorários são lançados à parte.</li>
+        <li><b>Emolumentos</b> (TJSE 2026, Lei 8.639/2019, Anexo I, Nota 24, incluída pela Lei 9.840/2025): a <b>meação é excluída</b> da base da escritura de inventário. A base corresponde à herança bruta: metade dos bens comuns sujeitos à meação, mais os bens particulares; sem meação, o valor integral da parcela inventariada. A fração de condomínio é aplicada uma única vez. Esta base não abate dívidas e não se confunde com o monte partível líquido do ITCMD. No cumulativo, calcula-se cada sucessão separadamente. FERD de 20%; R$ 4,77 por herdeiro a partir do 11º; ato acessório = metade da faixa. Registro/averbação no RI, certidões, diligências e outros custos são lançados à parte.</li>
         <li><b>Usufruto</b>: na doação com reserva, o imposto incide só sobre a doação (art. 2º, §5º); a extinção do usufruto não é tributada (art. 7º, III). A base (100% ou 50%, aplicada a todos os bens doados) é opção da ferramenta, a confirmar com a SEFAZ/SE.</li>
         <li><b>Quotas de sociedade</b> (2%): a parcela de quotas de cada quinhão é apurada pela partilha ideal; a faixa do art. 14, I é aferida pelo quinhão total. <b>Isenção do art. 8º, VI</b>: só é oferecida quando o espólio tem um único imóvel de até 2.600 UFP e alcança apenas a parcela do imóvel.</li>
       </ol>
     </details>
   </div>
 </main>
-<p class="rodape">Uso interno — Time CN2O · Cartório de Notas do 2º Ofício de Itabaiana/SE · Av. Ivo de Carvalho, 441</p>
 <div class="toast" id="itcToast" role="status"></div>

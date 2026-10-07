@@ -26,9 +26,10 @@
   const novaDecl = () => ({ cpf: '', estadoCivilObito: '', dataCasamento: '', tipo: 'extrajudicial', sobrepartilha: false, dataAbertura: '', processo: '', vara: '', dataDistribuicao: '', dataHomologacao: '', dataTransito: '', inventariante: { nome: '', cpf: '', endereco: '', contato: '' }, cessao: 'auto', renuncia: 'auto', responsavel: { nome: '', cpf: '' }, local: 'Itabaiana/SE', dividasDescricao: '' });
   const novaDoacao = () => ({ doadores: [{ nome: '' }], data: hojeISO(), reservaUsufruto: false, baseNuaPropriedade: '100', usufrutoAcessorio: true, donatarios: [pessoa({ nome: '', doacoesAnteriores: 0, impostoAnterior: 0 })], bens: [{ descricao: '', tipo: 'imovel_urbano', valor: 0, fracao: 100, destino: 'todos' }], aliquotaManual: '' });
   let S = estadoInicial();
+  let ARQUIVO = null;
   function estadoInicial() {
     const u = M.ufpVigente(hojeISO());
-    return { modo: 'inventario', ufp: u.valor, ufpManual: false, hoje: hojeISO(), inv: [novoFalecido(), novoFalecido('', 'solteiro')], doa: novaDoacao(), emol: { inv2Acessorio: false }, orc: { honorarios: '', certidoes: '', registro: '', outros: '' } };
+    return { modo: 'inventario', ufp: u.valor, ufpManual: false, hoje: hojeISO(), desconsiderarMulta: false, motivoMulta: '', inv: [novoFalecido(), novoFalecido('', 'solteiro')], doa: novaDoacao(), emol: { inv2Acessorio: false }, orc: { certidoes: '', registro: '', outros: '' } };
   }
   function exemplo() {
     const s = estadoInicial();
@@ -289,6 +290,9 @@
       fi.innerHTML = blocoFalecido(0, S.modo === 'cumulativo' ? '1º falecido e sua sucessão' : 'Falecido(a) e sucessão') + (S.modo === 'cumulativo' ? blocoFalecido(1, '2º falecido (inventário cumulativo)') : '');
     }
     $('#ufp').value = fmtN(S.ufp); $('#hoje').value = S.hoje;
+    $('#itcmdAjusteMulta').hidden = S.modo === 'doacao';
+    $('#itcmdSemMulta').checked = S.desconsiderarMulta === true;
+    $('#itcmdMotivoMulta').value = S.motivoMulta || '';
     atualizarSelo();
     renderImportacao();
     // os blocos E e F (details) mantêm o estado aberto/fechado que a escrevente escolheu, mesmo com o formulário refeito
@@ -365,7 +369,7 @@
     inv.exced = (inv.real.ativa && inv.real.totalExcedente > 0 && inv.real.natureza !== 'onerosa' && Math.abs(inv.real.diferenca) < 0.01) ? M.itcmdExcedente(inv, inv.real, { ufp: S.ufp, hoje: S.hoje }) : null;
   }
   function calcular() {
-    const opts = { ufp: S.ufp, hoje: S.hoje };
+    const opts = { ufp: S.ufp, hoje: S.hoje, desconsiderarMulta: S.desconsiderarMulta === true };
     atualizarSelo();
     const rc = $('#resCorpo'); let h = '';
     try {
@@ -392,12 +396,13 @@
         h += resumoInventario(inv, S.inv[0].nome ? `Espólio de ${S.inv[0].nome}` : 'Espólio');
       }
     } catch (e) { h = `<div class="aviso erro">Não foi possível calcular: ${esc(e.message)}</div>`; ULT = null; console.error(e); }
+    if (S.modo !== 'doacao' && S.desconsiderarMulta === true) h = `<div class="aviso"><b>Multa desconsiderada por ajuste manual.</b> O imposto principal foi mantido.${S.motivoMulta ? ' Motivo: ' + esc(S.motivoMulta) : ''}</div>` + h;
     rc.innerHTML = h;
     orcamento();
     renderImportacao();   // v1.42: a contagem "valor(es) a lançar" acompanha a digitação
   }
 
-  const ORC_EDITAVEIS = [['honorarios', 'Honorários advocatícios', 'a combinar com o cliente'], ['certidoes', 'Certidões e diligências', 'RI, negativas, avaliações'], ['registro', 'Registro/averbação no RI', 'tabela do Registro de Imóveis'], ['outros', 'Outros custos', '']];
+  const ORC_EDITAVEIS = [['certidoes', 'Certidões e diligências', 'RI, negativas, avaliações'], ['registro', 'Registro/averbação no RI', 'tabela do Registro de Imóveis'], ['outros', 'Outros custos', '']];
   function montarOrcamentoFixo() { // campos editáveis são criados uma única vez (não perdem o foco nem o valor)
     const oc = $('#orcCorpo');
     oc.innerHTML = `<p class="notinha" id="orcTitulo"></p><div class="tabela-wrap"><table><thead><tr><th>Item</th><th class="n">Valor</th></tr></thead><tbody id="orcLinhas"></tbody><tbody id="orcEditaveis">${ORC_EDITAVEIS.map(([k, r, d]) => `<tr><td><label for="orc_${k}">${r}</label>${d ? `<div class="notinha">${d}</div>` : ''}</td><td class="n" style="min-width:150px"><input type="text" id="orc_${k}" class="moeda" inputmode="decimal" data-path="orc.${k}" data-tipo="moedatexto" placeholder="0,00" aria-label="${r}"></td></tr>`).join('')}</tbody><tbody><tr class="total grande"><td>Total estimado do ato</td><td class="n" id="orcTotal">—</td></tr></tbody></table></div><div id="orcOpcoes" class="nao-imprimir"></div>`;
@@ -450,6 +455,7 @@
     const L = [];
     L.push(`ORÇAMENTO — ${ULT.modo === 'doacao' ? 'ESCRITURA DE DOAÇÃO' : ULT.modo === 'cumulativo' ? 'INVENTÁRIO CUMULATIVO' : 'INVENTÁRIO E PARTILHA'}`);
     L.push(`Cartório de Notas do 2º Ofício de Itabaiana/SE · referência ${dataBR(S.hoje)} · UFP/SE ${fmt(ULT.modo === 'doacao' ? ULT.d.ufp : S.ufp)}`); L.push('');
+    if (S.modo !== 'doacao' && S.desconsiderarMulta === true) L.push('MULTA DESCONSIDERADA POR AJUSTE MANUAL. Imposto principal mantido.' + (S.motivoMulta ? ' Motivo: ' + S.motivoMulta : ''));
     const bloco = (inv, t) => { L.push(t); L.push(`Monte-mor ${fmt(inv.pat.monteMor)}${inv.pat.dividas ? ` − dívidas ${fmt(inv.pat.dividas)}` : ''}${inv.pat.rg.temConjuge ? ` − meação ${fmt(inv.pat.meacao)}` : ''} = herança ${fmt(inv.pat.heranca)}`); inv.itc.linhas.forEach(l => L.push(`  • ${l.nome} (${l.papel}): quinhão ${fmt(l.quinhao)} = ${fmtN(l.ufps, 1)} UFP → ${l.situacao === 'tributado' ? pct(l.aliq) + ' = ' + fmt(l.imposto) : l.situacao}${l.multa ? ` + multa ${fmt(l.multa)}` : ''}`)); L.push(`  ITCMD: ${fmt(inv.itc.totalGeral)}`); if (inv.exced) L.push(`  Excedente de quinhão (Inter Vivos I): ${inv.exced.porBeneficiario.map(x => x.nome + ' ' + fmt(x.base)).join('; ')} → ITCMD doação ${fmt(inv.exced.total)}`); L.push(''); };
     if (ULT.modo === 'doacao') { L.push('Donatários:'); ULT.d.linhas.forEach(l => L.push(`  • ${l.nome}: base ${fmt(l.quinhao)} (${fmtN(l.ufps, 1)} UFP) → ${l.situacao === 'tributado' ? pct(l.aliq) + ' = ' + fmt(l.imposto) : l.situacao}`)); L.push(`  ITCMD: ${fmt(ULT.d.total)}`); L.push(''); }
     else if (ULT.modo === 'cumulativo') { bloco(ULT.c.inv1, `1ª declaração — ${S.inv[0].nome}`); bloco(ULT.c.inv2, `2ª declaração — ${S.inv[1].nome}`); }
@@ -539,37 +545,51 @@
     });
   }
   let timer = null;
-  function agendar() { clearTimeout(timer); timer = setTimeout(() => { calcular(); refrescarBlocosReais(); salvarAuto(); }, 250); }
+  function agendar() { salvarAuto(); clearTimeout(timer); timer = setTimeout(() => { calcular(); refrescarBlocosReais(); }, 250); }
 
-  $('#btExemplo').addEventListener('click', () => { S = exemplo(); ABERTOS = {}; renderForm(); calcular(); salvarAuto(); toast('Exemplo carregado'); });
-  $('#btLimpar').addEventListener('click', () => { S = estadoInicial(); ABERTOS = {}; renderForm(); calcular(); try { localStorage.removeItem('itcmd-rascunho'); } catch (e) { } toast('Formulário limpo'); });
-  $('#btSalvar').addEventListener('click', () => { salvarAuto(true); });
+  $('#btExemplo').addEventListener('click', () => { if (ARQUIVO && ARQUIVO.novo(exemplo())) toast('Exemplo carregado'); });
+  $('#btLimpar').addEventListener('click', () => { if (ARQUIVO) ARQUIVO.novo(); });
+  $('#btSalvar').addEventListener('click', () => { if (ARQUIVO) ARQUIVO.salvar().catch(e => toast(e.erro || e.message || 'Não foi possível salvar.')); });
   $('#btImprimir').addEventListener('click', imprimirOrcamento);
-  function imprimirOrcamento() {
-    if (!ULT) return;
-    let quem = ''; try { quem = (typeof SESSAO !== 'undefined' && SESSAO && SESSAO.nome) ? String(SESSAO.nome) : ''; } catch (e) { }
-    const css = `body{font-family:Arial,Helvetica,sans-serif;color:#000;font-size:12.5pt;margin:18mm 16mm;line-height:1.35}
-      h1{font-size:18pt;margin:0 0 2px}h2{font-size:14pt;margin:18px 0 6px;border-bottom:1.5pt solid #631325;padding-bottom:3px}h3{font-size:12.5pt;margin:14px 0 4px;color:#631325}
-      .cab{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:2pt solid #631325;padding-bottom:6px;margin-bottom:10px}.cab small{color:#333}
-      table{border-collapse:collapse;width:100%;font-size:11pt;margin-top:4px}th,td{border-bottom:.6pt solid #999;padding:4px 6px;text-align:left;vertical-align:top}th{font-size:9.5pt;text-transform:uppercase;letter-spacing:.04em;background:#f2eee6}
-      td.n,th.n{text-align:right;white-space:nowrap}tr.total td{font-weight:bold;border-top:1.5pt solid #333}tr.grande td{font-size:14pt}.notinha{font-size:10pt;color:#333}.dica{font-size:9.5pt;color:#333}
-      .pill{border:.6pt solid #666;border-radius:8px;padding:0 6px;font-size:10pt}.kpis{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0}.kpi{border:.8pt solid #999;border-radius:6px;padding:6px 10px;min-width:140px}.kpi .r{font-size:9.5pt;text-transform:uppercase}.kpi .v{font-weight:bold;font-size:13pt}
-      .aviso{border-left:3pt solid #b98a3e;padding:4px 8px;margin:6px 0;font-size:10.5pt}.aviso ul{margin:0;padding-left:16px}.fracao{font-weight:bold}.assinatura{margin-top:22px;font-size:10pt;color:#333;border-top:.6pt dashed #999;padding-top:8px}
-      .nao-imprimir,button,input{display:none}details{display:block}summary{font-weight:bold;margin-top:14px}ol,ul{font-size:10.5pt}@page{size:A4;margin:12mm}`;
-    // valores digitados no orçamento entram como texto (os inputs não imprimem)
-    const orc = $('#orcCorpo').cloneNode(true);
-    orc.querySelectorAll('input').forEach(i => { const s = document.createElement('span'); s.textContent = i.value ? fmt(parseMoeda(i.value)) : 'R$ 0,00'; i.replaceWith(s); });
-    const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Orçamento — ${esc($('#orcTitulo') ? $('#orcTitulo').textContent : 'ITCMD')}</title><style>${css}</style></head><body>
-      <div class="cab"><div><h1>Cartório de Notas do 2º Ofício de Itabaiana/SE</h1><div>Orçamento de custos do ato — ITCMD, emolumentos e despesas</div></div><small>${esc($('#orcData').textContent)}</small></div>
-      <h2>Orçamento do ato</h2>${orc.innerHTML}
-      <p class="assinatura">${esc($('#orcamento .assinatura').textContent)}${quem ? '<br>Elaborado por ' + esc(quem) + '.' : ''}</p>
-      <h2>Memória de cálculo</h2>${$('#resCorpo').innerHTML}
-      <details open><summary>Premissas e base legal</summary>${$('#premissas ol').outerHTML}</details>
-      </body></html>`;
-    const w = window.open('', '_blank');
-    if (!w) { toast('O navegador bloqueou a janela de impressão — libere pop-ups para o Hub.'); return; }
-    w.document.open(); w.document.write(html); w.document.close();
-    w.focus(); setTimeout(() => { try { w.print(); } catch (e) { } }, 350);
+  function capturarEstado() {
+    clearTimeout(timer); calcular();
+    if (S.orc) delete S.orc.honorarios;
+    return window.ITCMDArquivo.copiar(S);
+  }
+  function limparPdfsAtuais() {
+    ['declBaixar', 'declBaixarIV'].forEach(id => { const link = $('#' + id); if (!link) return; if (link.dataset.url) URL.revokeObjectURL(link.dataset.url); delete link.dataset.url; link.removeAttribute('href'); link.classList.add('oculto'); });
+    window.ITCMD_ULTIMO_PDF = window.ITCMD_ULTIMA_DECL = window.ITCMD_ULTIMO_PDF_IV = window.ITCMD_ULTIMA_DECL_IV = null;
+    const av = $('#declAviso'); if (av) { av.replaceChildren(); av.classList.add('oculto'); }
+  }
+  function aplicarEstadoSalvo(v) { clearTimeout(timer); S = migrar(v); ABERTOS = {}; ANTES_IMPORTACAO = null; limparPdfsAtuais(); renderForm(); calcular(); }
+  function gerarOrcamentoPdf() {
+    const id = ARQUIVO ? ARQUIVO.identificacao() : {};
+    const linhas = $$('#orcCorpo tbody tr').map(tr => {
+      const td = tr.children; if (td.length < 2) return null;
+      const label = td[0].querySelector('label'), input = td[1].querySelector('input');
+      return { rotulo: (label ? label.textContent : td[0].childNodes[0].textContent).trim(),
+        valor: input ? fmt(parseMoeda(input.value)) : td[1].textContent.trim(),
+        total: tr.classList.contains('total'), subtotal: tr.classList.contains('sub') };
+    }).filter(Boolean);
+    return window.ITCMDArquivo.pdfOrcamento(PDFMini, {
+      titulo: id.titulo || window.ITCMDArquivo.tituloPadrao(S), protocolo: id.protocolo || '',
+      linhas, ajusteMulta: S.modo !== 'doacao' && S.desconsiderarMulta === true ? 'Multa desconsiderada por ajuste manual. Imposto principal mantido.' + (S.motivoMulta ? ' Motivo: ' + S.motivoMulta : '') : '',
+      referencia: $('#orcData').textContent, resumo: textoResumo(),
+      premissas: [...new Set([...$$('#premissas li').map(x => x.textContent.trim()), ...$$('#resCorpo .aviso').map(x => x.textContent.trim())])],
+      assinatura: $('#orcamento .assinatura').textContent, quem: SESSAO.nome || ''
+    });
+  }
+  async function imprimirOrcamento() {
+    if (!ARQUIVO || ARQUIVO.modelo.ocupado) return;
+    const btn = $('#btImprimir'); btn.disabled = true;
+    try {
+      const estado = capturarEstado(); if (!ULT) throw new Error('Confira os dados antes de gerar o orçamento.');
+      const blob = gerarOrcamentoPdf();
+      const nome = 'Orcamento-ITCMD-' + (window.ITCMDArquivo.tituloPadrao(estado).replace(/[^\p{L}\p{N}]+/gu, '-')).slice(0,90) + '-' + estado.hoje + '.pdf';
+      await ARQUIVO.guardarDocumentos([{ tipo: 'orcamento', nome, blob }], estado);
+      ARQUIVO.oferecerPdf(blob, nome); toast('Orçamento salvo no Hub. Abra o PDF para imprimir.');
+    } catch (e) { if (!e.cancelado) toast(e.erro || e.message || 'Não foi possível arquivar o orçamento.'); }
+    finally { btn.disabled = false; }
   }
   $('#btCopiar').addEventListener('click', () => {
     const t = textoResumo();
@@ -579,13 +599,16 @@
   });
   function migrar(r) {
     const base = estadoInicial(); const s = { ...base, ...r, orc: { ...base.orc, ...(r.orc || {}) }, emol: { ...base.emol, ...(r.emol || {}) } };
+    delete s.orc.honorarios;
+    s.desconsiderarMulta = r.desconsiderarMulta === true;
+    s.motivoMulta = String(r.motivoMulta || '').slice(0, 1000);
     s.inv = [0, 1].map(k => { const f = { ...novoFalecido('', 'solteiro'), ...((r.inv || [])[k] || {}) }; f.conjuge = { nome: '', separadoFato: false, sumula377: false, ...(f.conjuge || {}) }; f.ascendentes = { ...base.inv[0].ascendentes, ...(f.ascendentes || {}) }; const d0 = novaDecl(); f.decl = { ...d0, ...(f.decl || {}), inventariante: { ...d0.inventariante, ...((f.decl || {}).inventariante || {}) }, responsavel: { ...d0.responsavel, ...((f.decl || {}).responsavel || {}) } }; ['descendentes', 'colaterais', 'bens'].forEach(c => { if (!Array.isArray(f[c])) f[c] = []; }); f.descendentes.concat(f.colaterais).forEach(x => { if (!x.uid) x.uid = uid(); if (!Array.isArray(x.representantes)) x.representantes = []; x.representantes.forEach(y => { if (!y.uid) y.uid = uid(); }); }); if (!f.isentosVI) f.isentosVI = {}; f.partilhaReal = { ...novaPartilhaReal(), ...(f.partilhaReal || {}) }; if (!f.partilhaReal.reais) f.partilhaReal.reais = {}; if (!f.partilhaReal.cpfs) f.partilhaReal.cpfs = {}; if (f.partilhaReal.taxaFr && !(f.partilhaReal.taxaFr instanceof M.Fr)) f.partilhaReal.taxaFr = f.partilhaReal.taxaFr.n != null ? new M.Fr(f.partilhaReal.taxaFr.n, f.partilhaReal.taxaFr.d) : null; return f; });
     s.doa = { ...novaDoacao(), ...(r.doa || {}) }; ['doadores', 'donatarios', 'bens'].forEach(c => { if (!Array.isArray(s.doa[c])) s.doa[c] = []; }); s.doa.donatarios.forEach(x => { if (!x.uid) x.uid = uid(); });
     return s;
   }
-  $('#btRestaurar').addEventListener('click', () => { try { const r = JSON.parse(localStorage.getItem('itcmd-rascunho')); if (r && r.S) { S = migrar(r.S); renderForm(); calcular(); toast('Rascunho restaurado'); } } catch (e) { toast('Rascunho ilegível'); } $('#barraRascunho').classList.add('oculto'); });
+  $('#btRestaurar').addEventListener('click', () => { if (!confirm('Este rascunho antigo não identifica quem o criou. Confirma que ele é seu e deseja importá-lo?')) return; try { const r = JSON.parse(localStorage.getItem('itcmd-rascunho')); if (r && r.S && ARQUIVO && ARQUIVO.novo(migrar(r.S))) toast('Rascunho importado. Salve o trabalho no Hub.'); } catch (e) { toast('Rascunho ilegível'); } $('#barraRascunho').classList.add('oculto'); });
   $('#btDescartar').addEventListener('click', () => { try { localStorage.removeItem('itcmd-rascunho'); } catch (e) { } $('#barraRascunho').classList.add('oculto'); });
-  function salvarAuto(avisar) { try { localStorage.setItem('itcmd-rascunho', JSON.stringify({ S, em: Date.now() })); if (avisar) toast('Rascunho salvo neste navegador'); } catch (e) { if (avisar) toast('Não foi possível salvar aqui'); } }
+  function salvarAuto() { if (ARQUIVO) ARQUIVO.marcar(); }
   let toastTimer = null;
   function toast(m) { if (typeof window.toast === 'function') { try { window.toast(m); return; } catch (e) { } } const t = $('#itcToast'); if (!t) return; t.textContent = m; t.classList.add('ativo'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('ativo'), 2200); }
 
@@ -800,21 +823,30 @@
       if (!arqs.length) { status.innerHTML = ''; toast('Anexe o requerimento e os documentos do dossiê'); return; }
       if (typeof IA_STATUS !== 'undefined' && IA_STATUS && IA_STATUS.configurada === false) { status.innerHTML = '<div class="aviso erro">A IA ainda não foi ligada no servidor — avise o Tabelião.</div>'; return; }
       ctrl = new AbortController(); btn.textContent = 'Interromper';
+      const origemArquivo = ARQUIVO ? ARQUIVO.modelo.ticket() : null;
+      const conferirOrigem = () => {
+        if (ctrl && ctrl.signal.aborted) throw { cancelado: true };
+        if (origemArquivo && !ARQUIVO.modelo.mesmaRevisao(origemArquivo)) throw { cancelado: true, contextoMudou: true };
+      };
       const t0 = Date.now();
       const pintar = () => { const seg = Math.round((Date.now() - t0) / 1000); status.innerHTML = typeof htmlProgresso === 'function' ? htmlProgresso(`Lendo ${arqs.length} arquivo(s) do dossiê…`, seg) : `<div class="importar-progresso"><b>Lendo o dossiê…</b>${seg} s — a IA está trabalhando; costuma levar até um minuto.</div>`; };
       pintar(); relogio = setInterval(pintar, 1000);
       const obs = ($('#itcmdObs').value || '').trim().slice(0, 4000);
       Promise.all(arqs.map(a => blobParaBase64(a.blob).then(b64 => ({ nome: a.nome, mime: a.mime, base64: b64 })))).then(arquivos => {
+        conferirOrigem();
         const corpo = { arquivos }; if (obs) corpo.texto = obs;
-        return api('/hub/ia/itcmd', { corpo, sinal: ctrl.signal });
+        return api('/hub/ia/itcmd', { corpo, sinal: ctrl.signal, semRedirecionar: true });
       }).then(r => {
+        conferirOrigem();
         clearInterval(relogio); status.innerHTML = '';
         if (!r || !r.dados) throw { status: 502, erro: 'resposta sem dados' };
         importarDossie(r.dados, { modelo: r.modelo, ms: r.ms, custo_usd: r.custo_usd, alertas: r.alertas, arquivos: arqs.map(a => a.nome) });
       }).catch(e => {
         clearInterval(relogio);
+        if (origemArquivo && !ARQUIVO.modelo.mesmaRevisao(origemArquivo)) e = { cancelado: true, contextoMudou: true };
+        if (e && e.status === 401) sessaoExpirada();
         const msg = (e && e.status === 502 && e.dados && e.dados.motivo === 'json') ? 'O modelo não devolveu dados estruturados — tente de novo. Os campos não foram alterados.' : (typeof mensagemErroIA === 'function' ? mensagemErroIA(e) : (e && e.erro) || 'falha na leitura');
-        status.innerHTML = (e && e.cancelado) ? '<p class="notinha">Leitura interrompida.</p>' : `<div class="aviso erro importar-erro">${esc(msg)}</div>`;
+        status.innerHTML = (e && e.contextoMudou) ? '<p class="notinha">O trabalho ou os dados mudaram durante a leitura. O formulário foi preservado. Repita a leitura do dossiê se quiser aplicá-la ao trabalho atual.</p>' : (e && e.cancelado) ? '<p class="notinha">Leitura interrompida.</p>' : `<div class="aviso erro importar-erro">${esc(msg)}</div>`;
       }).then(() => { ctrl = null; btn.textContent = 'Extrair dados do dossiê'; });
     });
   }
@@ -822,7 +854,9 @@
 
   /* ---------- v1.43 — Declaração do ITCMD (SEFAZ) ---------- */
   function invsAtuais() { if (!ULT || ULT.modo === 'doacao') return []; return ULT.modo === 'cumulativo' ? [ULT.c.inv1, ULT.c.inv2] : [ULT.inv]; }
-  function gerarDeclaracao(ignorarPendencias) {
+  async function gerarDeclaracao(ignorarPendencias) {
+    if (!ARQUIVO || ARQUIVO.modelo.ocupado) return;
+    capturarEstado();
     const aviso = $('#declAviso'), link = $('#declBaixar');
     if (!aviso) return;
     const mostrar = h => { aviso.innerHTML = h; aviso.classList.remove('oculto'); };
@@ -843,27 +877,28 @@
       return;
     }
     try {
+      const estado = capturarEstado();
       const r = window.ITCMD_DECL.gerarPdf(S, invs, { quem });
-      const nome = 'Declaracao-ITCMD-' + (invs.map(i => (i.falecido.nome || 'falecido').replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '')).join('-e-')).slice(0, 80) + '-' + S.hoje + '.pdf';
-      const url = URL.createObjectURL(r.blob);
-      if (link.dataset.url) { try { URL.revokeObjectURL(link.dataset.url); } catch (e) { } }
+      const nome = 'Declaracao-ITCMD-' + (invs.map(i => (i.falecido.nome || 'falecido').replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '')).join('-e-')).slice(0, 80) + '-' + estado.hoje + '.pdf';
+      const iv = temExced ? window.ITCMD_DECL.gerarInterVivos(S, invs, { quem }) : null;
+      const nomeIV = iv ? 'Declaracao-ITCMD-InterVivosI-' + iv.dados.map(D => D.donatario.nome.replace(/[^\p{L}\p{N}]+/gu, '-')).join('-').slice(0,60) + '-' + estado.hoje + '.pdf' : '';
+      const docs = [{ tipo: 'declaracao_causa_mortis', nome, blob: r.blob }];
+      if (iv) docs.push({ tipo: 'declaracao_inter_vivos', nome: nomeIV, blob: iv.blob });
+      mostrar('<div class="aviso">Arquivando declarações e dados no Hub…</div>');
+      const salvo = await ARQUIVO.guardarDocumentos(docs, estado);
+      const url = ARQUIVO.oferecerPdf(r.blob, nome);
+      if (link.dataset.url) URL.revokeObjectURL(link.dataset.url);
       link.href = url; link.download = nome; link.dataset.url = url; link.classList.remove('oculto');
       window.ITCMD_ULTIMO_PDF = r.bytes; window.ITCMD_ULTIMA_DECL = r.dados;
-      const a = document.createElement('a'); a.href = url; a.download = nome; document.body.appendChild(a); a.click(); a.remove();
-      let extra = '';
-      const iv = temExced ? window.ITCMD_DECL.gerarInterVivos(S, invs, { quem }) : null;
       if (iv) {
-        const nomeIV = 'Declaracao-ITCMD-InterVivosI-' + iv.dados.map(D => D.donatario.nome.replace(/[^\p{L}\p{N}]+/gu, '-').replace(/^-|-$/g, '')).join('-').slice(0, 60) + '-' + S.hoje + '.pdf';
-        const urlIV = URL.createObjectURL(iv.blob);
-        const linkIV = $('#declBaixarIV'); if (linkIV) { if (linkIV.dataset.url) { try { URL.revokeObjectURL(linkIV.dataset.url); } catch (e) { } } linkIV.href = urlIV; linkIV.download = nomeIV; linkIV.dataset.url = urlIV; linkIV.classList.remove('oculto'); }
+        const urlIV = ARQUIVO.oferecerPdf(iv.blob, nomeIV); const linkIV = $('#declBaixarIV');
+        if (linkIV) { if (linkIV.dataset.url) URL.revokeObjectURL(linkIV.dataset.url); linkIV.href = urlIV; linkIV.download = nomeIV; linkIV.dataset.url = urlIV; linkIV.classList.remove('oculto'); }
         window.ITCMD_ULTIMO_PDF_IV = iv.bytes; window.ITCMD_ULTIMA_DECL_IV = iv.dados;
-        setTimeout(() => { const a2 = document.createElement('a'); a2.href = urlIV; a2.download = nomeIV; document.body.appendChild(a2); a2.click(); a2.remove(); }, 600);
-        extra = ` <b>E mais:</b> a <b>Declaração Inter Vivos I</b> do excedente (${iv.dados.length} declaração(ões), ${iv.paginas} página(s)): <b>${esc(nomeIV)}</b> — quadro 6 com a estimativa da Calculadora; o DAE é emitido por donatário.`;
       } else { const linkIV = $('#declBaixarIV'); if (linkIV) linkIV.classList.add('oculto'); }
-      mostrar(`<div class="aviso ok">✓ Declaração gerada: <b>${esc(nome)}</b> — ${r.paginas} página(s)${invs.length > 1 ? ', uma declaração por falecido' : ''}. Confira o PDF antes de enviar ao advogado.${pend.length ? ' Campos em branco: ' + pend.map(x => x.itens.length).reduce((s, n) => s + n, 0) + '.' : ''}${extra}</div>`);
-      try { if (typeof registrar === 'function') registrar('pdf', 'itcmd', 'declaracao'); } catch (e) { }
-      toast('Declaração do ITCMD gerada');
-    } catch (e) { console.error(e); mostrar(`<div class="aviso erro">Não foi possível gerar o PDF: ${esc(e.message)}</div>`); }
+      mostrar('<div class="aviso ok">✓ Declaração arquivada na versão ' + salvo.versao + ': <b>' + esc(nome) + '</b> (' + r.paginas + ' página(s)). Confira o PDF antes de enviar ao advogado.' + (iv ? ' A Declaração Inter Vivos I do excedente também foi arquivada nesta versão.' : '') + (pend.length ? ' Há campos em branco, conforme a conferência apresentada.' : '') + '</div>');
+      try { if (typeof registrar === 'function') registrar('pdf', 'itcmd', 'declaracao'); } catch (e) {}
+      toast('Declarações salvas no Hub');
+    } catch (e) { if (!e.cancelado) mostrar(`<div class="aviso erro">Não foi possível arquivar o PDF: ${esc(e.erro || e.message || "tente novamente")}</div>`); }
   }
   RAIZ.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
@@ -874,8 +909,14 @@
 
   /* ---------- Início ---------- */
   if (/claude\.ai|claudeusercontent|anthropic/.test(location.hostname)) $('#btImprimir').classList.add('oculto');
-  let rascunho = null; try { rascunho = JSON.parse(localStorage.getItem('itcmd-rascunho')); } catch (e) { }
-  if (rascunho && rascunho.S) { S = exemplo(); $('#barraRascunho').classList.remove('oculto'); } else S = exemplo();
-  renderForm(); calcular();
-  window.ITCMD_UI = { get estado() { return S; }, set estado(v) { S = v; renderForm(); calcular(); }, calcular, textoResumo, get ultimo() { return ULT; } };
+  try { if (localStorage.getItem('itcmd-rascunho')) $('#barraRascunho').classList.remove('oculto'); } catch (e) {}
+  S = estadoInicial(); renderForm(); calcular();
+  ARQUIVO = window.ITCMDArquivo.montar({
+    host: $('#itcmdArquivo'), sessao: () => SESSAO, api, endpoint: () => CONFIG.endpoint, expirada: sessaoExpirada,
+    estado: capturarEstado, aplicar: aplicarEstadoSalvo, novo: estadoInicial
+  });
+  ARQUIVO.limparSessao = function () { ARQUIVO.reset(); aplicarEstadoSalvo(estadoInicial()); };
+  window.ITCMD_ARQUIVO = ARQUIVO;
+  window.ITCMD_UI = { get estado() { return S; }, set estado(v) { aplicarEstadoSalvo(v); ARQUIVO.marcar(); }, calcular, textoResumo, gerarOrcamentoPdf, get ultimo() { return ULT; } };
+
 })();

@@ -1,0 +1,14 @@
+#itcmdRaiz #itcmdArquivo{margin:14px 0}
+#itcmdRaiz .itc-arq-grupos{display:flex;gap:12px;flex-wrap:wrap;margin-top:20px;margin-bottom:12px}#itcmdRaiz .itc-arq-grupos .btn[aria-pressed="true"]{color:#fff;background:#631325}
+#itcmdRaiz .itc-arquivo{padding:20px;border:1px solid #d8c7cb;border-radius:12px;background:#fff}
+#itcmdRaiz .itc-arq-topo{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}
+#itcmdRaiz .itc-arq-topo h2{margin:0 0 8px}#itcmdRaiz .itc-arq-ident{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin:18px 0}
+#itcmdRaiz .itc-arq-ident label{display:flex;flex-direction:column;gap:7px;font-size:14px;font-weight:600;color:#202a3a}
+#itcmdRaiz .itc-arq-ident input,#itcmdRaiz .itc-arq-busca input{font:inherit;color:#202a3a;background:#fff;border:1px solid #b9bec6;border-radius:7px;padding:10px 12px;min-height:44px;width:100%;min-width:0;box-sizing:border-box}
+#itcmdRaiz .itc-arq-status{margin:12px 0;color:#631325;font-size:14px;line-height:1.5;font-weight:600}
+#itcmdRaiz .itc-arquivo details{margin-top:15px;border-top:1px solid #ddd;padding-top:12px}#itcmdRaiz .itc-arquivo summary{cursor:pointer;font-weight:700;color:#202a3a}
+#itcmdRaiz .itc-arq-busca{display:flex;gap:8px;margin:12px 0}#itcmdRaiz .itc-arq-item{display:flex;flex-direction:column;gap:5px;text-align:left;width:100%;padding:12px;margin-top:8px;border:1px solid #ddd;border-radius:8px;background:#fff;color:#202a3a}
+#itcmdRaiz .itc-arq-item span,#itcmdRaiz .itc-arq-versao span{font-size:12px;color:#667085}#itcmdRaiz .itc-arq-versao{margin-top:12px;padding:10px;background:#faf8f8;border-radius:8px}
+#itcmdRaiz .itc-arq-versao>div,#itcmdRaiz .itc-arq-documentos,#itcmdRaiz .itc-arq-download>div{display:flex;gap:8px;align-items:center;flex-wrap:wrap}#itcmdRaiz .itc-arq-documentos{margin-top:8px}#itcmdRaiz .itc-arq-documentos button{overflow-wrap:anywhere;max-width:100%;white-space:normal}
+#itcmdRaiz .itc-arq-download{padding:10px 0}#itcmdRaiz .itc-arq-download>div{margin-bottom:8px}#itcmdRaiz .itc-arquivo button:focus-visible,#itcmdRaiz .itc-arquivo input:focus-visible{outline:3px solid #631325;outline-offset:2px}
+@media(max-width:620px){#itcmdRaiz .itc-arq-ident{grid-template-columns:1fr}#itcmdRaiz .itc-arq-topo{flex-direction:column}#itcmdRaiz .itc-arq-topo .btn{align-self:flex-start}}

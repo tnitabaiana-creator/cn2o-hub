@@ -71,7 +71,7 @@ test('frontend servido inclui fontes corrigidas e todos os scripts continuam sin
   assert.doesNotMatch(html, /inventário com bens pela faixa do valor de todos os bens/);
   for (const [, script] of html.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)) new vm.Script(script);
 });
-test('tela de orçamento, barra de totais e função real de render usam a herança como base', () => {
+test('tela de orçamento, barra de totais e PDF arquivado usam a herança como base', async () => {
   const ui = fs.readFileSync(path.join(__dirname, 'ui.js'), 'utf8');
   const code = ui.slice(ui.indexOf('  function orcamento()'), ui.indexOf('  function textoResumo()'));
   const elements = new Map(); const $ = s => { if (!elements.has(s)) elements.set(s, { innerHTML: '', textContent: '', dataset: {}, contains: () => false }); return elements.get(s); };
@@ -92,14 +92,15 @@ test('tela de orçamento, barra de totais e função real de render usam a heran
   vm.runInNewContext(ui.slice(ui.indexOf('  function textoResumo()'), ui.indexOf('  /* ---------- Eventos ---------- */')) + '\nthis.resumo = textoResumo();', context);
   assert.match(context.resumo, /base dos emolumentos \(herança bruta\): R\$ 1\.000\.000,00 − meação excluída R\$ 500\.000,00 = R\$ 500\.000,00/);
   assert.match(context.resumo, /R\$ 6\.214,99/);
-  // Executa a função real de impressão e captura o HTML enviado à nova janela.
-  $('#orcCorpo').cloneNode = () => ({ innerHTML: '<table>' + $('#orcLinhas').innerHTML + '</table>', querySelectorAll: () => [] });
-  $('#premissas ol').outerHTML = '<ol><li>Nota 24</li></ol>';
-  let printed = '';
-  context.window = { open: () => ({ document: { open() {}, write: h => { printed = h; }, close() {} }, focus() {}, print() {} }) };
-  context.setTimeout = fn => fn();
-  const start = ui.indexOf('  function imprimirOrcamento()'), end = ui.indexOf("  $('#btCopiar')", start);
-  vm.runInNewContext(ui.slice(start, end) + '\nimprimirOrcamento();', context);
-  assert.match(printed, /base dos emolumentos \(herança bruta\): R\$ 1\.000\.000,00 − meação excluída R\$ 500\.000,00 = R\$ 500\.000,00/);
-  assert.match(printed, /R\$ 6\.214,99/);
+  // O fluxo real arquiva o PDF com o estado antes de oferecê-lo para impressão.
+  const eventos = []; let arquivado;
+  context.window = { ITCMDArquivo: require('../../../itcmd-arquivo.js') };
+  context.capturarEstado = () => context.S; context.gerarOrcamentoPdf = () => new Blob([context.resumo]); context.toast = () => {};
+  context.ARQUIVO = { modelo: {}, guardarDocumentos: async docs => { eventos.push('salvar'); arquivado = docs[0]; }, oferecerPdf: () => eventos.push('oferecer') };
+  const start = ui.indexOf('  async function imprimirOrcamento()'), end = ui.indexOf("  $('#btCopiar')", start);
+  await vm.runInNewContext(ui.slice(start, end) + '\nimprimirOrcamento();', context);
+  assert.deepEqual(eventos, ['salvar', 'oferecer']);
+  assert.equal(arquivado.tipo, 'orcamento');
+  assert.match(await arquivado.blob.text(), /base dos emolumentos \(herança bruta\): R\$ 1\.000\.000,00 − meação excluída R\$ 500\.000,00 = R\$ 500\.000,00/);
+  assert.match(await arquivado.blob.text(), /R\$ 6\.214,99/);
 });
