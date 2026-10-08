@@ -1,0 +1,9 @@
+.gestao-eyebrow { color:var(--vinho,#631325); font-size:11px; font-weight:700; letter-spacing:.15em; text-transform:uppercase; margin:0 0 10px; }
+.gestao-lista { list-style:none; padding:0; margin:24px 0; display:grid; gap:12px; }
+.gestao-lista button { width:100%; display:grid; grid-template-columns:46px 1fr 22px; align-items:center; gap:18px; padding:24px; text-align:left; color:var(--texto,#202a3a); background:var(--card,#fff); border:1px solid var(--linha,#e4ded2); border-radius:15px; cursor:pointer; font:inherit; transition:border-color .2s,box-shadow .2s; }
+.gestao-lista button:hover,.gestao-lista button:focus-visible { border-color:#631325; box-shadow:0 5px 18px rgba(32,42,58,.07); }
+.gestao-lista strong { display:block; font-size:18px; line-height:1.35; }
+.gestao-lista small { display:block; margin-top:7px; font-size:14px; line-height:1.55; color:var(--texto-suave,#626977); }
+.gestao-num { display:grid; place-items:center; width:42px; height:42px; border-radius:12px; background:var(--chip-fundo,rgba(99,19,37,.07)); color:var(--chip-texto,#631325); font-size:14px; font-weight:700; }
+#paginaGestaoEscrituras > .ferramenta-cab { margin-bottom:20px; }
+@media(max-width:600px) { .gestao-lista button { padding:18px 14px; grid-template-columns:35px 1fr 14px; gap:11px; } .gestao-num { width:33px;height:36px; } .gestao-lista strong { font-size:16px; } }

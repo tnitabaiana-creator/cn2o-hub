@@ -34,6 +34,7 @@ class Element {
   descendants() { return this.children.flatMap(x => typeof x === 'string' ? [] : [x, ...x.descendants()]); }
   querySelectorAll(selector) {
     if (selector === '[data-voltar]') return this.descendants().filter(x => 'data-voltar' in x.attrs);
+    if (selector === '[data-gestao-rel]') return this.descendants().filter(x => 'data-gestao-rel' in x.attrs);
     if (selector === '.carregando') return this.descendants().filter(x => x.className === 'carregando');
     if (selector === '[aria-label]') return this.descendants().filter(x => 'aria-label' in x.attrs);
     if (selector === '.card-acao') return this.descendants().filter(x => x.classList.contains('card-acao'));
@@ -76,7 +77,7 @@ function harness(login = 'colaborador.teste', admin = false) {
   const document = {
     createElement: tag => new Element(tag), getElementById: el,
     querySelectorAll(selector) {
-      if (selector === '[data-voltar]') return d.root.querySelectorAll(selector);
+      if (selector === '[data-voltar]' || selector === '[data-gestao-rel]') return d.root.querySelectorAll(selector);
       if (selector === '#secFerramentas .card, #linksUteis .link-item') return [...homeCards(), ...usefulLinks()];
       throw new Error('Unsupported selector in real code: ' + selector);
     }
@@ -86,7 +87,7 @@ function harness(login = 'colaborador.teste', admin = false) {
   const history = { pushState(state, _unused, url) { entries.splice(++cursor); entries.push({ state, url }); location.hash = url.includes('#') ? url.slice(url.indexOf('#')) : ''; } };
   const window = { scrollTo() {}, addEventListener(name, fn) { (winEvents[name] ||= []).push(fn); } };
   const ctx = vm.createContext({ document, window, location, history, el, SESSAO: { login, admin },
-    registrarAbertura: route => openings.push(route), toast: text => messages.push(text),
+    registrarAbertura: route => openings.push(route), marcarNav() {}, toast: text => messages.push(text),
     acervoAoAbrir: value => acervoCalls.push(value), setTimeout: fn => { fn(); return 0; } });
   vm.runInContext(configCode + navCode + leafHandlers + backHandlers + filterCode + '\naplicarLinks();', ctx);
   el('app').hidden = false;
