@@ -5404,6 +5404,7 @@ const SESSAO = { token: null, nome: null, login: null, cargo: null, admin: false
 
 function api(caminho, opcoes) {
   opcoes = opcoes || {};
+  const identidadeDaRequisicao = { token: SESSAO.token, login: SESSAO.login };
   const temCorpo = opcoes.corpo !== undefined;
   const headers = {};
   if (temCorpo) headers['Content-Type'] = 'application/json';
@@ -5421,7 +5422,7 @@ function api(caminho, opcoes) {
       try { dados = bruto ? JSON.parse(bruto) : null; } catch (e) {}
       if (!r.ok) {
         const err = { status: r.status, erro: (dados && dados.erro) || ('erro ' + r.status), dados: dados || {} };
-        if (r.status === 401 && !opcoes.semRedirecionar) sessaoExpirada();
+        if (r.status === 401 && !opcoes.semRedirecionar && SESSAO.token === identidadeDaRequisicao.token && SESSAO.login === identidadeDaRequisicao.login) sessaoExpirada();
         throw err;
       }
       semConexao(false);

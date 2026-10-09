@@ -9,6 +9,14 @@
   const esc = valor => String(valor == null ? '' : valor).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const mesValido = valor => /^\d{4}-(0[1-9]|1[0-2])$/.test(String(valor || ''));
   const inteiro = valor => Number.isSafeInteger(valor) && valor >= 0;
+  const METODOS = ['direta', 'auditoria_concordante', 'trello_divergencia'];
+  function validarMetodos(valor, total, legadoDireto) {
+    if (valor == null && legadoDireto) return { direta: total, auditoria_concordante: 0, trello_divergencia: 0 };
+    if (!valor || typeof valor !== 'object' || Array.isArray(valor) ||
+        Object.keys(valor).some(k => !METODOS.includes(k)) || METODOS.some(k => !inteiro(valor[k])) ||
+        METODOS.reduce((s, k) => s + valor[k], 0) !== total) throw new Error('Métodos de atribuição inválidos.');
+    return Object.fromEntries(METODOS.map(k => [k, valor[k]]));
+  }
   const numero = valor => Number(valor).toLocaleString('pt-BR');
   function diaValido(dia) {
     if (!/^\d{4}-\d{2}-\d{2}$/.test(String(dia || ''))) return false;
@@ -55,14 +63,21 @@
     const pessoas = new Set();
     const colaboradores = r.colaboradores.map(p => {
       if (!p || typeof p.id !== 'string' || !p.id || p.id.length > 160 || pessoas.has(p.id) ||
-          typeof p.nome !== 'string' || !p.nome.trim() || p.nome.length > 200 || p.fonte !== 'Extra Digital' ||
+          typeof p.nome !== 'string' || !p.nome.trim() || p.nome.length > 200 || !['Extra Digital', 'Extra Digital + Trello'].includes(p.fonte) ||
           !Array.isArray(p.marcos) || !p.marcos.length || new Set(p.marcos).size !== p.marcos.length ||
-          p.marcos.some(m => !['lavratura', 'registro'].includes(m)) || !inteiro(p.total_observado) ||
+          p.marcos.some(m => !['lavratura', 'registro', 'atribuicao_gerencial'].includes(m)) || !inteiro(p.total_observado) ||
           (a.cobertura_completa ? p.total_oficial !== p.total_observado : p.total_oficial !== null)) throw new Error('Atribuição de autoria inválida.');
+      const metodos = validarMetodos(p.metodos, p.total_observado, p.fonte === 'Extra Digital' && !p.marcos.includes('atribuicao_gerencial'));
+      const gerencial = metodos.auditoria_concordante + metodos.trello_divergencia;
+      if ((gerencial > 0) !== p.marcos.includes('atribuicao_gerencial') ||
+          (metodos.direta > 0) !== p.marcos.some(m => ['lavratura', 'registro'].includes(m)) ||
+          p.fonte !== (gerencial ? 'Extra Digital + Trello' : 'Extra Digital')) throw new Error('Fonte incompatível com o método de atribuição.');
       pessoas.add(p.id);
-      return { id: p.id, nome: p.nome, marcos: p.marcos.slice(), total_observado: p.total_observado, total_oficial: p.total_oficial };
+      return { id: p.id, nome: p.nome, fonte: p.fonte, marcos: p.marcos.slice(), metodos, total_observado: p.total_observado, total_oficial: p.total_oficial };
     });
     if (colaboradores.reduce((s, p) => s + p.total_observado, 0) !== a.com_autoria_confirmada) throw new Error('Autoria divergente do total.');
+    const metodos = validarMetodos(a.metodos, a.com_autoria_confirmada, colaboradores.every(p => p.metodos.direta === p.total_observado));
+    if (METODOS.some(k => colaboradores.reduce((s, p) => s + p.metodos[k], 0) !== metodos[k])) throw new Error('Métodos divergentes do total atribuído.');
     const meses = validarResposta({ meses: r.meses });
     if ((!meses.length && r.total_observado) || meses.some(m => m.mes < r.inicio.slice(0, 7) || m.mes > r.fim.slice(0, 7))) throw new Error('Bases fora do período.');
     // Cobertura de um período não é a cobertura do mês inteiro, mas exige todas as datas consultadas.
@@ -77,7 +92,7 @@
       com_pendencia_identificacao: r.com_pendencia_identificacao, meses, tipos,
       classificacao: { versao: c.versao, nao_classificados: c.nao_classificados, divergentes: c.divergentes },
       colaboradores, autoria: { status: a.status, sem_autoria_confirmada: a.sem_autoria_confirmada,
-        com_autoria_confirmada: a.com_autoria_confirmada, cobertura_completa: a.cobertura_completa } };
+        com_autoria_confirmada: a.com_autoria_confirmada, cobertura_completa: a.cobertura_completa, metodos } };
   }
   function validarSemana(r, referencia) {
     if (!r || r.fuso !== 'America/Sao_Paulo' || !diaValido(r.referencia) || (referencia && r.referencia !== referencia) ||
@@ -117,8 +132,14 @@
     if (r.tipos.length) html += '<div class="lavrados-tipos">' + r.tipos.map(t => '<div class="lavrados-tipo"><span>' + esc(t.nome) + (t.codigo === 'nao_classificado' ? '<small>Classificação não confirmada pela fonte</small>' : '') + '</span><strong>' + numero(t.total_observado) + '</strong></div>').join('') + '</div>';
     else html += '<p>Nenhum tipo disponível no período coberto pela extração.</p>';
     if (r.classificacao.divergentes) html += '<p class="lavrados-pendencia">' + numero(r.classificacao.divergentes) + ' registro(s) com classificação divergente na fonte, mantido(s) na contagem e sem classificação presumida.</p>';
-    html += '<div class="lavrados-autoria"><h4>Por escrevente responsável pelo registro/lavratura</h4><p>' + (r.autoria.cobertura_completa ? 'Atribuições confirmadas para todo o período.' : r.autoria.com_autoria_confirmada ? 'Contagens com evidência de autoria confirmada até esta extração. O agrupamento ainda não representa um fechamento individual.' : 'A extração ainda não identifica responsáveis com evidência de registro/lavratura.') + ' Usuários de cadastro e de protocolo não recebem atribuição automática de autoria.</p>';
-    if (r.colaboradores.length) html += '<div class="lavrados-tipos">' + r.colaboradores.map(p => '<div class="lavrados-tipo"><span>' + esc(p.nome) + '<small>Evidência: ' + p.marcos.map(esc).join(' e ') + ' · Extra Digital</small></span><strong>' + numero(p.total_observado) + '</strong></div>').join('') + '</div>';
+    html += '<div class="lavrados-autoria"><h4>Por escrevente responsável</h4><p>' + (r.autoria.cobertura_completa ? 'Atribuições conferidas para todo o período.' : r.autoria.com_autoria_confirmada ? 'Atribuições conferidas até esta extração. O agrupamento ainda não representa um fechamento individual.' : 'A extração ainda não permite atribuir as escrituras aos responsáveis.') + ' Prioridade para a evidência direta de registro/lavratura. Quando ela falta, o último escrevente da auditoria é comparado ao responsável do cartão Trello; na divergência, prevalece o Trello, conforme critério do titular.</p>';
+    if (r.colaboradores.length) html += '<div class="lavrados-tipos">' + r.colaboradores.map(p => {
+      const m = p.metodos, explicacoes = [];
+      if (m.direta) explicacoes.push('Evidência: ' + p.marcos.filter(x => x !== 'atribuicao_gerencial').map(esc).join(' e ') + ' · Extra Digital · ' + numero(m.direta));
+      if (m.auditoria_concordante) explicacoes.push('Critério gerencial · auditoria e Trello concordantes · ' + numero(m.auditoria_concordante));
+      if (m.trello_divergencia) explicacoes.push('Critério gerencial · Trello prevalece na divergência · ' + numero(m.trello_divergencia));
+      return '<div class="lavrados-tipo"><span>' + esc(p.nome) + '<small>' + explicacoes.join('<br>') + '</small></span><strong>' + numero(p.total_observado) + '</strong></div>';
+    }).join('') + '</div>';
     if (r.autoria.sem_autoria_confirmada) html += '<div class="lavrados-tipo lavrados-sem-autoria"><span>Responsável não identificado<small>Pendência de atribuição; não representa produtividade zero.</small></span><strong>' + numero(r.autoria.sem_autoria_confirmada) + '</strong></div>';
     else if (!r.colaboradores.length) html += '<p>Sem atos atribuídos no período coberto pela extração.</p>';
     html += '</div></div>';

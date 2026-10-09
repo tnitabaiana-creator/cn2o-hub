@@ -216,6 +216,35 @@ test('identificador e nome de autoria aceitam os limites de 160 e 200 caracteres
   assert.throws(() => L.validarSemana({ ...r, colaboradores: [{ ...pessoa, nome: 'N'.repeat(201) }] }));
 });
 
+test('atribuição gerencial diferencia concordância e prevalência Trello sem mudar o total de escrituras', () => {
+  const metodos = { direta: 1, auditoria_concordante: 2, trello_divergencia: 3 };
+  const r = semana({ colaboradores: [colaborador({ total_observado: 6, fonte: 'Extra Digital + Trello', marcos: ['registro', 'atribuicao_gerencial'], metodos,
+    evidencia: { referencia: 'REFERENCIA-PRIVADA-NAO-EXIBIR' } })], autoria: { ...autoria(1, 6), metodos } });
+  const antes = JSON.stringify(r), dados = L.validarSemana(r), html = L.renderizar({ visao: 'semana', semana: { dados } });
+  assert.equal(dados.total_observado, 7); assert.equal(dados.autoria.sem_autoria_confirmada, 1);
+  assert.deepEqual(dados.autoria.metodos, metodos); assert.deepEqual(dados.colaboradores[0].metodos, metodos);
+  assert.match(html, /Evidência: registro · Extra Digital · 1/);
+  assert.match(html, /auditoria e Trello concordantes · 2/);
+  assert.match(html, /Trello prevalece na divergência · 3/);
+  assert.match(html, /Responsável não identificado/); assert.doesNotMatch(html, /REFERENCIA-PRIVADA/);
+  assert.equal(JSON.stringify(r), antes);
+});
+
+test('atribuição gerencial exige método conciliado, marco próprio e fonte correspondente', () => {
+  const metodos = { direta: 0, auditoria_concordante: 1, trello_divergencia: 2 };
+  const p = colaborador({ fonte: 'Extra Digital + Trello', marcos: ['atribuicao_gerencial'], metodos });
+  const r = semana({ colaboradores: [p], autoria: { ...autoria(4, 3), metodos } });
+  assert.equal(L.validarSemana(r).colaboradores[0].metodos.direta, 0);
+  for (const mudanca of [
+    { fonte: 'Extra Digital' }, { metodos: undefined }, { marcos: ['registro'] },
+    { marcos: ['registro', 'atribuicao_gerencial'] },
+    { metodos: { ...metodos, trello_divergencia: -1 } },
+    { metodos: { ...metodos, trello_divergencia: 3 } }
+  ]) assert.throws(() => L.validarSemana({ ...r, colaboradores: [{ ...p, ...mudanca }] }));
+  assert.throws(() => L.validarSemana({ ...r, autoria: { ...r.autoria, metodos: undefined } }));
+  assert.throws(() => L.validarSemana({ ...r, autoria: { ...r.autoria, metodos: { direta: 1, auditoria_concordante: 1, trello_divergencia: 1 } } }));
+});
+
 test('consulta de tipos do mês ocorre após a base mensal e sem verbos de escrita', async t => {
   const mensal = defer();
   const a = ambiente(t, (p, padrao) => p === MES ? mensal.promise : padrao(p));
