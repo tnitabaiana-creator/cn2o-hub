@@ -7,7 +7,7 @@ const vm = require('node:vm');
 const L = require('../gestao-lavrados.js');
 const tick = () => new Promise(resolve => setImmediate(resolve));
 const defer = () => { let resolve, reject; const promise = new Promise((a, b) => { resolve = a; reject = b; }); return { promise, resolve, reject }; };
-const mes = (extra = {}) => ({ mes: '2026-09', ate: '2026-09-30', corte_em: '2026-10-01T02:59:59Z', dia_final_completo: true, revisao: 1, total_oficial: 223, total_observado: 223, cobertura_completa: true, com_vinculo: 130, sem_vinculo: 93, importado_em: '2026-10-09T14:00:00Z', ...extra });
+const mes = (extra = {}) => ({ mes: '2026-09', ate: '2026-09-30', corte_em: '2026-10-01T03:00:00Z', dia_final_completo: true, revisao: 1, total_oficial: 223, total_observado: 223, cobertura_completa: true, com_vinculo: 130, sem_vinculo: 93, importado_em: '2026-10-09T14:00:00Z', ...extra });
 function ambiente(api, extra = {}) {
   const listeners = {}, chamadas = [], session = { token: 'privado', login: 'gestor', admin: true };
   let monitor, expirou = 0;
@@ -55,7 +55,7 @@ test('consulta é somente GET lógico e seleção do mês financeiro ausente per
   assert.match(a.host.innerHTML, /Junho de 2026/); assert.match(a.host.innerHTML, /Mês não conciliado/);
   assert.doesNotMatch(a.host.innerHTML, /<select/);
   a.controle.selecionar('2026-09'); assert.match(a.host.innerHTML, /<strong>223<\/strong>/);
-  assert.equal(a.chamadas.length, 1); a.controle.destruir();
+  assert.deepEqual(a.chamadas, ['/hub/atos-lavrados/meses', '/hub/atos-lavrados/resumo?inicio=2026-09-01&fim=2026-09-30']); a.controle.destruir();
 });
 test('exportação usa snapshot do mês e da sessão atuais, com corte e sem zero inventado', async () => {
   const a = ambiente(null, { mes: '2026-09' });
@@ -64,7 +64,7 @@ test('exportação usa snapshot do mês e da sessão atuais, com corte e sem zer
   assert.equal(copia.dados.total_oficial, 223); copia.dados.total_oficial = 999;
   const linhas = L.resumoExportacao(a.controle.snapshot('2026-09'));
   assert.deepEqual(linhas.find(x => x[0] === 'Escrituras lavradas'), ['Escrituras lavradas', '223']);
-  assert.match(JSON.stringify(linhas), /30\/09\/2026 às 23:59:59/);
+  assert.match(JSON.stringify(linhas), /01\/10\/2026 às 00:00:00/);
   assert.match(JSON.stringify(L.resumoExportacao(a.controle.snapshot('2026-08'))), /Não disponível/);
   a.session.login = 'outra'; assert.equal(a.controle.snapshot('2026-09'), null); a.controle.destruir();
 });
@@ -93,7 +93,7 @@ test('falha de rede não preserva um total antigo como se ainda fosse a consulta
   let falhar = false; const a = ambiente(() => { if (falhar) throw new Error('rede'); return { meses: [mes()] }; });
   await tick(); falhar = true; await a.controle.recarregar();
   assert.match(a.host.innerHTML, /fonte oficial está indisponível/); assert.doesNotMatch(a.host.innerHTML, /223/);
-  falhar = false; a.listeners.click({ target: { closest: () => ({}) } }); await tick();
+  falhar = false; a.listeners.click({ target: { closest: () => ({ hasAttribute: nome => nome === 'data-lav-retry' }) } }); await tick();
   assert.match(a.host.innerHTML, /<strong>223<\/strong>/); a.controle.destruir();
 });
 test('resposta de requisição superada não repõe dados antigos', async () => {
