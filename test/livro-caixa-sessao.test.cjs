@@ -14,6 +14,8 @@ function trecho(inicio, fim) {
 const baixarAnexo = trecho('    async function baixarAnexo(', '    const monitor');
 const carregar = trecho('    async function carregar(', '    function desenhar(');
 const salvar = trecho('    async function salvar(', '    async function historico(');
+const requisitar = trecho('    async function requisitar(', '    function situacao(');
+const historico = trecho('    async function historico(', '    async function baixarAnexo(');
 function downloadContexto() {
   let liberar, ativo = true, expiracoes = 0, downloads = 0;
   const ctx = vm.createContext({
@@ -52,7 +54,7 @@ function salvamentoContexto(respostaPost) {
     op: { api: async (rota, op) => { requests.push({ rota, corpo: op?.corpo }); if (op?.corpo) return respostaPost; throw { status: 503, erro: 'GET indisponível' }; } }
   });
   vm.runInContext('function atual(){return registros[0]} function desenhar(){host.querySelector("[data-salvar]").disabled=ocupado||bloqueado;}', ctx);
-  vm.runInContext(carregar + salvar, ctx);
+  vm.runInContext(requisitar + carregar + salvar, ctx);
   return { ctx, avisos, requests, elementos, iniciar: () => vm.runInContext('salvar({preventDefault(){}})', ctx) };
 }
 test('POST confirmado seguido de GET indisponível mantém revisão e resultado salvos', async () => {
@@ -65,6 +67,50 @@ test('POST confirmado seguido de GET indisponível mantém revisão e resultado 
   assert.equal(a.ctx.registros[0].projecao.liquido_projetado, 365.62);
   assert.equal(a.ctx.alterado, false);
   assert.match(a.avisos.at(-1), /Despesas salvas, mas a leitura/);
+});
+
+function apiContexto() {
+  const html = fs.readFileSync(path.join(__dirname, '../index.html'), 'utf8');
+  const inicio = html.indexOf('function api(caminho, opcoes)'), fim = html.indexOf('/* ============================================================', inicio);
+  assert.ok(inicio >= 0 && fim > inicio);
+  let resolver, ativo = true, expiracoesGlobais = 0, expiracoesLocais = 0, pedidos = 0;
+  const elementos = { '[data-total]': { value: '200,00' }, '[data-fonte]': { value: 'Livro fictício' }, '[data-salvar]': { disabled: false } };
+  const ctx = vm.createContext({
+    ROTA: '/hub/livro-caixa', CONFIG: { endpoint: 'https://exemplo.invalid' }, SESSAO: { token: 'sessao-antiga' },
+    geracao: 0, ocupado: false, bloqueado: false, alterado: false, arquivo: null, selecionado: '2026-10', registros: [mes(1, 100)],
+    autorizado: () => ativo, centavos: L.centavos, lerArquivo: async () => undefined,
+    host: { querySelector: k => elementos[k], querySelectorAll: () => Object.values(elementos) },
+    semConexao: () => {}, sessaoExpirada: () => { expiracoesGlobais++; }, situacao: () => {},
+    fetch: () => { pedidos++; return new Promise(resolve => { resolver = resolve; }); }
+  });
+  vm.runInContext(html.slice(inicio, fim), ctx);
+  ctx.op = { api: ctx.api, expirada: () => { expiracoesLocais++; } };
+  vm.runInContext('function atual(){return registros[0]} function desenhar(){}', ctx);
+  vm.runInContext(requisitar + carregar + salvar + historico, ctx);
+  return {
+    ctx, iniciar: expressao => vm.runInContext(expressao, ctx),
+    trocarSessao: () => { ativo = false; ctx.SESSAO.token = 'sessao-nova'; },
+    responder401: () => resolver({ ok: false, status: 401, text: async () => '{"erro":"sessão expirada"}' }),
+    contagem: () => ({ pedidos, globais: expiracoesGlobais, locais: expiracoesLocais })
+  };
+}
+test('GET, POST e histórico usam API real sem redirecionar uma sessão nova por 401 tardio', async () => {
+  for (const expressao of ['carregar(true)', 'salvar({preventDefault(){}})', 'historico()']) {
+    const a = apiContexto(), pendente = a.iniciar(expressao);
+    // O POST primeiro aguarda FileReader; os demais chegam ao fetch imediatamente.
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(a.contagem().pedidos, 1, expressao);
+    a.trocarSessao(); a.responder401(); await pendente;
+    assert.deepEqual(a.contagem(), { pedidos: 1, globais: 0, locais: 0 });
+  }
+});
+test('wrapper encerra somente a sessão ainda corrente e bloqueia novos pedidos após troca', async () => {
+  const a = apiContexto(), pendente = a.iniciar("requisitar('/hub/livro-caixa', {semRedirecionar:false})");
+  a.responder401(); await assert.rejects(pendente, e => e.status === 401);
+  assert.deepEqual(a.contagem(), { pedidos: 1, globais: 0, locais: 1 });
+  a.trocarSessao();
+  await assert.rejects(a.iniciar("requisitar('/hub/livro-caixa')"), e => e.cancelado === true);
+  assert.equal(a.contagem().pedidos, 1);
 });
 test('resposta de POST com mês ou revisão incorretos bloqueia repetição e conserva versão conhecida', async () => {
   for (const resposta of [{ ...mes(2, 200), mes: '2026-11' }, mes(1, 200), { mes: '2026-10', despesas: { revisao: 2 } }]) {
