@@ -2801,6 +2801,9 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 .atd-livro strong{display:block;font:800 26px/1.15 'Montserrat',sans-serif;color:#202a3a;margin-top:4px}
 .atd-livro strong.v{color:#631325}
 .atd-livro small{display:block;font-size:14px;line-height:1.35;color:#202a3a;margin-top:2px}
+#prodLivro{grid-template-columns:repeat(4,minmax(0,1fr))}
+#prodLivro strong{font-size:clamp(18px,2.1vw,26px)}
+@media(max-width:720px){#prodLivro{grid-template-columns:repeat(2,minmax(0,1fr))}}
 .atd-q{margin-top:14px;padding:14px 16px;border:1.5px solid rgba(32,42,58,.16);border-radius:12px;background:#ffffff;min-width:0}
 .atd-q h4{margin:0;font:700 17px/1.25 'Montserrat',sans-serif;color:#202a3a}
 .atd-q .atd-sub{margin:3px 0 10px;font-size:14px;line-height:1.45;color:#3a4454}
@@ -3009,6 +3012,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 <link rel="stylesheet" href="agenda-imagens.css">
 <link rel="stylesheet" href="itcmd-arquivo.css">
 <link rel="stylesheet" href="gestao-produtividade.css">
+<link rel="stylesheet" href="livro-caixa.css">
 <link rel="stylesheet" href="gestao-lavrados.css">
 <link rel="stylesheet" href="gestao.css">
 </head>
@@ -3343,12 +3347,18 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
         <li><button type="button" data-gestao-rel="atendimentos"><span class="gestao-num" aria-hidden="true">02</span><span><strong>Atendimentos do balcão</strong><small>Volume de atendimentos, períodos e indicadores do balcão de senhas.</small></span><span aria-hidden="true">→</span></button></li>
         <li><button type="button" data-gestao-rel="produtividade"><span class="gestao-num" aria-hidden="true">03</span><span><strong>Produtividade financeira</strong><small>Receita e lançamentos financeiros, com conferência das escrituras lavradas por mês.</small></span><span aria-hidden="true">→</span></button></li>
         <li><button type="button" id="gestaoEscrituras"><span class="gestao-num" aria-hidden="true">04</span><span><strong>Relatório de produtividade de escrituras</strong><small>Contagem oficial de escrituras lavradas e consulta ao histórico de fluxo e complexidade do Trello.</small></span><span aria-hidden="true">→</span></button></li>
+        <li id="gestaoLivroCaixaItem" hidden><button type="button" id="gestaoLivroCaixa"><span class="gestao-num" aria-hidden="true">05</span><span><strong>Livro-caixa do tabelião</strong><small>Receitas, despesas confirmadas e demonstrativo mensal privativo do tabelião.</small></span><span aria-hidden="true">→</span></button></li>
       </ul>
     </div>
     <div id="paginaGestaoEscrituras" hidden>
       <button class="voltar" data-voltar type="button">← Voltar à gestão</button>
       <div class="ferramenta-cab"><div><p class="gestao-eyebrow">Gestão · Escrituras</p><h2 tabindex="-1">Relatório de produtividade de escrituras</h2></div></div>
       <div id="gestaoProdutividadeHost"></div>
+    </div>
+    <div id="paginaLivroCaixa" hidden>
+      <button class="voltar" data-voltar type="button">← Voltar à gestão</button>
+      <div class="ferramenta-cab"><div><p class="gestao-eyebrow">Gestão · Acesso privativo</p><h2 tabindex="-1">Livro-caixa do tabelião</h2></div></div>
+      <div id="livroCaixaHost"></div>
     </div>
 
     <div id="paginaCalculadoras" class="pagina-grupo grupo-calculadoras" hidden>
@@ -5284,6 +5294,7 @@ const CLAUSULAS = [
 <script src="itcmd-arquivo.js"></script>
 <script src="gestao-lavrados.js"></script>
 <script src="gestao-produtividade.js"></script>
+<script src="livro-caixa.js"></script>
 <script>
 /* ============================================================
    HUB CN2O — o hub do Time CN2O · versão definitiva
@@ -5506,6 +5517,8 @@ function migrarSessaoAntiga() {
 }
 function limparSessao() {
   destruirGestaoProdutividade();
+  destruirLivroCaixa();
+  el('gestaoLivroCaixaItem').hidden = true;
   if (window.GestaoLavrados) window.GestaoLavrados.limparSessao();
   if (window.ITCMD_ARQUIVO) window.ITCMD_ARQUIVO.limparSessao();
   MA_IMAGENS.reset();   // remove blobs privados e cancela uploads/prévias da sessão anterior
@@ -5608,6 +5621,7 @@ function restaurarSessao() {
   });
 }
 function sair() {
+  if (LIVRO_CAIXA && !LIVRO_CAIXA.podeSair()) { toast('Há alterações no livro-caixa. Salve ou descarte antes de sair.'); return; }
   if (window.ITCMD_ARQUIVO && !window.ITCMD_ARQUIVO.modelo.seguro()) return;
   if (MA_IMAGENS.ocupado()) { toast('Aguarde o print terminar de salvar antes de sair.'); return; }
   const token = SESSAO.token;
@@ -5633,6 +5647,7 @@ function mostrarApp() {
   el('avatarIni').textContent = (SESSAO.nome || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(function (n) { return n.charAt(0).toUpperCase(); }).join('') || '?';
   el('btnEditarMural').hidden = !SESSAO.admin;
   el('navRelatorios').hidden = !SESSAO.admin;   // v1.38.2 — atalho da barra lateral, só o Tabelião
+  el('gestaoLivroCaixaItem').hidden = !podeLivroCaixa();
   pintarCardMinutas();   // v1.31 — mini-quadro 3.3 "Em breve" (aberto só ao Tabelião)
   el('telaLogin').hidden = true;
   el('app').hidden = false;
@@ -5655,7 +5670,7 @@ function primeiroNome(n) {
 /* ============================================================
    NAVEGAÇÃO (com botão Voltar do navegador e atalhos #protocolo etc.)
 ============================================================ */
-const PAGINAS = ['paginaHub', 'paginaGestao', 'paginaGestaoEscrituras', 'paginaConsultas', 'paginaCalculadoras', 'paginaIA', 'paginaExtrator', 'paginaAnalisador', 'paginaMinutas', 'paginaConsulta', 'paginaRedator', 'paginaItbi', 'paginaItcmd', 'paginaAcervo', 'paginaEmbutida'];
+const PAGINAS = ['paginaHub', 'paginaGestao', 'paginaGestaoEscrituras', 'paginaLivroCaixa', 'paginaConsultas', 'paginaCalculadoras', 'paginaIA', 'paginaExtrator', 'paginaAnalisador', 'paginaMinutas', 'paginaConsulta', 'paginaRedator', 'paginaItbi', 'paginaItcmd', 'paginaAcervo', 'paginaEmbutida'];
 const ROTAS = { consultas: 'paginaConsultas', calculadoras: 'paginaCalculadoras', ia: 'paginaIA', extrator: 'paginaExtrator', analista: 'paginaAnalisador', minutas: 'paginaMinutas', consulta: 'paginaConsulta', redator: 'paginaRedator', itbi: 'paginaItbi', itcmd: 'paginaItcmd', acervo: 'paginaAcervo', protocolo: 'protocolo', calculadora: 'calculadora', agenda: 'agenda', despesas: 'despesas' };
 /* ============================================================
    v1.34 — IA NOTARIAL (quadro 03): as quatro ferramentas de IA saíram do quadro geral
@@ -5666,9 +5681,22 @@ const ROTAS = { consultas: 'paginaConsultas', calculadoras: 'paginaCalculadoras'
 const PAGINAS_IA = ['paginaExtrator', 'paginaAnalisador', 'paginaMinutas', 'paginaRedator'];
 const VOLTAR_HUB = '← Voltar ao hub';
 const VOLTAR_IA = '← Voltar aos assistentes';
-const GRUPO_POR_ROTA = { consulta: 'paginaConsultas', acervo: 'paginaConsultas', pastas: 'paginaConsultas', calculadora: 'paginaCalculadoras', itcmd: 'paginaCalculadoras', 'gestao-escrituras': 'paginaGestao' };
+const GRUPO_POR_ROTA = { consulta: 'paginaConsultas', acervo: 'paginaConsultas', pastas: 'paginaConsultas', calculadora: 'paginaCalculadoras', itcmd: 'paginaCalculadoras', 'gestao-escrituras': 'paginaGestao', 'livro-caixa': 'paginaGestao' };
 const ROTA_DO_GRUPO = { paginaConsultas: 'consultas', paginaCalculadoras: 'calculadoras', paginaGestao: 'gestao' };
 let GESTAO_PRODUTIVIDADE = null;
+let LIVRO_CAIXA = null;
+function podeLivroCaixa() { return SESSAO.login === 'cesar.bravo'; }
+function destruirLivroCaixa() {
+  if (LIVRO_CAIXA) LIVRO_CAIXA.destruir();
+  LIVRO_CAIXA = null;
+}
+function abrirLivroCaixa(semHistorico) {
+  if (!podeLivroCaixa()) { mostrarPagina('paginaHub', semHistorico); return; }
+  if (LIVRO_CAIXA && !LIVRO_CAIXA.podeSair()) { toast('Há alterações no livro-caixa. Salve ou descarte antes de sair.'); return; }
+  if (mostrarPagina('paginaLivroCaixa', semHistorico, 'livro-caixa') === false) return;
+  destruirLivroCaixa();
+  LIVRO_CAIXA = window.LivroCaixa.montar({ host: el('livroCaixaHost'), api: api, sessao: function () { return SESSAO; }, endpoint: CONFIG.endpoint, expirada: sessaoExpirada });
+}
 function destruirGestaoProdutividade() {
   if (GESTAO_PRODUTIVIDADE) GESTAO_PRODUTIVIDADE.destruir();
   GESTAO_PRODUTIVIDADE = null;
@@ -5680,8 +5708,8 @@ function abrirGestao(semHistorico) {
 function abrirProdutividadeEscrituras(semHistorico) {
   if (!SESSAO.admin) { mostrarPagina('paginaHub', semHistorico); return; }
   if (GESTAO_PRODUTIVIDADE && !GESTAO_PRODUTIVIDADE.podeSair()) { toast('Os meses financeiros ainda não foram salvos. Aguarde ou resolva o aviso do relatório antes de sair.'); return; }
+  if (mostrarPagina('paginaGestaoEscrituras', semHistorico, 'gestao-escrituras') === false) return;
   destruirGestaoProdutividade();
-  mostrarPagina('paginaGestaoEscrituras', semHistorico, 'gestao-escrituras');
   GESTAO_PRODUTIVIDADE = window.GestaoProdutividade.montar({ host: el('gestaoProdutividadeHost'), api: api, sessao: function () { return SESSAO; }, expirada: sessaoExpirada });
 }
 function abrirRelatorioGestao(visao) {
@@ -5701,11 +5729,14 @@ function pintarVoltar(id) {
   alvo.querySelectorAll('[data-voltar]').forEach(function (b) { if (b.textContent.indexOf('Voltar') >= 0) b.textContent = rotulo; });
 }
 function mostrarPagina(id, semHistorico, rota) {
+  if (id === 'paginaLivroCaixa' && !podeLivroCaixa()) { id = 'paginaHub'; rota = ''; }
   if ((id === 'paginaGestao' || id === 'paginaGestaoEscrituras') && !SESSAO.admin) { id = 'paginaHub'; rota = ''; }
+  if (podeLivroCaixa() && id !== 'paginaLivroCaixa' && LIVRO_CAIXA && !LIVRO_CAIXA.podeSair()) { toast('Há alterações no livro-caixa. Salve ou descarte antes de sair.'); return false; }
   if (SESSAO.admin && id !== 'paginaGestaoEscrituras' && GESTAO_PRODUTIVIDADE && !GESTAO_PRODUTIVIDADE.podeSair()) { toast('Os meses financeiros ainda não foram salvos. Aguarde ou resolva o aviso do relatório antes de sair.'); return false; }
   if (id !== 'paginaGestaoEscrituras') destruirGestaoProdutividade();
+  if (id !== 'paginaLivroCaixa') destruirLivroCaixa();
   PAGINAS.forEach(function (p) { el(p).hidden = (p !== id); });
-  if (id === 'paginaGestao' || id === 'paginaGestaoEscrituras') marcarNav('gestao');
+  if (id === 'paginaGestao' || id === 'paginaGestaoEscrituras' || id === 'paginaLivroCaixa') marcarNav('gestao');
   else if (el('navRelatorios').classList.contains('ativo')) marcarNav('inicio');
   el('wrapPrincipal').classList.toggle('largo', id === 'paginaEmbutida');
   const grupo = GRUPO_POR_ROTA[(rota || '').split('=')[0]];
@@ -5756,6 +5787,7 @@ function podeDespesas() { return ['cesar.bravo', 'jonas.aragao'].indexOf(SESSAO.
 function abrirRota(rota, semHistorico) {
   if (rota === 'gestao' || rota === 'relatorios') { abrirGestao(semHistorico); return; }
   if (rota === 'gestao-escrituras') { abrirProdutividadeEscrituras(semHistorico); return; }
+  if (rota === 'livro-caixa') { abrirLivroCaixa(semHistorico); return; }
   if (rota === 'despesas') { if (!podeDespesas()) { toast('Acesso exclusivo de César Bravo e Jonas Aragão.'); return; } abrirEmbutida('despesas', semHistorico); return; }
   // v1.39.4: o anexo do CERT abre numa aba nova (link do cartão), que não tem sessão; o
   // anexo.html manda para cá com #anexo=ID e, depois do login, a mesma aba volta para ele
@@ -6348,7 +6380,7 @@ function fecharSubMural(forcar) {
   ED = null;
   // v1.38.2: só volta a barra para Início se o editor veio do atalho Relatórios
   // (o Esc também passa por aqui, com qualquer item da barra ativo)
-  if (el('navRelatorios').classList.contains('ativo') && paginaAtual() !== 'paginaGestao' && paginaAtual() !== 'paginaGestaoEscrituras') marcarNav('inicio');
+  if (el('navRelatorios').classList.contains('ativo') && paginaAtual() !== 'paginaGestao' && paginaAtual() !== 'paginaGestaoEscrituras' && paginaAtual() !== 'paginaLivroCaixa') marcarNav('inicio');
 }
 
 /* ============================================================
@@ -6912,7 +6944,7 @@ function maSair() {
 }
 window.addEventListener('pagehide', function () { if (maPendentes().length) maDescarregarSub(true); });
 window.addEventListener('beforeunload', function (e) {
-  if (MA_IMAGENS.ocupado()) { e.preventDefault(); e.returnValue = ''; }
+  if (MA_IMAGENS.ocupado() || (LIVRO_CAIXA && !LIVRO_CAIXA.podeSair())) { e.preventDefault(); e.returnValue = ''; }
 });
 
 /* ============================================================
@@ -9497,6 +9529,7 @@ el('cardCalculadora').addEventListener('click', function () { abrirEmbutida('cal
   el('cardPastas').addEventListener('click', function () { abrirEmbutida('pastas'); });   // v1.44
 el('cardIA').addEventListener('click', function () { mostrarPagina('paginaIA', false, 'ia'); });   // v1.34 — quadro 03
 el('gestaoEscrituras').addEventListener('click', function () { abrirProdutividadeEscrituras(false); });
+el('gestaoLivroCaixa').addEventListener('click', function () { abrirLivroCaixa(false); });
 document.querySelectorAll('[data-gestao-rel]').forEach(function (b) { b.addEventListener('click', function () { abrirRelatorioGestao(b.dataset.gestaoRel); }); });
 el('cardExtrator').addEventListener('click', function () { abrirDaIA('paginaExtrator', 'extrator'); });     // 3.1
 el('cardAnalisador').addEventListener('click', function () { abrirDaIA('paginaAnalisador', 'analista'); }); // 3.2
@@ -15515,6 +15548,12 @@ const PROD_MESES_RE = ['janeiro', 'fevereiro', 'mar[çc]o', 'abril', 'maio', 'ju
 // linhas → { dados, mes, ano, avisos[], resumo }
 function prodInterpretar(linhas, arquivo, formato, nomeParaId) {
   const norm = function (s) { return String(s == null ? '' : s).toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim(); };
+  for (let i = 0; i < Math.min(linhas.length, 15); i++) {
+    const base = linhas[i].findIndex(function (s) { return norm(s).replace(/[^a-z0-9]/g, '') === 'basedereceita'; });
+    if (base >= 0 && linhas.slice(i + 1).some(function (r) { return /^liquida/.test(norm(r[base]).replace(/[^a-z0-9]/g, '')); })) {
+      throw new Error('Este arquivo já contém receita líquida após repasses. Importe a Pesquisa de Produtividade original com valores brutos para evitar um segundo desconto.');
+    }
+  }
   let h = -1, cab = null;
   for (let i = 0; i < Math.min(linhas.length, 15); i++) {
     const r = linhas[i].map(norm);
@@ -15604,13 +15643,30 @@ const prodMesCurto = function (ch) { return ATD_MES_CURTO[+ch.slice(5, 7) - 1] +
 const PROD_COR = { mesa: '#631325', balcao: '#2F6E63', tabeliao: '#A66A2E', sistema: '#8D8779' };
 const PROD_PERFIL = { mesa: 'Mesa de escrituras', balcao: 'Balcão', tabeliao: 'Tabelião', sistema: 'Sistema' };
 
-function prodCfg() { return (PROD.dados && PROD.dados.config) || { corte: 200, ferd: 16.6667, ir: 27.5 }; }
-function prodMeses() { return (PROD.dados && PROD.dados.meses) || []; }
+const PROD_MESES_EXIBICAO = new WeakMap();
+function prodCfg() { return (PROD.dados && PROD.dados.config) || { corte: 200 }; }
+function prodMesesOriginais() { return (PROD.dados && PROD.dados.meses) || []; }
+// A API preserva o bruto e calcula a projeção líquida uma única vez, em centavos.
+// O decorador estável evita mutações na importação e mantém comparações entre meses.
+function prodMesExibicao(original) {
+  if (PROD_MESES_EXIBICAO.has(original)) return PROD_MESES_EXIBICAO.get(original);
+  const d = original.dados_liquidos, f = original.financeiro;
+  const pronto = !!(d && d.base_receita === 'liquida_apos_repasses' && f && f.percentual_repasses === 29.5694 &&
+    Array.isArray(d.pessoas) && d.pessoas.every(function (p) { return Number.isFinite(p.total_bruto); }) &&
+    Number.isFinite(d.total) && Number.isFinite(f.bruto) && Number.isFinite(f.repasses) && Number.isFinite(f.receita_liquida) &&
+    Math.round(d.total * 100) === Math.round(f.receita_liquida * 100) &&
+    Math.round(f.bruto * 100) - Math.round(f.repasses * 100) === Math.round(f.receita_liquida * 100));
+  const exibicao = Object.assign({}, original, { dados: pronto ? d : null });
+  PROD_MESES_EXIBICAO.set(original, exibicao);
+  return exibicao;
+}
+function prodMeses() { return prodMesesOriginais().map(prodMesExibicao); }
 function prodMes(ch) { return prodMeses().filter(function (m) { return m.chave === ch; })[0] || null; }
 function prodPerfil(p) {
   if (/n[ãa]o utilizar|sistema|extradigital|^sem setor$/i.test(p.id + ' ' + (p.nome || ''))) return 'sistema';
   if (((PROD.dados && PROD.dados.tabeliaes) || []).indexOf(String(p.id).toLowerCase()) >= 0) return 'tabeliao';
-  return p.atos && p.total / p.atos >= prodCfg().corte ? 'mesa' : 'balcao';
+  const bruto = p.total_bruto == null ? p.total : p.total_bruto;
+  return p.atos && bruto / p.atos >= prodCfg().corte ? 'mesa' : 'balcao';
 }
 function prodNome(p) {
   const nomes = (PROD.dados && PROD.dados.nomes) || {};
@@ -15619,7 +15675,7 @@ function prodNome(p) {
   if (/^sem setor$/i.test(p.id)) return 'Sem setor';
   if (/n[ãa]o utilizar|extradigital/i.test(p.id + ' ' + (p.nome || ''))) return 'Sistema (não utilizar)';
   if (!p.nome) {   // planilha só com login: usa o nome completo que veio de outro mês, se houver
-    const ms = prodMeses();
+    const ms = prodMesesOriginais();
     for (let i = ms.length - 1; i >= 0 && !p.nome; i--) {
       const o = ms[i].dados.pessoas.filter(function (x) { return x.id === p.id && x.nome; })[0];
       if (o) p = { id: p.id, nome: o.nome };
@@ -15632,9 +15688,9 @@ function prodNome(p) {
 function prodComparado(m) {
   if (!m || PROD.comp === 'none') return null;
   const ms = prodMeses();
-  if (PROD.comp === 'auto') { const i = ms.indexOf(m); return i > 0 ? ms[i - 1] : null; }
+  if (PROD.comp === 'auto') { const i = ms.findIndex(function (x) { return x.chave === m.chave; }); return i > 0 && ms[i - 1].dados ? ms[i - 1] : null; }
   const c = prodMes(PROD.comp);
-  return c && c !== m ? c : null;
+  return c && c.dados && c.chave !== m.chave ? c : null;
 }
 // indicadores derivados de cada pessoa
 function prodPessoas(m) {
@@ -15676,7 +15732,7 @@ function prodDesenhar() {
   if (PROD.erro && !PROD.dados) { corpo.innerHTML = '<p class="ed-vazio">Não consegui ler a produtividade (' + esc(PROD.erro) + ').</p>'; return; }
   const ms = prodMeses(), cfg = prodCfg();
   corpo.innerHTML =
-    '<p class="sub-data" style="margin-bottom:8px">Faturamento por escrevente a partir da <b>Pesquisa de Produtividade</b> do sistema do cartório. A planilha é lida neste computador e o servidor guarda só os totais do mês.</p>' +
+    '<p class="sub-data" style="margin-bottom:8px">Receita líquida por usuário financeiro a partir da <b>Pesquisa de Produtividade</b>. Os valores descontam os repasses de 29,5694%; os totais brutos importados são preservados para conferência.</p>' +
     '<div class="aud-filtros prod-barra">' +
       '<label class="aud-campo"><span>Mês</span><select id="prodMes">' + ms.slice().reverse().map(function (m) {
         return '<option value="' + m.chave + '"' + (m.chave === PROD.cur ? ' selected' : '') + '>' + prodMesBr(m.chave) + '</option>';
@@ -15690,11 +15746,9 @@ function prodDesenhar() {
     '<input type="file" id="prodArquivo" accept=".xls,.csv,.txt,application/vnd.ms-excel,text/csv" hidden>' +
     '<div id="prodImp"></div>' +
     '<details class="rel-suporte prod-ajustes"><summary>Ajustes do relatório</summary>' +
-      '<p class="sub-data">A mesa de escrituras é quem tem ticket médio a partir do corte; o Tabelião e os lançamentos de sistema ficam à parte. A cascata é uma <b>estimativa</b>: o IR real é progressivo e tem as deduções do livro-caixa.</p>' +
+      '<p class="sub-data">A classificação mesa/balcão considera o valor médio <b>bruto</b> por lançamento, antes dos repasses. Tabelião e sistema ficam à parte.</p>' +
       '<div class="aud-filtros">' +
         '<label class="aud-campo"><span>Mesa a partir de (R$)</span><input type="number" id="prodCorte" min="1" step="10" value="' + cfg.corte + '"></label>' +
-        '<label class="aud-campo"><span>FERD (%)</span><input type="number" id="prodFerd" min="0" max="100" step="0.0001" value="' + cfg.ferd + '"></label>' +
-        '<label class="aud-campo"><span>IR estimado (%)</span><input type="number" id="prodIr" min="0" max="100" step="0.1" value="' + cfg.ir + '"></label>' +
         '<button type="button" class="btn-vinho" id="prodSalvarCfg">Salvar ajustes</button>' +
         '<button type="button" class="btn-fantasma prod-perigo" id="prodApagar">Apagar este mês</button>' +
       '</div><p class="aud-conta" id="prodCfgSit"></p></details>' +
@@ -15723,44 +15777,42 @@ function prodRender() {
   if (!box) return;
   const m = prodMes(PROD.cur);
   montarLavradosRelatorio('prodLavrados', PROD.cur, prodMeses().map(function (item) { return item.chave; }));
-  el('prodPdf').disabled = el('prodCsv').disabled = el('prodApagar').disabled = !m;
+  el('prodPdf').disabled = el('prodCsv').disabled = !m || !m.dados;
+  el('prodApagar').disabled = !m;
   if (!m) { box.innerHTML = '<div class="atd-vazio" style="margin-top:10px">Nenhum mês ainda. Use <b>Importar planilha</b> com a Pesquisa de Produtividade do sistema (.xls ou .csv).</div>'; return; }
+  if (!m.dados) { box.innerHTML = '<p class="atd-vazio">A base de receita líquida deste mês ainda não está disponível. Recarregue após a atualização do servidor. Os totais brutos importados estão preservados.</p>'; return; }
   const d = m.dados, c = prodComparado(m), P = prodPessoas(m), cfg = prodCfg();
   box.innerHTML =
     '<h3 class="atd-titulo">' + prodMesBr(m.chave) + (c ? ' <small class="prod-vs">comparado com ' + prodMesBr(c.chave) + '</small>' : '') + '</h3>' +
     '<p class="sub-data">' + esc((m.fonte || '') + ' · importado ' + (m.importado_por ? 'por ' + m.importado_por + ' ' : '') + (m.importado_em ? 'em ' + quandoCurto(m.importado_em) : '')) + '</p>' +
     '<div class="atd-livro" id="prodLivro"></div>' +
     '<section class="atd-q" id="prodQIa"></section>' +
-    '<section class="atd-q"><h4>Mesa de escrituras × balcão</h4><p class="atd-sub">Separação pelo ticket médio: a partir de ' + prodR$0(cfg.corte) + ' por lançamento, a pessoa conta como mesa. Comparar mesa com balcão distorce a análise individual.</p><div class="prod-perfis" id="prodPerfis"></div></section>' +
+    '<section class="atd-q"><h4>Mesa de escrituras × balcão</h4><p class="atd-sub">Classificação pelo valor médio bruto: a partir de ' + prodR$0(cfg.corte) + ' por lançamento, o usuário integra a mesa. Os valores exibidos são líquidos dos repasses.</p><div class="prod-perfis" id="prodPerfis"></div></section>' +
     '<section class="atd-q"><h4>Por usuário do lançamento financeiro</h4><p class="atd-sub">As quantidades abaixo são lançamentos financeiros, não escrituras únicas. O <b>índice de valor</b> é a participação na receita dividida pela participação nos lançamentos. O usuário financeiro não identifica automaticamente o responsável pela lavratura.</p>' +
       '<div class="aud-rolo"><table class="aud-tabela prod-tabela" id="prodTabela"></table></div></section>' +
     '<div class="atd-grade">' +
-      '<section class="atd-q"><h4>Faturamento por pessoa</h4><p class="atd-sub">Vinho: mesa · verde: balcão · ocre: Tabelião.</p><div id="prodGFat"></div></section>' +
+      '<section class="atd-q"><h4>Receita líquida por usuário financeiro</h4><p class="atd-sub">Vinho: mesa · verde: balcão · ocre: Tabelião.</p><div id="prodGFat"></div></section>' +
       '<section class="atd-q"><h4>Lançamentos por pessoa</h4><p class="atd-sub">Quantidade de linhas financeiras no mês.</p><div id="prodGAtos"></div></section>' +
       '<section class="atd-q"><h4>Formas de pagamento</h4><p class="atd-sub" id="prodPgSub"></p><div id="prodGPg"></div></section>' +
-      '<section class="atd-q"><h4>Faixas de valor por lançamento</h4><p class="atd-sub">Receita em cada faixa de valor unitário; a quantidade de lançamentos aparece ao passar o mouse.</p><div class="atd-area atd-baixa" id="prodGFaixa"></div></section>' +
+      '<section class="atd-q"><h4>Faixas de valor por lançamento</h4><p class="atd-sub">Receita líquida em cada faixa do valor bruto original. Passe o mouse para ver a quantidade de lançamentos.</p><div class="atd-area atd-baixa" id="prodGFaixa"></div></section>' +
     '</div>' +
-    (d.serie ? '<section class="atd-q"><h4>Faturamento por dia</h4><p class="atd-sub">Passe o mouse sobre a linha para ver quem faturou em cada dia.</p><div class="atd-area" id="prodGDia"></div></section>' +
-      '<section class="atd-q"><h4>Dia da semana</h4><p class="atd-sub">Média de faturamento em cada dia útil do mês.</p><div class="atd-area atd-baixa" id="prodGSem"></div></section>' : '') +
+    (d.serie ? '<section class="atd-q"><h4>Receita líquida por dia</h4><p class="atd-sub">Passe o mouse para consultar os usuários dos lançamentos financeiros de cada dia.</p><div class="atd-area" id="prodGDia"></div></section>' +
+      '<section class="atd-q"><h4>Dia da semana</h4><p class="atd-sub">Média da receita líquida em cada dia útil do mês.</p><div class="atd-area atd-baixa" id="prodGSem"></div></section>' : '') +
     (c ? '<section class="atd-q"><h4>Variação por pessoa</h4><p class="atd-sub">Diferença em reais frente a ' + prodMesBr(c.chave) + '.</p><div id="prodGVar"></div></section>' : '') +
-    '<section class="atd-q"><h4>Mês a mês</h4><p class="atd-sub">Faturamento de todos os meses importados; o mês em foco aparece em vinho.</p><div class="atd-area atd-baixa" id="prodGMeses"></div>' +
+    '<section class="atd-q"><h4>Mês a mês</h4><p class="atd-sub">Receita líquida dos meses disponíveis; o mês em foco aparece em vinho. Meses sem base líquida não integram o acumulado.</p><div class="atd-area atd-baixa" id="prodGMeses"></div>' +
       '<div class="aud-rolo"><table class="aud-tabela prod-tabela" id="prodTabMeses"></table></div></section>' +
-    '<section class="atd-q"><h4>Do bruto ao disponível <small>(estimativa)</small></h4><p class="atd-sub">FERD de ' + prodPct(cfg.ferd) + ' sobre o bruto e IR de ' + prodPct(cfg.ir) + ' sobre o líquido. Os percentuais mudam em "Ajustes do relatório".</p><div id="prodCascata"></div></section>';
+    '<section class="atd-q"><h4>Conciliação da receita</h4><p class="atd-sub">Bruto importado, repasses de 29,5694% e receita líquida do cartório.</p><div id="prodCascata"></div></section>';
   prodLivro(m, c, P); prodIa(m); prodPerfis(m, P); prodTabela(m, c, P); prodGraficos(m, c, P); prodMesAMes(m); prodCascata(m);
 }
 
 function prodLivro(m, c, P) {
   const d = m.dados;
-  let quinto;
-  if (c) { const v = c.dados.total ? (d.total - c.dados.total) / c.dados.total * 100 : null; quinto = ['Variação', prodPct(v, true), 'frente a ' + prodMesBr(c.chave), v != null && v < 0]; }
-  else if (d.serie) { let i = 0; d.serie.total.forEach(function (v, k) { if (v > d.serie.total[i]) i = k; }); quinto = ['Melhor dia', prodR$0(d.serie.total[i]), relDia(d.serie.dias[i])]; }
-  else quinto = ['Pessoas', String(P.filter(function (p) { return p.perfil !== 'sistema'; }).length), 'com lançamento no mês'];
+  const v = c && c.dados.total ? (d.total - c.dados.total) / c.dados.total * 100 : null;
   const it = [
-    ['Faturamento bruto', prodR$(d.total), ''],
+    ['Receita líquida do cartório', prodR$(d.total), 'após repasses de 29,5694%'],
     ['Lançamentos financeiros', atdN(d.atos), c && c.dados.atos ? prodPct((d.atos - c.dados.atos) / c.dados.atos * 100, true) + ' frente a ' + prodMesCurto(c.chave) : 'linhas da Pesquisa de Produtividade'],
-    ['Ticket médio', prodR$(d.atos ? d.total / d.atos : 0), d.mediana != null ? 'mediana ' + prodR$(d.mediana) : ''],
-    ['Média por dia útil', prodR$0(d.total / d.diasUteis), d.diasUteis + ' dias úteis'],
-    quinto
+    ['Média por dia útil', prodR$(d.diasUteis ? d.total / d.diasUteis : null), d.diasUteis ? d.diasUteis + ' dias úteis' : 'dias úteis não informados'],
+    ['Variação / mês', prodPct(v, true), c ? 'frente a ' + prodMesBr(c.chave) : 'selecione um mês para comparação', v != null && v < 0]
   ];
   el('prodLivro').innerHTML = it.map(function (x) { return '<div><span>' + esc(x[0]) + '</span><strong' + (x[3] ? ' class="v"' : '') + '>' + esc(x[1]) + '</strong><small>' + esc(x[2]) + '</small></div>'; }).join('');
 }
@@ -15772,8 +15824,8 @@ function prodPerfis(m, P) {
     if (!L.length) return '';
     const t = L.reduce(function (s, p) { return s + p.total; }, 0), a = L.reduce(function (s, p) { return s + p.atos; }, 0);
     return '<div class="prod-perfil" style="--prod-cor:' + PROD_COR[g] + '"><span class="prod-tag">' + PROD_PERFIL[g] + '</span>' +
-      '<strong>' + prodR$(t) + '</strong><small>' + prodPct(d.total ? t / d.total * 100 : 0) + ' da receita</small>' +
-      '<p>' + atdN(a) + ' lançamentos (' + prodPct(d.atos ? a / d.atos * 100 : 0) + ' do volume) · ticket médio ' + prodR$(a ? t / a : 0) + ' · ' + L.length + (L.length === 1 ? ' pessoa' : ' pessoas') + '</p>' +
+      '<strong>' + prodR$(t) + '</strong><small>' + prodPct(d.total ? t / d.total * 100 : 0) + ' da receita líquida</small>' +
+      '<p>' + atdN(a) + ' lançamentos (' + prodPct(d.atos ? a / d.atos * 100 : 0) + ' do volume) · ticket líquido ' + prodR$(a ? t / a : 0) + ' · ' + L.length + (L.length === 1 ? ' pessoa' : ' pessoas') + '</p>' +
       '<p class="prod-quem">' + L.map(function (p) { return esc(p.nomeTela); }).join(', ') + '</p></div>';
   }).join('');
 }
@@ -15784,14 +15836,14 @@ function prodColunas(m, c) {
     { k: 'perfil', t: 'Perfil', f: function (p) { return PROD_PERFIL[p.perfil]; } },
     { k: 'atos', t: 'Lançamentos', f: function (p) { return atdN(p.atos); } },
     { k: 'shareA', t: '% lançamentos', f: function (p) { return prodPct(p.shareA); } },
-    { k: 'total', t: 'Faturamento', f: function (p) { return prodR$(p.total); } },
-    { k: 'shareR', t: '% receita', f: function (p) { return prodPct(p.shareR); } },
+    { k: 'total', t: 'Receita líquida', f: function (p) { return prodR$(p.total); } },
+    { k: 'shareR', t: '% receita líquida', f: function (p) { return prodPct(p.shareR); } },
     { k: 'indice', t: 'Índice', f: function (p) { return '<b class="' + (p.indice >= 1 ? 'prod-sobe' : 'prod-desce') + '">' + prodX(p.indice) + '</b>'; } },
-    { k: 'ticket', t: 'Ticket médio', f: function (p) { return prodR$(p.ticket); } },
-    { k: 'mediana', t: 'Mediana', f: function (p) { return prodR$(p.mediana); } },
-    { k: 'max', t: 'Maior lançamento', f: function (p) { return prodR$(p.max); } },
+    { k: 'ticket', t: 'Ticket líquido', f: function (p) { return prodR$(p.ticket); } },
+    { k: 'mediana', t: 'Mediana líquida', f: function (p) { return prodR$(p.mediana); } },
+    { k: 'max', t: 'Maior valor líquido', f: function (p) { return prodR$(p.max); } },
     { k: 'atosDia', t: 'Lanç./dia útil', f: function (p) { return p.atosDia.toLocaleString('pt-BR', { maximumFractionDigits: 1 }); } },
-    { k: 'porDia', t: 'R$/dia útil', f: function (p) { return prodR$0(p.porDia); } }
+    { k: 'porDia', t: 'Líquido/dia útil', f: function (p) { return prodR$0(p.porDia); } }
   ];
   if (m.dados.serie) cols.push({ k: 'dias', t: 'Dias com lançamento', f: function (p) { return p.dias == null ? '—' : String(p.dias); } });
   if (c) {
@@ -15800,7 +15852,7 @@ function prodColunas(m, c) {
     const delta = function (campo) { return function (p) { const a = ant[p.id]; return a && a[campo] ? (p[campo] - a[campo]) / Math.abs(a[campo]) * 100 : null; }; };
     const dA = delta('atos'), dT = delta('total');
     cols.push({ k: 'dAtos', t: 'Δ lançamentos', v: dA, f: function (p) { const v = dA(p); return v == null ? '—' : '<span class="' + (v >= 0 ? 'prod-sobe' : 'prod-desce') + '">' + prodPct(v, true) + '</span>'; } });
-    cols.push({ k: 'dTot', t: 'Δ faturamento', v: dT, f: function (p) { const v = dT(p); return v == null ? '—' : '<span class="' + (v >= 0 ? 'prod-sobe' : 'prod-desce') + '">' + prodPct(v, true) + '</span>'; } });
+    cols.push({ k: 'dTot', t: 'Δ receita líquida', v: dT, f: function (p) { const v = dT(p); return v == null ? '—' : '<span class="' + (v >= 0 ? 'prod-sobe' : 'prod-desce') + '">' + prodPct(v, true) + '</span>'; } });
   }
   return cols;
 }
@@ -15857,19 +15909,19 @@ function prodBarras(id, itens, fmt, dicas) {
 function prodGraficos(m, c, P) {
   const d = m.dados;
   const gente = P.filter(function (p) { return p.perfil !== 'sistema'; });
-  const dicaP = function (p) { return '<b>' + esc(p.nomeTela) + '</b><br>' + PROD_PERFIL[p.perfil] + '<br>Faturamento: ' + prodR$(p.total) + '<br>Lançamentos: ' + atdN(p.atos) + '<br>Ticket médio: ' + prodR$(p.ticket); };
+  const dicaP = function (p) { return '<b>' + esc(p.nomeTela) + '</b><br>' + PROD_PERFIL[p.perfil] + '<br>Receita líquida: ' + prodR$(p.total) + '<br>Lançamentos: ' + atdN(p.atos) + '<br>Ticket líquido: ' + prodR$(p.ticket); };
   prodBarras('prodGFat', gente.slice().sort(function (a, b) { return b.total - a.total; }).map(function (p) { return { k: p.nomeTela, v: p.total, cor: PROD_COR[p.perfil], p: p }; }), prodR$0, function (it) { return dicaP(it.p); });
   prodBarras('prodGAtos', gente.slice().sort(function (a, b) { return b.atos - a.atos; }).map(function (p) { return { k: p.nomeTela, v: p.atos, cor: PROD_COR[p.perfil], p: p }; }), atdN, function (it) { return dicaP(it.p); });
   const sem = d.pgto.filter(function (x) { return x.forma === PROD_SEM_FORMA; })[0];
   el('prodPgSub').textContent = 'Quantidade de lançamentos por forma.' + (sem ? ' "' + PROD_SEM_FORMA + '" soma ' + prodR$(sem.total) + ' em ' + atdN(sem.qtd) + ' lançamentos sem forma de pagamento informada.' : '');
   prodBarras('prodGPg', d.pgto.slice(0, 12).map(function (x) { return { k: x.forma, v: x.qtd, x: x }; }), atdN, function (it) { return '<b>' + esc(it.k) + '</b><br>' + atdN(it.x.qtd) + ' lançamentos<br>' + prodR$(it.x.total); });
   if (d.faixas) atdColunas('prodGFaixa', d.faixas.map(function (f) { return f.faixa.replace('R$ ', ''); }), d.faixas.map(function (f) { return f.total; }), d.faixas.map(function () { return ATD_COR.v; }), function (i) {
-    const f = d.faixas[i]; return '<b>' + esc(f.faixa) + '</b><br>Receita: ' + prodR$(f.total) + '<br>Lançamentos: ' + atdN(f.qtd);
+    const f = d.faixas[i]; return '<b>' + esc(f.faixa) + '</b><br>Receita líquida: ' + prodR$(f.total) + '<br>Lançamentos: ' + atdN(f.qtd);
   });
   else atdVazio('prodGFaixa', 'Este mês veio do painel anterior sem as faixas de valor.');
   if (d.serie) {
     const s = d.serie;
-    atdLinha('prodGDia', s.dias.map(function (x) { return x.slice(8, 10) + '/' + x.slice(5, 7); }), [{ nome: 'Faturamento', v: s.total, cor: ATD_COR.v, area: true }], function (i) {
+    atdLinha('prodGDia', s.dias.map(function (x) { return x.slice(8, 10) + '/' + x.slice(5, 7); }), [{ nome: 'Receita líquida', v: s.total, cor: ATD_COR.v, area: true }], function (i) {
       const top = Object.keys(s.porPessoa).map(function (id) { return [id, s.porPessoa[id][i]]; }).filter(function (x) { return x[1] > 0; }).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 5);
       const nome = function (id) { const p = d.pessoas.filter(function (x) { return x.id === id; })[0]; return p ? prodNome(p) : id; };
       return '<b>' + ATD_DSEM[atdDeIso(s.dias[i]).getDay()] + ', ' + relDia(s.dias[i]) + '</b><br>Total: ' + prodR$(s.total[i]) + (top.length ? '<br>' + top.map(function (x) { return esc(nome(x[0])) + ': ' + prodR$0(x[1]); }).join('<br>') : '');
@@ -15893,34 +15945,34 @@ function prodGraficos(m, c, P) {
 }
 
 function prodMesAMes(m) {
-  const ms = prodMeses();
-  atdColunas('prodGMeses', ms.map(function (x) { return prodMesCurto(x.chave); }), ms.map(function (x) { return x.dados.total; }), ms.map(function (x) { return x === m ? ATD_COR.v : ATD_COR.m18; }), function (i) {
+  const ms = prodMeses().filter(function (x) { return !!x.dados; });
+  atdColunas('prodGMeses', ms.map(function (x) { return prodMesCurto(x.chave); }), ms.map(function (x) { return x.dados.total; }), ms.map(function (x) { return x.chave === m.chave ? ATD_COR.v : ATD_COR.m18; }), function (i) {
     const x = ms[i].dados; return '<b>' + prodMesBr(ms[i].chave) + '</b><br>' + prodR$(x.total) + '<br>' + atdN(x.atos) + ' lançamentos · ' + x.diasUteis + ' dias úteis';
   });
   let tT = 0, tA = 0, tD = 0;
-  el('prodTabMeses').innerHTML = '<thead><tr><th>Mês</th><th>Faturamento</th><th>Lançamentos financeiros</th><th>Ticket por lançamento</th><th>Dias úteis</th><th>Média/dia útil</th><th>Lançamentos/dia útil</th><th>Δ receita</th></tr></thead><tbody>' +
+  el('prodTabMeses').innerHTML = '<thead><tr><th>Mês</th><th>Receita líquida</th><th>Lançamentos financeiros</th><th>Ticket líquido</th><th>Dias úteis</th><th>Média/dia útil</th><th>Lançamentos/dia útil</th><th>Δ receita líquida</th></tr></thead><tbody>' +
     ms.map(function (x, i) {
       const d = x.dados, v = i ? (d.total - ms[i - 1].dados.total) / ms[i - 1].dados.total * 100 : null;
       tT += d.total; tA += d.atos; tD += d.diasUteis;
-      return '<tr' + (x === m ? ' class="prod-atual"' : '') + '><td>' + prodMesBr(x.chave) + '</td><td>' + prodR$(d.total) + '</td><td>' + atdN(d.atos) + '</td><td>' + prodR$(d.atos ? d.total / d.atos : 0) + '</td><td>' + d.diasUteis + '</td><td>' + prodR$0(d.total / d.diasUteis) + '</td><td>' + atdN(d.atos / d.diasUteis) + '</td><td>' +
+      return '<tr' + (x.chave === m.chave ? ' class="prod-atual"' : '') + '><td>' + prodMesBr(x.chave) + '</td><td>' + prodR$(d.total) + '</td><td>' + atdN(d.atos) + '</td><td>' + prodR$(d.atos ? d.total / d.atos : 0) + '</td><td>' + d.diasUteis + '</td><td>' + prodR$0(d.total / d.diasUteis) + '</td><td>' + atdN(d.atos / d.diasUteis) + '</td><td>' +
         (v == null ? '—' : '<span class="' + (v >= 0 ? 'prod-sobe' : 'prod-desce') + '">' + prodPct(v, true) + '</span>') + '</td></tr>';
     }).join('') + '</tbody><tfoot><tr><td>Acumulado</td><td>' + prodR$(tT) + '</td><td>' + atdN(tA) + '</td><td>' + prodR$(tA ? tT / tA : 0) + '</td><td>' + tD + '</td><td>' + prodR$0(tD ? tT / tD : 0) + '</td><td>' + atdN(tD ? tA / tD : 0) + '</td><td>—</td></tr></tfoot>';
 }
 
-function prodCascataValores(total) {
-  const cfg = prodCfg(), ferd = total * cfg.ferd / 100, liq = total - ferd, ir = liq * cfg.ir / 100;
-  return { bruto: total, ferd: ferd, liq: liq, ir: ir, disp: liq - ir };
+function prodCascataValores(m) {
+  // Conciliação fornecida pelo servidor: não descontar os repasses novamente.
+  const f = m.financeiro;
+  return { bruto: f.bruto, repasses: f.repasses, liq: f.receita_liquida };
 }
 function prodCascata(m) {
-  const k = prodCascataValores(m.dados.total), B = k.bruto || 1;
-  const passos = [['Emolumento bruto', k.bruto, 'total lançado no mês', '#202a3a'], ['(−) FERD', k.ferd, prodPct(prodCfg().ferd) + ' do bruto', '#8A2F45', 1],
-    ['Emolumento líquido', k.liq, 'base do imposto de renda', '#631325'], ['(−) IR estimado', k.ir, prodPct(prodCfg().ir) + ' do líquido', '#A66A2E', 1],
-    ['Disponível estimado', k.disp, prodR$0(k.disp / m.dados.diasUteis) + ' por dia útil', '#2F6E63']];
+  const k = prodCascataValores(m), B = k.bruto || 1;
+  const passos = [['Receita bruta', k.bruto, 'total importado preservado', '#202a3a'], ['(−) Repasses', k.repasses, '29,5694% do bruto', '#8A2F45', 1],
+    ['Receita líquida do cartório', k.liq, '70,4306% do bruto, com arredondamento em centavos', '#631325']];
   el('prodCascata').innerHTML = passos.map(function (x) {
     return '<div class="prod-casc' + (x[4] ? ' neg' : '') + '"><div><b>' + x[0] + '</b><small>' + esc(x[2]) + '</small></div>' +
       '<div class="prod-casc-barra"><i style="width:' + Math.max(0, Math.min(100, x[1] / B * 100)).toFixed(1) + '%;background:' + x[3] + '"></i></div>' +
       '<div class="prod-casc-v">' + prodR$(x[1]) + '<small>' + prodPct(x[1] / B * 100) + ' do bruto</small></div></div>';
-  }).join('');
+  }).join('') + (m.financeiro.notas || []).map(function (n) { return '<p class="atd-sub">' + esc(n.mensagem) + '</p>'; }).join('');
 }
 
 /* ---------- análise da IA ---------- */
@@ -15929,13 +15981,14 @@ function prodIa(m) {
   const P = {}; m.dados.pessoas.forEach(function (p) { P[p.id] = p; });
   let h = '<h4>Análise do mês <small>(IA)</small></h4>';
   if (!a) {
-    h += '<p class="atd-sub">A IA lê só os totais deste mês (e do anterior, para comparar) e escreve um resumo, um texto por escrevente, observações de gestão e o que parece fora do padrão. Confira sempre com os números acima.</p>';
+    if (m.analise_status === 'anterior_base_obsoleta') h += '<p class="atd-sub">A análise anterior usava outra base financeira e foi preservada no histórico. Gere uma nova análise para a receita líquida.</p>';
+    h += '<p class="atd-sub">A IA lê só os totais deste mês (e do anterior, para comparar) e escreve um resumo, um texto por usuário financeiro, observações de gestão e o que parece fora do padrão. Confira sempre com os números acima.</p>';
   } else {
     h += '<p class="atd-sub">Feita em ' + esc(quandoCurto(m.analise_em)) + (a.comparado_com ? ', comparando com ' + prodMesBr(a.comparado_com) : '') + '. Texto de apoio: confira com os números acima.</p>' +
       (a.resumo ? '<p class="prod-ia-resumo">' + esc(a.resumo) + '</p>' : '') +
       (a.alertas && a.alertas.length ? '<ul class="prod-alertas">' + a.alertas.map(function (x) { return '<li class="' + (x.nivel === 'atencao' ? 'atencao' : '') + '"><b>' + esc(x.titulo) + '</b> ' + esc(x.detalhe) + '</li>'; }).join('') + '</ul>' : '') +
       (a.observacoes && a.observacoes.length ? '<ol class="prod-obs">' + a.observacoes.map(function (x) { return '<li>' + esc(x) + '</li>'; }).join('') + '</ol>' : '') +
-      (a.pessoas && a.pessoas.length ? '<details class="prod-ia-pessoas"><summary>Texto por escrevente</summary>' + a.pessoas.map(function (x) {
+      (a.pessoas && a.pessoas.length ? '<details class="prod-ia-pessoas"><summary>Texto por usuário financeiro</summary>' + a.pessoas.map(function (x) {
         const p = P[x.id]; return '<div class="prod-ia-p"><b>' + esc(p ? prodNome(p) : x.id) + '</b><p>' + esc(x.texto) + '</p></div>';
       }).join('') + '</details>' : '');
   }
@@ -15948,7 +16001,9 @@ function prodAnalisar(m) {
   const b = el('prodIaBt'), sit = el('prodIaSit');
   PROD.ocupado = true; b.disabled = true; sit.textContent = 'A IA está lendo os números do mês… (cerca de 30 segundos)';
   api('/hub/relatorios/produtividade/analisar', { corpo: { ano: +m.chave.slice(0, 4), mes: +m.chave.slice(5, 7) } }).then(function (r) {
-    m.analise = r.analise; m.analise_em = new Date().toISOString();
+    m.analise = r.analise; m.analise_em = new Date().toISOString(); m.analise_status = 'atual';
+    const original = prodMesesOriginais().find(function (x) { return x.chave === m.chave; });
+    if (original) { original.analise = m.analise; original.analise_em = m.analise_em; original.analise_status = m.analise_status; }
     if (prodAberta() && PROD.cur === m.chave) prodIa(m);
     toast('✓ Análise pronta');
   }).catch(function (e) {
@@ -15959,7 +16014,7 @@ function prodAnalisar(m) {
 /* ---------- importação ---------- */
 function prodNomeParaId() {
   const m = {};
-  prodMeses().forEach(function (x) { x.dados.pessoas.forEach(function (p) { if (p.nome) m[p.nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim()] = p.id; }); });
+  prodMesesOriginais().forEach(function (x) { x.dados.pessoas.forEach(function (p) { if (p.nome) m[p.nome.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').trim()] = p.id; }); });
   return m;
 }
 function prodLerArquivo(f) {
@@ -16018,7 +16073,7 @@ function prodPintarImp() {
   box.innerHTML = '<section class="atd-q prod-imp"><h4>Conferir antes de integrar</h4>' +
     '<p class="atd-sub">' + esc(I.arquivo) + ' · ' + (I.formato === 'xls' ? 'planilha do Excel' : I.formato === 'html' ? 'planilha exportada em HTML' : 'CSV') + (x.colunas.data ? ', com a data dos lançamentos' : ', sem data') + '</p>' +
     '<div class="atd-livro">' +
-      '<div><span>Faturamento</span><strong>' + prodR$(d.total) + '</strong><small>soma da coluna Valor</small></div>' +
+      '<div><span>Total bruto importado</span><strong>' + prodR$(d.total) + '</strong><small>soma da coluna Valor</small></div>' +
       '<div><span>Lançamentos</span><strong>' + atdN(d.atos) + '</strong><small>' + (x.descartadas ? 'linha de total do sistema descartada' : '') + '</small></div>' +
       '<div><span>Pessoas</span><strong>' + gente + '</strong><small>' + esc(d.pessoas.slice(0, 4).map(prodNome).join(', ') + (gente > 4 ? '…' : '')) + '</small></div>' +
       '<div><span>Formas de pagamento</span><strong>' + d.pgto.length + '</strong><small>' + (x.colunas.forma ? '' : 'coluna não encontrada') + '</small></div>' +
@@ -16060,7 +16115,7 @@ function prodIntegrar() {
 
 /* ---------- ajustes e exclusão ---------- */
 function prodSalvarCfg() {
-  const corpo = { corte: +el('prodCorte').value, ferd: +el('prodFerd').value, ir: +el('prodIr').value };
+  const corpo = { corte: +el('prodCorte').value };
   const sit = el('prodCfgSit');
   sit.textContent = 'Salvando…';
   api('/hub/relatorios/produtividade/config', { corpo: corpo }).then(function (r) {
@@ -16089,20 +16144,23 @@ function prodResumoLavradosExportacao(mes) {
 }
 function prodCsv() {
   const m = prodMes(PROD.cur);
-  if (!m) return;
+  if (!m || !m.dados) return;
   const resumoOficial = prodResumoLavradosExportacao(m.chave);
   if (!resumoOficial) return;
   const c = prodComparado(m), P = prodPessoas(m), cols = prodColunas(m, c);
   const n2 = function (v) { return v == null || !isFinite(v) ? '' : String(Math.round(v * 100) / 100).replace('.', ','); };
   const campo = function (s) { s = String(s == null ? '' : s); if (/^[=+\-@]/.test(s)) s = "'" + s; return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-  const linhas = [cols.map(function (x) { return x.t; }).join(';')];
+  const linhas = [cols.map(function (x) { return x.t; }).concat(['Base de receita']).join(';')];
   P.sort(function (a, b) { return b.total - a.total; }).forEach(function (p) {
     linhas.push(cols.map(function (x) {
       if (x.k === 'nomeTela') return campo(p.nomeTela);
       if (x.k === 'perfil') return PROD_PERFIL[p.perfil];
       return n2(x.v ? x.v(p) : p[x.k]);
-    }).join(';'));
+    }).concat(['liquida_apos_repasses']).join(';'));
   });
+  const conciliacao = prodCascataValores(m);
+  linhas.push('', campo('Conciliação da receita · ' + m.chave), 'Receita bruta;' + n2(conciliacao.bruto), 'Repasses (29,5694%);' + n2(conciliacao.repasses), 'Receita líquida do cartório;' + n2(conciliacao.liq));
+  (m.financeiro.notas || []).forEach(function (n) { linhas.push(campo('Nota financeira') + ';' + campo(n.mensagem)); });
   linhas.push('', campo('Resumo separado · escrituras lavradas · fonte oficial'));
   resumoOficial.forEach(function (linha) { linhas.push(linha.map(campo).join(';')); });
   const blob = new Blob(['﻿' + linhas.join('\r\n')], { type: 'text/csv;charset=utf-8' });
@@ -16113,7 +16171,7 @@ function prodCsv() {
 }
 function prodPdf() {
   const m = prodMes(PROD.cur);
-  if (!m || typeof PDFMini !== 'function') return;
+  if (!m || !m.dados || typeof PDFMini !== 'function') return;
   const resumoOficial = prodResumoLavradosExportacao(m.chave);
   if (!resumoOficial) return;
   const d = m.dados, c = prodComparado(m), P = prodPessoas(m).sort(function (a, b) { return b.total - a.total; }), cfg = prodCfg();
@@ -16127,41 +16185,47 @@ function prodPdf() {
     pdf.retangulo(0, 0, pdf.larguraMm, 22, { preencher: MARINHO, borda: false });
     pdf.retangulo(0, 22, pdf.larguraMm, 1.4, { preencher: VINHO, borda: false });
     pdf.fonte(true, 8).corTexto('#C9A15A').texto(X, 8, 'CARTÓRIO DE NOTAS DO 2º OFÍCIO · ITABAIANA/SE');
-    pdf.fonte(true, 15).corTexto('#ffffff').texto(X, 16.5, 'Produtividade em reais · ' + prodMesBr(m.chave));
+    pdf.fonte(true, 14).corTexto('#ffffff').texto(X, 16.5, 'Produtividade financeira · ' + prodMesBr(m.chave));
     pdf.fonte(false, 8).corTexto('#c9d1dc').texto(X, 16.5, 'folha ' + pag, { alinhar: 'dir', larguraMm: W });
     y = 32;
   }
   function espaco(h) { if (y + h > pdf.alturaMm - 16) { rodape(); pdf.novaPagina(); pag++; cabecalho(); } }
-  function rodape() { pdf.fonte(false, 7).corTexto(CINZA).texto(X, pdf.alturaMm - 8, 'Hub CN2O · gerado em ' + agoraCurto() + ' · uso interno · cascata e IA são estimativa e apoio: confira com o sistema'); }
+  function rodape() { pdf.fonte(false, 7).corTexto(CINZA).texto(X, pdf.alturaMm - 8, 'Hub CN2O · gerado em ' + agoraCurto() + ' · uso interno · receita líquida após repasses de 29,5694%'); }
   function titulo(t) { espaco(14); pdf.fonte(true, 11).corTexto(VINHO).texto(X, y, t); pdf.linha(X, y + 1.8, X + W, y + 1.8, { cor: '#C9A15A', espessura: 0.4 }); y += 7; }
   function paragrafo(t, tam) { pdf.fonte(false, tam || 9).corTexto('#1c222e'); pdf.quebrar(t, W, false, tam || 9).forEach(function (l) { espaco(5); pdf.texto(X, y, l); y += (tam || 9) * 0.45; }); y += 1.5; }
   function tabela(cab, larg, linhas, alinhar) {
-    const alt = 6;
+    const cabLinhas = cab.map(function (t, i) { return pdf.quebrar(t, larg[i] - 3, true, 7.5); });
+    const altCab = Math.max(6, Math.max.apply(null, cabLinhas.map(function (l) { return l.length; })) * 3.4 + 2.6);
+    function celulas(textos, passo) {
+      let x = X;
+      textos.forEach(function (ls, i) { ls.forEach(function (t, j) { pdf.texto(x + 1.5, y + j * passo, t, alinhar[i] === 'd' ? { alinhar: 'dir', larguraMm: larg[i] - 3 } : {}); }); x += larg[i]; });
+    }
     const desenharCab = function () {
-      pdf.retangulo(X, y - 4.2, W, alt, { preencher: MARINHO, borda: false });
+      pdf.retangulo(X, y - 4.2, W, altCab, { preencher: MARINHO, borda: false });
       pdf.fonte(true, 7.5).corTexto('#ffffff');
-      let x = X; cab.forEach(function (t, i) { pdf.texto(x + 1.5, y, t, alinhar[i] === 'd' ? { alinhar: 'dir', larguraMm: larg[i] - 3 } : {}); x += larg[i]; });
-      y += alt;
+      celulas(cabLinhas, 3.4);
+      y += altCab;
     };
-    espaco(alt * 3); desenharCab();
+    espaco(altCab + 12); desenharCab();
     linhas.forEach(function (l, k) {
-      if (y + alt > pdf.alturaMm - 16) { espaco(alt * 3); desenharCab(); }
+      const textos = l.v.map(function (t, i) { return pdf.quebrar(t, larg[i] - 3, !!l.negrito, 8); });
+      const alt = Math.max(6, Math.max.apply(null, textos.map(function (ls) { return ls.length; })) * 3.7 + 2.3);
+      if (y + alt > pdf.alturaMm - 16) { espaco(alt + altCab); desenharCab(); }
       if (k % 2) pdf.retangulo(X, y - 4.2, W, alt, { preencher: '#f6f3ec', borda: false });
       pdf.fonte(l.negrito, 8).corTexto('#1c222e');
-      let x = X; l.v.forEach(function (t, i) { pdf.texto(x + 1.5, y, t, alinhar[i] === 'd' ? { alinhar: 'dir', larguraMm: larg[i] - 3 } : {}); x += larg[i]; });
+      celulas(textos, 3.7);
       y += alt;
     });
     y += 3;
   }
   cabecalho();
   // indicadores
-  const kp = [['Faturamento bruto', prodR$(d.total)], ['Lançamentos financeiros', atdN(d.atos)], ['Ticket médio', prodR$(d.atos ? d.total / d.atos : 0)], ['Média por dia útil', prodR$0(d.total / d.diasUteis)]];
-  if (c) kp.push(['Variação x ' + prodMesCurto(c.chave), prodPct(c.dados.total ? (d.total - c.dados.total) / c.dados.total * 100 : null, true)]);
+  const kp = [['Receita líquida do cartório', prodR$(d.total)], ['Lançamentos financeiros', atdN(d.atos)], ['Média por dia útil', prodR$(d.diasUteis ? d.total / d.diasUteis : null)], ['Variação / mês' + (c ? ' x ' + prodMesCurto(c.chave) : ''), prodPct(c && c.dados.total ? (d.total - c.dados.total) / c.dados.total * 100 : null, true)]];
   const lk = W / kp.length;
   kp.forEach(function (k, i) {
     const x = X + i * lk;
     pdf.retangulo(x + 0.8, y - 4, lk - 1.6, 15, { preencher: '#fbf9f4', corBorda: '#e4ded2', borda: true, espessura: 0.25 });
-    pdf.fonte(false, 7).corTexto(CINZA).texto(x + 3, y + 0.5, k[0].toUpperCase());
+    pdf.fonte(false, 6.3).corTexto(CINZA).texto(x + 3, y + 0.5, k[0].toUpperCase());
     pdf.fonte(true, 11).corTexto(i ? MARINHO : VINHO).texto(x + 3, y + 7.5, k[1]);
   });
   y += 18;
@@ -16169,8 +16233,9 @@ function prodPdf() {
   titulo('Escrituras lavradas · fonte oficial');
   resumoOficial.forEach(function (linha) { paragrafo(linha[0] + ': ' + linha[1], 8); });
   titulo('Por usuário do lançamento financeiro');
-  tabela(['Usuário', 'Perfil', 'Lançam.', 'Faturamento', '% receita', 'Ticket médio', 'Índice'].concat(c ? ['Δ fat.'] : []),
-    c ? [44, 26, 16, 30, 17, 25, 14, 10] : [48, 28, 17, 32, 18, 26, 13],
+  paragrafo('Valores líquidos dos repasses. Usuário financeiro não identifica o responsável pela lavratura.', 8);
+  tabela(['Usuário', 'Perfil', 'Lanç.', 'Receita líquida', '% receita', 'Ticket líquido', 'Índice'].concat(c ? ['Δ líquida'] : []),
+    c ? [36, 27, 13, 29, 17, 26, 14, 20] : [48, 28, 17, 32, 18, 26, 13],
     P.map(function (p) {
       const ant = c && c.dados.pessoas.filter(function (x) { return x.id === p.id; })[0];
       const v = [p.nomeTela, PROD_PERFIL[p.perfil], atdN(p.atos), prodR$(p.total), prodPct(p.shareR), prodR$(p.ticket), prodX(p.indice)];
@@ -16179,20 +16244,21 @@ function prodPdf() {
     }).concat([{ negrito: true, v: ['Total', '', atdN(d.atos), prodR$(d.total), '100,0%', prodR$(d.atos ? d.total / d.atos : 0), '1,00×'].concat(c ? [''] : []) }]),
     c ? ['e', 'e', 'd', 'd', 'd', 'd', 'd', 'd'] : ['e', 'e', 'd', 'd', 'd', 'd', 'd']);
   titulo('Mesa de escrituras × balcão');
-  tabela(['Perfil', 'Pessoas', 'Lançam.', 'Faturamento', '% receita', 'Ticket médio'], [50, 20, 22, 36, 22, 32],
+  paragrafo('Classificação pelo valor médio bruto; receitas e médias exibidas líquidas dos repasses.', 8);
+  tabela(['Perfil', 'Pessoas', 'Lanç.', 'Receita líquida', '% receita', 'Ticket líquido'], [50, 20, 22, 36, 22, 32],
     ['mesa', 'balcao', 'tabeliao'].map(function (g) {
       const L = P.filter(function (p) { return p.perfil === g; });
       const t = L.reduce(function (s, p) { return s + p.total; }, 0), a = L.reduce(function (s, p) { return s + p.atos; }, 0);
       return L.length ? { v: [PROD_PERFIL[g] + (g === 'mesa' ? ' (≥ ' + prodR$0(cfg.corte) + ')' : ''), String(L.length), atdN(a), prodR$(t), prodPct(d.total ? t / d.total * 100 : 0), prodR$(a ? t / a : 0)] } : null;
     }).filter(Boolean), ['e', 'd', 'd', 'd', 'd', 'd']);
   titulo('Formas de pagamento');
-  tabela(['Forma', 'Lançamentos', 'Valor'], [100, 40, 42], d.pgto.map(function (x) { return { v: [x.forma, atdN(x.qtd), prodR$(x.total)] }; }), ['e', 'd', 'd']);
-  const k = prodCascataValores(d.total);
-  titulo('Do bruto ao disponível (estimativa)');
+  tabela(['Forma', 'Lançamentos', 'Valor líquido'], [100, 40, 42], d.pgto.map(function (x) { return { v: [x.forma, atdN(x.qtd), prodR$(x.total)] }; }), ['e', 'd', 'd']);
+  const k = prodCascataValores(m);
+  titulo('Conciliação da receita');
   tabela(['Etapa', 'Valor', '% do bruto'], [100, 42, 40], [
-    { v: ['Emolumento bruto', prodR$(k.bruto), '100,0%'] }, { v: ['(−) FERD (' + prodPct(cfg.ferd) + ')', prodR$(k.ferd), prodPct(k.ferd / (k.bruto || 1) * 100)] },
-    { v: ['Emolumento líquido', prodR$(k.liq), prodPct(k.liq / (k.bruto || 1) * 100)] }, { v: ['(−) IR estimado (' + prodPct(cfg.ir) + ')', prodR$(k.ir), prodPct(k.ir / (k.bruto || 1) * 100)] },
-    { negrito: true, v: ['Disponível estimado', prodR$(k.disp), prodPct(k.disp / (k.bruto || 1) * 100)] }], ['e', 'd', 'd']);
+    { v: ['Receita bruta', prodR$(k.bruto), '100,0%'] }, { v: ['(−) Repasses', prodR$(k.repasses), '29,5694%'] },
+    { negrito: true, v: ['Receita líquida do cartório', prodR$(k.liq), '70,4306%'] }], ['e', 'd', 'd']);
+  (m.financeiro.notas || []).forEach(function (n) { paragrafo(n.mensagem, 8); });
   if (m.analise) {
     const a = m.analise, porId = {};
     d.pessoas.forEach(function (p) { porId[p.id] = p; });
