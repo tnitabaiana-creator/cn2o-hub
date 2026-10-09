@@ -142,3 +142,51 @@ test('erro de carregamento permite nova tentativa sem HTML residual', async () =
   await tick(); assert.equal(a.find('iframe'), undefined); assert.equal(a.find('button').hidden, false);
   a.find('button').click(); await tick(); assert.ok(a.find('iframe')); a.controle.destruir();
 });
+
+test('ponte comunica apenas o mês financeiro e os meses disponíveis, sem dados pessoais', () => {
+  const doc = P.prepararDocumento(html, null, 'canal'), events = {}, enviados = [];
+  const ctx = { parent: { postMessage: m => enviados.push(m) }, document: { addEventListener: (k, fn) => { events[k] = fn; } }, URL,
+    M: { junho: { nome: 'Junho', ano: '2026', users: [{ nome: 'PESSOA-PRIVADA' }], total: 9000 }, setembro: { nome: 'Setembro', ano: '2026' } }, CUR: 'junho' };
+  ctx.window = ctx;
+  vm.runInNewContext(doc.match(/<script id="cn2o-produtividade-ponte">([\s\S]*?)<\/script>/)[1], ctx);
+  events.DOMContentLoaded();
+  assert.equal(enviados.length, 1); assert.equal(enviados[0].tipo, 'cn2o-produtividade-periodo'); assert.equal(enviados[0].mes, '2026-06');
+  assert.deepEqual(Array.from(enviados[0].meses), ['2026-06', '2026-09']);
+  assert.doesNotMatch(JSON.stringify(enviados), /PESSOA-PRIVADA|9000/);
+  ctx.M.parcial = { nome: 'Setembro parcial', ano: '2026' }; ctx.CUR = 'parcial';
+  events.DOMContentLoaded(); assert.equal(enviados[1].mes, null, 'nome livre deve desfazer a associação anterior');
+});
+
+test('painel oficial acompanha mês do iframe somente por canal e origem válidos; destruição limpa ambos', async () => {
+  const selecoes = [], mounts = []; let destruido = 0;
+  const a = ambiente(null, { lavrados: { montar: op => { mounts.push(op); return { selecionar: (...args) => selecoes.push(args), destruir: () => destruido++ }; } } });
+  await tick(); assert.equal(mounts.length, 1);
+  const f = a.find('iframe'), canal = f.srcdoc.match(/"canal":"([^"]+)"/)[1];
+  const data = { tipo: 'cn2o-produtividade-periodo', canal, mes: '2026-06', meses: ['2026-06', '2026-09'] };
+  a.events.message({ source: {}, origin: 'null', data });
+  a.events.message({ source: f.contentWindow, origin: 'https://outro', data });
+  a.events.message({ source: f.contentWindow, origin: 'null', data: { ...data, mes: '2026-99' } });
+  assert.equal(selecoes.length, 0);
+  a.events.message({ source: f.contentWindow, origin: 'null', data });
+  assert.deepEqual(selecoes, [['2026-06', ['2026-06', '2026-09']]]);
+  assert.equal(a.calls.length, 1, 'selecionar mês não grava o relatório');
+  a.controle.destruir(); assert.equal(destruido, 1);
+});
+
+test('adaptação V3 identifica períodos financeiros e de cartões sem mudar scores ou totais', () => {
+  const base = '<html><head></head><body><script>const TRELLO_DATA = {};</script></body></html>';
+  const source = P.prepararDocumento(base, null, 'canal');
+  const match = source.match(/<script id="cn2o-historico-periodos">([\s\S]*?)<\/script>/);
+  assert.match(source, /A exportação deste HTML não incorpora a fonte oficial/);
+  assert.ok(match); assert.equal((P.prepararDocumento(source, null, 'outro').match(/id="cn2o-historico-periodos"/g) || []).length, 1);
+  const heads = Array.from({ length: 4 }, () => ({})); let nota = null, chamadas = 0;
+  const table = { parentNode: { insertBefore: node => { nota = node; } }, querySelectorAll: () => heads };
+  const M = { junho: { nome: 'Junho', ano: '2026', total: 100, atos: 15 } }, TRELLO_DATA = { score: 3.4, finalizados: 7 };
+  const ctx = { M, TRELLO_DATA, CUR: 'junho', TPER: 'set', PER_LBL: { set: 'Setembro/2026', out: 'Outubro/2026 (01–07)' }, tFusao: () => chamadas++,
+    document: { getElementById: id => id === 'tblFusao' ? table : nota, createElement: () => ({ style: {} }) } };
+  vm.runInNewContext(match[1], ctx);
+  assert.match(nota.textContent, /financeiro de Junho\/2026; cartões arquivados de Setembro\/2026/);
+  assert.match(heads[2].textContent, /Lançamentos financeiros/); assert.match(heads[3].textContent, /Cartões arquivados/);
+  ctx.tFusao('out'); assert.equal(chamadas, 1); assert.match(nota.textContent, /Outubro\/2026/);
+  assert.deepEqual(M, { junho: { nome: 'Junho', ano: '2026', total: 100, atos: 15 } }); assert.deepEqual(TRELLO_DATA, { score: 3.4, finalizados: 7 });
+});

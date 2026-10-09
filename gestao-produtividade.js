@@ -54,6 +54,19 @@
     function avisar() {
       parent.postMessage({ tipo: 'cn2o-produtividade-estado', canal: config.canal, chave: chave, valor: atual }, '*');
     }
+    function informarPeriodo() {
+      if (typeof M === 'undefined' || typeof CUR === 'undefined') return;
+      var nomes = ['janeiro', 'fevereiro', 'março', 'abril', 'maio', 'junho', 'julho', 'agosto', 'setembro', 'outubro', 'novembro', 'dezembro'];
+      function periodo(m) {
+        var mes = m && nomes.indexOf(String(m.nome || '').toLowerCase());
+        return m && mes >= 0 && /^\d{4}$/.test(String(m.ano)) ? m.ano + '-' + String(mes + 1).padStart(2, '0') : '';
+      }
+      var mes = periodo(M[CUR]);
+      parent.postMessage({ tipo: 'cn2o-produtividade-periodo', canal: config.canal, mes: mes || null, meses: Object.keys(M).map(function (k) { return periodo(M[k]); }).filter(Boolean) }, '*');
+    }
+    function depoisDoControle() { if (typeof setTimeout === 'function') setTimeout(informarPeriodo, 0); }
+    document.addEventListener('DOMContentLoaded', informarPeriodo);
+    document.addEventListener('change', depoisDoControle);
     var memoria = {
       getItem: function (k) { return k === chave ? atual : null; },
       setItem: function (k, valor) {
@@ -69,6 +82,7 @@
     Object.defineProperty(memoria, 'length', { get: function () { return atual === null ? 0 : 1; } });
     Object.defineProperty(window, 'localStorage', { value: memoria, configurable: false });
     document.addEventListener('click', function (ev) {
+      depoisDoControle();
       var botao = ev.target && ev.target.closest && ev.target.closest('button');
       if (botao && (botao.id === 'btnDownloadHtml' || botao.id === 'btnManageDownloadHtml')) {
         var ponte = document.getElementById('cn2o-produtividade-ponte');
@@ -91,6 +105,36 @@
       } catch (_) { ev.preventDefault(); }
     }, true);
   }
+  // Executada depois do script original. Esclarece o cruzamento sem recalcular o histórico.
+  function esclarecerHistorico() {
+    if (document.body && !document.getElementById('cn2o-aviso-exportacao-oficial')) {
+      var aviso = document.createElement('p'); aviso.id = 'cn2o-aviso-exportacao-oficial';
+      aviso.style.cssText = 'padding:14px 20px;margin:0;background:#631325;color:#fff;font:13px/1.6 sans-serif';
+      aviso.textContent = 'Documento histórico: financeiro, cartões e senhas. A contagem oficial de escrituras lavradas está disponível na seção Gestão do Hub. A exportação deste HTML não incorpora a fonte oficial nem transforma cartões arquivados em escrituras lavradas.';
+      document.body.insertBefore(aviso, document.body.firstChild);
+    }
+    function indicar(p) {
+      var tabela = document.getElementById('tblFusao');
+      if (!tabela || typeof M === 'undefined' || typeof CUR === 'undefined') return;
+      var financeiro = M[CUR], fluxo = typeof PER_LBL !== 'undefined' && PER_LBL[p] ? PER_LBL[p] : 'período do histórico';
+      var mes = financeiro ? financeiro.nome + '/' + financeiro.ano : 'período não informado';
+      var nota = document.getElementById('cn2o-periodos-historicos');
+      if (!nota) {
+        nota = document.createElement('p'); nota.id = 'cn2o-periodos-historicos';
+        nota.style.cssText = 'padding:12px 16px;margin:0;border-left:3px solid #631325;background:#f6eef0;color:#202a3a;font-size:13px;line-height:1.6';
+        tabela.parentNode.insertBefore(nota, tabela);
+      }
+      nota.textContent = 'Fontes e períodos independentes: financeiro de ' + mes + '; cartões arquivados de ' + fluxo + '; senhas de setembro/2026. Os seletores não representam um único período. Este quadro histórico não é a contagem oficial de escrituras lavradas.';
+      var th = tabela.querySelectorAll('thead th');
+      if (th[2]) th[2].textContent = 'Lançamentos financeiros (' + mes + ')';
+      if (th[3]) th[3].textContent = 'Cartões arquivados (' + fluxo + ')';
+    }
+    if (typeof tFusao === 'function') {
+      var anterior = tFusao;
+      tFusao = function (p) { anterior(p); indicar(p); };
+      indicar(typeof TPER !== 'undefined' ? TPER : '');
+    }
+  }
   function prepararDocumento(html, meses, canal) {
     if (typeof html !== 'string' || !html.trim() || html.length > 4 * LIMITE) throw new Error('O relatório recebido está inválido.');
     const config = { meses: validarMeses(meses), canal: canal };
@@ -101,11 +145,14 @@
     // Fontes locais de fallback mantêm o relatório independente de serviços externos.
     html = html.replace(/<link\b[^>]*>/gi, function (tag) { return /(?:https?:)?\/\//i.test(tag) ? '' : tag; });
     html = html.replace(/<base\b[^>]*>/gi, '');
+    // A exportação pode conter a adaptação de uma sessão anterior: não duplicá-la.
+    html = html.replace(/<script id="cn2o-historico-periodos">[\s\S]*?<\/script>/gi, '');
+    const historico = /const\s+TRELLO_DATA\s*=/.test(html) ? '<script id="cn2o-historico-periodos">(' + esclarecerHistorico.toString() + ')();<\/script>' : '';
     if (/<head\b[^>]*>/i.test(html)) {
       html = html.replace(/<head\b[^>]*>/i, function (tag) { return tag + preambulo; });
-      return /<\/head\s*>/i.test(html) ? html.replace(/<\/head\s*>/i, RESPONSIVO + '</head>') : html + RESPONSIVO;
-    }
-    return '<!doctype html><html><head>' + preambulo + RESPONSIVO + '</head><body>' + html + '</body></html>';
+      html = /<\/head\s*>/i.test(html) ? html.replace(/<\/head\s*>/i, RESPONSIVO + '</head>') : html + RESPONSIVO;
+    } else html = '<!doctype html><html><head>' + preambulo + RESPONSIVO + '</head><body>' + html + '</body></html>';
+    return /<\/body\s*>/i.test(html) ? html.replace(/<\/body\s*>/i, historico + '</body>') : html + historico;
   }
   function montar(op) {
     if (!op || !op.host || typeof op.api !== 'function' || typeof op.sessao !== 'function') throw new Error('Configuração do relatório incompleta.');
@@ -113,17 +160,21 @@
     const host = op.host;
     let vivo = true, geracao = 0, frame = null, canal = '', revisao = null, dono = null;
     let pendente, ultimoSalvo = null, salvando = false, conflito = false, erroSalvar = false;
-    let monitor = null;
+    let monitor = null, oficiais = null;
     const painel = doc.createElement('section'); painel.className = 'gestao-produtividade';
     const topo = doc.createElement('div'); topo.className = 'gestao-produtividade__topo';
-    const titulo = doc.createElement('h3'); titulo.textContent = 'Relatório consolidado';
-    const periodo = doc.createElement('p'); periodo.textContent = 'Escrituras: setembro e 1–7 de outubro de 2026';
+    const titulo = doc.createElement('h3'); titulo.textContent = 'Produção oficial e histórico';
+    const periodo = doc.createElement('p'); periodo.textContent = 'Confira as escrituras lavradas por mês na fonte oficial Extra Digital.';
     const aviso = doc.createElement('p'); aviso.className = 'gestao-produtividade__nota';
-    aviso.textContent = 'Consulta aos períodos do relatório. Os dados do Trello e de senhas não são atualizados em tempo real.';
+    aviso.textContent = 'O documento histórico conserva cartões, pesos de complexidade, dados financeiros e senhas de seus períodos originais. Cartões arquivados não substituem a contagem oficial de escrituras lavradas.';
     const status = doc.createElement('p'); status.className = 'gestao-produtividade__status'; status.setAttribute('role', 'status'); status.setAttribute('aria-live', 'polite');
     const tentar = doc.createElement('button'); tentar.type = 'button'; tentar.className = 'gestao-produtividade__tentar'; tentar.textContent = 'Tentar novamente'; tentar.hidden = true;
     const area = doc.createElement('div'); area.className = 'gestao-produtividade__area';
-    topo.append(titulo, periodo, aviso, status, tentar); painel.append(topo, area); host.replaceChildren(painel);
+    const oficiaisHost = doc.createElement('div'); oficiaisHost.className = 'gestao-produtividade__oficiais';
+    const historicoTitulo = doc.createElement('h3'); historicoTitulo.textContent = 'Documento histórico · financeiro, Trello e balcão';
+    const historicoNota = doc.createElement('p'); historicoNota.className = 'gestao-produtividade__nota';
+    historicoNota.textContent = 'Critérios originais do relatório. Os totais e rankings de cartões abaixo são históricos; consulte acima a conferência de escrituras lavradas. Não há conversão automática dos scores por cartão em pesos por ato.';
+    topo.append(titulo, periodo, aviso, status, tentar); painel.append(topo, oficiaisHost, historicoTitulo, historicoNota, area); host.replaceChildren(painel);
     function sessao() { const s = op.sessao() || {}; return { token: s.token || '', login: s.login || '', admin: s.admin === true }; }
     function igual(a, b) { return a && b && a.token === b.token && a.login === b.login && a.admin === b.admin; }
     function permitido() { const s = sessao(); return !!s.token && !!s.login && s.admin; }
@@ -147,6 +198,7 @@
       win.removeEventListener('message', receber);
       win.removeEventListener('beforeunload', antesDeSair);
       if (monitor !== null) win.clearInterval(monitor);
+      if (oficiais) oficiais.destruir(); oficiais = null;
       apagarFrame(); painel.remove();
     }
     function expirar() { destruir(); if (op.expirada) op.expirada(); }
@@ -160,6 +212,8 @@
     async function carregar() {
       if (!vivo) return;
       if (!permitido()) { mostrar('Entre com uma conta autorizada para consultar este relatório.', true, false); return; }
+      const fonteOficial = op.lavrados || root.GestaoLavrados;
+      if (!oficiais && fonteOficial) oficiais = fonteOficial.montar({ host: oficiaisHost, api: op.api, sessao: op.sessao, expirada: op.expirada, window: win });
       const g = ++geracao; dono = sessao(); apagarFrame(); pendente = undefined; ultimoSalvo = null;
       revisao = null; salvando = false; conflito = false; erroSalvar = false;
       mostrar('Carregando relatório…', false, false);
@@ -207,7 +261,13 @@
       if (!vivo) return;
       if (!atual(geracao)) { conferirSessao(); return; }
       const msg = ev.data;
-      if (!frame || ev.source !== frame.contentWindow || ev.origin !== 'null' || !msg || msg.tipo !== 'cn2o-produtividade-estado' || msg.canal !== canal || msg.chave !== CHAVE) return;
+      if (!frame || ev.source !== frame.contentWindow || ev.origin !== 'null' || !msg || msg.canal !== canal) return;
+      if (msg.tipo === 'cn2o-produtividade-periodo') {
+        const formato = /^\d{4}-(0[1-9]|1[0-2])$/;
+        if (oficiais && (msg.mes === null || formato.test(msg.mes || '')) && Array.isArray(msg.meses) && msg.meses.length <= 120 && msg.meses.every(m => typeof m === 'string' && formato.test(m))) oficiais.selecionar(msg.mes, msg.meses);
+        return;
+      }
+      if (msg.tipo !== 'cn2o-produtividade-estado' || msg.chave !== CHAVE) return;
       try {
         if (msg.valor !== null && (typeof msg.valor !== 'string' || msg.valor.length > LIMITE)) throw new Error('Estado inválido.');
         const dados = validarMeses(msg.valor === null ? null : JSON.parse(msg.valor));

@@ -3009,6 +3009,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 <link rel="stylesheet" href="agenda-imagens.css">
 <link rel="stylesheet" href="itcmd-arquivo.css">
 <link rel="stylesheet" href="gestao-produtividade.css">
+<link rel="stylesheet" href="gestao-lavrados.css">
 <link rel="stylesheet" href="gestao.css">
 </head>
 <body>
@@ -3340,8 +3341,8 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
       <ul class="gestao-lista" aria-label="Relatórios de gestão">
         <li><button type="button" data-gestao-rel="escreventes"><span class="gestao-num" aria-hidden="true">01</span><span><strong>Relatórios das escreventes</strong><small>Prévia semanal e mensal, acompanhamento e histórico dos envios.</small></span><span aria-hidden="true">→</span></button></li>
         <li><button type="button" data-gestao-rel="atendimentos"><span class="gestao-num" aria-hidden="true">02</span><span><strong>Atendimentos do balcão</strong><small>Volume de atendimentos, períodos e indicadores do balcão de senhas.</small></span><span aria-hidden="true">→</span></button></li>
-        <li><button type="button" data-gestao-rel="produtividade"><span class="gestao-num" aria-hidden="true">03</span><span><strong>Produtividade financeira</strong><small>Receita, atos e comparativos da Pesquisa de Produtividade.</small></span><span aria-hidden="true">→</span></button></li>
-        <li><button type="button" id="gestaoEscrituras"><span class="gestao-num" aria-hidden="true">04</span><span><strong>Relatório de produtividade de escrituras</strong><small>Produção por escrevente, complexidade dos atos e tempo de tramitação. Relatório consolidado — versão 3.</small></span><span aria-hidden="true">→</span></button></li>
+        <li><button type="button" data-gestao-rel="produtividade"><span class="gestao-num" aria-hidden="true">03</span><span><strong>Produtividade financeira</strong><small>Receita e lançamentos financeiros, com conferência das escrituras lavradas por mês.</small></span><span aria-hidden="true">→</span></button></li>
+        <li><button type="button" id="gestaoEscrituras"><span class="gestao-num" aria-hidden="true">04</span><span><strong>Relatório de produtividade de escrituras</strong><small>Contagem oficial de escrituras lavradas e consulta ao histórico de fluxo e complexidade do Trello.</small></span><span aria-hidden="true">→</span></button></li>
       </ul>
     </div>
     <div id="paginaGestaoEscrituras" hidden>
@@ -5281,6 +5282,7 @@ const CLAUSULAS = [
 <script src="itcmd-orcamento-dados.js"></script>
 <script src="itcmd-orcamento-pdf.js"></script>
 <script src="itcmd-arquivo.js"></script>
+<script src="gestao-lavrados.js"></script>
 <script src="gestao-produtividade.js"></script>
 <script>
 /* ============================================================
@@ -5504,6 +5506,7 @@ function migrarSessaoAntiga() {
 }
 function limparSessao() {
   destruirGestaoProdutividade();
+  if (window.GestaoLavrados) window.GestaoLavrados.limparSessao();
   if (window.ITCMD_ARQUIVO) window.ITCMD_ARQUIVO.limparSessao();
   MA_IMAGENS.reset();   // remove blobs privados e cancela uploads/prévias da sessão anterior
   MA.salvando = 0;      // respostas tardias da sessão anterior não alteram os contadores atuais
@@ -8120,6 +8123,24 @@ function pintarAbaConsumo(painel) {
    de instalação, fica recolhida no fim da tela.
 ============================================================ */
 const REL_ROT_ENVIAR = '✉ Enviar agora', REL_ROT_CARGA = 'Rodar carga';
+const LAVRADOS_RELATORIOS = new Map();
+function montarLavradosRelatorio(id, mes, meses) {
+  const anterior = LAVRADOS_RELATORIOS.get(id);
+  if (anterior) anterior.destruir();
+  LAVRADOS_RELATORIOS.delete(id);
+  const host = el(id);
+  if (!host || !window.GestaoLavrados || !SESSAO.admin || !mes) return;
+  LAVRADOS_RELATORIOS.set(id, window.GestaoLavrados.montar({ host: host, api: api, sessao: function () { return SESSAO; }, expirada: sessaoExpirada, mes: mes, meses: meses || [mes], seletor: false }));
+}
+function relLavradosMensal() {
+  const r = relEstado(), host = el('edRelLavrados');
+  if (!host) return;
+  const partes = /^([0-9]{4})-([0-9]{2})-01$/.exec(r.ref || '');
+  const d = partes ? new Date(+partes[1], +partes[2] - 2, 1) : null;
+  const mes = r.tipo === 'mensal' && d ? d.getFullYear() + '-' + dd(d.getMonth() + 1) : '';
+  montarLavradosRelatorio('edRelLavrados', mes);
+  host.hidden = !mes;
+}
 function relEstado() {
   // visao (v1.39): 'escreventes', 'atendimentos' ou (v1.40) 'produtividade' — a última escolhida fica guardada
   const v = store.get('cn2o_rel_visao');
@@ -8198,6 +8219,8 @@ function pintarAbaRelatorios(painel) {
       '<button type="button" class="btn-fantasma" id="edRelCsv">⭳ Baixar CSV</button>' +
       '<button type="button" class="btn-fantasma" id="edRelEnviar">' + REL_ROT_ENVIAR + '</button>' +
     '</div>' +
+    '<p class="sub-data">A prévia e seu CSV acompanham o fluxo de cartões do Trello. Escrituras lavradas são conferidas separadamente na fonte oficial Extra Digital; arquivamento de cartão não substitui a data de lavratura.</p>' +
+    '<div id="edRelLavrados" hidden></div>' +
     '<div id="edRelPrevia"></div>' +
     '<h3 class="ed-titulo versalete">Envios</h3>' +
     '<div id="edRelEnvios"><p class="ed-vazio">Lendo os envios…</p></div>' +
@@ -8218,9 +8241,10 @@ function pintarAbaRelatorios(painel) {
     per.value = lista.some(function (p) { return p.ref === r.ref; }) ? r.ref : lista[1].ref;
     r.tipo = tipo.value; r.ref = per.value;
     relDesarmar(el('edRelEnviar'), REL_ROT_ENVIAR);
+    relLavradosMensal();
   }
   tipo.addEventListener('change', function () { r.ref = ''; pintarPeriodos(); });
-  per.addEventListener('change', function () { r.ref = per.value; relDesarmar(el('edRelEnviar'), REL_ROT_ENVIAR); });
+  per.addEventListener('change', function () { r.ref = per.value; relDesarmar(el('edRelEnviar'), REL_ROT_ENVIAR); relLavradosMensal(); });
   pintarPeriodos();
   el('edRelVer').addEventListener('click', relVerPrevia);
   el('edRelCsv').addEventListener('click', relBaixarCsv);
@@ -15674,6 +15698,7 @@ function prodDesenhar() {
         '<button type="button" class="btn-vinho" id="prodSalvarCfg">Salvar ajustes</button>' +
         '<button type="button" class="btn-fantasma prod-perigo" id="prodApagar">Apagar este mês</button>' +
       '</div><p class="aud-conta" id="prodCfgSit"></p></details>' +
+    '<div id="prodLavrados"></div>' +
     '<div id="prodConteudo"></div>';
   el('prodMes').addEventListener('change', function () { PROD.cur = this.value; relDesarmar(el('prodApagar'), 'Apagar este mês'); prodRender(); });
   el('prodComp').value = PROD.comp;
@@ -15697,6 +15722,7 @@ function prodRender() {
   const box = el('prodConteudo');
   if (!box) return;
   const m = prodMes(PROD.cur);
+  montarLavradosRelatorio('prodLavrados', PROD.cur, prodMeses().map(function (item) { return item.chave; }));
   el('prodPdf').disabled = el('prodCsv').disabled = el('prodApagar').disabled = !m;
   if (!m) { box.innerHTML = '<div class="atd-vazio" style="margin-top:10px">Nenhum mês ainda. Use <b>Importar planilha</b> com a Pesquisa de Produtividade do sistema (.xls ou .csv).</div>'; return; }
   const d = m.dados, c = prodComparado(m), P = prodPessoas(m), cfg = prodCfg();
@@ -15705,14 +15731,14 @@ function prodRender() {
     '<p class="sub-data">' + esc((m.fonte || '') + ' · importado ' + (m.importado_por ? 'por ' + m.importado_por + ' ' : '') + (m.importado_em ? 'em ' + quandoCurto(m.importado_em) : '')) + '</p>' +
     '<div class="atd-livro" id="prodLivro"></div>' +
     '<section class="atd-q" id="prodQIa"></section>' +
-    '<section class="atd-q"><h4>Mesa de escrituras × balcão</h4><p class="atd-sub">Separação pelo ticket médio: a partir de ' + prodR$0(cfg.corte) + ' por ato, a pessoa conta como mesa. Comparar mesa com balcão distorce a análise individual.</p><div class="prod-perfis" id="prodPerfis"></div></section>' +
-    '<section class="atd-q"><h4>Por escrevente</h4><p class="atd-sub">Clique no título de uma coluna para ordenar. O <b>índice de valor</b> é a parte da receita dividida pela parte dos atos: acima de 1,00, a pessoa gera mais receita do que o volume sugere.</p>' +
+    '<section class="atd-q"><h4>Mesa de escrituras × balcão</h4><p class="atd-sub">Separação pelo ticket médio: a partir de ' + prodR$0(cfg.corte) + ' por lançamento, a pessoa conta como mesa. Comparar mesa com balcão distorce a análise individual.</p><div class="prod-perfis" id="prodPerfis"></div></section>' +
+    '<section class="atd-q"><h4>Por usuário do lançamento financeiro</h4><p class="atd-sub">As quantidades abaixo são lançamentos financeiros, não escrituras únicas. O <b>índice de valor</b> é a participação na receita dividida pela participação nos lançamentos. O usuário financeiro não identifica automaticamente o responsável pela lavratura.</p>' +
       '<div class="aud-rolo"><table class="aud-tabela prod-tabela" id="prodTabela"></table></div></section>' +
     '<div class="atd-grade">' +
       '<section class="atd-q"><h4>Faturamento por pessoa</h4><p class="atd-sub">Vinho: mesa · verde: balcão · ocre: Tabelião.</p><div id="prodGFat"></div></section>' +
-      '<section class="atd-q"><h4>Atos por pessoa</h4><p class="atd-sub">Quantidade de lançamentos no mês.</p><div id="prodGAtos"></div></section>' +
+      '<section class="atd-q"><h4>Lançamentos por pessoa</h4><p class="atd-sub">Quantidade de linhas financeiras no mês.</p><div id="prodGAtos"></div></section>' +
       '<section class="atd-q"><h4>Formas de pagamento</h4><p class="atd-sub" id="prodPgSub"></p><div id="prodGPg"></div></section>' +
-      '<section class="atd-q"><h4>Faixas de valor por ato</h4><p class="atd-sub">Receita em cada faixa de valor unitário; a quantidade de atos aparece ao passar o mouse.</p><div class="atd-area atd-baixa" id="prodGFaixa"></div></section>' +
+      '<section class="atd-q"><h4>Faixas de valor por lançamento</h4><p class="atd-sub">Receita em cada faixa de valor unitário; a quantidade de lançamentos aparece ao passar o mouse.</p><div class="atd-area atd-baixa" id="prodGFaixa"></div></section>' +
     '</div>' +
     (d.serie ? '<section class="atd-q"><h4>Faturamento por dia</h4><p class="atd-sub">Passe o mouse sobre a linha para ver quem faturou em cada dia.</p><div class="atd-area" id="prodGDia"></div></section>' +
       '<section class="atd-q"><h4>Dia da semana</h4><p class="atd-sub">Média de faturamento em cada dia útil do mês.</p><div class="atd-area atd-baixa" id="prodGSem"></div></section>' : '') +
@@ -15731,7 +15757,7 @@ function prodLivro(m, c, P) {
   else quinto = ['Pessoas', String(P.filter(function (p) { return p.perfil !== 'sistema'; }).length), 'com lançamento no mês'];
   const it = [
     ['Faturamento bruto', prodR$(d.total), ''],
-    ['Lançamentos', atdN(d.atos), c && c.dados.atos ? prodPct((d.atos - c.dados.atos) / c.dados.atos * 100, true) + ' frente a ' + prodMesCurto(c.chave) : 'atos no mês'],
+    ['Lançamentos financeiros', atdN(d.atos), c && c.dados.atos ? prodPct((d.atos - c.dados.atos) / c.dados.atos * 100, true) + ' frente a ' + prodMesCurto(c.chave) : 'linhas da Pesquisa de Produtividade'],
     ['Ticket médio', prodR$(d.atos ? d.total / d.atos : 0), d.mediana != null ? 'mediana ' + prodR$(d.mediana) : ''],
     ['Média por dia útil', prodR$0(d.total / d.diasUteis), d.diasUteis + ' dias úteis'],
     quinto
@@ -15747,24 +15773,24 @@ function prodPerfis(m, P) {
     const t = L.reduce(function (s, p) { return s + p.total; }, 0), a = L.reduce(function (s, p) { return s + p.atos; }, 0);
     return '<div class="prod-perfil" style="--prod-cor:' + PROD_COR[g] + '"><span class="prod-tag">' + PROD_PERFIL[g] + '</span>' +
       '<strong>' + prodR$(t) + '</strong><small>' + prodPct(d.total ? t / d.total * 100 : 0) + ' da receita</small>' +
-      '<p>' + atdN(a) + ' atos (' + prodPct(d.atos ? a / d.atos * 100 : 0) + ' do volume) · ticket médio ' + prodR$(a ? t / a : 0) + ' · ' + L.length + (L.length === 1 ? ' pessoa' : ' pessoas') + '</p>' +
+      '<p>' + atdN(a) + ' lançamentos (' + prodPct(d.atos ? a / d.atos * 100 : 0) + ' do volume) · ticket médio ' + prodR$(a ? t / a : 0) + ' · ' + L.length + (L.length === 1 ? ' pessoa' : ' pessoas') + '</p>' +
       '<p class="prod-quem">' + L.map(function (p) { return esc(p.nomeTela); }).join(', ') + '</p></div>';
   }).join('');
 }
 
 function prodColunas(m, c) {
   const cols = [
-    { k: 'nomeTela', t: 'Escrevente', f: function (p) { return '<span class="prod-bola" style="background:' + PROD_COR[p.perfil] + '"></span>' + esc(p.nomeTela); } },
+    { k: 'nomeTela', t: 'Usuário financeiro', f: function (p) { return '<span class="prod-bola" style="background:' + PROD_COR[p.perfil] + '"></span>' + esc(p.nomeTela); } },
     { k: 'perfil', t: 'Perfil', f: function (p) { return PROD_PERFIL[p.perfil]; } },
-    { k: 'atos', t: 'Atos', f: function (p) { return atdN(p.atos); } },
-    { k: 'shareA', t: '% atos', f: function (p) { return prodPct(p.shareA); } },
+    { k: 'atos', t: 'Lançamentos', f: function (p) { return atdN(p.atos); } },
+    { k: 'shareA', t: '% lançamentos', f: function (p) { return prodPct(p.shareA); } },
     { k: 'total', t: 'Faturamento', f: function (p) { return prodR$(p.total); } },
     { k: 'shareR', t: '% receita', f: function (p) { return prodPct(p.shareR); } },
     { k: 'indice', t: 'Índice', f: function (p) { return '<b class="' + (p.indice >= 1 ? 'prod-sobe' : 'prod-desce') + '">' + prodX(p.indice) + '</b>'; } },
     { k: 'ticket', t: 'Ticket médio', f: function (p) { return prodR$(p.ticket); } },
     { k: 'mediana', t: 'Mediana', f: function (p) { return prodR$(p.mediana); } },
-    { k: 'max', t: 'Maior ato', f: function (p) { return prodR$(p.max); } },
-    { k: 'atosDia', t: 'Atos/dia útil', f: function (p) { return p.atosDia.toLocaleString('pt-BR', { maximumFractionDigits: 1 }); } },
+    { k: 'max', t: 'Maior lançamento', f: function (p) { return prodR$(p.max); } },
+    { k: 'atosDia', t: 'Lanç./dia útil', f: function (p) { return p.atosDia.toLocaleString('pt-BR', { maximumFractionDigits: 1 }); } },
     { k: 'porDia', t: 'R$/dia útil', f: function (p) { return prodR$0(p.porDia); } }
   ];
   if (m.dados.serie) cols.push({ k: 'dias', t: 'Dias com lançamento', f: function (p) { return p.dias == null ? '—' : String(p.dias); } });
@@ -15773,7 +15799,7 @@ function prodColunas(m, c) {
     c.dados.pessoas.forEach(function (p) { ant[p.id] = p; });
     const delta = function (campo) { return function (p) { const a = ant[p.id]; return a && a[campo] ? (p[campo] - a[campo]) / Math.abs(a[campo]) * 100 : null; }; };
     const dA = delta('atos'), dT = delta('total');
-    cols.push({ k: 'dAtos', t: 'Δ atos', v: dA, f: function (p) { const v = dA(p); return v == null ? '—' : '<span class="' + (v >= 0 ? 'prod-sobe' : 'prod-desce') + '">' + prodPct(v, true) + '</span>'; } });
+    cols.push({ k: 'dAtos', t: 'Δ lançamentos', v: dA, f: function (p) { const v = dA(p); return v == null ? '—' : '<span class="' + (v >= 0 ? 'prod-sobe' : 'prod-desce') + '">' + prodPct(v, true) + '</span>'; } });
     cols.push({ k: 'dTot', t: 'Δ faturamento', v: dT, f: function (p) { const v = dT(p); return v == null ? '—' : '<span class="' + (v >= 0 ? 'prod-sobe' : 'prod-desce') + '">' + prodPct(v, true) + '</span>'; } });
   }
   return cols;
@@ -15831,14 +15857,14 @@ function prodBarras(id, itens, fmt, dicas) {
 function prodGraficos(m, c, P) {
   const d = m.dados;
   const gente = P.filter(function (p) { return p.perfil !== 'sistema'; });
-  const dicaP = function (p) { return '<b>' + esc(p.nomeTela) + '</b><br>' + PROD_PERFIL[p.perfil] + '<br>Faturamento: ' + prodR$(p.total) + '<br>Atos: ' + atdN(p.atos) + '<br>Ticket médio: ' + prodR$(p.ticket); };
+  const dicaP = function (p) { return '<b>' + esc(p.nomeTela) + '</b><br>' + PROD_PERFIL[p.perfil] + '<br>Faturamento: ' + prodR$(p.total) + '<br>Lançamentos: ' + atdN(p.atos) + '<br>Ticket médio: ' + prodR$(p.ticket); };
   prodBarras('prodGFat', gente.slice().sort(function (a, b) { return b.total - a.total; }).map(function (p) { return { k: p.nomeTela, v: p.total, cor: PROD_COR[p.perfil], p: p }; }), prodR$0, function (it) { return dicaP(it.p); });
   prodBarras('prodGAtos', gente.slice().sort(function (a, b) { return b.atos - a.atos; }).map(function (p) { return { k: p.nomeTela, v: p.atos, cor: PROD_COR[p.perfil], p: p }; }), atdN, function (it) { return dicaP(it.p); });
   const sem = d.pgto.filter(function (x) { return x.forma === PROD_SEM_FORMA; })[0];
-  el('prodPgSub').textContent = 'Quantidade de lançamentos por forma.' + (sem ? ' "' + PROD_SEM_FORMA + '" soma ' + prodR$(sem.total) + ' em ' + atdN(sem.qtd) + ' atos — costuma ser escritura paga por guia, depósito ou baixa posterior.' : '');
+  el('prodPgSub').textContent = 'Quantidade de lançamentos por forma.' + (sem ? ' "' + PROD_SEM_FORMA + '" soma ' + prodR$(sem.total) + ' em ' + atdN(sem.qtd) + ' lançamentos sem forma de pagamento informada.' : '');
   prodBarras('prodGPg', d.pgto.slice(0, 12).map(function (x) { return { k: x.forma, v: x.qtd, x: x }; }), atdN, function (it) { return '<b>' + esc(it.k) + '</b><br>' + atdN(it.x.qtd) + ' lançamentos<br>' + prodR$(it.x.total); });
   if (d.faixas) atdColunas('prodGFaixa', d.faixas.map(function (f) { return f.faixa.replace('R$ ', ''); }), d.faixas.map(function (f) { return f.total; }), d.faixas.map(function () { return ATD_COR.v; }), function (i) {
-    const f = d.faixas[i]; return '<b>' + esc(f.faixa) + '</b><br>Receita: ' + prodR$(f.total) + '<br>Atos: ' + atdN(f.qtd);
+    const f = d.faixas[i]; return '<b>' + esc(f.faixa) + '</b><br>Receita: ' + prodR$(f.total) + '<br>Lançamentos: ' + atdN(f.qtd);
   });
   else atdVazio('prodGFaixa', 'Este mês veio do painel anterior sem as faixas de valor.');
   if (d.serie) {
@@ -15869,10 +15895,10 @@ function prodGraficos(m, c, P) {
 function prodMesAMes(m) {
   const ms = prodMeses();
   atdColunas('prodGMeses', ms.map(function (x) { return prodMesCurto(x.chave); }), ms.map(function (x) { return x.dados.total; }), ms.map(function (x) { return x === m ? ATD_COR.v : ATD_COR.m18; }), function (i) {
-    const x = ms[i].dados; return '<b>' + prodMesBr(ms[i].chave) + '</b><br>' + prodR$(x.total) + '<br>' + atdN(x.atos) + ' atos · ' + x.diasUteis + ' dias úteis';
+    const x = ms[i].dados; return '<b>' + prodMesBr(ms[i].chave) + '</b><br>' + prodR$(x.total) + '<br>' + atdN(x.atos) + ' lançamentos · ' + x.diasUteis + ' dias úteis';
   });
   let tT = 0, tA = 0, tD = 0;
-  el('prodTabMeses').innerHTML = '<thead><tr><th>Mês</th><th>Faturamento</th><th>Atos</th><th>Ticket médio</th><th>Dias úteis</th><th>Média/dia útil</th><th>Atos/dia útil</th><th>Δ receita</th></tr></thead><tbody>' +
+  el('prodTabMeses').innerHTML = '<thead><tr><th>Mês</th><th>Faturamento</th><th>Lançamentos financeiros</th><th>Ticket por lançamento</th><th>Dias úteis</th><th>Média/dia útil</th><th>Lançamentos/dia útil</th><th>Δ receita</th></tr></thead><tbody>' +
     ms.map(function (x, i) {
       const d = x.dados, v = i ? (d.total - ms[i - 1].dados.total) / ms[i - 1].dados.total * 100 : null;
       tT += d.total; tA += d.atos; tD += d.diasUteis;
@@ -16053,9 +16079,19 @@ function prodApagar() {
 }
 
 /* ---------- CSV e PDF ---------- */
+function prodResumoLavradosExportacao(mes) {
+  if (!SESSAO.token || !SESSAO.admin) return null;
+  const fonte = window.GestaoLavrados, controle = LAVRADOS_RELATORIOS.get('prodLavrados');
+  if (!fonte) return [['Fonte oficial', 'Indisponível no momento da exportação. Consulte Escrituras lavradas na Gestão do Hub.']];
+  const snapshot = controle ? controle.snapshot(mes) : { mes: mes, status: 'indisponivel', dados: null };
+  if (!snapshot) { toast('A sessão ou a consulta oficial mudou. Reabra o relatório antes de exportar.'); return null; }
+  return fonte.resumoExportacao(snapshot);
+}
 function prodCsv() {
   const m = prodMes(PROD.cur);
   if (!m) return;
+  const resumoOficial = prodResumoLavradosExportacao(m.chave);
+  if (!resumoOficial) return;
   const c = prodComparado(m), P = prodPessoas(m), cols = prodColunas(m, c);
   const n2 = function (v) { return v == null || !isFinite(v) ? '' : String(Math.round(v * 100) / 100).replace('.', ','); };
   const campo = function (s) { s = String(s == null ? '' : s); if (/^[=+\-@]/.test(s)) s = "'" + s; return /[;"\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
@@ -16067,6 +16103,8 @@ function prodCsv() {
       return n2(x.v ? x.v(p) : p[x.k]);
     }).join(';'));
   });
+  linhas.push('', campo('Resumo separado · escrituras lavradas · fonte oficial'));
+  resumoOficial.forEach(function (linha) { linhas.push(linha.map(campo).join(';')); });
   const blob = new Blob(['﻿' + linhas.join('\r\n')], { type: 'text/csv;charset=utf-8' });
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob); a.download = 'produtividade-cn2o-' + m.chave + '.csv';
@@ -16076,6 +16114,8 @@ function prodCsv() {
 function prodPdf() {
   const m = prodMes(PROD.cur);
   if (!m || typeof PDFMini !== 'function') return;
+  const resumoOficial = prodResumoLavradosExportacao(m.chave);
+  if (!resumoOficial) return;
   const d = m.dados, c = prodComparado(m), P = prodPessoas(m).sort(function (a, b) { return b.total - a.total; }), cfg = prodCfg();
   const pdf = new PDFMini({ pagina: 'A4' });
   // as fontes padrão do PDF (WinAnsi) não têm −, ≥ e Δ
@@ -16115,7 +16155,7 @@ function prodPdf() {
   }
   cabecalho();
   // indicadores
-  const kp = [['Faturamento bruto', prodR$(d.total)], ['Lançamentos', atdN(d.atos)], ['Ticket médio', prodR$(d.atos ? d.total / d.atos : 0)], ['Média por dia útil', prodR$0(d.total / d.diasUteis)]];
+  const kp = [['Faturamento bruto', prodR$(d.total)], ['Lançamentos financeiros', atdN(d.atos)], ['Ticket médio', prodR$(d.atos ? d.total / d.atos : 0)], ['Média por dia útil', prodR$0(d.total / d.diasUteis)]];
   if (c) kp.push(['Variação x ' + prodMesCurto(c.chave), prodPct(c.dados.total ? (d.total - c.dados.total) / c.dados.total * 100 : null, true)]);
   const lk = W / kp.length;
   kp.forEach(function (k, i) {
@@ -16126,8 +16166,10 @@ function prodPdf() {
   });
   y += 18;
   paragrafo(d.diasUteis + ' dias úteis · ' + P.filter(function (p) { return p.perfil !== 'sistema'; }).length + ' pessoas com lançamento · fonte: ' + (m.fonte || 'Pesquisa de Produtividade'), 8);
-  titulo('Por escrevente');
-  tabela(['Escrevente', 'Perfil', 'Atos', 'Faturamento', '% receita', 'Ticket médio', 'Índice'].concat(c ? ['Δ fat.'] : []),
+  titulo('Escrituras lavradas · fonte oficial');
+  resumoOficial.forEach(function (linha) { paragrafo(linha[0] + ': ' + linha[1], 8); });
+  titulo('Por usuário do lançamento financeiro');
+  tabela(['Usuário', 'Perfil', 'Lançam.', 'Faturamento', '% receita', 'Ticket médio', 'Índice'].concat(c ? ['Δ fat.'] : []),
     c ? [44, 26, 16, 30, 17, 25, 14, 10] : [48, 28, 17, 32, 18, 26, 13],
     P.map(function (p) {
       const ant = c && c.dados.pessoas.filter(function (x) { return x.id === p.id; })[0];
@@ -16137,7 +16179,7 @@ function prodPdf() {
     }).concat([{ negrito: true, v: ['Total', '', atdN(d.atos), prodR$(d.total), '100,0%', prodR$(d.atos ? d.total / d.atos : 0), '1,00×'].concat(c ? [''] : []) }]),
     c ? ['e', 'e', 'd', 'd', 'd', 'd', 'd', 'd'] : ['e', 'e', 'd', 'd', 'd', 'd', 'd']);
   titulo('Mesa de escrituras × balcão');
-  tabela(['Perfil', 'Pessoas', 'Atos', 'Faturamento', '% receita', 'Ticket médio'], [50, 20, 22, 36, 22, 32],
+  tabela(['Perfil', 'Pessoas', 'Lançam.', 'Faturamento', '% receita', 'Ticket médio'], [50, 20, 22, 36, 22, 32],
     ['mesa', 'balcao', 'tabeliao'].map(function (g) {
       const L = P.filter(function (p) { return p.perfil === g; });
       const t = L.reduce(function (s, p) { return s + p.total; }, 0), a = L.reduce(function (s, p) { return s + p.atos; }, 0);
