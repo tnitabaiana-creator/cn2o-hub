@@ -188,16 +188,41 @@
     kpis = function (m, cmp) {
       var idx=Object.keys(M).indexOf(m.key), anterior=cmp&&cmp.mes || (idx>0?M[Object.keys(M)[idx-1]]:null);
       var variacao=anterior&&anterior.total>0?(m.total-anterior.total)/anterior.total*100:null;
-      var cards=[['Receita líquida',fmtBRL(m.total),'Após 29,5694% de repasses · antes de despesas e IR'],['Lançamentos',num(m.atos),'Quantidade financeira; não é a contagem de escrituras'],['Média/dia útil',fmtBRL(m.mediaDiaria),m.diasUteis+' dias úteis na fonte'],['Variação com o mês',variacao===null?'—':pct(variacao),anterior?'Comparação com '+anterior.nome+'/'+anterior.ano:'Sem mês anterior disponível']];
+      var cards=[['Receita líquida do cartório',fmtBRL(m.total),m.nome+'/'+m.ano+' · todos os atos da fonte mensal · após 29,5694% de repasses'],['Lançamentos',num(m.atos),'Quantidade financeira; não é a contagem de escrituras'],['Média/dia útil',fmtBRL(m.mediaDiaria),m.diasUteis+' dias úteis na fonte'],['Variação com o mês',variacao===null?'—':pct(variacao),anterior?'Comparação com '+anterior.nome+'/'+anterior.ano:'Sem mês anterior disponível']];
       document.getElementById('kpis').innerHTML=cards.map(function(c,i){return '<div class="kpi '+(i===0?'hero':'')+'"><div class="lbl">'+esc(c[0])+'</div><div class="val">'+esc(c[1])+'</div><div class="det">'+esc(c[2])+'</div></div>';}).join('');
     };
     observacoes = function (m) {
       document.getElementById('obsList').innerHTML='<li><strong>Base financeira:</strong> Pesquisa de Produtividade importada no Hub para '+esc(m.nome)+'/'+esc(m.ano)+'.</li><li>Receita líquida de <strong>'+esc(fmtBRL(m.total))+'</strong>, após 29,5694% de repasses. Pessoas, médias, tickets, séries e comparações usam essa mesma base líquida.</li><li>Despesas e imposto de renda são tratados no Livro Caixa. Os valores desta visão não são resultado final após despesas.</li><li>Faixas são definidas pelo valor bruto do lançamento na fonte; os totais monetários das barras são líquidos.</li><li>Operador do lançamento financeiro não identifica automaticamente quem lavrou a escritura.</li>'+(m.financeiro.notas||[]).map(function(n){return '<li>'+esc(n.mensagem)+'</li>';}).join('');
     };
     function rotulo(s) {return typeof s==='string'?s.replace(/Faturamento bruto/gi,'Receita líquida').replace(/Receita bruta/gi,'Receita líquida').replace(/Emolumento bruto/gi,'Receita líquida'):s;}
+    function rotuloIndividual(s) {
+      return rotulo(s).replace(/escreventes/gi,'operadores financeiros').replace(/escrevente/gi,'operador financeiro')
+        .replace(/faturamento/gi,'receita líquida').replace(/atos realizados/gi,'lançamentos financeiros').replace(/\batos\b/gi,'lançamentos')
+        .replace(/Maior Ato/g,'Maior lançamento').replace(/por ato/gi,'por lançamento').replace(/receita total gerada/gi,'receita registrada na fonte');
+    }
+    // Valores de pessoas são agrupamentos de usuários financeiros, não autoria.
+    // A análise original inferia atuação do escrevente somente a partir do nome.
+    analise = function (m, cmp) {
+      document.getElementById('analise').innerHTML=m.users.map(function(u){
+        var anterior=cmp&&cmp.byName[u.nome],comparacao='';
+        if(anterior&&anterior.total)comparacao=' Variação líquida de '+esc(pct((u.total-anterior.total)/anterior.total*100))+' em relação a '+esc(cmp.label)+'.';
+        return '<div class="anrow"><div><h4>'+u.nome+'</h4><div class="nums">Operador do lançamento financeiro<br><b>'+esc(num(u.atos))+'</b> lançamentos · <b>'+esc(fmtBRL(u.total))+'</b></div></div><p>Receita líquida associada a este usuário na fonte financeira mensal; média de '+esc(fmtBRL(u.mediaDia))+' por dia útil.'+comparacao+' A receita por escrevente responsável permanece pendente de vínculo entre o lançamento e o ato.</p></div>';
+      }).join('');
+    };
+    if(typeof tFusao==='function')tFusao=function(p){
+      // Nunca fazer join entre usuário financeiro e autor por igualdade de nome.
+      // Os dados históricos de cartões, pesos e senhas continuam íntegros.
+      var atendimento=TRELLO_DATA.atendimentos,rows=ESC.map(function(e){return{e:e,r:TR(p,e),o:TR('out',e),a:atendimento[e]};}).sort(function(a,b){return b.r.finalizados-a.r.finalizados;}),tot=TR(p,'TOTAL');
+      var pendente='<td title="Sem vínculo financeiro por ato confirmado">Pendente de vínculo</td>';
+      var headers=['Escrevente','Receita por autor','Lançamentos por autor','Cartões arquivados','Distribuídos','Saldo','Por dia útil','Mediana trâmite','p90','Score médio','Prod. ponderada','Em curso 07/10','Senhas (set)','Tempo médio (med.)','Horas balcão','No-show'];
+      var corpo=rows.map(function(x){return '<tr><td>'+esc(ESC_FULL[x.e])+'</td>'+pendente+pendente+'<td><b>'+num(x.r.finalizados)+'</b></td><td>'+num(x.r.distribuidos)+'</td><td>'+num(x.r.finalizados-x.r.distribuidos)+'</td><td>'+d2(x.r.por_dia_util)+'</td><td>'+d1(x.r.tramite_esc_med)+' d</td><td>'+d1(x.r.tramite_esc_p90)+' d</td><td>'+d1(x.r.score_medio)+'</td><td>'+d1(x.r.producao_ponderada)+'</td><td>'+num(x.o.wip)+'</td><td>'+num(x.a.chamados)+'</td><td>'+d1(x.a.tempo_medio)+' min ('+d1(x.a.tempo_med)+')</td><td>'+d1(x.a.tempo_total_h)+' h</td><td>'+num(x.a.noshow)+'</td></tr>';}).join('');
+      function soma(fn){return rows.reduce(function(s,x){return s+fn(x);},0);}
+      var footer='<tr><td>Total histórico da mesa</td>'+pendente+pendente+'<td>'+num(tot.finalizados)+'</td><td>'+num(soma(function(x){return x.r.distribuidos;}))+'</td><td>'+num(tot.finalizados-soma(function(x){return x.r.distribuidos;}))+'</td><td>'+d2(tot.por_dia_util)+'</td><td>'+d1(tot.tramite_esc_med)+' d</td><td>'+d1(tot.tramite_esc_p90)+' d</td><td>'+d1(tot.score_medio)+'</td><td>'+d1(tot.producao_ponderada)+'</td><td>'+num(soma(function(x){return x.o.wip;}))+'</td><td>'+num(soma(function(x){return x.a.chamados;}))+'</td><td>—</td><td>'+d1(soma(function(x){return x.a.tempo_total_h;}))+' h</td><td>'+num(soma(function(x){return x.a.noshow;}))+'</td></tr>';
+      document.getElementById('tblFusao').innerHTML='<thead><tr>'+headers.map(function(h){return'<th>'+esc(h)+'</th>';}).join('')+'</tr></thead><tbody>'+corpo+'</tbody><tfoot>'+footer+'</tfoot>';
+    };
     var antigoChart = mkChart;
     mkChart = function (id,cfg) {
-      function ajustar(obj){if(!obj||typeof obj!=='object')return;Object.keys(obj).forEach(function(k){if(['label','text'].indexOf(k)>=0&&typeof obj[k]==='string')obj[k]=rotulo(obj[k]);else if(obj[k]&&typeof obj[k]==='object')ajustar(obj[k]);});}
+        function ajustar(obj){if(!obj||typeof obj!=='object')return;Object.keys(obj).forEach(function(k){if(['label','text'].indexOf(k)>=0&&typeof obj[k]==='string')obj[k]=id.indexOf('chT')===0?rotulo(obj[k]):rotuloIndividual(obj[k]);else if(obj[k]&&typeof obj[k]==='object')ajustar(obj[k]);});}
       ajustar(cfg);return antigoChart(id,cfg);
     };
     function rotularDOM() {
@@ -205,16 +230,33 @@
       var walker=document.createTreeWalker(document.body,4),node;
       while((node=walker.nextNode())){var tag=node.parentNode&&node.parentNode.tagName;if(tag!=='SCRIPT'&&tag!=='STYLE')node.nodeValue=rotulo(node.nodeValue);}
       var heading=document.getElementById('h-mes');if(heading)heading.textContent=M[CUR].nome+' de '+M[CUR].ano+' · lançamentos financeiros';
+      var subtitulo=document.getElementById('h-sub');if(subtitulo)subtitulo.textContent='Fonte mensal de todos os atos. Valores por operador do lançamento financeiro; receita por autor depende de vínculo por ato. Despesas e IR ficam no Livro-caixa.';
+      ['s-hist','s-perfis','s-tabela','s-dual','s-idx','s-cards','s-daily','s-dow','s-var','s-bubble','s-faixa','s-analise'].forEach(function(id){
+        var sec=document.getElementById(id);if(!sec)return;
+        var w=document.createTreeWalker(sec,4),n;while((n=w.nextNode())){var t=n.parentNode&&n.parentNode.tagName;if(t!=='SCRIPT'&&t!=='STYLE')n.nodeValue=rotuloIndividual(n.nodeValue);}
+      });
+      function texto(sel,valor){var e=document.querySelector(sel);if(e)e.textContent=valor;}
+      texto('#s-perfis h2','Agrupamentos de usuários da fonte financeira');
+      texto('#s-perfis .sec-sub','Grupos históricos da fonte financeira. A classificação de usuários não comprova autoria dos atos. Os valores apresentados são líquidos após os repasses.');
+      texto('#s-dual .sec-sub','Receita líquida (barras) e quantidade de lançamentos financeiros (linha), agrupadas pelo usuário da fonte.');
+      texto('#s-idx .grid-3 > div:last-child .sec-sub','Receita líquida agrupada pelo operador do lançamento; não representa crédito por autoria.');
+      texto('#s-bubble .sec-sub','Cada círculo representa um operador financeiro; o tamanho reflete a receita líquida associada aos seus lançamentos.');
+      texto('#s-analise h2','Leitura dos lançamentos por operador financeiro');
+      texto('#s-analise .sec-sub','Valores da fonte financeira por usuário. Atribuição de receita por responsável pelo ato ainda não confirmada.');
+      texto('#cards-sub','Valores líquidos por operador financeiro em '+M[CUR].nome+'/'+M[CUR].ano+'. Não representam receita por autoria.');
+      document.querySelectorAll('#cards .cat').forEach(function(e){e.textContent='Operador do lançamento financeiro';});
+      texto('#s-t-tabela .sec-sub','Histórico de cartões e senhas por escrevente. Receita e lançamentos por autor ficam pendentes até existir vínculo financeiro por ato; igualdade de nome não confirma esse vínculo.');
       var faixasTitulo=document.querySelector('#s-faixa h2'),faixasNota=document.querySelector('#s-faixa .sec-sub');
       if(faixasTitulo)faixasTitulo.textContent='Receita líquida por faixa do lançamento bruto';
       if(faixasNota)faixasNota.textContent='Faixas: valor bruto unitário da fonte. Barras: receita líquida após repasses. Linha: quantidade de lançamentos.';
     }
     var antigoRender=render;
     render=function(){antigoRender();rotularDOM();};
+    if(typeof tabela==='function'){var antigaTabela=tabela;tabela=function(m,cmp){antigaTabela(m,cmp);rotularDOM();};}
     var css=document.createElement('style');css.id='cn2o-financeiro-view-estilo';css.textContent='.kpis{grid-template-columns:repeat(4,minmax(0,1fr))}#s-casc,#s-caixa,#modalImport,#modalManage{display:none!important}@media(max-width:600px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}';
     document.head.appendChild(css);
     document.getElementById('btnCsv').onclick=function(){
-      var m=M[CUR],cmp=getComparator(m),head=['Base de receita','Versão financeira','Responsável pelo lançamento','Lançamentos','Receita líquida','Ticket líquido','Mediana líquida','Maior lançamento líquido','Média líquida por dia útil'];
+      var m=M[CUR],cmp=getComparator(m),head=['Base de receita','Versão financeira','Operador do lançamento financeiro','Lançamentos','Receita líquida','Ticket líquido','Mediana líquida','Maior lançamento líquido','Média líquida por dia útil'];
       if(cmp)head.push('Receita líquida '+cmp.label,'Variação líquida percentual');
       var lines=[head];m.users.forEach(function(u){var p=cmp&&cmp.byName[u.nome],row=['liquida_apos_repasses','receita-liquida-2026-10-v1',u.nome,u.atos,u.total,u.ticket,u.mediana,u.max,u.mediaDia];if(cmp)row.push(p?p.total:'',p&&p.total?(u.total-p.total)/p.total*100:'');lines.push(row);});
       var text='\ufeff'+lines.map(function(row){return row.map(function(v){var s=v==null?'':typeof v==='number'?String(v).replace('.',','):String(v);if(typeof v==='string'&&/^[=+@-]/.test(s))s="'"+s;return '"'+s.replace(/"/g,'""')+'"';}).join(';');}).join('\r\n');
@@ -249,9 +291,10 @@
         nota.style.cssText = 'padding:12px 16px;margin:0;border-left:3px solid #631325;background:#f6eef0;color:#202a3a;font-size:13px;line-height:1.6';
         tabela.parentNode.insertBefore(nota, tabela);
       }
-      nota.textContent = 'Fontes e períodos independentes: financeiro de ' + mes + '; cartões arquivados de ' + fluxo + '; senhas de setembro/2026. Os seletores não representam um único período. Este quadro histórico não é a contagem oficial de escrituras lavradas.';
+      nota.textContent = 'Fontes e períodos independentes: financeiro de ' + mes + '; cartões arquivados de ' + fluxo + '; senhas de setembro/2026. Os seletores não representam um único período. Este quadro histórico não é a contagem oficial de escrituras lavradas.' + (financeiroAtual ? ' Receita e lançamentos por autor: pendentes de vínculo financeiro por ato.' : '');
       var th = tabela.querySelectorAll('thead th');
-      if (th[2]) th[2].textContent = 'Lançamentos financeiros (' + mes + ')';
+      if (financeiroAtual && th[1]) th[1].textContent = 'Receita por autor · pendente';
+      if (th[2]) th[2].textContent = financeiroAtual ? 'Lançamentos por autor · pendente' : 'Lançamentos financeiros (' + mes + ')';
       if (th[3]) th[3].textContent = 'Cartões arquivados (' + fluxo + ')';
     }
     if (typeof tFusao === 'function') {

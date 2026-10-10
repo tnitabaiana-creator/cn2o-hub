@@ -271,7 +271,7 @@ function runtimeFinanceiro(documento) {
   const main=scripts.find(s=>s.includes('/* --- INICIO_BASE_DATA --- */'));
   if(main.includes('function refreshSelectors()'))vm.runInContext(main,ctx);
   else {
-    Object.assign(ctx,{M:{},CUR:'setembro',COMP_TARGET:'none',persistMonths(){},handleFile(){},processCsvText(){},renderManageModal(){},cascata(){},caixa(){},getComparator:()=>null,kpis(){},observacoes(){},mkChart(){},render(){},fmtBRL:n=>'R$ '+n.toFixed(2),num:String,pct:n=>n.toFixed(1)+'%',showToast(){},downloadDashboardHtml(){}});
+    Object.assign(ctx,{M:{},CUR:'setembro',COMP_TARGET:'none',persistMonths(){},handleFile(){},processCsvText(){},renderManageModal(){},cascata(){},caixa(){},getComparator:()=>null,kpis(){},observacoes(){},analise(){},mkChart(){},render(){},fmtBRL:n=>'R$ '+n.toFixed(2),num:String,pct:n=>n.toFixed(1)+'%',showToast(){},downloadDashboardHtml(){}});
     vm.runInContext(main.match(/\/\* CN2O_FINANCEIRO_VIEW_INICIO \*\/([\s\S]*?)\/\* CN2O_FINANCEIRO_VIEW_FIM \*\//)[1],ctx);
     vm.runInContext('kpis(M[CUR],null);observacoes(M[CUR]);',ctx);
   }
@@ -290,6 +290,21 @@ test('runtime da projeção exibe quatro KPIs, bloqueia edição e exporta CSV l
   assert.match(r.element('obsList').innerHTML,/valor bruto do lançamento/); assert.match(r.element('obsList').innerHTML,/Livro Caixa/);
 });
 
+test('KPI mensal inclui todos os atos e análise não atribui receita financeira por autoria', () => {
+  const row=financeiroFixture(); row.dados.pessoas[0].nome=row.dados_liquidos.pessoas[0].nome='César Bravo';
+  row.financeiro.base_individual='usuario_financeiro';
+  row.financeiro.receita_por_autor={status:'pendente_vinculo_financeiro_por_ato',colaboradores:[],total_atribuido:null};
+  const original=JSON.stringify(row),r=runtimeFinanceiro(P.prepararDocumento(v3,null,'canal',P.projetarFinanceiro({meses:[row]})));
+  assert.match(r.element('kpis').innerHTML,/Receita líquida do cartório/);
+  assert.match(r.element('kpis').innerHTML,/Setembro\/2026 · todos os atos da fonte mensal/);
+  assert.match(r.element('kpis').innerHTML,/704\.31/);
+  r.run('analise(M[CUR],null)');
+  assert.match(r.element('analise').innerHTML,/Operador do lançamento financeiro/);
+  assert.match(r.element('analise').innerHTML,/pendente de vínculo entre o lançamento e o ato/);
+  assert.doesNotMatch(r.element('analise').innerHTML,/Atuação direta|entrega .*receita|receita gerada/);
+  assert.equal(JSON.stringify(row),original);
+});
+
 // Opt-in private integration input remains outside git: SOURCE_V3=<original HTML> node --test ...
 test('HTML V3 real renderiza todos os meses sintéticos e reabre exportação sem reaplicar repasses', {skip:!process.env.SOURCE_V3}, async () => {
   const fs=require('node:fs'),crypto=require('node:crypto'),source=fs.readFileSync(process.env.SOURCE_V3,'utf8'),hash=crypto.createHash('sha256').update(source).digest('hex');
@@ -300,6 +315,13 @@ test('HTML V3 real renderiza todos os meses sintéticos e reabre exportação se
   r.run("setCurMonth('2026-08'); COMP_TARGET='auto'; render();"); assert.equal(r.run('getComparator(M[CUR])'),null);
   r.run("setCurMonth('2026-09'); COMP_TARGET='auto'; render();"); assert.equal(r.run('getComparator(M[CUR]).mes.total'),704.31);
   assert.equal(r.run("CHARTS.chFaixa.config.data.datasets[0].data[0]"),704.31); assert.equal(r.run("CHARTS.chFaixa.config.data.datasets[0].label"),'Receita líquida');
+  const historico=r.run('JSON.stringify(TRELLO_DATA)');
+  r.run('M[CUR].users[0].nome=ESC_FULL[ESC[0]]; M[CUR].users[0].total=123456789.99; render();');
+  assert.match(r.element('tblFusao').innerHTML,/Receita por autor/);
+  assert.match(r.element('tblFusao').innerHTML,/Pendente de vínculo/);
+  assert.doesNotMatch(r.element('tblFusao').innerHTML,/R\$|123\.456\.789|123456789/,'igualdade de nome não transfere receita financeira ao autor');
+  assert.equal(r.run('JSON.stringify(TRELLO_DATA)'),historico,'scores, cartões e senhas não são recalculados');
+  r.run('M[CUR].users[0].total=704.31;');
   r.element('btnDownloadHtml').onclick(); const exported=await r.blobs.at(-1).text(),second=runtimeFinanceiro(exported);
   assert.equal(second.run('M[CUR].total'),704.31); assert.equal(second.run('M[CUR].users[0].max'),352.15);
   assert.equal(crypto.createHash('sha256').update(fs.readFileSync(process.env.SOURCE_V3,'utf8')).digest('hex'),hash);
