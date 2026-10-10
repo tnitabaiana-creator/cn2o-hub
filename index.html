@@ -8174,6 +8174,68 @@ function relLavradosMensal() {
   montarLavradosRelatorio('edRelLavrados', mes);
   host.hidden = !mes;
 }
+let REL_RECEITA_LEITURA = 0, REL_PREVIA_LEITURA = 0;
+function relCompetenciasReceita(tipo, ref) {
+  if (!['semanal', 'mensal'].includes(tipo) || !/^\d{4}-\d{2}-\d{2}$/.test(ref || '')) return null;
+  const d = new Date(ref + 'T00:00:00Z');
+  if (!Number.isFinite(d.getTime()) || d.toISOString().slice(0, 10) !== ref) return null;
+  const ano = d.getUTCFullYear(), mes = d.getUTCMonth(), dia = d.getUTCDate();
+  const fim = tipo === 'mensal' ? new Date(Date.UTC(ano, mes, 0)) : new Date(Date.UTC(ano, mes, dia - ((d.getUTCDay() + 6) % 7) - 1));
+  const inicio = tipo === 'mensal' ? new Date(Date.UTC(fim.getUTCFullYear(), fim.getUTCMonth(), 1)) : new Date(fim.getTime() - 6 * 864e5);
+  const meses = [], cursor = new Date(Date.UTC(inicio.getUTCFullYear(), inicio.getUTCMonth(), 1));
+  while (cursor <= fim) { meses.push(cursor.toISOString().slice(0, 7)); cursor.setUTCMonth(cursor.getUTCMonth() + 1); }
+  return { inicio: inicio.toISOString().slice(0, 10), fim: fim.toISOString().slice(0, 10), meses: meses };
+}
+function relConsultaVigente(r, tipo, ref, token, login, host) {
+  return !!(ED && ED.aba === 'relatorios' && ED.rel === r && r.visao === 'escreventes' && r.tipo === tipo && r.ref === ref &&
+    SESSAO.admin && SESSAO.token === token && SESSAO.login === login && host && host.isConnected && el(host.id) === host);
+}
+function relReceitaHtml(tipo, ref, receita, carregando) {
+  const periodo = relCompetenciasReceita(tipo, ref);
+  if (!periodo) return '<p class="ed-vazio">Receita líquida indisponível: selecione um período válido.</p>';
+  const valida = !!(receita && receita.escopo === 'competencias_mensais' && receita.base_individual === 'usuario_financeiro' &&
+    receita.periodo_relatorio && receita.periodo_relatorio.inicio === periodo.inicio && receita.periodo_relatorio.fim === periodo.fim &&
+    Array.isArray(receita.competencias) && receita.competencias.length === periodo.meses.length &&
+    new Set(receita.competencias.map(function (c) { return c && c.mes; })).size === periodo.meses.length &&
+    receita.competencias.every(function (c) { return c && periodo.meses.includes(c.mes); }));
+  const dinheiro = function (n) { return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); };
+  const mesNome = function (mes) { return primeiraMaiuscula(MESES[+mes.slice(5, 7) - 1]) + ' de ' + mes.slice(0, 4); };
+  const cartoes = periodo.meses.map(function (mes) {
+    const c = valida && receita.competencias.find(function (x) { return x.mes === mes; });
+    const disponivel = c && c.status === 'disponivel' && Number.isFinite(c.receita_liquida) && Number.isSafeInteger(c.receita_liquida_centavos) &&
+      Math.round(c.receita_liquida * 100) === c.receita_liquida_centavos;
+    let detalhes = '<small>Competência mensal: ' + esc(mesNome(mes)) + '</small>';
+    if (disponivel) {
+      detalhes += '<small>70,4306% do bruto de todos os atos, após repasses de 29,5694%.</small>';
+      if (Number.isFinite(c.media_dia_util) && Number.isInteger(c.dias_uteis) && c.dias_uteis > 0) detalhes += '<small>Média mensal por dia útil: ' + esc(dinheiro(c.media_dia_util)) + ' · ' + c.dias_uteis + ' dias úteis.</small>';
+      detalhes += '<small>Fonte: ' + esc(c.fonte || 'Pesquisa de Produtividade') + (c.importado_em ? ' · importado em ' + esc(quandoCurto(c.importado_em)) : '') + '</small>';
+    } else if (!carregando) detalhes += '<small>' + (c && c.status === 'ausente' ? 'A fonte financeira desta competência ainda não foi importada.' : 'Não foi possível confirmar a fonte financeira desta competência.') + '</small>';
+    return '<div><span>Receita líquida do cartório</span><strong>' + (carregando ? 'Carregando…' : disponivel ? esc(dinheiro(c.receita_liquida)) : 'Indisponível') + '</strong>' + detalhes + '</div>';
+  });
+  return '<div class="atd-livro" style="grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">' + cartoes.join('') + '</div>' +
+    (tipo === 'semanal' ? '<p class="sub-data">Valores mensais disponíveis na fonte importada; não representam receita semanal nem comprovam mês fechado. Não há rateio pela semana.</p>' : '') +
+    '<p class="sub-data">A receita por escrevente responsável depende de vínculo financeiro por ato. Usuário do lançamento financeiro não comprova autoria.</p>';
+}
+function relCarregarReceita() {
+  const r = relEstado(), host = el('edRelReceita');
+  if (!host || !SESSAO.admin || !SESSAO.token || r.visao !== 'escreventes') return;
+  const tipo = r.tipo, ref = r.ref, token = SESSAO.token, login = SESSAO.login, leitura = ++REL_RECEITA_LEITURA;
+  host.innerHTML = relReceitaHtml(tipo, ref, null, true);
+  return api('/hub/relatorios/receita-mensal?tipo=' + encodeURIComponent(tipo) + '&ref=' + encodeURIComponent(ref)).then(function (j) {
+    if (leitura !== REL_RECEITA_LEITURA || !relConsultaVigente(r, tipo, ref, token, login, host)) return;
+    host.innerHTML = relReceitaHtml(tipo, ref, j && j.receita_mensal, false);
+  }).catch(function () {
+    if (leitura === REL_RECEITA_LEITURA && relConsultaVigente(r, tipo, ref, token, login, host)) host.innerHTML = relReceitaHtml(tipo, ref, null, false);
+  });
+}
+function relAtualizarPeriodo() {
+  ++REL_PREVIA_LEITURA;
+  const previa = el('edRelPrevia'), botao = el('edRelVer');
+  if (previa) previa.innerHTML = '';
+  if (botao) { botao.disabled = false; botao.textContent = 'Ver prévia'; }
+  relLavradosMensal();
+  relCarregarReceita();
+}
 function relEstado() {
   // visao (v1.39): 'escreventes', 'atendimentos' ou (v1.40) 'produtividade' — a última escolhida fica guardada
   const v = store.get('cn2o_rel_visao');
@@ -8225,13 +8287,14 @@ function relDesarmar(b, rotulo) { if (!b) return; b.dataset.confirma = ''; b.tex
 // A prévia (HTML) e o CSV não são JSON: vêm por fetch com o cabeçalho da sessão,
 // como o CSV da auditoria.
 function relBaixar(caminho) {
-  return fetch(CONFIG.endpoint + '/hub/relatorios' + caminho, { headers: { 'X-Auth-Token': SESSAO.token }, cache: 'no-store' })
+  const token = SESSAO.token;
+  return fetch(CONFIG.endpoint + '/hub/relatorios' + caminho, { headers: { 'X-Auth-Token': token }, cache: 'no-store' })
     .then(function (r) {
       if (r.ok) return r;
       return r.text().then(function (t) {
         let d = null;
         try { d = JSON.parse(t); } catch (e) {}
-        if (r.status === 401) sessaoExpirada();
+        if (r.status === 401 && SESSAO.token === token) sessaoExpirada();
         throw { status: r.status, erro: (d && d.erro) || ('erro ' + r.status) };
       });
     }, function () { throw { status: 0, erro: 'sem conexão com o servidor — verifique a internet e tente de novo' }; });
@@ -8243,6 +8306,7 @@ function pintarAbaRelatorios(painel) {
   if (r.visao === 'produtividade') { prodPintar(painel); return; }   // v1.40 (produtividade.js)
   painel.innerHTML = relChave('escreventes') +
     '<p class="sub-data" style="margin-bottom:10px">O relatório <b>semanal</b> sai sozinho toda segunda-feira às 8h e o <b>mensal</b> no 1º dia útil do mês, às 8h, por e-mail. Aqui você vê qualquer semana ou mês antes, envia na hora e acompanha os envios. Não precisa publicar o mural.</p>' +
+    '<div id="edRelReceita" aria-live="polite"></div>' +
     '<div id="edRelSituacao"><p class="ed-vazio">Lendo a situação dos relatórios…</p></div>' +
     '<h3 class="ed-titulo versalete">Ver ou enviar um relatório</h3>' +
     '<div class="aud-filtros">' +
@@ -8274,10 +8338,10 @@ function pintarAbaRelatorios(painel) {
     per.value = lista.some(function (p) { return p.ref === r.ref; }) ? r.ref : lista[1].ref;
     r.tipo = tipo.value; r.ref = per.value;
     relDesarmar(el('edRelEnviar'), REL_ROT_ENVIAR);
-    relLavradosMensal();
+    relAtualizarPeriodo();
   }
   tipo.addEventListener('change', function () { r.ref = ''; pintarPeriodos(); });
-  per.addEventListener('change', function () { r.ref = per.value; relDesarmar(el('edRelEnviar'), REL_ROT_ENVIAR); relLavradosMensal(); });
+  per.addEventListener('change', function () { r.ref = per.value; relDesarmar(el('edRelEnviar'), REL_ROT_ENVIAR); relAtualizarPeriodo(); });
   pintarPeriodos();
   el('edRelVer').addEventListener('click', relVerPrevia);
   el('edRelCsv').addEventListener('click', relBaixarCsv);
@@ -8333,18 +8397,20 @@ function relPintarSituacao() {
 
 function relVerPrevia() {
   const r = relEstado(), b = el('edRelVer'), box = el('edRelPrevia');
+  const tipo = r.tipo, ref = r.ref, token = SESSAO.token, login = SESSAO.login, leitura = ++REL_PREVIA_LEITURA;
+  const vigente = function () { return leitura === REL_PREVIA_LEITURA && relConsultaVigente(r, tipo, ref, token, login, box); };
   b.disabled = true; b.textContent = 'Montando…';
   box.innerHTML = '<p class="aud-conta">Montando o relatório — leva alguns segundos (o servidor consulta o Trello).</p>';
-  relBaixar('/previa?tipo=' + encodeURIComponent(r.tipo) + '&ref=' + encodeURIComponent(r.ref))
+  return relBaixar('/previa?tipo=' + encodeURIComponent(tipo) + '&ref=' + encodeURIComponent(ref))
     .then(function (resp) { return resp.text(); })
     .then(function (html) {
-      if (!relAbaAberta() || !box.isConnected) return;
+      if (!vigente()) return;
       box.innerHTML = '<p class="aud-conta">Prévia — é exatamente o e-mail que seria enviado.</p>' +
         '<iframe class="rel-previa" title="Prévia do relatório" sandbox="allow-popups allow-popups-to-escape-sandbox"></iframe>';
       box.querySelector('iframe').srcdoc = html;
     })
-    .catch(function (e) { if (box.isConnected) box.innerHTML = '<p class="ed-vazio">Não consegui montar a prévia (' + esc(relErro(e)) + ').</p>'; })
-    .then(function () { if (b.isConnected) { b.disabled = false; b.textContent = 'Ver prévia'; } });
+    .catch(function (e) { if (vigente()) box.innerHTML = '<p class="ed-vazio">Não consegui montar a prévia (' + esc(relErro(e)) + ').</p>'; })
+    .then(function () { if (vigente() && b.isConnected) { b.disabled = false; b.textContent = 'Ver prévia'; } });
 }
 function relBaixarCsv() {
   const r = relEstado(), b = el('edRelCsv'), antes = b.textContent;
