@@ -238,6 +238,25 @@ test('exportação oficial preserva cinco métodos, corte real, dados originais 
   }
 });
 
+test('prévia e CSV incluem Criado Por gerencial sem alterar receita mensal nem atribuir receita individual', () => {
+  const a = ambiente(), resumo = resumoOficial(), originalReceita = JSON.stringify(setembro());
+  const metodos = { direta: 0, auditoria_concordante: 0, trello_divergencia: 0, movimentacao_arquivo_trello: 0, ultimo_escrevente_antes_arquivo_trello: 0, criado_por_extra: 15 };
+  Object.assign(resumo.colaboradores[0], { fonte: 'Extra Digital', marcos: ['atribuicao_gerencial'], metodos: { ...metodos }, com_cartao_trello: 0 });
+  Object.assign(resumo.autoria, { metodos, com_cartao_trello: 0 });
+  const original = JSON.stringify(resumo), dados = dadosOficiais(a, resumo), html = a.c.relOficialHtml(dados), rows = lerCsv(a.c.relOficialCsv(dados));
+  assert.match(html, /Criado Por — Extra Digital: 15/); assert.match(html, /usuário criador registrado no Extra Digital/);
+  assert.match(html, /não é comprovação de quem executou fisicamente a lavratura/); assert.match(html, /não são convertidas automaticamente/);
+  assert.match(html, /Total oficial: 223/); assert.match(html, /Responsável não identificado: 208/);
+  const pessoa = rows.find(r => r.secao === 'responsavel'), total = rows.find(r => r.secao === 'escrituras');
+  assert.equal(pessoa.criado_por_extra, '15'); assert.equal(total.criado_por_extra, '15'); assert.equal(total.quantidade_oficial, '223');
+  assert.equal(pessoa.fonte, 'Extra Digital'); assert.equal(pessoa.quantidade_oficial, ''); assert.equal(pessoa.receita_liquida_brl, '');
+  assert.equal(pessoa.ultimo_escrevente_antes_arquivo_trello, '0'); assert.equal(pessoa.com_cartao_trello, '0');
+  assert.equal(rows.find(r => r.secao === 'criterio_metodo' && r.id === 'criado_por_extra').descricao, 'Criado Por — Extra Digital');
+  assert.equal(rows.find(r => r.secao === 'receita_mensal_cartorio').receita_liquida_brl, '704,31');
+  assert.equal(rows.find(r => r.secao === 'receita_por_autor').status, 'pendente_vinculo_financeiro_por_ato');
+  assert.equal(JSON.stringify(resumo), original); assert.equal(JSON.stringify(setembro()), originalReceita);
+});
+
 test('base ausente e receita indisponível não exportam zeros; zero coberto continua documentado', () => {
   const a = ambiente(), resumo = resumoOficial();
   resumo.total_observado = 0; resumo.total_oficial = null; resumo.cobertura_completa = false; resumo.com_vinculo = resumo.sem_vinculo = 0;

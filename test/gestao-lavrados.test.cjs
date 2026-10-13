@@ -43,10 +43,10 @@ test('pendência de identificação aparece sem excluir registro da extração n
   assert.match(html, /Extração mensal completa/); assert.doesNotMatch(html, /Mês conciliado/);
   assert.match(html, /Escrituras lavradas/); assert.match(html, /Procurações e testamentos não integram/);
 });
-test('não exibe criador como autor nem dados extras recebidos, e não modifica o payload', () => {
+test('não usa campos extras não validados como autoria e não modifica o payload', () => {
   const dados = { meses: [mes({ criador: 'DADO-PRIVADO-CRIADOR', responsavel: 'DADO-PRIVADO-RESPONSAVEL' })] }, antes = JSON.stringify(dados);
   const html = L.renderizar({ dados: L.validarResposta(dados), mes: '2026-09' });
-  assert.doesNotMatch(html, /DADO-PRIVADO/); assert.match(html, /Vínculo não identifica autoria/);
+  assert.doesNotMatch(html, /DADO-PRIVADO/); assert.match(html, /O vínculo Hub é conferido separadamente da autoria/);
   assert.equal(JSON.stringify(dados), antes);
 });
 test('consulta é somente GET lógico e seleção do mês financeiro ausente permanece explícita', async () => {

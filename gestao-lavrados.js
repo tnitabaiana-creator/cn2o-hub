@@ -9,12 +9,12 @@
   const esc = valor => String(valor == null ? '' : valor).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const mesValido = valor => /^\d{4}-(0[1-9]|1[0-2])$/.test(String(valor || ''));
   const inteiro = valor => Number.isSafeInteger(valor) && valor >= 0;
-  const METODOS = ['direta', 'auditoria_concordante', 'trello_divergencia', 'movimentacao_arquivo_trello', 'ultimo_escrevente_antes_arquivo_trello'];
+  const METODOS = ['direta', 'auditoria_concordante', 'trello_divergencia', 'movimentacao_arquivo_trello', 'ultimo_escrevente_antes_arquivo_trello', 'criado_por_extra'];
   function validarMetodos(valor, total, legadoDireto) {
     if (valor == null && legadoDireto) return Object.fromEntries(METODOS.map(k => [k, k === 'direta' ? total : 0]));
     // As chaves novas podem faltar nas respostas anteriores à mudança de critério.
     // Não atribui movimentações a registros legados nem altera os dados recebidos.
-    if (valor && typeof valor === 'object' && !Array.isArray(valor)) valor = { movimentacao_arquivo_trello: 0, ultimo_escrevente_antes_arquivo_trello: 0, ...valor };
+    if (valor && typeof valor === 'object' && !Array.isArray(valor)) valor = { movimentacao_arquivo_trello: 0, ultimo_escrevente_antes_arquivo_trello: 0, criado_por_extra: 0, ...valor };
     if (!valor || typeof valor !== 'object' || Array.isArray(valor) ||
         Object.keys(valor).some(k => !METODOS.includes(k)) || METODOS.some(k => !inteiro(valor[k])) ||
         METODOS.reduce((s, k) => s + valor[k], 0) !== total) throw new Error('Métodos de atribuição inválidos.');
@@ -76,10 +76,11 @@
           p.marcos.some(m => !['lavratura', 'registro', 'atribuicao_gerencial'].includes(m)) || !inteiro(p.total_observado) ||
           (a.cobertura_completa ? p.total_oficial !== p.total_observado : p.total_oficial !== null)) throw new Error('Atribuição de autoria inválida.');
       const metodos = validarMetodos(p.metodos, p.total_observado, p.fonte === 'Extra Digital' && !p.marcos.includes('atribuicao_gerencial'));
-      const gerencial = metodos.auditoria_concordante + metodos.trello_divergencia + metodos.movimentacao_arquivo_trello + metodos.ultimo_escrevente_antes_arquivo_trello;
+      const trello = metodos.auditoria_concordante + metodos.trello_divergencia + metodos.movimentacao_arquivo_trello + metodos.ultimo_escrevente_antes_arquivo_trello;
+      const gerencial = trello + metodos.criado_por_extra;
       if ((gerencial > 0) !== p.marcos.includes('atribuicao_gerencial') ||
           (metodos.direta > 0) !== p.marcos.some(m => ['lavratura', 'registro'].includes(m)) ||
-          p.fonte !== (gerencial ? 'Extra Digital + Trello' : 'Extra Digital')) throw new Error('Fonte incompatível com o método de atribuição.');
+          p.fonte !== (trello ? 'Extra Digital + Trello' : 'Extra Digital')) throw new Error('Fonte incompatível com o método de atribuição.');
       pessoas.add(p.id);
       return { id: p.id, nome: p.nome, fonte: p.fonte, marcos: p.marcos.slice(), metodos, total_observado: p.total_observado, total_oficial: p.total_oficial,
         com_cartao_trello: validarCartoesTrello(p.com_cartao_trello, p.total_observado) };
@@ -148,12 +149,14 @@
     else html += '<p>Nenhum tipo disponível no período coberto pela extração.</p>';
     if (r.classificacao.divergentes) html += '<p class="lavrados-pendencia">' + numero(r.classificacao.divergentes) + ' registro(s) com classificação divergente na fonte, mantido(s) na contagem e sem classificação presumida.</p>';
     html += '<div class="lavrados-autoria"><h4>Por escrevente responsável</h4><p>' + (r.autoria.cobertura_completa ? 'Atribuições conferidas para todo o período.' : r.autoria.com_autoria_confirmada ? 'Atribuições conferidas até esta consulta. O agrupamento ainda não representa um fechamento individual.' : 'Há escrituras sem responsável identificado na base de atribuições.') + '</p>';
-    if (r.autoria.metodos.movimentacao_arquivo_trello || r.autoria.metodos.ultimo_escrevente_antes_arquivo_trello || !r.autoria.com_autoria_confirmada) html += '<p><strong>Movimentação para o arquivo — Trello.</strong> Critério gerencial do titular: conta criadora da ação registrada na última entrada do cartão vinculado de uma etapa fora do arquivo para a lista de arquivo do quadro Protocolo Cadastro. A contagem e o mês das escrituras continuam pela data Minuta/Lavratura do Extra Digital. O histórico não comprova quem clicou fisicamente nem quem elaborou ou lavrou o ato.</p>';
+    if (r.autoria.metodos.criado_por_extra || !r.autoria.com_autoria_confirmada) html += '<p><strong>Criado Por — Extra Digital.</strong> Autoria gerencial definida pelo titular a partir do usuário criador registrado no Extra Digital; não é comprovação de quem executou fisicamente a lavratura. A contagem e o mês das escrituras continuam pela data Minuta/Lavratura do Extra Digital.</p>';
+    if (r.autoria.metodos.movimentacao_arquivo_trello || r.autoria.metodos.ultimo_escrevente_antes_arquivo_trello) html += '<p><strong>Movimentação para o arquivo — Trello.</strong> Critério gerencial do titular: conta criadora da ação registrada na última entrada do cartão vinculado de uma etapa fora do arquivo para a lista de arquivo do quadro Protocolo Cadastro. A contagem e o mês das escrituras continuam pela data Minuta/Lavratura do Extra Digital. O histórico não comprova quem clicou fisicamente nem quem elaborou ou lavrou o ato.</p>';
     if (r.autoria.metodos.ultimo_escrevente_antes_arquivo_trello) html += '<p><strong>Último escrevente que movimentou antes do arquivo — Trello.</strong> Quando a conta da entrada no arquivo é genérica ou de colaborador não escrevente, o crédito gerencial segue o último escrevente individual com movimentação real anterior a essa entrada, na mesma etapa ou entre etapas. Conta desconhecida permanece pendente. Este critério não comprova clique manual nem elaboração do ato.</p>';
-    if (r.autoria.metodos.direta || r.autoria.metodos.auditoria_concordante || r.autoria.metodos.trello_divergencia) html += '<p>As atribuições históricas conservam o método indicado em cada linha; não são convertidas automaticamente para o novo critério.</p>';
+    if (r.autoria.metodos.direta || r.autoria.metodos.auditoria_concordante || r.autoria.metodos.trello_divergencia || r.autoria.metodos.movimentacao_arquivo_trello || r.autoria.metodos.ultimo_escrevente_antes_arquivo_trello) html += '<p>As atribuições históricas conservam o método indicado em cada linha; não são convertidas automaticamente para o novo critério.</p>';
     if (r.autoria.com_cartao_trello != null) html += '<p class="lavrados-vinculos">' + numero(r.autoria.com_cartao_trello) + ' escritura(s) atribuída(s) com cartão Trello identificado. Essa referência é distinta do vínculo com o Hub.</p>';
     if (r.colaboradores.length) html += '<div class="lavrados-tipos">' + r.colaboradores.map(p => {
       const m = p.metodos, explicacoes = [];
+      if (m.criado_por_extra) explicacoes.push('Criado Por — Extra Digital · ' + numero(m.criado_por_extra));
       if (m.direta) explicacoes.push('Evidência: ' + p.marcos.filter(x => x !== 'atribuicao_gerencial').map(esc).join(' e ') + ' · Extra Digital · ' + numero(m.direta));
       if (m.auditoria_concordante) explicacoes.push('Critério gerencial · auditoria e Trello concordantes · ' + numero(m.auditoria_concordante));
       if (m.trello_divergencia) explicacoes.push('Critério gerencial · Trello prevalece na divergência · ' + numero(m.trello_divergencia));
@@ -192,7 +195,7 @@
     if (estado.carregando) return html + '<p role="status">Consultando a fonte oficial…</p></section>';
     if (estado.erro) return html + '<p class="lavrados-erro" role="status">A fonte oficial está indisponível. Nenhum total foi presumido.</p><button type="button" data-lav-retry>Tentar novamente</button></section>';
     html += '<div class="lavrados-destaque"><strong>' + s.numero + '</strong><div><h4>' + esc(estado.semAssociacao ? 'Período financeiro não identificado' : atual ? nomeMes(atual) : 'Nenhum mês conciliado') + '</h4><span class="lavrados-selo lavrados-selo--' + s.classe + '">' + (estado.semAssociacao ? 'Sem associação de período' : s.rotulo) + '</span><p>' + (estado.semAssociacao ? 'O nome informado no financeiro não identifica um mês. Escolha um mês oficial para consulta independente.' : s.cobertura) + '</p></div></div>';
-    if (m) html += '<p class="lavrados-vinculos">' + numero(m.com_vinculo) + ' com vínculo confirmado ao Hub · ' + numero(m.sem_vinculo) + ' sem vínculo confirmado. Vínculo não identifica autoria; não há atribuição automática ao criador do registro.</p>' +
+    if (m) html += '<p class="lavrados-vinculos">' + numero(m.com_vinculo) + ' com vínculo confirmado ao Hub · ' + numero(m.sem_vinculo) + ' sem vínculo confirmado. O vínculo Hub é conferido separadamente da autoria; o critério de cada atribuição consta abaixo.</p>' +
       (m.com_pendencia_identificacao ? '<p class="lavrados-vinculos">' + numero(m.com_pendencia_identificacao) + ' registro(s) com identificação a conferir, incluído(s) na contagem da fonte.</p>' : '') +
       '<p class="lavrados-atualizado">Extração em ' + diaBr(diaDoCorte(m.corte_em)) + ' às ' + horaDoCorte(m) + ' (horário de Brasília).</p>' +
       (m.importado_em && !Number.isNaN(Date.parse(m.importado_em)) ? '<p class="lavrados-atualizado">Base importada em ' + esc(new Date(m.importado_em).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })) + '. Retrato da importação; não é atualização em tempo real.</p>' : '');

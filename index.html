@@ -8197,10 +8197,11 @@ const REL_METODOS = [
   ['auditoria_concordante', 'Auditoria e responsável Trello concordantes'],
   ['trello_divergencia', 'Responsável Trello prevalece na divergência'],
   ['movimentacao_arquivo_trello', 'Movimentação para o arquivo — Trello'],
-  ['ultimo_escrevente_antes_arquivo_trello', 'Último escrevente que movimentou antes do arquivo — Trello']
+  ['ultimo_escrevente_antes_arquivo_trello', 'Último escrevente que movimentou antes do arquivo — Trello'],
+  ['criado_por_extra', 'Criado Por — Extra Digital']
 ];
 const REL_CRITERIO_OFICIAL = 'Fonte de contagem: Extra Digital (CTN), família Escritura, Registrado(a), pela data Minuta/Lavratura. Arquivamento de cartão não muda a competência da lavratura.';
-const REL_CRITERIO_AUTORIA = 'Critério gerencial do titular: conta criadora da ação da última entrada de etapa não-arquivo para arquivo. Se a conta é genérica ou de colaborador não escrevente, considera-se o último escrevente individual com movimentação real anterior, na mesma etapa ou entre etapas. Conta desconhecida permanece pendente. Não comprova clique manual, elaboração ou lavratura física. Os métodos históricos permanecem identificados.';
+const REL_CRITERIO_AUTORIA = 'Critério atual: Criado Por — Extra Digital. Autoria gerencial definida pelo titular a partir do usuário criador registrado no Extra Digital; não é comprovação de quem executou fisicamente a lavratura. As atribuições anteriores mantêm o método identificado em cada linha e não são convertidas automaticamente. Critério histórico Trello: conta criadora da ação da última entrada de etapa não-arquivo para arquivo. Se a conta é genérica ou de colaborador não escrevente, considera-se o último escrevente individual com movimentação real anterior, na mesma etapa ou entre etapas. Conta desconhecida permanece pendente. Não comprova clique manual, elaboração ou lavratura física. Os métodos históricos permanecem identificados.';
 function relReceitaDados(tipo, ref, receita) {
   const periodo = relCompetenciasReceita(tipo, ref);
   if (!periodo) return [];

@@ -222,7 +222,7 @@ test('atribuição gerencial diferencia concordância e prevalência Trello sem 
     evidencia: { referencia: 'REFERENCIA-PRIVADA-NAO-EXIBIR' } })], autoria: { ...autoria(1, 6), metodos } });
   const antes = JSON.stringify(r), dados = L.validarSemana(r), html = L.renderizar({ visao: 'semana', semana: { dados } });
   assert.equal(dados.total_observado, 7); assert.equal(dados.autoria.sem_autoria_confirmada, 1);
-  assert.deepEqual(dados.autoria.metodos, { ...metodos, movimentacao_arquivo_trello: 0, ultimo_escrevente_antes_arquivo_trello: 0 });
+  assert.deepEqual(dados.autoria.metodos, { ...metodos, movimentacao_arquivo_trello: 0, ultimo_escrevente_antes_arquivo_trello: 0, criado_por_extra: 0 });
   assert.deepEqual(dados.colaboradores[0].metodos, dados.autoria.metodos);
   assert.match(html, /Evidência: registro · Extra Digital · 1/);
   assert.match(html, /auditoria e Trello concordantes · 2/);
@@ -317,6 +317,53 @@ test('consulta mensal apresenta novo responsável após leitura e limpa seus dad
 function antesArquivo(total = 3) {
   return { ...arquivoTrello(0), ultimo_escrevente_antes_arquivo_trello: total };
 }
+function criadoPor(total = 3) {
+  return { ...antesArquivo(0), criado_por_extra: total };
+}
+test('Criado Por é autoria gerencial Extra Digital sem exigir evidência Trello ou lavratura física', () => {
+  const metodos = criadoPor(), p = colaborador({ fonte: 'Extra Digital', marcos: ['atribuicao_gerencial'], metodos, com_cartao_trello: 0,
+    nome: '<b>Pessoa de teste</b>', evidencia: { usuario: 'USUARIO-PRIVADO', referencia: 'FONTE-PRIVADA' } });
+  const r = semana({ colaboradores: [p], autoria: { ...autoria(4, 3), metodos, com_cartao_trello: 0 } }), original = JSON.stringify(r);
+  const dados = L.validarSemana(r), html = L.renderizar({ visao: 'semana', semana: { dados } });
+  assert.equal(dados.total_observado, 7); assert.equal(dados.autoria.sem_autoria_confirmada, 4);
+  assert.equal(dados.colaboradores[0].fonte, 'Extra Digital'); assert.equal(dados.colaboradores[0].metodos.criado_por_extra, 3);
+  assert.match(html, /Criado Por — Extra Digital · 3/); assert.match(html, /usuário criador registrado no Extra Digital/);
+  assert.match(html, /não é comprovação de quem executou fisicamente a lavratura/); assert.match(html, /data Minuta\/Lavratura/);
+  assert.match(html, /Responsável não identificado/); assert.match(html, /&lt;b&gt;Pessoa de teste&lt;\/b&gt;/);
+  assert.doesNotMatch(html, /Movimentação para o arquivo — Trello\.|Evidência: registro|USUARIO-PRIVADO|FONTE-PRIVADA/);
+  const mensal = L.renderizar({ dados: L.validarResposta({ meses: r.meses }), mes: '2026-10' });
+  assert.match(mensal, /vínculo Hub é conferido separadamente da autoria/); assert.doesNotMatch(mensal, /não há atribuição automática ao criador/);
+  assert.doesNotMatch(JSON.stringify(dados), /USUARIO-PRIVADO|FONTE-PRIVADA/); assert.equal(JSON.stringify(r), original);
+});
+test('Criado Por pode coexistir com autoria direta e com métodos Trello preservando suas fontes', () => {
+  for (const trello of [false, true]) {
+    const metodos = { ...criadoPor(3), direta: 1, ...(trello ? { movimentacao_arquivo_trello: 2 } : {}) }, total = trello ? 6 : 4;
+    const p = colaborador({ total_observado: total, fonte: trello ? 'Extra Digital + Trello' : 'Extra Digital', marcos: ['registro', 'atribuicao_gerencial'], metodos });
+    const r = semana({ colaboradores: [p], autoria: { ...autoria(7 - total, total), metodos } });
+    const dados = L.validarSemana(r), html = L.renderizar({ visao: 'semana', semana: { dados } });
+    assert.deepEqual(dados.autoria.metodos, metodos); assert.equal(dados.autoria.com_autoria_confirmada + dados.autoria.sem_autoria_confirmada, 7);
+    assert.match(html, /Criado Por — Extra Digital · 3/); assert.match(html, /Evidência: registro · Extra Digital · 1/);
+    if (trello) assert.match(html, /Movimentação para o arquivo — Trello · 2/);
+    assert.match(html, /atribuições históricas conservam o método/);
+  }
+});
+test('Criado Por exige soma reconciliada e marco gerencial, sem aceitar fonte Trello isolada', () => {
+  const metodos = criadoPor(), p = colaborador({ fonte: 'Extra Digital', marcos: ['atribuicao_gerencial'], metodos });
+  const r = semana({ colaboradores: [p], autoria: { ...autoria(4, 3), metodos } });
+  for (const valor of [-1, 1.5, '3', null, undefined, 4]) {
+    assert.throws(() => L.validarSemana({ ...r, colaboradores: [{ ...p, metodos: { ...metodos, criado_por_extra: valor } }] }));
+  }
+  for (const patch of [{ fonte: 'Extra Digital + Trello' }, { marcos: ['registro'] }, { marcos: ['registro', 'atribuicao_gerencial'] }]) {
+    assert.throws(() => L.validarSemana({ ...r, colaboradores: [{ ...p, ...patch }] }));
+  }
+  assert.throws(() => L.validarSemana({ ...r, autoria: { ...r.autoria, metodos: { ...criadoPor(2), direta: 1 } } }));
+});
+test('resposta anterior de cinco métodos recebe Criado Por zero sem reclassificar nem mudar a fonte', () => {
+  const metodos = antesArquivo(), r = semana({ colaboradores: [responsavelArquivo(3, { metodos })], autoria: { ...autoria(4, 3), metodos } });
+  const original = JSON.stringify(r), dados = L.validarSemana(r);
+  assert.equal(dados.autoria.metodos.criado_por_extra, 0); assert.equal(dados.colaboradores[0].metodos.criado_por_extra, 0);
+  assert.equal(dados.colaboradores[0].fonte, 'Extra Digital + Trello'); assert.equal(JSON.stringify(r), original);
+});
 test('último escrevente antes do arquivo mantém critério gerencial isolado ou junto aos quatro métodos anteriores', () => {
   for (const metodos of [antesArquivo(), { direta: 1, auditoria_concordante: 1, trello_divergencia: 1, movimentacao_arquivo_trello: 1, ultimo_escrevente_antes_arquivo_trello: 2 }]) {
     const total = Object.values(metodos).reduce((s, n) => s + n, 0);
@@ -324,7 +371,7 @@ test('último escrevente antes do arquivo mantém critério gerencial isolado ou
       evidencia: { acao: 'REFERENCIA-PRIVADA', membro: 'MEMBRO-PRIVADO' } });
     const r = semana({ colaboradores: [p], autoria: { ...autoria(7 - total, total), metodos } }), antes = JSON.stringify(r);
     const dados = L.validarSemana(r), html = L.renderizar({ visao: 'semana', semana: { dados } });
-    assert.deepEqual(dados.colaboradores[0].metodos, metodos); assert.deepEqual(dados.autoria.metodos, metodos);
+    assert.deepEqual(dados.colaboradores[0].metodos, { ...metodos, criado_por_extra: 0 }); assert.deepEqual(dados.autoria.metodos, { ...metodos, criado_por_extra: 0 });
     assert.equal(dados.total_observado, 7); assert.equal(dados.inicio, '2026-10-05'); assert.equal(dados.colaboradores[0].total_oficial, null);
     assert(html.includes('Último escrevente que movimentou antes do arquivo — Trello · ' + metodos.ultimo_escrevente_antes_arquivo_trello));
     assert.match(html, /conta da entrada no arquivo é genérica/); assert.match(html, /movimentação real anterior/); assert.match(html, /Conta desconhecida permanece pendente/);
