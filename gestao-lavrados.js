@@ -9,13 +9,21 @@
   const esc = valor => String(valor == null ? '' : valor).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   const mesValido = valor => /^\d{4}-(0[1-9]|1[0-2])$/.test(String(valor || ''));
   const inteiro = valor => Number.isSafeInteger(valor) && valor >= 0;
-  const METODOS = ['direta', 'auditoria_concordante', 'trello_divergencia'];
+  const METODOS = ['direta', 'auditoria_concordante', 'trello_divergencia', 'movimentacao_arquivo_trello', 'ultimo_escrevente_antes_arquivo_trello'];
   function validarMetodos(valor, total, legadoDireto) {
-    if (valor == null && legadoDireto) return { direta: total, auditoria_concordante: 0, trello_divergencia: 0 };
+    if (valor == null && legadoDireto) return Object.fromEntries(METODOS.map(k => [k, k === 'direta' ? total : 0]));
+    // As chaves novas podem faltar nas respostas anteriores à mudança de critério.
+    // Não atribui movimentações a registros legados nem altera os dados recebidos.
+    if (valor && typeof valor === 'object' && !Array.isArray(valor)) valor = { movimentacao_arquivo_trello: 0, ultimo_escrevente_antes_arquivo_trello: 0, ...valor };
     if (!valor || typeof valor !== 'object' || Array.isArray(valor) ||
         Object.keys(valor).some(k => !METODOS.includes(k)) || METODOS.some(k => !inteiro(valor[k])) ||
         METODOS.reduce((s, k) => s + valor[k], 0) !== total) throw new Error('Métodos de atribuição inválidos.');
     return Object.fromEntries(METODOS.map(k => [k, valor[k]]));
+  }
+  function validarCartoesTrello(valor, total) {
+    if (valor === undefined) return null; // Backend legado: quantidade desconhecida.
+    if (!inteiro(valor) || valor > total) throw new Error('Quantidade com cartão Trello inválida.');
+    return valor;
   }
   const numero = valor => Number(valor).toLocaleString('pt-BR');
   function diaValido(dia) {
@@ -68,16 +76,23 @@
           p.marcos.some(m => !['lavratura', 'registro', 'atribuicao_gerencial'].includes(m)) || !inteiro(p.total_observado) ||
           (a.cobertura_completa ? p.total_oficial !== p.total_observado : p.total_oficial !== null)) throw new Error('Atribuição de autoria inválida.');
       const metodos = validarMetodos(p.metodos, p.total_observado, p.fonte === 'Extra Digital' && !p.marcos.includes('atribuicao_gerencial'));
-      const gerencial = metodos.auditoria_concordante + metodos.trello_divergencia;
+      const gerencial = metodos.auditoria_concordante + metodos.trello_divergencia + metodos.movimentacao_arquivo_trello + metodos.ultimo_escrevente_antes_arquivo_trello;
       if ((gerencial > 0) !== p.marcos.includes('atribuicao_gerencial') ||
           (metodos.direta > 0) !== p.marcos.some(m => ['lavratura', 'registro'].includes(m)) ||
           p.fonte !== (gerencial ? 'Extra Digital + Trello' : 'Extra Digital')) throw new Error('Fonte incompatível com o método de atribuição.');
       pessoas.add(p.id);
-      return { id: p.id, nome: p.nome, fonte: p.fonte, marcos: p.marcos.slice(), metodos, total_observado: p.total_observado, total_oficial: p.total_oficial };
+      return { id: p.id, nome: p.nome, fonte: p.fonte, marcos: p.marcos.slice(), metodos, total_observado: p.total_observado, total_oficial: p.total_oficial,
+        com_cartao_trello: validarCartoesTrello(p.com_cartao_trello, p.total_observado) };
     });
     if (colaboradores.reduce((s, p) => s + p.total_observado, 0) !== a.com_autoria_confirmada) throw new Error('Autoria divergente do total.');
     const metodos = validarMetodos(a.metodos, a.com_autoria_confirmada, colaboradores.every(p => p.metodos.direta === p.total_observado));
     if (METODOS.some(k => colaboradores.reduce((s, p) => s + p.metodos[k], 0) !== metodos[k])) throw new Error('Métodos divergentes do total atribuído.');
+    const comCartaoTrello = validarCartoesTrello(a.com_cartao_trello, a.com_autoria_confirmada);
+    if (comCartaoTrello !== null) {
+      const conhecidos = colaboradores.reduce((s, p) => s + (p.com_cartao_trello === null ? 0 : p.com_cartao_trello), 0);
+      const desconhecidos = colaboradores.reduce((s, p) => s + (p.com_cartao_trello === null ? p.total_observado : 0), 0);
+      if (comCartaoTrello < conhecidos || comCartaoTrello > conhecidos + desconhecidos) throw new Error('Cartões Trello divergentes do total atribuído.');
+    }
     const meses = validarResposta({ meses: r.meses });
     if ((!meses.length && r.total_observado) || meses.some(m => m.mes < r.inicio.slice(0, 7) || m.mes > r.fim.slice(0, 7))) throw new Error('Bases fora do período.');
     // Cobertura de um período não é a cobertura do mês inteiro, mas exige todas as datas consultadas.
@@ -92,7 +107,7 @@
       com_pendencia_identificacao: r.com_pendencia_identificacao, meses, tipos,
       classificacao: { versao: c.versao, nao_classificados: c.nao_classificados, divergentes: c.divergentes },
       colaboradores, autoria: { status: a.status, sem_autoria_confirmada: a.sem_autoria_confirmada,
-        com_autoria_confirmada: a.com_autoria_confirmada, cobertura_completa: a.cobertura_completa, metodos } };
+        com_autoria_confirmada: a.com_autoria_confirmada, cobertura_completa: a.cobertura_completa, metodos, com_cartao_trello: comCartaoTrello } };
   }
   function validarSemana(r, referencia) {
     if (!r || r.fuso !== 'America/Sao_Paulo' || !diaValido(r.referencia) || (referencia && r.referencia !== referencia) ||
@@ -132,12 +147,19 @@
     if (r.tipos.length) html += '<div class="lavrados-tipos">' + r.tipos.map(t => '<div class="lavrados-tipo"><span>' + esc(t.nome) + (t.codigo === 'nao_classificado' ? '<small>Classificação não confirmada pela fonte</small>' : '') + '</span><strong>' + numero(t.total_observado) + '</strong></div>').join('') + '</div>';
     else html += '<p>Nenhum tipo disponível no período coberto pela extração.</p>';
     if (r.classificacao.divergentes) html += '<p class="lavrados-pendencia">' + numero(r.classificacao.divergentes) + ' registro(s) com classificação divergente na fonte, mantido(s) na contagem e sem classificação presumida.</p>';
-    html += '<div class="lavrados-autoria"><h4>Por escrevente responsável</h4><p>' + (r.autoria.cobertura_completa ? 'Atribuições conferidas para todo o período.' : r.autoria.com_autoria_confirmada ? 'Atribuições conferidas até esta extração. O agrupamento ainda não representa um fechamento individual.' : 'A extração ainda não permite atribuir as escrituras aos responsáveis.') + ' Prioridade para a evidência direta de registro/lavratura. Quando ela falta, o último escrevente da auditoria é comparado ao responsável do cartão Trello; na divergência, prevalece o Trello, conforme critério do titular.</p>';
+    html += '<div class="lavrados-autoria"><h4>Por escrevente responsável</h4><p>' + (r.autoria.cobertura_completa ? 'Atribuições conferidas para todo o período.' : r.autoria.com_autoria_confirmada ? 'Atribuições conferidas até esta consulta. O agrupamento ainda não representa um fechamento individual.' : 'Há escrituras sem responsável identificado na base de atribuições.') + '</p>';
+    if (r.autoria.metodos.movimentacao_arquivo_trello || r.autoria.metodos.ultimo_escrevente_antes_arquivo_trello || !r.autoria.com_autoria_confirmada) html += '<p><strong>Movimentação para o arquivo — Trello.</strong> Critério gerencial do titular: conta criadora da ação registrada na última entrada do cartão vinculado de uma etapa fora do arquivo para a lista de arquivo do quadro Protocolo Cadastro. A contagem e o mês das escrituras continuam pela data Minuta/Lavratura do Extra Digital. O histórico não comprova quem clicou fisicamente nem quem elaborou ou lavrou o ato.</p>';
+    if (r.autoria.metodos.ultimo_escrevente_antes_arquivo_trello) html += '<p><strong>Último escrevente que movimentou antes do arquivo — Trello.</strong> Quando a conta da entrada no arquivo é genérica ou de colaborador não escrevente, o crédito gerencial segue o último escrevente individual com movimentação real anterior a essa entrada, na mesma etapa ou entre etapas. Conta desconhecida permanece pendente. Este critério não comprova clique manual nem elaboração do ato.</p>';
+    if (r.autoria.metodos.direta || r.autoria.metodos.auditoria_concordante || r.autoria.metodos.trello_divergencia) html += '<p>As atribuições históricas conservam o método indicado em cada linha; não são convertidas automaticamente para o novo critério.</p>';
+    if (r.autoria.com_cartao_trello != null) html += '<p class="lavrados-vinculos">' + numero(r.autoria.com_cartao_trello) + ' escritura(s) atribuída(s) com cartão Trello identificado. Essa referência é distinta do vínculo com o Hub.</p>';
     if (r.colaboradores.length) html += '<div class="lavrados-tipos">' + r.colaboradores.map(p => {
       const m = p.metodos, explicacoes = [];
       if (m.direta) explicacoes.push('Evidência: ' + p.marcos.filter(x => x !== 'atribuicao_gerencial').map(esc).join(' e ') + ' · Extra Digital · ' + numero(m.direta));
       if (m.auditoria_concordante) explicacoes.push('Critério gerencial · auditoria e Trello concordantes · ' + numero(m.auditoria_concordante));
       if (m.trello_divergencia) explicacoes.push('Critério gerencial · Trello prevalece na divergência · ' + numero(m.trello_divergencia));
+      if (m.movimentacao_arquivo_trello) explicacoes.push('Movimentação para o arquivo — Trello · ' + numero(m.movimentacao_arquivo_trello));
+      if (m.ultimo_escrevente_antes_arquivo_trello) explicacoes.push('Último escrevente que movimentou antes do arquivo — Trello · ' + numero(m.ultimo_escrevente_antes_arquivo_trello));
+      if (p.com_cartao_trello != null) explicacoes.push('Com cartão Trello identificado na atribuição · ' + numero(p.com_cartao_trello));
       return '<div class="lavrados-tipo"><span>' + esc(p.nome) + '<small>' + explicacoes.join('<br>') + '</small></span><strong>' + numero(p.total_observado) + '</strong></div>';
     }).join('') + '</div>';
     if (r.autoria.sem_autoria_confirmada) html += '<div class="lavrados-tipo lavrados-sem-autoria"><span>Responsável não identificado<small>Pendência de atribuição; não representa produtividade zero.</small></span><strong>' + numero(r.autoria.sem_autoria_confirmada) + '</strong></div>';

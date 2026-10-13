@@ -222,7 +222,8 @@ test('atribuição gerencial diferencia concordância e prevalência Trello sem 
     evidencia: { referencia: 'REFERENCIA-PRIVADA-NAO-EXIBIR' } })], autoria: { ...autoria(1, 6), metodos } });
   const antes = JSON.stringify(r), dados = L.validarSemana(r), html = L.renderizar({ visao: 'semana', semana: { dados } });
   assert.equal(dados.total_observado, 7); assert.equal(dados.autoria.sem_autoria_confirmada, 1);
-  assert.deepEqual(dados.autoria.metodos, metodos); assert.deepEqual(dados.colaboradores[0].metodos, metodos);
+  assert.deepEqual(dados.autoria.metodos, { ...metodos, movimentacao_arquivo_trello: 0, ultimo_escrevente_antes_arquivo_trello: 0 });
+  assert.deepEqual(dados.colaboradores[0].metodos, dados.autoria.metodos);
   assert.match(html, /Evidência: registro · Extra Digital · 1/);
   assert.match(html, /auditoria e Trello concordantes · 2/);
   assert.match(html, /Trello prevalece na divergência · 3/);
@@ -243,6 +244,156 @@ test('atribuição gerencial exige método conciliado, marco próprio e fonte co
   ]) assert.throws(() => L.validarSemana({ ...r, colaboradores: [{ ...p, ...mudanca }] }));
   assert.throws(() => L.validarSemana({ ...r, autoria: { ...r.autoria, metodos: undefined } }));
   assert.throws(() => L.validarSemana({ ...r, autoria: { ...r.autoria, metodos: { direta: 1, auditoria_concordante: 1, trello_divergencia: 1 } } }));
+});
+
+function arquivoTrello(total = 3) {
+  return { direta: 0, auditoria_concordante: 0, trello_divergencia: 0, movimentacao_arquivo_trello: total };
+}
+function responsavelArquivo(total = 3, extra = {}) {
+  return colaborador({ fonte: 'Extra Digital + Trello', marcos: ['atribuicao_gerencial'],
+    total_observado: total, metodos: arquivoTrello(total), ...extra });
+}
+test('movimentação ao arquivo atribui sem exigir auditoria CTN e mantém contagem e período da lavratura', () => {
+  const p = responsavelArquivo(3, { nome: '<b>Responsável fictício</b>', evidencia: { tipo: 'trello_movimentacao_arquivo_criterio_titular', idAcao: 'EVENTO-PRIVADO' } });
+  const r = semana({ colaboradores: [p], autoria: { ...autoria(4, 3), metodos: arquivoTrello(3) } });
+  const antes = JSON.stringify(r), dados = L.validarSemana(r), html = L.renderizar({ visao: 'semana', semana: { dados } });
+  assert.equal(dados.total_observado, 7); assert.equal(dados.inicio, '2026-10-05');
+  assert.equal(dados.colaboradores[0].total_observado, 3); assert.equal(dados.autoria.sem_autoria_confirmada, 4);
+  assert.equal(dados.colaboradores[0].metodos.auditoria_concordante, 0);
+  assert.match(html, /Movimentação para o arquivo — Trello · 3/);
+  assert.match(html, /conta criadora da ação registrada na última entrada do cartão vinculado/);
+  assert.match(html, /data Minuta\/Lavratura do Extra Digital/);
+  assert.match(html, /não comprova quem clicou fisicamente nem quem elaborou ou lavrou o ato/);
+  assert.match(html, /Responsável não identificado/); assert.match(html, /&lt;b&gt;Responsável fictício&lt;\/b&gt;/);
+  assert.doesNotMatch(html, /último escrevente da auditoria|Prioridade para|Evidência: registro|EVENTO-PRIVADO/);
+  assert.doesNotMatch(JSON.stringify(dados), /EVENTO-PRIVADO/); assert.equal(JSON.stringify(r), antes);
+});
+test('setembro com 223 escrituras mantém pendências de responsável fora do agrupamento individual', () => {
+  const metodos = arquivoTrello(190), base = mes({ total_observado: 223, total_oficial: 223, sem_vinculo: 163 });
+  const r = resumo({ total_observado: 223, total_oficial: 223, sem_vinculo: 163, meses: [base],
+    tipos: [{ codigo: 'compra_venda', nome: 'Compra e venda', total_observado: 170, total_oficial: 170 },
+      { codigo: 'inventario_partilha', nome: 'Inventário e partilha', total_observado: 53, total_oficial: 53 }],
+    classificacao: classificacao(0, 0, 53, 170),
+    colaboradores: [responsavelArquivo(103), responsavelArquivo(87, { id: 'pessoa-teste-2', nome: 'Pessoa fictícia 2' })],
+    autoria: { ...autoria(33, 190, false), metodos } });
+  const dados = L.validarResumo(r), html = L.renderizar({ dados: L.validarResposta({ meses: [base] }), mes: '2026-09', detalhe: { mes: '2026-09', dados } });
+  assert.match(html, /Setembro de 2026/); assert.match(html, /<strong>223<\/strong>/);
+  assert.match(html, /Movimentação para o arquivo — Trello · 103/); assert.match(html, /Movimentação para o arquivo — Trello · 87/);
+  assert.match(html, /<strong>33<\/strong>/); assert.match(html, /não representa produtividade zero/);
+  assert.ok(dados.colaboradores.every(p => p.total_oficial === null));
+  assert.equal(dados.tipos.reduce((s, t) => s + t.total_observado, 0), 223);
+});
+test('critério novo reconcilia método global, fontes e marcos sem permitir crédito excedente', () => {
+  const p = responsavelArquivo(), r = semana({ colaboradores: [p], autoria: { ...autoria(4, 3), metodos: arquivoTrello() } });
+  for (const patch of [{ fonte: 'Extra Digital' }, { fonte: 'Trello' }, { marcos: ['registro'] },
+    { marcos: ['registro', 'atribuicao_gerencial'] }, { metodos: { ...arquivoTrello(), movimentacao_arquivo_trello: -1 } },
+    { metodos: { ...arquivoTrello(), movimentacao_arquivo_trello: 4 } },
+    { metodos: { ...arquivoTrello(), movimentacao_arquivo_trello: '3' } },
+    { metodos: { ...arquivoTrello(), campo_desconhecido: 0 } }]) {
+    assert.throws(() => L.validarSemana({ ...r, colaboradores: [{ ...p, ...patch }] }));
+  }
+  assert.throws(() => L.validarSemana({ ...r, autoria: { ...r.autoria, metodos: { direta: 0, auditoria_concordante: 1, trello_divergencia: 0, movimentacao_arquivo_trello: 2 } } }));
+});
+test('histórico e novo método coexistem sem reclassificar a fonte anterior', () => {
+  const metodos = { direta: 1, auditoria_concordante: 1, trello_divergencia: 1, movimentacao_arquivo_trello: 3 };
+  const p = responsavelArquivo(6, { marcos: ['registro', 'atribuicao_gerencial'], metodos });
+  const r = semana({ colaboradores: [p], autoria: { ...autoria(1, 6), metodos } });
+  const dados = L.validarSemana(r), html = L.renderizar({ visao: 'semana', semana: { dados } });
+  assert.equal(dados.autoria.metodos.movimentacao_arquivo_trello, 3); assert.equal(dados.autoria.com_autoria_confirmada, 6);
+  assert.match(html, /Evidência: registro · Extra Digital · 1/); assert.match(html, /Movimentação para o arquivo — Trello · 3/);
+  assert.match(html, /atribuições históricas conservam o método/);
+});
+test('consulta mensal apresenta novo responsável após leitura e limpa seus dados ao trocar de sessão', async t => {
+  const metodos = arquivoTrello(100), detalhe = resumo({ colaboradores: [responsavelArquivo(100, { total_oficial: 100 })], autoria: { ...autoria(0, 100, true), metodos } });
+  const a = ambiente(t, (p, padrao) => p.startsWith(RESUMO) ? detalhe : padrao(p));
+  await tick();
+  assert.match(a.host.innerHTML, /Movimentação para o arquivo — Trello · 100/);
+  assert.match(a.host.innerHTML, /Atribuições conferidas para todo o período/);
+  assert.doesNotMatch(a.host.innerHTML, /Responsável não identificado/);
+  assert.ok(a.chamadas.every(c => c.config === undefined));
+  a.session.login = 'outro-login'; a.monitor(); assert.equal(a.host.innerHTML, '');
+});
+
+function antesArquivo(total = 3) {
+  return { ...arquivoTrello(0), ultimo_escrevente_antes_arquivo_trello: total };
+}
+test('último escrevente antes do arquivo mantém critério gerencial isolado ou junto aos quatro métodos anteriores', () => {
+  for (const metodos of [antesArquivo(), { direta: 1, auditoria_concordante: 1, trello_divergencia: 1, movimentacao_arquivo_trello: 1, ultimo_escrevente_antes_arquivo_trello: 2 }]) {
+    const total = Object.values(metodos).reduce((s, n) => s + n, 0);
+    const p = responsavelArquivo(total, { metodos, marcos: metodos.direta ? ['registro', 'atribuicao_gerencial'] : ['atribuicao_gerencial'],
+      evidencia: { acao: 'REFERENCIA-PRIVADA', membro: 'MEMBRO-PRIVADO' } });
+    const r = semana({ colaboradores: [p], autoria: { ...autoria(7 - total, total), metodos } }), antes = JSON.stringify(r);
+    const dados = L.validarSemana(r), html = L.renderizar({ visao: 'semana', semana: { dados } });
+    assert.deepEqual(dados.colaboradores[0].metodos, metodos); assert.deepEqual(dados.autoria.metodos, metodos);
+    assert.equal(dados.total_observado, 7); assert.equal(dados.inicio, '2026-10-05'); assert.equal(dados.colaboradores[0].total_oficial, null);
+    assert(html.includes('Último escrevente que movimentou antes do arquivo — Trello · ' + metodos.ultimo_escrevente_antes_arquivo_trello));
+    assert.match(html, /conta da entrada no arquivo é genérica/); assert.match(html, /movimentação real anterior/); assert.match(html, /Conta desconhecida permanece pendente/);
+    assert.match(html, /na mesma etapa ou entre etapas/); assert.match(html, /não comprova clique manual nem elaboração/);
+    assert.doesNotMatch(html, /REFERENCIA-PRIVADA|MEMBRO-PRIVADO|quem realizou a última movimentação/);
+    assert.doesNotMatch(JSON.stringify(dados), /REFERENCIA-PRIVADA|MEMBRO-PRIVADO/); assert.equal(JSON.stringify(r), antes);
+  }
+});
+test('quinto método exige contagem inteira reconciliada, fonte Trello e marco gerencial', () => {
+  const metodos = antesArquivo(), p = responsavelArquivo(3, { metodos });
+  const r = semana({ colaboradores: [p], autoria: { ...autoria(4, 3), metodos } });
+  for (const valor of [-1, 1.5, '3', null, undefined, 4]) {
+    assert.throws(() => L.validarSemana({ ...r, colaboradores: [{ ...p, metodos: { ...metodos, ultimo_escrevente_antes_arquivo_trello: valor } }] }));
+  }
+  for (const patch of [{ fonte: 'Extra Digital' }, { marcos: ['registro'] }, { marcos: ['registro', 'atribuicao_gerencial'] }]) {
+    assert.throws(() => L.validarSemana({ ...r, colaboradores: [{ ...p, ...patch }] }));
+  }
+  assert.throws(() => L.validarSemana({ ...r, autoria: { ...r.autoria, metodos: { ...antesArquivo(2), movimentacao_arquivo_trello: 1 } } }));
+});
+test('respostas com três ou quatro métodos continuam válidas e cartão ausente não vira zero', () => {
+  for (const metodos of [{ direta: 0, auditoria_concordante: 1, trello_divergencia: 2 }, arquivoTrello()]) {
+    const r = semana({ colaboradores: [responsavelArquivo(3, { metodos })], autoria: { ...autoria(4, 3), metodos } });
+    const antes = JSON.stringify(r), dados = L.validarSemana(r), html = L.renderizar({ visao: 'semana', semana: { dados } });
+    assert.equal(dados.autoria.metodos.ultimo_escrevente_antes_arquivo_trello, 0);
+    assert.equal(dados.colaboradores[0].metodos.ultimo_escrevente_antes_arquivo_trello, 0);
+    assert.equal(dados.autoria.com_cartao_trello, null); assert.equal(dados.colaboradores[0].com_cartao_trello, null);
+    assert.doesNotMatch(html, /com cartão Trello identificado|Com cartão Trello identificado|Último escrevente que movimentou/);
+    assert.equal(JSON.stringify(r), antes);
+  }
+});
+test('cartões Trello contam atos atribuídos e permanecem separados do vínculo Hub e dos pendentes', () => {
+  for (const cartoes of [0, 3]) {
+    const metodos = cartoes ? antesArquivo() : { ...antesArquivo(0), direta: 3 };
+    const p = cartoes ? responsavelArquivo(3, { metodos, com_cartao_trello: cartoes }) : colaborador({ metodos, com_cartao_trello: cartoes });
+    const r = semana({ com_vinculo: 0, sem_vinculo: 7, colaboradores: [p], autoria: { ...autoria(4, 3), metodos, com_cartao_trello: cartoes } });
+    const dados = L.validarSemana(r), html = L.renderizar({ visao: 'semana', semana: { dados } });
+    assert.equal(dados.com_vinculo, 0); assert.equal(dados.autoria.sem_autoria_confirmada, 4);
+    assert.equal(dados.autoria.com_cartao_trello, cartoes); assert.equal(dados.colaboradores[0].com_cartao_trello, cartoes);
+    assert(html.includes(cartoes + ' escritura(s) atribuída(s) com cartão Trello identificado'));
+    assert(html.includes('Com cartão Trello identificado na atribuição · ' + cartoes));
+    assert.match(html, /Essa referência é distinta do vínculo com o Hub/); assert.match(html, /Responsável não identificado/);
+  }
+});
+test('contagens Trello inválidas ou divergentes são recusadas, sem completar campos legados parciais', () => {
+  const metodos = antesArquivo(), p = responsavelArquivo(3, { metodos, com_cartao_trello: 3 });
+  const r = semana({ colaboradores: [p], autoria: { ...autoria(4, 3), metodos, com_cartao_trello: 3 } });
+  for (const valor of [-1, 1.5, '3', null, 4, Number.MAX_SAFE_INTEGER + 1]) {
+    assert.throws(() => L.validarSemana({ ...r, autoria: { ...r.autoria, com_cartao_trello: valor } }));
+    assert.throws(() => L.validarSemana({ ...r, colaboradores: [{ ...p, com_cartao_trello: valor }] }));
+  }
+  assert.throws(() => L.validarSemana({ ...r, autoria: { ...r.autoria, com_cartao_trello: 2 } }));
+  assert.throws(() => L.validarSemana({ ...r, colaboradores: [{ ...p, com_cartao_trello: 2 }] }));
+  const misto = { ...r, colaboradores: [responsavelArquivo(2, { com_cartao_trello: 2 }), responsavelArquivo(1, { id: 'pessoa-teste-2' })], autoria: { ...r.autoria, metodos: arquivoTrello() } };
+  const dados = L.validarSemana(misto); assert.equal(dados.colaboradores[1].com_cartao_trello, null);
+  assert.equal(dados.autoria.com_cartao_trello, 3);
+  assert.throws(() => L.validarSemana({ ...misto, autoria: { ...misto.autoria, com_cartao_trello: 1 } }));
+  const semGlobal = L.validarSemana({ ...r, autoria: { ...r.autoria, com_cartao_trello: undefined } });
+  assert.equal(semGlobal.autoria.com_cartao_trello, null); assert.equal(semGlobal.colaboradores[0].com_cartao_trello, 3);
+});
+test('detalhe mensal mostra quinto método e cartões sem alterar snapshot e apaga tudo ao trocar sessão', async t => {
+  const metodos = antesArquivo(100), detalhe = resumo({ colaboradores: [responsavelArquivo(100, { metodos, total_oficial: 100, com_cartao_trello: 100 })],
+    autoria: { ...autoria(0, 100, true), metodos, com_cartao_trello: 100 } });
+  const a = ambiente(t, (p, padrao) => p.startsWith(RESUMO) ? detalhe : padrao(p)); await tick();
+  assert.match(a.host.innerHTML, /Último escrevente que movimentou antes do arquivo — Trello · 100/);
+  assert(a.host.innerHTML.includes('100 escritura(s) atribuída(s) com cartão Trello identificado'));
+  assert.equal(a.controle.snapshot('2026-09').dados.total_oficial, 100);
+  assert.equal(a.controle.snapshot('2026-09').dados.com_vinculo, 60);
+  assert.ok(a.chamadas.every(c => c.config === undefined));
+  a.session.login = 'outro-login'; a.monitor(); assert.equal(a.host.innerHTML, '');
 });
 
 test('consulta de tipos do mês ocorre após a base mensal e sem verbos de escrita', async t => {

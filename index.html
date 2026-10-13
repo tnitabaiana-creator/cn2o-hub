@@ -8174,7 +8174,8 @@ function relLavradosMensal() {
   montarLavradosRelatorio('edRelLavrados', mes);
   host.hidden = !mes;
 }
-let REL_RECEITA_LEITURA = 0, REL_PREVIA_LEITURA = 0;
+let REL_RECEITA_LEITURA = 0;
+const REL_SAIDAS = { oficial_html: 0, oficial_csv: 0, historico_html: 0, historico_csv: 0 };
 function relCompetenciasReceita(tipo, ref) {
   if (!['semanal', 'mensal'].includes(tipo) || !/^\d{4}-\d{2}-\d{2}$/.test(ref || '')) return null;
   const d = new Date(ref + 'T00:00:00Z');
@@ -8190,18 +8191,125 @@ function relConsultaVigente(r, tipo, ref, token, login, host) {
   return !!(ED && ED.aba === 'relatorios' && ED.rel === r && r.visao === 'escreventes' && r.tipo === tipo && r.ref === ref &&
     SESSAO.admin && SESSAO.token === token && SESSAO.login === login && host && host.isConnected && el(host.id) === host);
 }
-function relReceitaHtml(tipo, ref, receita, carregando) {
+
+const REL_METODOS = [
+  ['direta', 'Evidência direta — Extra Digital'],
+  ['auditoria_concordante', 'Auditoria e responsável Trello concordantes'],
+  ['trello_divergencia', 'Responsável Trello prevalece na divergência'],
+  ['movimentacao_arquivo_trello', 'Movimentação para o arquivo — Trello'],
+  ['ultimo_escrevente_antes_arquivo_trello', 'Último escrevente que movimentou antes do arquivo — Trello']
+];
+const REL_CRITERIO_OFICIAL = 'Fonte de contagem: Extra Digital (CTN), família Escritura, Registrado(a), pela data Minuta/Lavratura. Arquivamento de cartão não muda a competência da lavratura.';
+const REL_CRITERIO_AUTORIA = 'Critério gerencial do titular: conta criadora da ação da última entrada de etapa não-arquivo para arquivo. Se a conta é genérica ou de colaborador não escrevente, considera-se o último escrevente individual com movimentação real anterior, na mesma etapa ou entre etapas. Conta desconhecida permanece pendente. Não comprova clique manual, elaboração ou lavratura física. Os métodos históricos permanecem identificados.';
+function relReceitaDados(tipo, ref, receita) {
   const periodo = relCompetenciasReceita(tipo, ref);
-  if (!periodo) return '<p class="ed-vazio">Receita líquida indisponível: selecione um período válido.</p>';
+  if (!periodo) return [];
   const valida = !!(receita && receita.escopo === 'competencias_mensais' && receita.base_individual === 'usuario_financeiro' &&
     receita.periodo_relatorio && receita.periodo_relatorio.inicio === periodo.inicio && receita.periodo_relatorio.fim === periodo.fim &&
     Array.isArray(receita.competencias) && receita.competencias.length === periodo.meses.length &&
     new Set(receita.competencias.map(function (c) { return c && c.mes; })).size === periodo.meses.length &&
     receita.competencias.every(function (c) { return c && periodo.meses.includes(c.mes); }));
+  return periodo.meses.map(function (mes) {
+    const c = valida && receita.competencias.find(function (x) { return x.mes === mes; });
+    const ok = !!(c && c.status === 'disponivel' && Number.isFinite(c.receita_liquida) &&
+      Number.isSafeInteger(c.receita_liquida_centavos) && Math.round(c.receita_liquida * 100) === c.receita_liquida_centavos);
+    return { mes: mes, status: ok ? 'disponivel' : c && c.status === 'ausente' ? 'ausente' : 'indisponivel',
+      receita_liquida: ok ? c.receita_liquida : null, receita_liquida_centavos: ok ? c.receita_liquida_centavos : null,
+      media_dia_util: ok && Number.isFinite(c.media_dia_util) && Number.isInteger(c.dias_uteis) && c.dias_uteis > 0 ? c.media_dia_util : null,
+      dias_uteis: ok && Number.isInteger(c.dias_uteis) && c.dias_uteis > 0 ? c.dias_uteis : null,
+      fonte: ok && typeof c.fonte === 'string' ? c.fonte : 'Pesquisa de Produtividade',
+      importado_em: ok && typeof c.importado_em === 'string' ? c.importado_em : '' };
+  });
+}
+function relConsultarOficial(tipo, ref) {
+  const periodo = relCompetenciasReceita(tipo, ref);
+  if (!periodo || !window.GestaoLavrados || typeof window.GestaoLavrados.validarResumo !== 'function') return Promise.reject({ erro: 'fonte oficial indisponível' });
+  return Promise.all([
+    api('/hub/atos-lavrados/resumo?inicio=' + periodo.inicio + '&fim=' + periodo.fim),
+    api('/hub/relatorios/receita-mensal?tipo=' + encodeURIComponent(tipo) + '&ref=' + encodeURIComponent(ref)).catch(function () { return null; })
+  ]).then(function (respostas) {
+    const resumo = window.GestaoLavrados.validarResumo(respostas[0], periodo);
+    return { tipo: tipo, ref: ref, periodo: periodo, resumo: resumo, receita: respostas[1] && respostas[1].receita_mensal };
+  });
+}
+function relOficialHtml(dados) {
+  const r = dados.resumo, base = r.meses.length > 0, autoria = r.autoria;
+  const valor = function (v) { return v == null ? 'Indisponível' : relNum(v); };
+  const tabela = function (titulos, linhas) {
+    return '<div style="overflow-x:auto"><table><thead><tr>' + titulos.map(function (x) { return '<th>' + esc(x) + '</th>'; }).join('') +
+      '</tr></thead><tbody>' + linhas.map(function (linha) { return '<tr>' + linha.map(function (x) { return '<td>' + esc(x) + '</td>'; }).join('') + '</tr>'; }).join('') + '</tbody></table></div>';
+  };
+  let corpo = '<h1>Relatório oficial de escrituras lavradas</h1><p>Período da lavratura: <b>' + relDia(r.inicio) + ' a ' + relDia(r.fim) + '</b></p>' +
+    relReceitaHtml(dados.tipo, dados.ref, dados.receita, false) + '<h2>Escrituras lavradas · Extra Digital (CTN)</h2><p>' + esc(REL_CRITERIO_OFICIAL) + '</p>' +
+    '<p><b>Total oficial: ' + valor(base ? r.total_oficial : null) + '</b> · Observado na extração: ' + valor(base ? r.total_observado : null) + '</p>' +
+    '<p>' + (!base ? 'Base oficial ausente; não representa zero atos.' : r.cobertura_completa ? 'Cobertura completa do período consultado.' : 'Cobertura parcial; o total observado não representa o período completo.') + '</p>';
+  if (base) {
+    corpo += tabela(['Competência da base', 'Cobertura até', 'Corte da extração', 'Dia final', 'Revisão'], r.meses.map(function (m) {
+      return [m.mes, relDia(m.ate), m.corte_em, m.dia_final_completo ? 'Completo' : 'Parcial', m.revisao == null ? 'Não informada' : m.revisao];
+    }));
+    corpo += '<h2>Por tipo de escritura</h2>' + tabela(['Tipo', 'Observado', 'Oficial'], r.tipos.map(function (t) { return [t.nome, valor(t.total_observado), valor(t.total_oficial)]; }));
+    corpo += '<p>Classificação: Sub-tipo e Finalidade do Extra Digital. Não classificados: ' + relNum(r.classificacao.nao_classificados) + ' · Divergentes: ' + relNum(r.classificacao.divergentes) + '.</p>';
+  }
+  corpo += '<h2>Por escrevente responsável</h2><p>' + esc(REL_CRITERIO_AUTORIA) + '</p>';
+  if (!base) corpo += '<p>Atribuições indisponíveis sem a base oficial.</p>';
+  else {
+    corpo += '<p>Atribuições conferidas: ' + relNum(autoria.com_autoria_confirmada) + ' · Responsável não identificado: ' + relNum(autoria.sem_autoria_confirmada) +
+      '. Pendência de atribuição não representa produtividade zero.</p><p>' + (autoria.cobertura_completa ? 'Cobertura individual completa.' : 'Agrupamento individual parcial; totais individuais oficiais indisponíveis.') + '</p>';
+    corpo += tabela(['Responsável', 'Atribuições observadas', 'Total individual oficial', 'Métodos', 'Atos com cartão Trello'], r.colaboradores.map(function (p) {
+      return [p.nome, valor(p.total_observado), valor(p.total_oficial), REL_METODOS.filter(function (m) { return p.metodos[m[0]] > 0; }).map(function (m) { return m[1] + ': ' + relNum(p.metodos[m[0]]); }).join('; '), valor(p.com_cartao_trello)];
+    }));
+    corpo += '<h3>Métodos de atribuição</h3>' + tabela(['Método', 'Atribuições'], REL_METODOS.map(function (m) { return [m[1], relNum(autoria.metodos[m[0]])]; }));
+    corpo += '<p>Vínculo com protocolo Hub: ' + relNum(r.com_vinculo) + '. Atos atribuídos com cartão Trello identificado: ' + valor(autoria.com_cartao_trello) + '. São referências distintas.</p>';
+  }
+  corpo += '<p>Receita por autor: indisponível enquanto não houver vínculo financeiro por ato. Nenhum valor foi distribuído por nome, quantidade ou score Trello.</p>';
+  return '<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<meta http-equiv="Content-Security-Policy" content="default-src &apos;none&apos;; style-src &apos;unsafe-inline&apos;; base-uri &apos;none&apos;; form-action &apos;none&apos;">' +
+    '<title>Relatório oficial de escrituras lavradas</title><style>body{font:15px/1.5 system-ui,sans-serif;color:#202a3a;margin:24px;max-width:1100px}h1,h2,h3{color:#631325}table{border-collapse:collapse;width:100%;margin:12px 0}th,td{border:1px solid #ddd;text-align:left;padding:8px;vertical-align:top}th{background:#f5f1f2}.atd-livro{display:grid;gap:16px}.atd-livro>div{border:1px solid #ddd;padding:16px}.atd-livro span,.atd-livro strong,.atd-livro small{display:block}.atd-livro strong{font-size:24px}.sub-data,small{color:#555}@media(max-width:600px){body{margin:12px}h1{font-size:24px}}</style></head><body>' + corpo + '</body></html>';
+}
+function relOficialCsv(dados) {
+  const r = dados.resumo, base = r.meses.length > 0, a = r.autoria;
+  const colunas = ['secao','inicio','fim','competencia','id','descricao','quantidade_observada','quantidade_oficial','status','fonte'].concat(REL_METODOS.map(function (m) { return m[0]; }),
+    ['com_cartao_trello','receita_liquida_brl','media_dia_util_brl','dias_uteis','corte_em','importado_em','criterio']);
+  const linhas = [], status = !base ? 'ausente' : r.cobertura_completa ? 'completo' : 'parcial';
+  function linha(x) { linhas.push(Object.assign({ inicio: r.inicio, fim: r.fim }, x)); }
+  linha(Object.assign({ secao: 'escrituras', descricao: 'Escrituras lavradas', quantidade_observada: base ? r.total_observado : null,
+    quantidade_oficial: base ? r.total_oficial : null, status: status, fonte: 'Extra Digital (CTN)', criterio: REL_CRITERIO_OFICIAL,
+    com_cartao_trello: base ? a.com_cartao_trello : null }, base ? a.metodos : {}));
+  r.meses.forEach(function (m) { linha({ secao: 'cobertura', competencia: m.mes, descricao: 'Base mensal até ' + m.ate,
+    status: m.dia_final_completo ? 'dia_final_completo' : 'dia_final_parcial', corte_em: m.corte_em, importado_em: m.importado_em,
+    fonte: 'Extra Digital (CTN)', criterio: 'Revisão da base: ' + (m.revisao == null ? 'não informada' : m.revisao) }); });
+  if (base) {
+    r.tipos.forEach(function (t) { linha({ secao: 'tipo', id: t.codigo, descricao: t.nome, quantidade_observada: t.total_observado,
+      quantidade_oficial: t.total_oficial, status: status, fonte: 'Extra Digital (CTN)', criterio: 'Classificação Sub-tipo e Finalidade' }); });
+    r.colaboradores.forEach(function (p) { linha(Object.assign({ secao: 'responsavel', id: p.id, descricao: p.nome,
+      quantidade_observada: p.total_observado, quantidade_oficial: p.total_oficial, status: a.cobertura_completa ? 'completo' : 'parcial',
+      fonte: p.fonte, criterio: REL_CRITERIO_AUTORIA, com_cartao_trello: p.com_cartao_trello }, p.metodos)); });
+    linha({ secao: 'pendencia_autoria', descricao: 'Responsável não identificado', quantidade_observada: a.sem_autoria_confirmada,
+      status: a.sem_autoria_confirmada ? 'pendente' : 'sem_pendencia', criterio: 'Não representa produtividade zero; sem receita individual presumida.' });
+    linha({ secao: 'vinculo_hub', descricao: 'Com vínculo com protocolo Hub', quantidade_observada: r.com_vinculo,
+      criterio: 'Vínculo Hub é distinto da referência de cartão Trello.' });
+  }
+  relReceitaDados(dados.tipo, dados.ref, dados.receita).forEach(function (c) {
+    linha({ secao: 'receita_mensal_cartorio', competencia: c.mes, descricao: 'Receita líquida do cartório — todos os atos',
+      status: c.status, fonte: c.fonte, receita_liquida_brl: c.receita_liquida == null ? null : c.receita_liquida.toFixed(2).replace('.', ','),
+      media_dia_util_brl: c.media_dia_util == null ? null : c.media_dia_util.toFixed(2).replace('.', ','), dias_uteis: c.dias_uteis, importado_em: c.importado_em,
+      criterio: '70,4306% do bruto após repasses de 29,5694%. Competência mensal integral da fonte importada; não comprova mês fechado, não é receita semanal e não há rateio por autor.' });
+  });
+  REL_METODOS.forEach(function (m) { linha({ secao: 'criterio_metodo', id: m[0], descricao: m[1], criterio: REL_CRITERIO_AUTORIA }); });
+  linha({ secao: 'receita_por_autor', descricao: 'Indisponível', status: 'pendente_vinculo_financeiro_por_ato',
+    criterio: 'Usuário financeiro não comprova autoria; nenhum valor individual presumido.' });
+  function celula(v) { let t = v == null ? '' : String(v); if (/^[\s]*[=+@-]/.test(t) || /^[\t\r\n]/.test(t)) t = "'" + t; return '"' + t.replace(/"/g, '""') + '"'; }
+  return '\uFEFF' + [colunas.map(celula).join(';')].concat(linhas.map(function (x) { return colunas.map(function (k) { return celula(x[k]); }).join(';'); })).join('\r\n') + '\r\n';
+}
+
+function relReceitaHtml(tipo, ref, receita, carregando) {
+  const periodo = relCompetenciasReceita(tipo, ref);
+  if (!periodo) return '<p class="ed-vazio">Receita líquida indisponível: selecione um período válido.</p>';
+  const competencias = relReceitaDados(tipo, ref, receita);
   const dinheiro = function (n) { return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }); };
   const mesNome = function (mes) { return primeiraMaiuscula(MESES[+mes.slice(5, 7) - 1]) + ' de ' + mes.slice(0, 4); };
   const cartoes = periodo.meses.map(function (mes) {
-    const c = valida && receita.competencias.find(function (x) { return x.mes === mes; });
+    const c = competencias.find(function (x) { return x.mes === mes; });
     const disponivel = c && c.status === 'disponivel' && Number.isFinite(c.receita_liquida) && Number.isSafeInteger(c.receita_liquida_centavos) &&
       Math.round(c.receita_liquida * 100) === c.receita_liquida_centavos;
     let detalhes = '<small>Competência mensal: ' + esc(mesNome(mes)) + '</small>';
@@ -8229,10 +8337,11 @@ function relCarregarReceita() {
   });
 }
 function relAtualizarPeriodo() {
-  ++REL_PREVIA_LEITURA;
-  const previa = el('edRelPrevia'), botao = el('edRelVer');
-  if (previa) previa.innerHTML = '';
-  if (botao) { botao.disabled = false; botao.textContent = 'Ver prévia'; }
+  Object.keys(REL_SAIDAS).forEach(function (chave) { ++REL_SAIDAS[chave]; });
+  ['edRelPrevia', 'edRelHistoricoPrevia'].forEach(function (id) { const host = el(id); if (host) host.innerHTML = ''; });
+  [['edRelVer', 'Ver prévia oficial'], ['edRelCsv', '⭳ Baixar CSV oficial'], ['edRelVerHistorico', 'Ver histórico Trello'], ['edRelCsvHistorico', '⭳ CSV histórico Trello']].forEach(function (x) {
+    const botao = el(x[0]); if (botao) { botao.disabled = false; botao.textContent = x[1]; }
+  });
   relLavradosMensal();
   relCarregarReceita();
 }
@@ -8284,17 +8393,16 @@ function relArmar(b, chave, rotuloConfirma, rotulo) {
   setTimeout(function () { if (b.isConnected && b.dataset.confirma === chave) relDesarmar(b, rotulo); }, 6000);
 }
 function relDesarmar(b, rotulo) { if (!b) return; b.dataset.confirma = ''; b.textContent = rotulo; b.classList.remove('on'); }
-// A prévia (HTML) e o CSV não são JSON: vêm por fetch com o cabeçalho da sessão,
-// como o CSV da auditoria.
+// Apenas o histórico Trello retorna HTML/CSV prontos. A saída oficial usa JSON validado.
 function relBaixar(caminho) {
-  const token = SESSAO.token;
+  const token = SESSAO.token, login = SESSAO.login;
   return fetch(CONFIG.endpoint + '/hub/relatorios' + caminho, { headers: { 'X-Auth-Token': token }, cache: 'no-store' })
     .then(function (r) {
       if (r.ok) return r;
       return r.text().then(function (t) {
         let d = null;
         try { d = JSON.parse(t); } catch (e) {}
-        if (r.status === 401 && SESSAO.token === token) sessaoExpirada();
+        if (r.status === 401 && SESSAO.token === token && SESSAO.login === login) sessaoExpirada();
         throw { status: r.status, erro: (d && d.erro) || ('erro ' + r.status) };
       });
     }, function () { throw { status: 0, erro: 'sem conexão com o servidor — verifique a internet e tente de novo' }; });
@@ -8305,21 +8413,26 @@ function pintarAbaRelatorios(painel) {
   if (r.visao === 'atendimentos') { atdPintar(painel); return; }   // v1.39
   if (r.visao === 'produtividade') { prodPintar(painel); return; }   // v1.40 (produtividade.js)
   painel.innerHTML = relChave('escreventes') +
-    '<p class="sub-data" style="margin-bottom:10px">O relatório <b>semanal</b> sai sozinho toda segunda-feira às 8h e o <b>mensal</b> no 1º dia útil do mês, às 8h, por e-mail. Aqui você vê qualquer semana ou mês antes, envia na hora e acompanha os envios. Não precisa publicar o mural.</p>' +
+    '<p class="sub-data" style="margin-bottom:10px">Consulte e exporte escrituras da fonte oficial Extra Digital (CTN), pela data de lavratura, com atribuições conferidas e pendências explícitas. O histórico de cartões e seus envios por e-mail ficam na seção separada abaixo.</p>' +
     '<div id="edRelReceita" aria-live="polite"></div>' +
-    '<div id="edRelSituacao"><p class="ed-vazio">Lendo a situação dos relatórios…</p></div>' +
-    '<h3 class="ed-titulo versalete">Ver ou enviar um relatório</h3>' +
+    '<h3 class="ed-titulo versalete">Relatório oficial de escrituras lavradas</h3>' +
     '<div class="aud-filtros">' +
       '<label class="aud-campo"><span>Relatório</span><select id="edRelTipo"><option value="semanal">Semanal</option><option value="mensal">Mensal</option></select></label>' +
       '<label class="aud-campo rel-campo-periodo"><span>Período</span><select id="edRelPeriodo"></select></label>' +
-      '<button type="button" class="btn-vinho" id="edRelVer">Ver prévia</button>' +
-      '<button type="button" class="btn-fantasma" id="edRelCsv">⭳ Baixar CSV</button>' +
-      '<button type="button" class="btn-fantasma" id="edRelEnviar">' + REL_ROT_ENVIAR + '</button>' +
+      '<button type="button" class="btn-vinho" id="edRelVer">Ver prévia oficial</button>' +
+      '<button type="button" class="btn-fantasma" id="edRelCsv">⭳ Baixar CSV oficial</button>' +
     '</div>' +
-    '<p class="sub-data">A prévia e seu CSV acompanham o fluxo de cartões do Trello. Escrituras lavradas são conferidas separadamente na fonte oficial Extra Digital; arquivamento de cartão não substitui a data de lavratura.</p>' +
+    '<p class="sub-data">A prévia e o CSV usam o período selecionado e a mesma fonte oficial. O arquivamento de cartão orienta a atribuição gerencial; não substitui a data de lavratura. A receita mantém sua competência mensal própria.</p>' +
     '<div id="edRelLavrados" hidden></div>' +
     '<div id="edRelPrevia"></div>' +
-    '<h3 class="ed-titulo versalete">Envios</h3>' +
+    '<details class="rel-suporte"><summary>Histórico de cartões Trello e envios por e-mail</summary>' +
+      '<p class="sub-data">Relatórios históricos de cartões: não são a contagem oficial de escrituras lavradas. O envio automático e o botão Enviar agora continuam usando este relatório histórico: semanal às segundas-feiras às 8h; mensal no 1º dia útil, às 8h.</p>' +
+      '<div id="edRelSituacao"><p class="ed-vazio">Lendo a situação do histórico…</p></div>' +
+      '<div class="aud-filtros"><button type="button" class="btn-fantasma" id="edRelVerHistorico">Ver histórico Trello</button>' +
+        '<button type="button" class="btn-fantasma" id="edRelCsvHistorico">⭳ CSV histórico Trello</button>' +
+        '<button type="button" class="btn-fantasma" id="edRelEnviar">' + REL_ROT_ENVIAR + '</button></div>' +
+      '<div id="edRelHistoricoPrevia"></div>' +
+    '<h3 class="ed-titulo versalete">Envios do histórico Trello</h3>' +
     '<div id="edRelEnvios"><p class="ed-vazio">Lendo os envios…</p></div>' +
     // v1.38.3: ferramenta de instalação — recolhida, para o suporte
     '<details class="rel-suporte"><summary>Carga do histórico (uso do suporte)</summary>' +
@@ -8329,7 +8442,7 @@ function pintarAbaRelatorios(painel) {
         '<button type="button" class="btn-vinho" id="edRelCarga">' + REL_ROT_CARGA + '</button>' +
       '</div>' +
       '<p class="aud-conta" id="edRelCargaSit"></p>' +
-    '</details>';
+    '</details></details>';
   const tipo = el('edRelTipo'), per = el('edRelPeriodo');
   tipo.value = r.tipo;
   function pintarPeriodos() {
@@ -8345,6 +8458,8 @@ function pintarAbaRelatorios(painel) {
   pintarPeriodos();
   el('edRelVer').addEventListener('click', relVerPrevia);
   el('edRelCsv').addEventListener('click', relBaixarCsv);
+  el('edRelVerHistorico').addEventListener('click', function () { relGerarSaida('html', true); });
+  el('edRelCsvHistorico').addEventListener('click', function () { relGerarSaida('csv', true); });
   el('edRelEnviar').addEventListener('click', relEnviar);
   el('edRelCarga').addEventListener('click', relCarga);
   el('edRelDesde').addEventListener('input', function () { relDesarmar(el('edRelCarga'), REL_ROT_CARGA); });
@@ -8370,6 +8485,7 @@ function relPintarSituacao() {
   const s = relEstado().status, box = el('edRelSituacao');
   if (!s || !box) return;
   const ra = s.rastreio || {}, w = s.webhooks, em = s.email || {}, inv = ra.assinaturas_invalidas || {};
+  const cartoesArquivados = Number.isSafeInteger(ra.conclusoes) && ra.conclusoes >= 0 ? relNum(ra.conclusoes) : 'Indisponível';
   // v1.38.3: nada de webhook, assinatura, provedor ou nome de variável na tela do Tabelião —
   // só "tudo em ordem" ou o que ele precisa saber; o detalhe continua no JSON do /status.
   const avisos = [];
@@ -8378,7 +8494,7 @@ function relPintarSituacao() {
   if (acompanhamentoComDefeito) avisos.push('O acompanhamento dos cartões do Trello precisa de um ajuste técnico. Avise o suporte.');
   if (!em.configurado || em.provedor === 'arquivo') avisos.push('Os relatórios <b>não estão saindo por e-mail</b>. Avise o suporte.');
   else if (em.homologacao) avisos.push('Os relatórios estão em teste e vão só para <b>' + esc((em.para || []).join(', ')) + '</b>. Avise o suporte para liberar o envio definitivo.');
-  if (ra.sem_tipo) avisos.push(relNum(ra.sem_tipo) + ' ato(s) concluído(s) sem o tipo reconhecido no título do cartão — entram nos relatórios como OUTROS.');
+  if (ra.sem_tipo) avisos.push(relNum(ra.sem_tipo) + ' cartão(ões) arquivado(s) sem o tipo reconhecido no título — entram nos relatórios como OUTROS.');
   const itens = avisos.length
     ? avisos.map(function (t) { return '<li class="rel-alerta">' + t + '</li>'; })
     : ['<li class="rel-ok">Tudo em ordem: os relatórios saem sozinhos por e-mail.</li>'];
@@ -8389,49 +8505,46 @@ function relPintarSituacao() {
     : 'Nenhum relatório enviado ainda.';
   box.innerHTML =
     '<div class="num-quadro">' +
-      '<div class="num-atual"><span>Atos concluídos</span><b>' + relNum(ra.conclusoes) + '</b></div>' +
+      '<div class="num-atual"><span>Cartões arquivados · histórico</span><b>' + cartoesArquivados + '</b></div>' +
       '<div class="num-info">' + ultimo + '</div>' +
     '</div>' +
     '<ul class="rel-situacao">' + itens.join('') + '</ul>';
 }
 
-function relVerPrevia() {
-  const r = relEstado(), b = el('edRelVer'), box = el('edRelPrevia');
-  const tipo = r.tipo, ref = r.ref, token = SESSAO.token, login = SESSAO.login, leitura = ++REL_PREVIA_LEITURA;
-  const vigente = function () { return leitura === REL_PREVIA_LEITURA && relConsultaVigente(r, tipo, ref, token, login, box); };
-  b.disabled = true; b.textContent = 'Montando…';
-  box.innerHTML = '<p class="aud-conta">Montando o relatório — leva alguns segundos (o servidor consulta o Trello).</p>';
-  return relBaixar('/previa?tipo=' + encodeURIComponent(tipo) + '&ref=' + encodeURIComponent(ref))
-    .then(function (resp) { return resp.text(); })
-    .then(function (html) {
-      if (!vigente()) return;
-      box.innerHTML = '<p class="aud-conta">Prévia — é exatamente o e-mail que seria enviado.</p>' +
-        '<iframe class="rel-previa" title="Prévia do relatório" sandbox="allow-popups allow-popups-to-escape-sandbox"></iframe>';
-      box.querySelector('iframe').srcdoc = html;
-    })
-    .catch(function (e) { if (vigente()) box.innerHTML = '<p class="ed-vazio">Não consegui montar a prévia (' + esc(relErro(e)) + ').</p>'; })
-    .then(function () { if (vigente() && b.isConnected) { b.disabled = false; b.textContent = 'Ver prévia'; } });
-}
-function relBaixarCsv() {
-  const r = relEstado(), b = el('edRelCsv'), antes = b.textContent;
-  b.disabled = true; b.textContent = 'Preparando…';
-  relBaixar('/previa?formato=csv&wip=0&tipo=' + encodeURIComponent(r.tipo) + '&ref=' + encodeURIComponent(r.ref))
-    .then(function (resp) {
-      const m = /filename="([^"]+)"/.exec(resp.headers.get('Content-Disposition') || '');
-      return resp.blob().then(function (blob) { return { blob: blob, nome: m ? m[1] : 'relatorio-' + r.tipo + '.csv' }; });
-    })
-    .then(function (x) {
-      const url = URL.createObjectURL(x.blob);
-      const link = document.createElement('a');
-      link.href = url; link.download = x.nome;
-      document.body.appendChild(link);
-      link.click();
+
+function relGerarSaida(formato, historico) {
+  const r = relEstado(), csv = formato === 'csv', b = el(historico ? csv ? 'edRelCsvHistorico' : 'edRelVerHistorico' : csv ? 'edRelCsv' : 'edRelVer');
+  const box = el(historico ? 'edRelHistoricoPrevia' : 'edRelPrevia'), tipo = r.tipo, ref = r.ref, token = SESSAO.token, login = SESSAO.login;
+  if (!token || !relConsultaVigente(r, tipo, ref, token, login, box) || !b || !b.isConnected) return;
+  const chave = (historico ? 'historico_' : 'oficial_') + formato, leitura = ++REL_SAIDAS[chave];
+  const antes = historico ? csv ? '⭳ CSV histórico Trello' : 'Ver histórico Trello' : csv ? '⭳ Baixar CSV oficial' : 'Ver prévia oficial';
+  const vigente = function () { return leitura === REL_SAIDAS[chave] && relConsultaVigente(r, tipo, ref, token, login, box) && b.isConnected && el(b.id) === b; };
+  b.disabled = true; b.textContent = csv ? 'Preparando…' : 'Montando…';
+  if (!csv) box.innerHTML = '<p class="aud-conta">' + (historico ? 'Consultando o histórico de cartões Trello…' : 'Consultando atos oficiais e receita mensal…') + '</p>';
+  const consulta = historico ? relBaixar('/previa?' + (csv ? 'formato=csv&wip=0&' : '') + 'tipo=' + encodeURIComponent(tipo) + '&ref=' + encodeURIComponent(ref))
+    .then(function (resp) { return csv ? resp.blob() : resp.text(); }) : relConsultarOficial(tipo, ref);
+  return consulta.then(function (dados) {
+    if (!vigente()) return;
+    if (csv) {
+      const blob = historico ? dados : new Blob([relOficialCsv(dados)], { type: 'text/csv;charset=utf-8' });
+      const url = URL.createObjectURL(blob), link = document.createElement('a');
+      link.href = url; link.download = (historico ? 'historico-trello-' : 'escrituras-oficiais-') + tipo + '-' + (historico ? ref : dados.periodo.inicio + '-a-' + dados.periodo.fim) + '.csv';
+      document.body.appendChild(link); link.click();
       setTimeout(function () { try { URL.revokeObjectURL(url); } catch (e) {} link.remove(); }, 8000);
-      toast('✓ Planilha do relatório baixada.');
-    })
-    .catch(function (e) { toast('Não consegui baixar o CSV (' + relErro(e) + ').', true); })
-    .then(function () { if (b.isConnected) { b.disabled = false; b.textContent = antes; } });
+      toast(historico ? '✓ CSV histórico Trello baixado.' : '✓ CSV oficial de escrituras baixado.');
+    } else {
+      box.innerHTML = '<p class="aud-conta">' + (historico ? 'Histórico Trello — conteúdo do e-mail legado, separado da contagem oficial.' : 'Prévia oficial — escrituras pela data de lavratura. Esta consulta não envia e-mail.') + '</p>' +
+        '<iframe class="rel-previa" title="' + (historico ? 'Histórico de cartões Trello' : 'Relatório oficial de escrituras lavradas') + '" sandbox=""></iframe>';
+      box.querySelector('iframe').srcdoc = historico ? dados : relOficialHtml(dados);
+    }
+  }).catch(function (e) {
+    if (!vigente()) return;
+    if (csv) toast('Não consegui baixar o CSV (' + relErro(e) + ').', true);
+    else box.innerHTML = '<p class="ed-vazio">Relatório indisponível (' + esc(relErro(e)) + '). Nenhum total foi presumido.</p>';
+  }).then(function () { if (vigente()) { b.disabled = false; b.textContent = antes; } });
 }
+function relVerPrevia() { return relGerarSaida('html', false); }
+function relBaixarCsv() { return relGerarSaida('csv', false); }
 function relEnviar() {
   const r = relEstado(), b = el('edRelEnviar');
   const em = (r.status && r.status.email) || null;
