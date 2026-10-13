@@ -120,6 +120,8 @@ test('página coloca receita antes do quadro Trello e atualiza ao mudar o perío
   vm.runInContext("relCarregarSituacao=()=>{};relCarregarEnvios=()=>{};relLavradosMensal=()=>{};relPeriodos=()=>[{ref:'2026-11-01',rotulo:'Outubro'},{ref:'2026-10-01',rotulo:'Setembro'}]", a.c);
   a.c.pintarAbaRelatorios(painel);
   assert(painel.innerHTML.indexOf('id="edRelReceita"') < painel.innerHTML.indexOf('id="edRelSituacao"'));
+  assert.match(painel.innerHTML, /A autoria gerencial segue o campo Criado Por — Extra Digital; a contagem usa a data Minuta\/Lavratura/);
+  assert.doesNotMatch(painel.innerHTML, /O arquivamento de cartão orienta a atribuição gerencial/);
   assert.equal(a.chamadas[0].url, '/hub/relatorios/receita-mensal?tipo=mensal&ref=2026-10-01');
   a.el('edRelPrevia').innerHTML = 'prévia antiga';
   const periodo = a.el('edRelPeriodo'); periodo.value = '2026-11-01'; periodo.handlers.change.call(periodo);
