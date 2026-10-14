@@ -6,6 +6,7 @@
 <title>CN2O · Hub de Protocolo</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="controle-sucessorio.css">
 <style>
 /* ============ IDENTIDADE CN2O — Brandbook jan/2026 ============
    Paleta oficial (exclusiva): #631325 vinho · #202a3a marinho · #ffffff
@@ -277,6 +278,18 @@ input.moeda{font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.01
   </section>
 
   <!-- 2 · IDENTIFICAÇÃO -->
+  <section class="bloco oculto" id="blSucessao">
+    <h2 class="versalete">Controle interno sucessório</h2>
+    <p>Digite o nome para consultar os alertas internos. No cumulativo, informe todos os autores da herança.</p>
+    <div id="sucessaoModalidadeBox"><label class="rotulo" for="sucessaoModalidade">Modalidade</label><select id="sucessaoModalidade"><option value="simples">Inventário simples</option><option value="cumulativo">Inventário cumulativo</option><option value="sobrepartilha">Escritura de sobrepartilha</option></select></div>
+    <div id="sucessaoAutorBox"><label class="rotulo" for="sucessaoAutor">Autor da herança</label><input id="sucessaoAutor" type="text" maxlength="180" placeholder="Preenchimento manual — nome completo do falecido" autocomplete="off"></div>
+    <div id="sucessaoAutoresBox" hidden><label class="rotulo" for="sucessaoAutores">Autores da herança — um nome completo por linha</label><textarea id="sucessaoAutores" maxlength="5000" placeholder="Nome completo de cada falecido" autocomplete="off"></textarea></div>
+    <button type="button" id="sucessaoConsultar">Consultar alertas</button>
+    <button type="button" id="sucessaoPainel">Pedidos de análise e cadastro de alertas</button>
+    <div id="sucessaoResultado" role="status" aria-live="polite"></div>
+    <div id="sucessaoConferencia" hidden><label><input id="sucessaoConferido" type="checkbox"> Conferi os documentos: estão completos quanto ao alerta, contemplam os interessados mencionados e não apresentam divergência sobre esses pontos.</label><label class="rotulo" for="sucessaoObservacao">Documentos/páginas conferidos ou pendência a submeter ao tabelião</label><textarea id="sucessaoObservacao" maxlength="6000" placeholder="Registre onde os interessados e pontos do alerta estão tratados; se houver ausência ou dúvida, descreva para o tabelião."></textarea></div>
+    <button type="button" id="sucessaoEncaminhar" hidden>Salvar pedido e encaminhar ao tabelião</button>
+  </section>
   <section class="bloco oculto" id="blIdent">
     <h2 class="versalete"><span class="n">2</span>Identificação</h2>
     <div class="grade">
@@ -514,6 +527,7 @@ input.moeda{font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:.01
 
 <script src="protocolo-curadoria.js"></script>
 <script src="protocolo-curadoria-form.js"></script>
+<script src="controle-sucessorio.js"></script>
 <script>
 /* ============================================================
    ESTADO
@@ -2061,7 +2075,7 @@ function renderDivergencias(){formularioCuradoria.renderDivergencias();}
 function atualizarCuradoria(){
   const c=lerCuradoria();
   const fingerprint=JSON.stringify({ato:S.ato,triagem:S.respostas,dossie:S.dossie,pagamentos:S.pagamentos,curadoria:{...c,confirmado:undefined},qual:S.qual,qtest:S.qtest,enot:S.enot,extras:S.extras,cert:{nc:S.cert.nc,arquivos:S.cert.arquivos.map(a=>({nome:a.nome,tamanho:a.tamanho,tipo:a.tipo}))},
-    formulario:Array.from(document.querySelectorAll('main input, main select, main textarea')).filter(campo=>!campo.closest('#blCuradoria')).map(campo=>({id:campo.id,valor:campo.value,marcado:campo.checked})),vendCat:S.vendCat});
+    formulario:Array.from(document.querySelectorAll('main input, main select, main textarea')).filter(campo=>!campo.closest('#blCuradoria') && !campo.closest('#sucessaoConferencia')).map(campo=>({id:campo.id,valor:campo.value,marcado:campo.checked})),vendCat:S.vendCat});
   if(S.curadoriaFingerprint!==null && fingerprint!==S.curadoriaFingerprint){
     if(el('curadoriaConfirmado').checked) S.curadoriaDesfeita=true;   // v1.47: avisa em vez de desmarcar calado
     el('curadoriaConfirmado').checked=false;c.confirmado=false;
@@ -2107,6 +2121,7 @@ const pega=k=>{try{return sessionStorage.getItem(k)}catch(e){return null}};
 const limpaSessao=()=>{try{sessionStorage.clear()}catch(_){}try{['cn2o_token','cn2o_nome','cn2o_cargo','cn2o_login','cn2o_hub_key'].forEach(k=>localStorage.removeItem(k))}catch(_){}};
 const EMBUTIDO=(()=>{try{return window.top!==window.self}catch(e){return true}})();
 const TOKEN=pega('cn2o_token'), NOME_SESSAO=pega('cn2o_nome')||'', CARGO_SESSAO=pega('cn2o_cargo')||'';
+CN2OSucessao.iniciar({getAto:()=>S.ato,endpoint:ENDPOINT_RAILWAY,token:TOKEN,alterado:()=>renderDossie()});
 if(ENDPOINT_RAILWAY && !TOKEN) location.href='index.html#protocolo';
 if(NOME_SESSAO){
   const si=document.getElementById('sessaoInfo');
@@ -2194,6 +2209,7 @@ el('btnProt').addEventListener('click',async ()=>{
 
   const payload={
     ato:S.ato, urgente:S.urgente,
+    sucessao: ['INV','CDH'].includes(S.ato) ? CN2OSucessao.dados() : undefined,
     apresentante:{nome:apres, telefone:telApresV},
     vendedor: (S.ato==='CV-Urbano'||S.ato==='CV-Rural') ? {
       nome: el('vendNome').value.trim().toUpperCase()||null,
@@ -2263,6 +2279,10 @@ Guarde este número: use-o para consultar o andamento do seu ato em cn2oita.com.
   const telParte = (ehTest||ehCert) ? '' : el('parteTel').value.trim();   // v1.36.1: CERT só avisa o solicitante
   payload.recibo_destinatarios = telParte ? ['apresentante','parte_envolvida'] : ['apresentante'];
 
+  S.enviando=true;el('btnProt').disabled=true;
+  const controleOk=await CN2OSucessao.verificar(payload);
+  S.enviando=false;el('btnProt').disabled=false;
+  if(!controleOk)return;
   let numeroReal='{NNNN}';
   if(ENDPOINT_RAILWAY){
     S.enviando=true;
