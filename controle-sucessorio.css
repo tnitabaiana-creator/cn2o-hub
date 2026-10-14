@@ -1,0 +1,6 @@
+.sucessao-caso{border-left:4px solid #bf8100;background:#fff9e9;padding:14px 18px;margin:14px 0;border-radius:6px;color:#302718}
+.sucessao-caso h4{margin:0 0 10px}.sucessao-caso p,.sucessao-caso li{line-height:1.5}
+#blSucessao textarea{width:100%;min-height:100px}#blSucessao button,.controle-painel button{padding:10px 16px;margin:6px 8px 6px 0;cursor:pointer}
+.controle-painel{max-width:1080px;margin:auto;padding:24px;font:16px/1.5 system-ui,sans-serif;color:#213132;background:#fff}
+.controle-painel input,.controle-painel textarea,.controle-painel select{display:block;width:100%;box-sizing:border-box;padding:10px;margin:6px 0 16px;font:inherit}
+.controle-painel textarea{min-height:100px}.controle-painel label{display:block}.controle-painel input[type=checkbox]{display:inline;width:auto}.controle-painel section{padding:18px;margin:20px 0;border:1px solid #bdcecb;border-radius:10px}.controle-painel table{width:100%;border-collapse:collapse}.controle-painel td,.controle-painel th{padding:10px;text-align:left;border-bottom:1px solid #ddd}.controle-painel pre{white-space:pre-wrap;overflow-wrap:anywhere}.controle-painel a{color:#065c65}
