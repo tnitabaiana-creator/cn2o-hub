@@ -1,6 +1,8 @@
 import {cloud} from './cloud-client.mjs';
+import {WORKSPACE} from './workspace.mjs';
 const hex=bytes=>[...new Uint8Array(bytes)].map(n=>n.toString(16).padStart(2,'0')).join('');
 export function checkManifest(input){
+ if(input?.workspace&&input.workspace!==WORKSPACE.id||WORKSPACE.id==='bravo'&&input?.workspace!=='bravo')throw new Error('O arquivo de importação não identifica este controle. Confira a empresa de destino.');
  if(input?.format!=='cn2o-expenses-1'||!Array.isArray(input.documents)||!Array.isArray(input.entries)||input.documents.length>2000||input.entries.length>2000)throw new Error('Arquivo de importação inválido.');
  const hashes=new Set();
  for(const d of input.documents){if(!/^[a-f0-9]{64}$/.test(d.hash)||typeof d.name!=='string'||d.name.length>499||!/^\d{4}-(0[1-9]|1[0-2])$/.test(d.period)||hashes.has(d.hash))throw new Error('Documento inválido ou repetido no arquivo de importação.');hashes.add(d.hash);}

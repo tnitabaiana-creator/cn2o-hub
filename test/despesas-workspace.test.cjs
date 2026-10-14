@@ -23,6 +23,9 @@ test('Bravo requests use only their own API and reject a CN2O response',()=>{
     const {cloud}=await import(${JSON.stringify(url)});
     await cloud.refresh();assert(calls.every(u=>u.includes('/hub/despesas-bravo/')));
     wrong=true;await assert.rejects(cloud.refresh(),/controle de destino/);
+    const {checkManifest}=await import(new URL('./batch-import.mjs',${JSON.stringify(url)}));
+    const manifest={format:'cn2o-expenses-1',documents:[],entries:[]};
+    assert.throws(()=>checkManifest(manifest));assert.throws(()=>checkManifest({...manifest,workspace:'cn2o'}));assert.equal(checkManifest({...manifest,workspace:'bravo'}).workspace,'bravo');
   `;
   const r=spawnSync(process.execPath,['--input-type=module','-e',code],{encoding:'utf8'});assert.equal(r.status,0,r.stderr);
 });

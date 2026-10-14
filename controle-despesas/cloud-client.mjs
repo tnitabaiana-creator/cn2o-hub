@@ -1,5 +1,5 @@
 import { startAuth, showAccess, hubHeaders, ENDPOINT } from './auth-client.mjs';
-import {WORKSPACE} from './workspace.mjs';
+import {WORKSPACE,resolveWorkspace} from './workspace.mjs';
 const size=1024*1024;
 let user=null;
 async function request(path,options={}){
@@ -11,6 +11,13 @@ const json=(path,body)=>request(path,{method:'POST',headers:{'Content-Type':'app
 export const cloud={
   request,
   json,
+  async destinationDocuments(target){
+    const identity=resolveWorkspace('?workspace='+encodeURIComponent(target));
+    const response=await fetch(ENDPOINT+identity.api+'data',{headers:hubHeaders(),cache:'no-store'});
+    if(!response.ok)throw new Error('Não foi possível consultar os comprovantes do destino.');
+    const data=await response.json();if(data.workspace!==target)throw new Error('O controle de destino não foi confirmado.');
+    return data.documents;
+  },
   get user(){return user;},
   async start(){const state=await startAuth();if(state.local)return {local:true};user=state.user;if(!user){showAccess();return {authenticated:false};}const data=await this.refresh();return {authenticated:true,...data};},
   async refresh(){const data=await (await request('data')).json();if((data.workspace&&data.workspace!==WORKSPACE.id)||WORKSPACE.id==='bravo'&&data.workspace!=='bravo')throw new Error('O servidor não confirmou o controle de destino. Nenhum dado de outro controle será exibido.');user=data.user;return data;},
