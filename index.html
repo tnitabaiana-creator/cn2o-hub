@@ -3014,6 +3014,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 <link rel="stylesheet" href="gestao-produtividade.css">
 <link rel="stylesheet" href="livro-caixa.css">
 <link rel="stylesheet" href="gestao-lavrados.css">
+<link rel="stylesheet" href="gestao-protocolo.css">
 <link rel="stylesheet" href="gestao.css">
 </head>
 <body>
@@ -3348,12 +3349,18 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
         <li><button type="button" data-gestao-rel="produtividade"><span class="gestao-num" aria-hidden="true">03</span><span><strong>Produtividade financeira</strong><small>Receita e lançamentos financeiros, com conferência das escrituras lavradas por mês.</small></span><span aria-hidden="true">→</span></button></li>
         <li><button type="button" id="gestaoEscrituras"><span class="gestao-num" aria-hidden="true">04</span><span><strong>Relatório de produtividade de escrituras</strong><small>Contagem oficial de escrituras lavradas e consulta ao histórico de fluxo e complexidade do Trello.</small></span><span aria-hidden="true">→</span></button></li>
         <li id="gestaoLivroCaixaItem" hidden><button type="button" id="gestaoLivroCaixa"><span class="gestao-num" aria-hidden="true">05</span><span><strong>Livro-caixa do tabelião</strong><small>Receitas, despesas confirmadas e demonstrativo mensal privativo do tabelião.</small></span><span aria-hidden="true">→</span></button></li>
+        <li><button type="button" id="gestaoProtocolo"><span class="gestao-num" aria-hidden="true">06</span><span><strong>Protocolo e Cadastro</strong><small>Entradas por dia, entregas semanais e prazos úteis da digitalização até a geração de minutas.</small></span><span aria-hidden="true">→</span></button></li>
       </ul>
     </div>
     <div id="paginaGestaoEscrituras" hidden>
       <button class="voltar" data-voltar type="button">← Voltar à gestão</button>
       <div class="ferramenta-cab"><div><p class="gestao-eyebrow">Gestão · Escrituras</p><h2 tabindex="-1">Relatório de produtividade de escrituras</h2></div></div>
       <div id="gestaoProdutividadeHost"></div>
+    </div>
+    <div id="paginaGestaoProtocolo" hidden>
+      <button class="voltar" data-voltar type="button">← Voltar à gestão</button>
+      <div class="ferramenta-cab"><div><p class="gestao-eyebrow">Gestão · Fluxo operacional</p><h2 tabindex="-1">Produtividade de Protocolo e Cadastro</h2><p class="desc">Da entrega da pasta em Digitalização ao encaminhamento para Gerar Minuta.</p></div></div>
+      <div id="gestaoProtocoloHost" aria-live="polite"></div>
     </div>
     <div id="paginaLivroCaixa" hidden>
       <button class="voltar" data-voltar type="button">← Voltar à gestão</button>
@@ -5293,6 +5300,7 @@ const CLAUSULAS = [
 <script src="itcmd-orcamento-pdf.js"></script>
 <script src="itcmd-arquivo.js"></script>
 <script src="gestao-lavrados.js"></script>
+<script src="gestao-protocolo.js"></script>
 <script src="gestao-produtividade.js"></script>
 <script src="livro-caixa.js"></script>
 <script>
@@ -5518,6 +5526,7 @@ function migrarSessaoAntiga() {
 }
 function limparSessao() {
   destruirGestaoProdutividade();
+  destruirGestaoProtocolo();
   destruirLivroCaixa();
   el('gestaoLivroCaixaItem').hidden = true;
   if (window.GestaoLavrados) window.GestaoLavrados.limparSessao();
@@ -5671,7 +5680,7 @@ function primeiroNome(n) {
 /* ============================================================
    NAVEGAÇÃO (com botão Voltar do navegador e atalhos #protocolo etc.)
 ============================================================ */
-const PAGINAS = ['paginaHub', 'paginaGestao', 'paginaGestaoEscrituras', 'paginaLivroCaixa', 'paginaConsultas', 'paginaCalculadoras', 'paginaIA', 'paginaExtrator', 'paginaAnalisador', 'paginaMinutas', 'paginaConsulta', 'paginaRedator', 'paginaItbi', 'paginaItcmd', 'paginaAcervo', 'paginaEmbutida'];
+const PAGINAS = ['paginaHub', 'paginaGestao', 'paginaGestaoEscrituras', 'paginaGestaoProtocolo', 'paginaLivroCaixa', 'paginaConsultas', 'paginaCalculadoras', 'paginaIA', 'paginaExtrator', 'paginaAnalisador', 'paginaMinutas', 'paginaConsulta', 'paginaRedator', 'paginaItbi', 'paginaItcmd', 'paginaAcervo', 'paginaEmbutida'];
 const ROTAS = { consultas: 'paginaConsultas', calculadoras: 'paginaCalculadoras', ia: 'paginaIA', extrator: 'paginaExtrator', analista: 'paginaAnalisador', minutas: 'paginaMinutas', consulta: 'paginaConsulta', redator: 'paginaRedator', itbi: 'paginaItbi', itcmd: 'paginaItcmd', acervo: 'paginaAcervo', protocolo: 'protocolo', calculadora: 'calculadora', agenda: 'agenda', despesas: 'despesas' };
 /* ============================================================
    v1.34 — IA NOTARIAL (quadro 03): as quatro ferramentas de IA saíram do quadro geral
@@ -5682,10 +5691,21 @@ const ROTAS = { consultas: 'paginaConsultas', calculadoras: 'paginaCalculadoras'
 const PAGINAS_IA = ['paginaExtrator', 'paginaAnalisador', 'paginaMinutas', 'paginaRedator'];
 const VOLTAR_HUB = '← Voltar ao hub';
 const VOLTAR_IA = '← Voltar aos assistentes';
-const GRUPO_POR_ROTA = { consulta: 'paginaConsultas', acervo: 'paginaConsultas', pastas: 'paginaConsultas', calculadora: 'paginaCalculadoras', itcmd: 'paginaCalculadoras', 'gestao-escrituras': 'paginaGestao', 'livro-caixa': 'paginaGestao' };
+const GRUPO_POR_ROTA = { consulta: 'paginaConsultas', acervo: 'paginaConsultas', pastas: 'paginaConsultas', calculadora: 'paginaCalculadoras', itcmd: 'paginaCalculadoras', 'gestao-escrituras': 'paginaGestao', 'gestao-protocolo': 'paginaGestao', 'livro-caixa': 'paginaGestao' };
 const ROTA_DO_GRUPO = { paginaConsultas: 'consultas', paginaCalculadoras: 'calculadoras', paginaGestao: 'gestao' };
 let GESTAO_PRODUTIVIDADE = null;
+let GESTAO_PROTOCOLO = null;
 let LIVRO_CAIXA = null;
+function destruirGestaoProtocolo() {
+  if (GESTAO_PROTOCOLO) GESTAO_PROTOCOLO.destruir();
+  GESTAO_PROTOCOLO = null;
+}
+function abrirGestaoProtocolo(semHistorico) {
+  if (!SESSAO.admin) { mostrarPagina('paginaHub', semHistorico); return; }
+  if (mostrarPagina('paginaGestaoProtocolo', semHistorico, 'gestao-protocolo') === false) return;
+  destruirGestaoProtocolo();
+  GESTAO_PROTOCOLO = window.GestaoProtocolo.montar({ host: el('gestaoProtocoloHost'), api: api, sessao: function () { return SESSAO; }, expirada: sessaoExpirada });
+}
 function podeLivroCaixa() { return SESSAO.login === 'cesar.bravo'; }
 function destruirLivroCaixa() {
   if (LIVRO_CAIXA) LIVRO_CAIXA.destruir();
@@ -5731,13 +5751,14 @@ function pintarVoltar(id) {
 }
 function mostrarPagina(id, semHistorico, rota) {
   if (id === 'paginaLivroCaixa' && !podeLivroCaixa()) { id = 'paginaHub'; rota = ''; }
-  if ((id === 'paginaGestao' || id === 'paginaGestaoEscrituras') && !SESSAO.admin) { id = 'paginaHub'; rota = ''; }
+  if ((id === 'paginaGestao' || id === 'paginaGestaoEscrituras' || id === 'paginaGestaoProtocolo') && !SESSAO.admin) { id = 'paginaHub'; rota = ''; }
   if (podeLivroCaixa() && id !== 'paginaLivroCaixa' && LIVRO_CAIXA && !LIVRO_CAIXA.podeSair()) { toast('Há alterações no livro-caixa. Salve ou descarte antes de sair.'); return false; }
   if (SESSAO.admin && id !== 'paginaGestaoEscrituras' && GESTAO_PRODUTIVIDADE && !GESTAO_PRODUTIVIDADE.podeSair()) { toast('Os meses financeiros ainda não foram salvos. Aguarde ou resolva o aviso do relatório antes de sair.'); return false; }
   if (id !== 'paginaGestaoEscrituras') destruirGestaoProdutividade();
+  if (id !== 'paginaGestaoProtocolo') destruirGestaoProtocolo();
   if (id !== 'paginaLivroCaixa') destruirLivroCaixa();
   PAGINAS.forEach(function (p) { el(p).hidden = (p !== id); });
-  if (id === 'paginaGestao' || id === 'paginaGestaoEscrituras' || id === 'paginaLivroCaixa') marcarNav('gestao');
+  if (id === 'paginaGestao' || id === 'paginaGestaoEscrituras' || id === 'paginaGestaoProtocolo' || id === 'paginaLivroCaixa') marcarNav('gestao');
   else if (el('navRelatorios').classList.contains('ativo')) marcarNav('inicio');
   el('wrapPrincipal').classList.toggle('largo', id === 'paginaEmbutida');
   const grupo = GRUPO_POR_ROTA[(rota || '').split('=')[0]];
@@ -5788,6 +5809,7 @@ function podeDespesas() { return ['cesar.bravo', 'jonas.aragao'].indexOf(SESSAO.
 function abrirRota(rota, semHistorico) {
   if (rota === 'gestao' || rota === 'relatorios') { abrirGestao(semHistorico); return; }
   if (rota === 'gestao-escrituras') { abrirProdutividadeEscrituras(semHistorico); return; }
+  if (rota === 'gestao-protocolo') { abrirGestaoProtocolo(semHistorico); return; }
   if (rota === 'livro-caixa') { abrirLivroCaixa(semHistorico); return; }
   if (rota === 'despesas') { if (!podeDespesas()) { toast('Acesso exclusivo de César Bravo e Jonas Aragão.'); return; } abrirEmbutida('despesas', semHistorico); return; }
   // v1.39.4: o anexo do CERT abre numa aba nova (link do cartão), que não tem sessão; o
@@ -9710,6 +9732,7 @@ el('cardCalculadora').addEventListener('click', function () { abrirEmbutida('cal
   el('cardPastas').addEventListener('click', function () { abrirEmbutida('pastas'); });   // v1.44
 el('cardIA').addEventListener('click', function () { mostrarPagina('paginaIA', false, 'ia'); });   // v1.34 — quadro 03
 el('gestaoEscrituras').addEventListener('click', function () { abrirProdutividadeEscrituras(false); });
+el('gestaoProtocolo').addEventListener('click', function () { abrirGestaoProtocolo(false); });
 el('gestaoLivroCaixa').addEventListener('click', function () { abrirLivroCaixa(false); });
 document.querySelectorAll('[data-gestao-rel]').forEach(function (b) { b.addEventListener('click', function () { abrirRelatorioGestao(b.dataset.gestaoRel); }); });
 el('cardExtrator').addEventListener('click', function () { abrirDaIA('paginaExtrator', 'extrator'); });     // 3.1

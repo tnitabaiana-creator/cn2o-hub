@@ -13,7 +13,7 @@ function trecho(a, b) {
 function ambiente(admin = true) {
   const chamadas = [], paginas = [], sessoes = { admin, token: 'token-ficticio', login: 'fixture.gestao' };
   const contexto = vm.createContext({
-    SESSAO: sessoes, CONFIG: { endpoint: 'http://localhost' }, window: { GestaoProdutividade: { montar(op) { chamadas.push(['montar', op]); return { podeSair: () => true, destruir() { chamadas.push(['destruir']); } }; } }, LivroCaixa: { montar(op) { chamadas.push(['livro', op]); return { podeSair: () => true, destruir() { chamadas.push(['destruirLivro']); } }; } } },
+    SESSAO: sessoes, CONFIG: { endpoint: 'http://localhost' }, window: { GestaoProtocolo: { montar(op) { chamadas.push(['protocolo', op]); return { destruir() { chamadas.push(['destruirProtocolo']); } }; } }, GestaoProdutividade: { montar(op) { chamadas.push(['montar', op]); return { podeSair: () => true, destruir() { chamadas.push(['destruir']); } }; } }, LivroCaixa: { montar(op) { chamadas.push(['livro', op]); return { podeSair: () => true, destruir() { chamadas.push(['destruirLivro']); } }; } } },
     el: id => ({ id }), api() {}, sessaoExpirada() {},
     toast: aviso => chamadas.push(['aviso', aviso]),
     mostrarPagina: (...args) => paginas.push(args), abrirEditorMural: (...args) => chamadas.push(['editor', ...args])
@@ -27,7 +27,8 @@ test('Gestão lista os relatórios e acrescenta livro-caixa inicialmente oculto'
   assert.match(menu, /data-nav="gestao"/); assert.match(menu, /hidden/); assert.match(menu, />Gestão<\/button>/);
   const lista = trecho('<ul class="gestao-lista"', '</ul>');
   assert.deepEqual([...lista.matchAll(/data-gestao-rel="([^"]+)"/g)].map(x => x[1]), ['escreventes', 'atendimentos', 'produtividade']);
-  assert.equal((lista.match(/<li\b/g) || []).length, 5);
+  assert.equal((lista.match(/<li\b/g) || []).length, 6);
+  assert.match(lista, /id="gestaoProtocolo"/);
   assert.match(lista, /id="gestaoEscrituras"/);
   assert.match(lista, /<li id="gestaoLivroCaixaItem" hidden>/);
   assert.doesNotMatch(lista, /Versão 3 Produtividade|<iframe|srcdoc/);
@@ -85,6 +86,25 @@ test('usuário sem perfil de gestão não monta o relatório nem abre os painéi
   a.run('abrirGestao(true); abrirProdutividadeEscrituras(true); abrirRelatorioGestao("escreventes")');
   assert.deepEqual(a.paginas, [['paginaHub', true], ['paginaHub', true]]);
   assert.deepEqual(a.chamadas, []);
+});
+
+test('Protocolo e Cadastro monta somente para administrador e limpa instância anterior', () => {
+  const a = ambiente(false); a.run('abrirGestaoProtocolo(true)');
+  assert.deepEqual(a.paginas, [['paginaHub', true]]); assert.deepEqual(a.chamadas, []);
+  a.sessoes.admin = true; a.run('abrirGestaoProtocolo(false)');
+  const op = a.chamadas[0][1]; assert.equal(op.host.id, 'gestaoProtocoloHost'); assert.equal(op.sessao(), a.sessoes);
+  assert.equal(typeof op.api, 'function'); assert.equal(typeof op.expirada, 'function');
+  a.run('abrirGestaoProtocolo(true); destruirGestaoProtocolo(); destruirGestaoProtocolo()');
+  assert.deepEqual(a.chamadas.map(x => x[0]), ['protocolo', 'destruirProtocolo', 'protocolo', 'destruirProtocolo']);
+  assert.deepEqual(a.paginas[1], ['paginaGestaoProtocolo', false, 'gestao-protocolo']);
+});
+
+test('Protocolo e Cadastro tem rota, retorno, guard de navegação e limpeza no logout', () => {
+  assert.match(trecho('function limparSessao()', 'function lerSessao('), /destruirGestaoProtocolo\(\)/);
+  assert.match(trecho('function abrirRota(', "if (rota === 'despesas')"), /rota === 'gestao-protocolo'/);
+  assert.match(trecho('function mostrarPagina(', '/* abre uma ferramenta'), /id !== 'paginaGestaoProtocolo'\) destruirGestaoProtocolo\(\)/);
+  assert.match(html, /'gestao-protocolo': 'paginaGestao'/);
+  assert.match(html, /<script src="gestao-protocolo.js"><\/script>/);
 });
 
 test('abertura e reabertura de escrituras destrói a instância anterior e usa sessão atual', () => {
