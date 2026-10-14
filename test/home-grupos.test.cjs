@@ -106,8 +106,8 @@ function harness(login = 'colaborador.teste', admin = false) {
 
 test('static HTML has unique IDs; home drops three cards and both groups retain original leaf IDs', () => {
   const h = harness(); assert.deepEqual(h.duplicates, []);
-  assert.equal(h.homeCards().length, 7, '10 original top-level cards minus 5 leaves plus 2 groups');
-  assert.deepEqual(h.homeCards().map(x => x.id), ['cardProtocolo','cardCalculadoras','cardIA','cardClausulas','cardConsultas','cardItbi','cardDespesas']);
+  assert.equal(h.homeCards().length, 8, 'Existing seven cards plus the separate Bravo control');
+  assert.deepEqual(h.homeCards().map(x => x.id), ['cardProtocolo','cardCalculadoras','cardIA','cardClausulas','cardConsultas','cardItbi','cardDespesas','cardDespesasBravo']);
   const leaves = id => h.el(id).descendants().filter(x => x.classList.contains('card')).map(x => x.id);
   assert.deepEqual(leaves('paginaConsultas'), ['cardConsulta','cardAcervo','cardPastas']);
   assert.deepEqual(leaves('paginaCalculadoras'), ['cardCalculadora','cardItcmd']);
@@ -179,5 +179,17 @@ test('expenses route and search keep existing two-user restriction', () => {
   for (const login of ['cesar.bravo', 'jonas.aragao']) {
     const allowed = harness(login); allowed.run("filtrarHub('despesas')"); assert.equal(allowed.el('cardDespesas').hidden, false);
     allowed.run("abrirRota('despesas')"); assert.equal(allowed.page(), 'paginaEmbutida'); assert.equal(allowed.backText(), '← Voltar ao hub');
+  }
+});
+
+test('Bravo tile and deep link use the separate workspace and keep the existing restriction',()=>{
+  const denied=harness();denied.el('cardDespesasBravo').click();assert.equal(denied.page(),'paginaHub');
+  denied.run("filtrarHub('Bravo')");assert.equal(denied.el('cardDespesasBravo').hidden,true);
+  for(const login of ['cesar.bravo','jonas.aragao']){
+    const h=harness(login);h.el('cardDespesasBravo').click();assert.equal(h.location.hash,'#despesas-bravo');
+    assert.equal(h.page(),'paginaEmbutida');assert.equal(h.el('embutidaTitulo').textContent,'Controle de Despesas da Bravo');
+    const frame=h.el('molduraEmbutida').children.find(x=>x.tag==='iframe');assert.ok(frame.src.includes('workspace=bravo'));
+    h.back();assert.equal(h.page(),'paginaHub');h.location.hash='#despesas-bravo';h.run('abrirPorEndereco()');
+    assert.equal(h.page(),'paginaEmbutida');
   }
 });

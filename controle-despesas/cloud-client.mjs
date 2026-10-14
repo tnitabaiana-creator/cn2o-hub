@@ -1,8 +1,9 @@
 import { startAuth, showAccess, hubHeaders, ENDPOINT } from './auth-client.mjs';
+import {WORKSPACE} from './workspace.mjs';
 const size=1024*1024;
 let user=null;
 async function request(path,options={}){
-  const response=await fetch(ENDPOINT+'/hub/despesas/'+path,{...options,headers:{...hubHeaders(),...options.headers}});
+  const response=await fetch(ENDPOINT+WORKSPACE.api+path,{...options,headers:{...hubHeaders(),...options.headers}});
   if(!response.ok){let result;try{result=await response.json();}catch{}throw Object.assign(new Error(result?.error||'O servidor não confirmou a operação.'),{status:response.status});}
   return response;
 }
@@ -12,7 +13,7 @@ export const cloud={
   json,
   get user(){return user;},
   async start(){const state=await startAuth();if(state.local)return {local:true};user=state.user;if(!user){showAccess();return {authenticated:false};}const data=await this.refresh();return {authenticated:true,...data};},
-  async refresh(){const data=await (await request('data')).json();user=data.user;return data;},
+  async refresh(){const data=await (await request('data')).json();if((data.workspace&&data.workspace!==WORKSPACE.id)||WORKSPACE.id==='bravo'&&data.workspace!=='bravo')throw new Error('O servidor não confirmou o controle de destino. Nenhum dado de outro controle será exibido.');user=data.user;return data;},
   async put(name,record){
     if(name==='entries'){const result=await json('data',record);record.version=result.version;return;}
     if(record.version){const result=await json('documents?action=ocr&id='+record.id,{ocr:record.ocr,version:record.version});record.version=result.version;return;}

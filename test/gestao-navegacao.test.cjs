@@ -65,7 +65,7 @@ test('guard de navegação impede desmontagem e evita montar outro módulo sobre
 
 test('livro tem rota, vínculo de retorno e limpeza no logout', () => {
   assert.match(trecho('function limparSessao()', 'function lerSessao('), /destruirLivroCaixa\(\)/);
-  assert.match(trecho('function abrirRota(', "if (rota === 'despesas')"), /rota === 'livro-caixa'/);
+  assert.match(trecho('function abrirRota(', "if (rota === 'despesas' ||"), /rota === 'livro-caixa'/);
   assert.match(html, /'livro-caixa': 'paginaGestao'/);
   assert.match(html, /el\('gestaoLivroCaixaItem'\)\.hidden = !podeLivroCaixa\(\)/);
   assert.match(html, /<script src="livro-caixa.js"><\/script>/);
@@ -101,7 +101,7 @@ test('Protocolo e Cadastro monta somente para administrador e limpa instância a
 
 test('Protocolo e Cadastro tem rota, retorno, guard de navegação e limpeza no logout', () => {
   assert.match(trecho('function limparSessao()', 'function lerSessao('), /destruirGestaoProtocolo\(\)/);
-  assert.match(trecho('function abrirRota(', "if (rota === 'despesas')"), /rota === 'gestao-protocolo'/);
+  assert.match(trecho('function abrirRota(', "if (rota === 'despesas' ||"), /rota === 'gestao-protocolo'/);
   assert.match(trecho('function mostrarPagina(', '/* abre uma ferramenta'), /id !== 'paginaGestaoProtocolo'\) destruirGestaoProtocolo\(\)/);
   assert.match(html, /'gestao-protocolo': 'paginaGestao'/);
   assert.match(html, /<script src="gestao-protocolo.js"><\/script>/);
@@ -146,7 +146,7 @@ test('sair e navegar para outra área limpam o documento privado e o atalho pres
   const navegar = trecho('function mostrarPagina(', '/* abre uma ferramenta');
   assert.match(navegar, /id !== 'paginaGestaoEscrituras'\) destruirGestaoProdutividade\(\)/);
   assert.match(navegar, /!SESSAO\.admin/);
-  const rota = trecho('function abrirRota(', "if (rota === 'despesas')");
+  const rota = trecho('function abrirRota(', "if (rota === 'despesas' ||");
   assert.match(rota, /rota === 'gestao' \|\| rota === 'relatorios'/);
   assert.match(rota, /rota === 'gestao-escrituras'/);
   assert.match(html, /'gestao-escrituras': 'paginaGestao'/);

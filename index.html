@@ -2940,6 +2940,11 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
 @media(max-width:560px){.ed-rodizio{grid-template-columns:1fr}}
 
 /* Controle de Despesas: identidade do Hub, destaque dourado somente no cartão. */
+#cardDespesasBravo{background:linear-gradient(145deg,#edf6f6,#cce4e5);border-color:#39787d;color:#173f46}
+#cardDespesasBravo h3,#cardDespesasBravo .card-acao{color:#173f46}
+#cardDespesasBravo .chip-ia{background:#e2f0ef;color:#173f46}
+:root[data-theme="dark"] #cardDespesasBravo{background:#183b40;border-color:#75afb3;color:#edf6f6}
+:root[data-theme="dark"] #cardDespesasBravo h3,:root[data-theme="dark"] #cardDespesasBravo .card-acao{color:#edf6f6}
 #cardDespesas{background:linear-gradient(145deg,#fffaf0,#f2dfa8);border-color:#bc902c;box-shadow:inset 0 3px 0 #b78a22;color:#202a3a}
 #cardDespesas h3,#cardDespesas .card-acao,#cardDespesas .card-ico{color:#74520c}
 #cardDespesas:not([hidden])~.card-arte{display:none} #cardPastas~.card-arte{display:none}
@@ -3276,6 +3281,13 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
             <h3>Controle de Despesas</h3>
             <p>Comprovantes, notas e contratos reunidos. Leitura automática, lançamentos e fechamento mensal com conferência.</p>
             <span class="card-acao">Organizar despesas →</span>
+          </button>
+
+          <button class="card card-despesas" id="cardDespesasBravo" type="button" hidden>
+            <div class="card-topo"><span class="card-num">BR</span><span class="chip-ia chip-guia">Restrito</span></div>
+            <h3>Despesas da Bravo</h3>
+            <p>Documentos, pagamentos e fechamento da Bravo Patrimonial. Acervo e contabilidade separados do cartório.</p>
+            <span class="card-acao">Organizar despesas da Bravo →</span>
           </button>
 
           <div class="card-arte" aria-hidden="true"></div>
@@ -5315,6 +5327,7 @@ const CONFIG = {
   endpoint: 'https://cn2o-hub-backend-production.up.railway.app',
   ferramentas: {
     despesas: { url: 'controle-despesas/', titulo: 'Controle de Despesas' },
+    'despesas-bravo': { url: 'controle-despesas/?workspace=bravo', titulo: 'Controle de Despesas da Bravo' },
     pastas:      { url: 'ficheiro-pastas.html', titulo: 'Ficheiro de Pastas' },   // v1.44
     protocolo:   { url: 'protocolo.html',   titulo: 'e-Protocolo' },
     calculadora: { url: 'calculadora.html', titulo: 'Calculadora de emolumentos — imóvel rural' }, // site próprio, sempre na versão atual
@@ -5652,6 +5665,7 @@ let LOGIN_DA_TELA = '';   // v1.39.4: de quem é o que está montado na página
 function mostrarApp() {
   LOGIN_DA_TELA = SESSAO.login || '';
   el('cardDespesas').hidden = !podeDespesas();
+  el('cardDespesasBravo').hidden = !podeDespesas();
   el('saudacao').innerHTML = 'Olá, <b>' + esc(primeiroNome(SESSAO.nome)) + '</b>!';
   fraseDoDia();
   el('avatarIni').textContent = (SESSAO.nome || '?').split(/\s+/).filter(Boolean).slice(0, 2).map(function (n) { return n.charAt(0).toUpperCase(); }).join('') || '?';
@@ -5681,7 +5695,7 @@ function primeiroNome(n) {
    NAVEGAÇÃO (com botão Voltar do navegador e atalhos #protocolo etc.)
 ============================================================ */
 const PAGINAS = ['paginaHub', 'paginaGestao', 'paginaGestaoEscrituras', 'paginaGestaoProtocolo', 'paginaLivroCaixa', 'paginaConsultas', 'paginaCalculadoras', 'paginaIA', 'paginaExtrator', 'paginaAnalisador', 'paginaMinutas', 'paginaConsulta', 'paginaRedator', 'paginaItbi', 'paginaItcmd', 'paginaAcervo', 'paginaEmbutida'];
-const ROTAS = { consultas: 'paginaConsultas', calculadoras: 'paginaCalculadoras', ia: 'paginaIA', extrator: 'paginaExtrator', analista: 'paginaAnalisador', minutas: 'paginaMinutas', consulta: 'paginaConsulta', redator: 'paginaRedator', itbi: 'paginaItbi', itcmd: 'paginaItcmd', acervo: 'paginaAcervo', protocolo: 'protocolo', calculadora: 'calculadora', agenda: 'agenda', despesas: 'despesas' };
+const ROTAS = { consultas: 'paginaConsultas', calculadoras: 'paginaCalculadoras', ia: 'paginaIA', extrator: 'paginaExtrator', analista: 'paginaAnalisador', minutas: 'paginaMinutas', consulta: 'paginaConsulta', redator: 'paginaRedator', itbi: 'paginaItbi', itcmd: 'paginaItcmd', acervo: 'paginaAcervo', protocolo: 'protocolo', calculadora: 'calculadora', agenda: 'agenda', despesas: 'despesas', 'despesas-bravo': 'despesas-bravo' };
 /* ============================================================
    v1.34 — IA NOTARIAL (quadro 03): as quatro ferramentas de IA saíram do quadro geral
    e passaram a morar numa subpágina (#paginaIA, rota #ia). Quem entra numa delas PELA
@@ -5811,7 +5825,7 @@ function abrirRota(rota, semHistorico) {
   if (rota === 'gestao-escrituras') { abrirProdutividadeEscrituras(semHistorico); return; }
   if (rota === 'gestao-protocolo') { abrirGestaoProtocolo(semHistorico); return; }
   if (rota === 'livro-caixa') { abrirLivroCaixa(semHistorico); return; }
-  if (rota === 'despesas') { if (!podeDespesas()) { toast('Acesso exclusivo de César Bravo e Jonas Aragão.'); return; } abrirEmbutida('despesas', semHistorico); return; }
+  if (rota === 'despesas' || rota === 'despesas-bravo') { if (!podeDespesas()) { toast('Acesso exclusivo de César Bravo e Jonas Aragão.'); return; } abrirEmbutida(rota, semHistorico); return; }
   // v1.39.4: o anexo do CERT abre numa aba nova (link do cartão), que não tem sessão; o
   // anexo.html manda para cá com #anexo=ID e, depois do login, a mesma aba volta para ele
   if (rota && rota.indexOf('anexo=') === 0) {
@@ -5912,6 +5926,7 @@ function aplicarLinks() {
   el('cardConsultas').addEventListener('click', function () { abrirRota('consultas'); });
   el('cardCalculadoras').addEventListener('click', function () { abrirRota('calculadoras'); });
   el('cardDespesas').addEventListener('click', function () { abrirRota('despesas'); });
+  el('cardDespesasBravo').addEventListener('click', function () { abrirRota('despesas-bravo'); });
   // v1.34 — mini-quadro 3.3, dentro de #paginaIA
   el('cardMinutas').addEventListener('click', function () {
     if (!geradorDisponivel()) { avisarGeradorEmBreve(); return; }   // v1.31 — em breve
@@ -7968,7 +7983,7 @@ const AUD_ACOES_NOME = {
   itbi: 'Guia de ITBI', admin: 'Administração', acesso: 'Acesso'   // v1.39.1: falhas, bloqueios, primeiro acesso
 };
 const AUD_FERR_NOME = {
-  despesas: 'Controle de Despesas',
+  despesas: 'Controle de Despesas', 'despesas-bravo': 'Despesas da Bravo',
   protocolo: 'e-Protocolo', calculadora: 'Calculadora', ia: 'IA-Not', extrator: 'Extrator',
   analista: 'e-Analista', minutas: 'Gerador de Minuta', redator: 'Redator CN2O',
   clausulas: 'Cláusulas', consulta: 'T-Consulta', itbi: 'Guia de ITBI', acervo: 'Acervo',
@@ -11716,7 +11731,7 @@ function filtrarHub(txt) {
   document.querySelectorAll('#secFerramentas .card, #linksUteis .link-item').forEach(function (n) {
     // v1.37.3 — os links úteis viraram ícones com nome curto: o nome por extenso mora no aria-label
     const alvo = n.querySelector('[aria-label]');
-    if (n.id === 'cardDespesas' && !podeDespesas()) { n.hidden = true; return; }
+    if ((n.id === 'cardDespesas' || n.id === 'cardDespesasBravo') && !podeDespesas()) { n.hidden = true; return; }
     const folhas = n.id === 'cardConsultas' ? el('paginaConsultas').textContent : n.id === 'cardCalculadoras' ? el('paginaCalculadoras').textContent : '';
     const texto = (n.textContent + ' ' + folhas + ' ' + (alvo ? alvo.getAttribute('aria-label') : '')).toLowerCase();
     n.hidden = !!t && texto.indexOf(t) === -1;
