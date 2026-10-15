@@ -6341,6 +6341,7 @@ function abrirSub(tipo, chave) {
   if (!MURAL && tipo !== 'editar' && tipo !== 'agenda' && tipo !== 'notas') { toast('O mural ainda está carregando…'); return; }
   const box = el('subConteudo');
   el('subpagina').classList.toggle('larga', tipo === 'editar');
+  el('subpagina').classList.toggle('aviso', tipo === 'aviso');
   el('subpagina').classList.toggle('agenda', tipo === 'agenda');
   el('subpagina').classList.toggle('notas', tipo === 'notas');   // v1.33 — Bloco de Notas
   if (MA.subAberta && tipo !== 'agenda') maDescarregarSub();   // saiu da agenda para outra subpágina: despacha o pendente
