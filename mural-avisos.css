@@ -1,0 +1,14 @@
+/* Mural: dois cartões com a mesma dimensão e avisos com leitura em destaque. */
+.mural-cards.mural-tres{align-items:stretch}
+.mural-cards.mural-tres .ficha-avisos,
+.mural-cards.mural-tres .ficha-rodizio{align-self:stretch;min-width:0}
+.ficha-rodizio .rz-lista{gap:6px}
+.ficha-rodizio .rz-lista li{min-height:44px;padding:6px 10px}
+.ficha-rodizio .pill-rodizio{background:#26665f;border-color:#26665f;color:#ffffff}
+.ficha-avisos .avisos-lista{margin-inline:-6px}
+.ficha-avisos .aviso-row{width:100%;min-height:158px;padding:20px 18px;gap:12px;background:#f6ce64;border-color:#c89422}
+.ficha-avisos .aviso-row:hover{background:#f2c34f}
+.ficha-avisos .aviso-titulo{font-size:18.6px;line-height:1.4;text-transform:uppercase;white-space:pre-line;overflow-wrap:break-word}
+.ficha-avisos .aviso-row.novo .aviso-titulo::after{display:inline-block;white-space:nowrap}
+.ficha-avisos .aviso-data{display:block;margin-top:8px;font-size:15px;text-transform:uppercase;color:#51401b}
+@media(max-width:880px){.mural-cards.mural-tres .ficha-avisos,.mural-cards.mural-tres .ficha-rodizio{height:auto}}
