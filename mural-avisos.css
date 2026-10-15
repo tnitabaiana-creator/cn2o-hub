@@ -1,3 +1,7 @@
+/* Pano em verde feltro, mantendo a textura e os papéis do mural. */
+.mural{background-color:#3f6a51}
+.mural .mural-sub{color:rgba(255,255,255,.82)}
+
 /* Mural: dois cartões com a mesma dimensão e avisos com leitura em destaque. */
 .mural-cards.mural-tres{align-items:stretch}
 .mural-cards.mural-tres .ficha-avisos,
