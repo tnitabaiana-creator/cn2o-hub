@@ -548,6 +548,17 @@ footer{border-top:1px solid var(--linha);padding:22px 20px 30px;text-align:cente
 .olho .olho-off{display:none}
 .olho.aberto .olho-on{display:none}
 .olho.aberto .olho-off{display:block}
+/* v1.50 — ditado por voz: botão de microfone dentro do campo ([data-ditado]) */
+.campo-ditado{position:relative;display:block}
+span.campo-ditado > textarea,span.campo-ditado > input{width:100%;box-sizing:border-box;padding-right:50px}
+.mic{position:absolute;right:6px;top:6px;width:38px;height:38px;display:grid;place-items:center;border:0;border-radius:8px;background:transparent;color:var(--texto-suave);cursor:pointer}
+.campo-ditado.linha .mic{top:50%;transform:translateY(-50%)}
+.mic:hover{color:var(--vinho)}
+.mic:focus-visible{outline:2px solid var(--vinho);outline-offset:1px}
+.mic svg{width:21px;height:21px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.mic.ouvindo{background:var(--vinho);color:#ffffff;animation:brilhar 1.3s ease-in-out infinite}
+.mic.indisponivel{opacity:.4;cursor:help}
+@media (prefers-reduced-motion: reduce){ .mic.ouvindo{animation:none} }
 .btn-entrar{position:relative;width:100%;margin-top:10px;background:var(--vinho);color:#ffffff;border:1px solid var(--botao-borda);border-radius:10px;
   padding:16px 54px;font-family:'Montserrat',sans-serif;font-weight:700;font-size:16px;letter-spacing:.02em;transition:filter .15s}
 .btn-entrar::after{content:"→";position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:20px;font-weight:400}
@@ -4657,7 +4668,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
           <p class="red-dica" id="redDicaProt">Com o número, o Redator lê no Hub o tipo de ato, as partes e os documentos que ainda faltam no dossiê — e escreve com eles.</p>
 
           <label class="min-campo" style="margin-top:14px"><span id="redContextoRot">3 · O que precisa ser dito *</span>
-            <textarea id="redContexto" rows="5" placeholder="Escreva com as suas palavras, pode ser em tópicos soltos. Ex.: falta o CCIR 2025 · o comprador vai buscar na segunda · pedir para mandar por e-mail"></textarea>
+            <textarea id="redContexto" rows="5" data-ditado placeholder="Escreva com as suas palavras, pode ser em tópicos soltos. Ex.: falta o CCIR 2025 · o comprador vai buscar na segunda · pedir para mandar por e-mail"></textarea>
           </label>
 
           <label class="min-campo" data-campo="recebido" hidden style="margin-top:14px"><span>4 · Cole aqui o texto recebido *</span>
@@ -4702,7 +4713,7 @@ span.aniv-inicial{display:inline-flex;align-items:center;justify-content:center;
           <pre id="saidaRedator" class="saida vazia" aria-live="polite">Escolha o tipo, diga para quem e o que precisa ser dito. O texto aparece aqui pronto para copiar, seguido do bloco ⚠ CONFERIR com o que o Tabelião deve verificar antes de assinar.</pre>
           <div id="redAjusteBox" hidden style="margin-top:12px">
             <label class="min-campo"><span>Não ficou como você queria?</span>
-              <input type="text" id="redAjuste" autocomplete="off" placeholder="ex.: deixe mais curto · tire a citação de lei · acrescente o prazo de 5 dias">
+              <input type="text" id="redAjuste" autocomplete="off" data-ditado placeholder="ex.: deixe mais curto · tire a citação de lei · acrescente o prazo de 5 dias">
             </label>
             <div class="linha-botoes" style="margin-top:10px">
               <button id="btnRefazer" class="btn-fantasma" type="button">Refazer com esse ajuste</button>
@@ -5766,6 +5777,7 @@ function pintarVoltar(id) {
   alvo.querySelectorAll('[data-voltar]').forEach(function (b) { if (b.textContent.indexOf('Voltar') >= 0) b.textContent = rotulo; });
 }
 function mostrarPagina(id, semHistorico, rota) {
+  if (typeof pararDitado === 'function') pararDitado();   // v1.50: trocar de página desliga o microfone
   if (id === 'paginaLivroCaixa' && !podeLivroCaixa()) { id = 'paginaHub'; rota = ''; }
   if ((id === 'paginaGestao' || id === 'paginaGestaoEscrituras' || id === 'paginaGestaoProtocolo') && !SESSAO.admin) { id = 'paginaHub'; rota = ''; }
   if (podeLivroCaixa() && id !== 'paginaLivroCaixa' && LIVRO_CAIXA && !LIVRO_CAIXA.podeSair()) { toast('Há alterações no livro-caixa. Salve ou descarte antes de sair.'); return false; }
@@ -9730,9 +9742,149 @@ function alternarTema() {
 }
 
 /* ============================================================
+   DITADO POR VOZ (v1.50) — microfone nos campos marcados com data-ditado
+   Motor: o reconhecimento de voz do próprio navegador (Web Speech API, pt-BR) —
+   Chrome e Edge. O áudio vai ao serviço de voz do navegador, não ao servidor do
+   cartório. Para trocar de motor (ex.: Speech-to-Text do Google Cloud), basta
+   mudar iniciarDitado(); o botão e a junção do texto continuam os mesmos.
+   Para ligar em outro módulo: <textarea data-ditado> (ou input) — nada mais.
+============================================================ */
+function ditadoSuportado(win) {
+  win = win || (typeof window !== 'undefined' ? window : {});
+  return !!(win.SpeechRecognition || win.webkitSpeechRecognition);
+}
+// Pontuação falada → sinais. A ordem importa: "ponto e vírgula" antes de "vírgula" e
+// de "ponto"; "ponto" sozinho não pega "ponto de referência" nem "ponto e …".
+const DITADO_COMANDOS = [
+  [/\s*\bnovo par[áa]grafo\b[ \t]*/gi, '\n\n'],
+  [/\s*\bnova linha\b[ \t]*/gi, '\n'],
+  [/\s*\bponto de interroga[çc][ãa]o\b/gi, '?'],
+  [/\s*\bponto de exclama[çc][ãa]o\b/gi, '!'],
+  [/\s*\bponto e v[íi]rgula\b/gi, ';'],
+  [/\s*\bdois pontos\b/gi, ':'],
+  [/\s*\bv[íi]rgula\b/gi, ','],
+  [/\s*\bponto final\b/gi, '.'],
+  [/\s*\bponto\b(?!\s+(?:de|do|da|e)\b)/gi, '.']
+];
+function pontuarDitado(falado) {
+  let t = String(falado == null ? '' : falado);
+  DITADO_COMANDOS.forEach(function (c) { t = t.replace(c[0], c[1]); });
+  return t
+    .replace(/[ \t]+([,.;:?!])/g, '$1')            // sem espaço antes do sinal
+    .replace(/([,.;:?!])(?=[^\s\d,.;:?!])/g, '$1 ') // um espaço depois
+    .replace(/[ \t]*\n[ \t]*/g, '\n')
+    .replace(/[ \t]{2,}/g, ' ')
+    .replace(/^[ \t]+|[ \t]+$/g, '');
+}
+// Junta o que foi falado ao fim do que já estava escrito — nunca apaga nada.
+// Maiúscula no começo do campo, depois de . ? ! e depois de quebra de linha.
+function juntarDitado(atual, falado) {
+  const antes = String(atual == null ? '' : atual);
+  let t = pontuarDitado(falado);
+  if (!t) return antes;
+  const inicioDeFrase = !antes.trim() || /[.?!]\s*$|\n\s*$/.test(antes);
+  if (inicioDeFrase) t = t.replace(/^(\s*)(\p{Ll})/u, function (m, e, l) { return e + l.toUpperCase(); });
+  t = t.replace(/([.?!]\s+|\n)(\p{Ll})/gu, function (m, s, l) { return s + l.toUpperCase(); });
+  if (!antes) return t;
+  if (/\s$/.test(antes) || /^[\n,.;:?!]/.test(t)) return antes + t;
+  return antes + ' ' + t;
+}
+// ---- ditado: sessão e botão (DOM)
+const MIC_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5.5 11a6.5 6.5 0 0 0 13 0"/><path d="M12 17.5V21"/><path d="M8.5 21h7"/></svg>';
+var DITADO = null;   // (var: mostrarPagina pode chamar pararDitado antes desta linha rodar) { rec, campo, botao, base, ativo, falou, reinicios }
+const DITADO_ERROS = {
+  'not-allowed': 'Permita o microfone no cadeado da barra de endereço e tente de novo.',
+  'service-not-allowed': 'Permita o microfone no cadeado da barra de endereço e tente de novo.',
+  'audio-capture': 'Nenhum microfone encontrado neste computador.',
+  'network': 'O ditado precisa de internet — confira a conexão e tente de novo.',
+  'no-speech': 'Não ouvi nada — clique no microfone e fale de novo.'
+};
+function pintarMic(botao, ouvindo) {
+  botao.classList.toggle('ouvindo', !!ouvindo);
+  botao.setAttribute('aria-pressed', ouvindo ? 'true' : 'false');
+  botao.setAttribute('aria-label', ouvindo ? 'Parar o ditado' : 'Ditar por voz');
+  botao.title = ouvindo ? 'Ouvindo… clique (ou Esc) para parar' : 'Ditar por voz — fale "vírgula", "ponto", "nova linha" para pontuar';
+}
+function pararDitado() {
+  const s = DITADO;
+  if (!s) return;
+  DITADO = null;
+  s.ativo = false;
+  pintarMic(s.botao, false);
+  try { s.rec.stop(); } catch (e) {}
+}
+function iniciarDitado(campo, botao) {
+  pararDitado();
+  const Rec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const rec = new Rec();
+  rec.lang = 'pt-BR';
+  rec.continuous = true;
+  rec.interimResults = true;
+  const s = { rec: rec, campo: campo, botao: botao, base: campo.value, ativo: true, falou: false, reinicios: 0 };
+  rec.onresult = function (ev) {
+    if (!s.ativo) return;
+    let dito = '';
+    for (let i = 0; i < ev.results.length; i++) dito += ev.results[i][0].transcript + (ev.results[i].isFinal ? ' ' : '');
+    if (dito.trim()) s.falou = true;
+    campo.value = juntarDitado(s.base, dito);
+    campo.scrollTop = campo.scrollHeight;
+    campo.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+  rec.onerror = function (ev) {
+    const cod = ev && ev.error;
+    if (cod === 'aborted' || !s.ativo) return;
+    if (cod === 'no-speech' && s.falou) return;   // pausa no meio do ditado: o onend religa
+    if (DITADO === s) pararDitado();
+    toast(DITADO_ERROS[cod] || ('O ditado parou (' + cod + ') — tente de novo.'), true);
+  };
+  // O navegador encerra sozinho depois de um silêncio; enquanto a pessoa não parar,
+  // religa do ponto em que está (o texto já ditado vira a nova base).
+  rec.onend = function () {
+    if (!s.ativo || DITADO !== s) return;
+    if (++s.reinicios > 30) { pararDitado(); return; }
+    s.base = campo.value;
+    try { rec.start(); } catch (e) { pararDitado(); }
+  };
+  try { rec.start(); }
+  catch (e) { toast('Não foi possível ligar o microfone — tente de novo.', true); return; }
+  DITADO = s;
+  pintarMic(botao, true);
+  campo.focus();
+  toast('🎙 Ouvindo… fale e clique no microfone (ou Esc) para parar.');
+}
+// Põe o botão de microfone em cada campo [data-ditado] dentro de raiz (uma vez só).
+function ligarDitado(raiz) {
+  (raiz || document).querySelectorAll('[data-ditado]').forEach(function (campo) {
+    if (campo.parentNode && campo.parentNode.classList && campo.parentNode.classList.contains('campo-ditado')) return;
+    const caixa = document.createElement('span');
+    caixa.className = 'campo-ditado' + (campo.tagName === 'INPUT' ? ' linha' : '');
+    campo.parentNode.insertBefore(caixa, campo);
+    caixa.appendChild(campo);
+    const botao = document.createElement('button');
+    botao.type = 'button';
+    botao.className = 'mic';
+    botao.innerHTML = MIC_SVG;
+    pintarMic(botao, false);
+    if (!ditadoSuportado()) {
+      botao.classList.add('indisponivel');
+      botao.title = 'O ditado por voz funciona no Chrome ou no Edge';
+    }
+    botao.addEventListener('click', function (ev) {
+      ev.preventDefault();
+      if (!ditadoSuportado()) { toast('O ditado por voz funciona no Chrome ou no Edge.', true); return; }
+      if (DITADO && DITADO.campo === campo) pararDitado();
+      else iniciarDitado(campo, botao);
+    });
+    caixa.appendChild(botao);
+  });
+}
+document.addEventListener('keydown', function (ev) { if (ev.key === 'Escape' && DITADO) pararDitado(); });
+
+/* ============================================================
    LIGAÇÕES E INICIALIZAÇÃO
 ============================================================ */
 el('formLogin').addEventListener('submit', entrar);
+ligarDitado(document);   // v1.50: microfone nos campos [data-ditado]
 // Olhos de mostrar/ocultar senha (home v1.3)
 document.querySelectorAll('[data-olho]').forEach(function (b) {
   b.addEventListener('click', function () {
@@ -9956,6 +10108,9 @@ montarFerramenta({
       .replace(/\n{3,}/g, '\n\n')
       .trim();
   }
+
+  // v1.50: redigir, refazer ou limpar desliga o microfone (captura: antes de ler os campos)
+  ['btnRedigir', 'btnRefazer', 'btnLimparRed'].forEach(function (id) { el(id).addEventListener('click', pararDitado, true); });
 
   montarFerramenta({
     ferramenta: 'redator', pagina: 'paginaRedator', exemplo: '',

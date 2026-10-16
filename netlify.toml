@@ -28,7 +28,7 @@
     X-Content-Type-Options = "nosniff"
     X-Frame-Options = "SAMEORIGIN"
     Referrer-Policy = "strict-origin-when-cross-origin"
-    Permissions-Policy = "camera=(), microphone=(), geolocation=(), payment=(), usb=()"
+    Permissions-Policy = "camera=(), microphone=(self), geolocation=(), payment=(), usb=()"
 
 # WASM restrito à página de leitura documental; política do restante do Hub preservada.
 [[headers]]
