@@ -825,7 +825,7 @@
     if (o.alertasModelo.length) h += `<p><b>Apontamentos do leitor</b></p><ul>${li(o.alertasModelo)}</ul>`;
     if (o.alertasServidor.length) h += `<p><b>Avisos do servidor</b></p><ul>${li(o.alertasServidor)}</ul>`;
     h += `<div class="acoes"><button type="button" class="btn primario" id="btLancarValores">${pend ? 'Lançar os valores →' : 'Ver a sucessão →'}</button><button type="button" class="btn" id="btDesfazerImportacao">Desfazer importação</button></div>`;
-    h += `<p class="meta">Os campos marcados "do dossiê" vieram da leitura dos documentos; o que você digitar por cima vale. Só o valor declarado de cada bem é lançado à mão.${o.meta && o.meta.modelo ? ` Leitura por ${esc(String(o.meta.modelo))}${o.meta.ms ? ' em ' + Math.round(o.meta.ms / 1000) + ' s' : ''}.` : ''}</p>`;
+    h += `<p class="meta">Os campos marcados "do dossiê" vieram da leitura dos documentos; o que você digitar por cima vale. Só o valor declarado de cada bem é lançado à mão.${o.meta && o.meta.modelo ? ` Leitura por ${esc(typeof nomeModelo === 'function' ? nomeModelo(o.meta.modelo) : String(o.meta.modelo))}${o.meta.ms ? ' em ' + Math.round(o.meta.ms / 1000) + ' s' : ''}.` : ''}</p>`;
     p.innerHTML = h; p.classList.remove('oculto');
   }
   RAIZ.addEventListener('click', e => {

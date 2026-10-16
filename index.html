@@ -8178,7 +8178,7 @@ function pintarAbaConsumo(painel) {
     }).join('');
     painel.innerHTML = '<table class="ed-tabela"><thead><tr><th>Quem</th><th>Ferramenta</th><th style="text-align:right">Usos</th><th style="text-align:right">Custo</th></tr></thead><tbody>' + corpo +
       '<tr><td><b>Total do mês</b></td><td></td><td class="num"><b>' + usos + '</b></td><td class="num"><b>US$ ' + total.toFixed(2).replace('.', ',') + '</b></td></tr></tbody></table>' +
-      '<p class="sub-data" style="margin-top:8px">Custo estimado pela tabela de preços do modelo (Gemini), só das análises concluídas.</p>';
+      '<p class="sub-data" style="margin-top:8px">Custo estimado pela tabela de preços do modelo (Claude; as linhas antigas, do Gemini), só das análises concluídas.</p>';
   }).catch(function (e) { if (painel.isConnected) painel.innerHTML = '<p class="ed-vazio">Não consegui ler o consumo (' + esc(e.erro) + ').</p>'; });
 }
 
@@ -9485,13 +9485,17 @@ function criarAnexos(raiz) {
 }
 
 /* ============================================================
-   FERRAMENTAS DE IA (Gemini, pelo servidor do cartório)
+   FERRAMENTAS DE IA (Claude, pelo servidor do cartório — v1.49)
 ============================================================ */
 // v1.29 — docs_ativo: o servidor informa se a ponte Minuta → Google Docs está ligada
 // (a tela do Gerador só ajusta o texto de ajuda; o link vem na resposta da geração)
 let IA_STATUS = { configurada: null, modelo: null, docs_ativo: false };
 function nomeModelo(m) {
   if (!m) return '';
+  // v1.49: claude-opus-5-5 → "Claude Opus 5.5" (o servidor escolhe modelo e esforço por ferramenta)
+  var c = /^claude-([a-z]+)-(\d+)-(\d+)$/i.exec(String(m));
+  if (c) return 'Claude ' + c[1].charAt(0).toUpperCase() + c[1].slice(1).toLowerCase() + ' ' + c[2] + '.' + c[3];
+  // nomes do Gemini (até a v1.48), para o histórico de uso
   var apelidos = { 'gemini-pro-latest': 'Gemini Pro (vigente)', 'gemini-flash-latest': 'Gemini Flash (vigente)', 'gemini-flash-lite-latest': 'Gemini Flash-Lite (vigente)' };
   if (apelidos[m]) return apelidos[m];
   return String(m).replace(/^gemini-/i, 'Gemini ').replace(/-flash-lite/i, ' Flash-Lite').replace(/-flash/i, ' Flash').replace(/-pro/i, ' Pro');
@@ -14887,7 +14891,7 @@ restaurarSessao();
     if (o.alertasModelo.length) h += `<p><b>Apontamentos do leitor</b></p><ul>${li(o.alertasModelo)}</ul>`;
     if (o.alertasServidor.length) h += `<p><b>Avisos do servidor</b></p><ul>${li(o.alertasServidor)}</ul>`;
     h += `<div class="acoes"><button type="button" class="btn primario" id="btLancarValores">${pend ? 'Lançar os valores →' : 'Ver a sucessão →'}</button><button type="button" class="btn" id="btDesfazerImportacao">Desfazer importação</button></div>`;
-    h += `<p class="meta">Os campos marcados "do dossiê" vieram da leitura dos documentos; o que você digitar por cima vale. Só o valor declarado de cada bem é lançado à mão.${o.meta && o.meta.modelo ? ` Leitura por ${esc(String(o.meta.modelo))}${o.meta.ms ? ' em ' + Math.round(o.meta.ms / 1000) + ' s' : ''}.` : ''}</p>`;
+    h += `<p class="meta">Os campos marcados "do dossiê" vieram da leitura dos documentos; o que você digitar por cima vale. Só o valor declarado de cada bem é lançado à mão.${o.meta && o.meta.modelo ? ` Leitura por ${esc(typeof nomeModelo === 'function' ? nomeModelo(o.meta.modelo) : String(o.meta.modelo))}${o.meta.ms ? ' em ' + Math.round(o.meta.ms / 1000) + ' s' : ''}.` : ''}</p>`;
     p.innerHTML = h; p.classList.remove('oculto');
   }
   RAIZ.addEventListener('click', e => {
