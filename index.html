@@ -8190,8 +8190,46 @@ function pintarAbaConsumo(painel) {
     }).join('');
     painel.innerHTML = '<table class="ed-tabela"><thead><tr><th>Quem</th><th>Ferramenta</th><th style="text-align:right">Usos</th><th style="text-align:right">Custo</th></tr></thead><tbody>' + corpo +
       '<tr><td><b>Total do mês</b></td><td></td><td class="num"><b>' + usos + '</b></td><td class="num"><b>US$ ' + total.toFixed(2).replace('.', ',') + '</b></td></tr></tbody></table>' +
-      '<p class="sub-data" style="margin-top:8px">Custo estimado pela tabela de preços do modelo (Claude; as linhas antigas, do Gemini), só das análises concluídas.</p>';
+      '<p class="sub-data" style="margin-top:8px">Custo estimado pela tabela de preços do modelo (Claude; as linhas antigas, do Gemini), só das análises concluídas.</p>' +
+      '<div id="triagemQuadro" style="margin-top:18px"><p class="ed-vazio">Carregando a triagem de esforço…</p></div>';
+    pintarTriagem(el('triagemQuadro'));
   }).catch(function (e) { if (painel.isConnected) painel.innerHTML = '<p class="ed-vazio">Não consegui ler o consumo (' + esc(e.erro) + ').</p>'; });
+}
+
+/* v1.51 — Triagem de esforço: o Haiku escolhe modelo e esforço caso a caso (backend triagem.js).
+   Em modo sombra a análise segue no perfil fixo; o quadro mostra o que a triagem teria escolhido
+   e quanto custaria — é a base para calibrar antes de ligar (IA_TRIAGEM=ativa). */
+const NOMES_TRIAGEM = { minuta: 'Gerador de Minuta', minuta_ue: 'Gerador de Minuta (UE)', matricula: 'e-Analista (matrícula)',
+  itcmd: 'Leitor ITCMD', qualificacao: 'Extrator (qualificação)', 'agente-redigir': 'Agentes · redigir',
+  'agente-revisar': 'Agentes · revisar', 'agente-extrair': 'Agentes · extrair' };
+function htmlTriagem(d) {
+  const usd = function (v) { return 'US$ ' + (Number(v) || 0).toFixed(3).replace('.', ','); };
+  const modo = { sombra: 'modo sombra — só registra; as análises seguem no perfil fixo', ativa: 'ativa — a triagem decide', desligada: 'desligada' }[d && d.modo] || '';
+  let h = '<h4 class="versalete" style="margin:0 0 6px">Triagem de esforço · ' + esc(modo) + '</h4>';
+  const fs = (d && d.ferramentas) || [];
+  if (!fs.length) return h + '<p class="ed-vazio">Nenhum caso registrado nos últimos ' + ((d && d.dias) || 14) + ' dias.</p>';
+  let real = 0, estimado = 0, triagem = 0;
+  const corpo = fs.map(function (f) {
+    real += Number(f.custo_real) || 0; estimado += Number(f.custo_estimado) || 0; triagem += Number(f.custo_triagem) || 0;
+    return '<tr><td>' + esc(NOMES_TRIAGEM[f.ferramenta] || f.ferramenta) + '</td><td class="num">' + (f.casos || 0) + '</td>' +
+      '<td class="num">' + (f.por_regra || 0) + ' / ' + (f.por_haiku || 0) + ' / ' + (f.falhas || 0) + '</td>' +
+      '<td class="num">' + (f.nota_media == null ? '—' : f.nota_media) + '</td>' +
+      '<td class="num">' + (f.sugeriu_menos || 0) + '</td>' +
+      '<td class="num">' + usd(f.custo_real) + '</td><td class="num">' + usd(f.custo_estimado) + '</td></tr>';
+  }).join('');
+  const economia = real - estimado - triagem;
+  return h + '<table class="ed-tabela"><thead><tr><th>Ferramenta</th><th style="text-align:right">Casos</th>' +
+    '<th style="text-align:right">Regra / Haiku / falha</th><th style="text-align:right">Nota média</th>' +
+    '<th style="text-align:right">Sugeriu modelo menor</th><th style="text-align:right">Custo real</th><th style="text-align:right">Com a triagem*</th></tr></thead><tbody>' + corpo +
+    '<tr><td><b>Total (' + ((d && d.dias) || 14) + ' dias)</b></td><td></td><td></td><td></td><td></td><td class="num"><b>' + usd(real) + '</b></td><td class="num"><b>' + usd(estimado) + '</b></td></tr></tbody></table>' +
+    '<p class="sub-data" style="margin-top:8px">Economia possível: <b>' + usd(Math.max(0, economia)) + '</b> (já descontado o custo da própria triagem, ' + usd(triagem) + ').' +
+    ' *Estimativa: os mesmos tokens no preço do modelo sugerido — com o esforço menor, a conta cairia mais. Confira, antes de ligar, se os casos em que ela sugeriu modelo menor saíram bem.</p>';
+}
+function pintarTriagem(caixa) {
+  if (!caixa) return;
+  api('/hub/ia/triagem?dias=14').then(function (d) {
+    if (caixa.isConnected) caixa.innerHTML = htmlTriagem(d);
+  }).catch(function (e) { if (caixa.isConnected) caixa.innerHTML = '<p class="ed-vazio">Não consegui ler a triagem (' + esc(e.erro || 'erro') + ').</p>'; });
 }
 
 /* ============================================================
