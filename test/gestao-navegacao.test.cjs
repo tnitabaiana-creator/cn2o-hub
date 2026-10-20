@@ -13,8 +13,8 @@ function trecho(a, b) {
 function ambiente(admin = true) {
   const chamadas = [], paginas = [], sessoes = { admin, token: 'token-ficticio', login: 'fixture.gestao' };
   const contexto = vm.createContext({
-    SESSAO: sessoes, CONFIG: { endpoint: 'http://localhost' }, window: { GestaoProtocolo: { montar(op) { chamadas.push(['protocolo', op]); return { destruir() { chamadas.push(['destruirProtocolo']); } }; } }, GestaoProdutividade: { montar(op) { chamadas.push(['montar', op]); return { podeSair: () => true, destruir() { chamadas.push(['destruir']); } }; } }, LivroCaixa: { montar(op) { chamadas.push(['livro', op]); return { podeSair: () => true, destruir() { chamadas.push(['destruirLivro']); } }; } } },
-    el: id => ({ id }), api() {}, sessaoExpirada() {},
+    SESSAO: sessoes, CONFIG: { endpoint: 'http://localhost' }, window: { GestaoPrazos: { montar(op) { chamadas.push(['prazos', op]); return { destruir() { chamadas.push(['destruirPrazos']); } }; } }, GestaoProtocolo: { montar(op) { chamadas.push(['protocolo', op]); return { destruir() { chamadas.push(['destruirProtocolo']); } }; } }, GestaoProdutividade: { montar(op) { chamadas.push(['montar', op]); return { podeSair: () => true, destruir() { chamadas.push(['destruir']); } }; } }, LivroCaixa: { montar(op) { chamadas.push(['livro', op]); return { podeSair: () => true, destruir() { chamadas.push(['destruirLivro']); } }; } } },
+    el: id => ({ id, classList:{contains:()=>false} }), api() {}, sessaoExpirada() {},
     toast: aviso => chamadas.push(['aviso', aviso]),
     mostrarPagina: (...args) => paginas.push(args), abrirEditorMural: (...args) => chamadas.push(['editor', ...args])
   });
@@ -27,8 +27,9 @@ test('Gestão lista os relatórios e acrescenta livro-caixa inicialmente oculto'
   assert.match(menu, /data-nav="gestao"/); assert.match(menu, /hidden/); assert.match(menu, />Gestão<\/button>/);
   const lista = trecho('<ul class="gestao-lista"', '</ul>');
   assert.deepEqual([...lista.matchAll(/data-gestao-rel="([^"]+)"/g)].map(x => x[1]), ['escreventes', 'atendimentos', 'produtividade']);
-  assert.equal((lista.match(/<li\b/g) || []).length, 6);
+  assert.equal((lista.match(/<li\b/g) || []).length, 7);
   assert.match(lista, /id="gestaoProtocolo"/);
+  assert.match(lista, /id="gestaoPrazos"/);
   assert.match(lista, /id="gestaoEscrituras"/);
   assert.match(lista, /<li id="gestaoLivroCaixaItem" hidden>/);
   assert.doesNotMatch(lista, /Versão 3 Produtividade|<iframe|srcdoc/);
@@ -105,6 +106,53 @@ test('Protocolo e Cadastro tem rota, retorno, guard de navegação e limpeza no 
   assert.match(trecho('function mostrarPagina(', '/* abre uma ferramenta'), /id !== 'paginaGestaoProtocolo'\) destruirGestaoProtocolo\(\)/);
   assert.match(html, /'gestao-protocolo': 'paginaGestao'/);
   assert.match(html, /<script src="gestao-protocolo.js"><\/script>/);
+});
+
+test('prazos têm entrada própria, vínculo em produtividade, autorização e limpeza de instância', () => {
+  const a = ambiente(false); a.run('abrirGestaoPrazos(true)');
+  assert.deepEqual(a.paginas,[['paginaHub',true]]); assert.deepEqual(a.chamadas,[]);
+  a.sessoes.admin = true; a.run('abrirGestaoPrazos(false)');
+  assert.equal(a.chamadas[0][0],'prazos'); assert.equal(a.chamadas[0][1].host.id,'gestaoPrazosHost');
+  assert.equal(a.chamadas[0][1].sessao(),a.sessoes);
+  a.run('abrirGestaoPrazos(true); destruirGestaoPrazos(); destruirGestaoPrazos()');
+  assert.deepEqual(a.chamadas.map(x=>x[0]),['prazos','destruirPrazos','prazos','destruirPrazos']);
+  assert.deepEqual(a.paginas[1],['paginaGestaoPrazos',false,'gestao-prazos']);
+  assert.match(trecho('function limparSessao()', 'function lerSessao('),/destruirGestaoPrazos\(\)/);
+  assert.match(trecho('function mostrarPagina(', '/* abre uma ferramenta'),/id !== 'paginaGestaoPrazos'\) destruirGestaoPrazos\(\)/);
+  assert.match(trecho('function abrirRota(', "if (rota === 'despesas' ||"),/rota === 'gestao-prazos'/);
+  assert.match(html,/'gestao-prazos': 'paginaGestao'/);
+  assert.match(html,/<script src="gestao-prazos.js"><\/script>/);
+  assert.match(trecho('<div id="paginaGestaoEscrituras"', '<div id="paginaGestaoPrazos"'),/href="#gestao-prazos"/);
+  assert.match(trecho('function pintarAbaRelatorios(', 'const tipo = el(\'edRelTipo\')'),/href="#gestao-prazos"/);
+});
+
+test('atalho do relatório das escreventes fecha o véu pelo mecanismo existente após autorizar a navegação', () => {
+  const elementos = new Map(), chamadas = [];
+  let pagina = 'paginaGestao', bloquear = false;
+  const el = id => {
+    if (!elementos.has(id)) {
+      const classes = new Set(id === 'veuMural' ? ['aberto'] : id === 'navRelatorios' ? ['ativo'] : []);
+      elementos.set(id,{id,classList:{contains:c=>classes.has(c),add:c=>classes.add(c),remove:c=>classes.delete(c)}});
+    }
+    return elementos.get(id);
+  };
+  const ctx = vm.createContext({
+    SESSAO:{admin:true,token:'ficticio',login:'gestor'},ED:{gestao:true,aba:'relatorios',sujo:false},
+    MA:{subAberta:false},NT:{subAberta:false},MA_IMAGENS:{fechar(){chamadas.push('fecharImagens');}},
+    el,api(){},sessaoExpirada(){},toast(){},paginaAtual:()=>pagina,
+    marcarNav:n=>chamadas.push('nav:'+n),
+    mostrarPagina:id=>{if(bloquear)return false;pagina=id;return true;},
+    window:{GestaoPrazos:{montar(){assert.equal(el('veuMural').classList.contains('aberto'),false,'Véu fechado antes da montagem');chamadas.push('montar');return {destruir(){}};}}}
+  });
+  vm.runInContext(trecho('let GESTAO_PRODUTIVIDADE = null;', "let VOLTAR_PARA = '';") +
+    trecho('function fecharSubMural(', '/* ============================================================'),ctx);
+  bloquear = true;
+  vm.runInContext('abrirGestaoPrazos(false)',ctx);
+  assert.equal(el('veuMural').classList.contains('aberto'),true);assert.equal(chamadas.length,0);
+  bloquear = false;
+  vm.runInContext('abrirGestaoPrazos(false)',ctx);
+  assert.equal(el('veuMural').classList.contains('aberto'),false);assert.equal(vm.runInContext('ED',ctx),null);
+  assert.equal(chamadas.at(-1),'montar');assert.ok(chamadas.includes('nav:gestao'));
 });
 
 test('abertura e reabertura de escrituras destrói a instância anterior e usa sessão atual', () => {
