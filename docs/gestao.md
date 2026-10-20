@@ -1,5 +1,13 @@
 # Gestão do Hub
 
+## Prazos por escrevente
+
+`#gestao-prazos` abre a consulta administrativa do prazo geral dos atos, também acessível pelos relatórios das escreventes e de produtividade de escrituras. `gestao-prazos.js` consulta `GET /hub/relatorios/prazos/semanal` com semana civil, responsável operacional, tipo, situação e paginação independente da fila e das conclusões.
+
+A fila representa o corte atual: vencidos acumulados ainda abertos e atos a vencer na semana selecionada. Selecionar uma semana anterior não reconstitui sua carteira histórica. As conclusões são eventos comprovados naquela semana, podem incluir cartões posteriormente reabertos e não equivalem à lavratura no Extra Digital. O responsável operacional não é substituído por “Criado por” do CTN.
+
+O CSV autenticado usa `/hub/relatorios/prazos/semanal.csv?formato=json` e exporta todos os resultados dos filtros, independentemente da paginação. Falhas, ausência de amostra, atribuições ausentes e sincronização pendente ficam explícitas. Troca de conta, logout e navegação destroem a instância e impedem respostas tardias de repor dados privados.
+
 A entrada lateral antes chamada Relatórios agora se chama Gestão. Permanece exclusiva do Tabelião, conforme a autorização do servidor. A lista dá acesso a Relatórios das escreventes, Atendimentos do balcão, Produtividade financeira e Relatório de produtividade de escrituras.
 
 Os três relatórios existentes reutilizam suas consultas, períodos e ações. Sua abertura por Gestão não apresenta os controles de edição/publicação do mural. O acesso pela aba de relatórios do editor continua disponível. As rotas `#gestao` e `#gestao-escrituras` permitem voltar, avançar e reabrir; `#relatorios` abre Gestão.
